@@ -1,0 +1,221 @@
+module LEAPfunctions
+using DelimitedFiles, PyCall, DataFrames, CSV
+
+export visible, outputtoleap, calculateleap, energyinvestment
+
+include("./IOlib.jl")
+using .IOlib
+
+"""
+    visible(state::Bool)
+
+Hide or show LEAP by setting visibility.
+"""
+function visible(state::Bool)
+	LEAP = connecttoleap()
+	if ismissing(LEAP)
+		error("Cannot connect to LEAP. Is it installed?")
+	end
+	LEAP.Visible = state
+	disconnectfromleap(LEAP)
+end
+
+"""
+    outputtoleap(file::String, indices::Array)
+
+First obtain LEAP branch info from the YAML config file and then send Macro model results to LEAP.
+"""
+function outputtoleap(file::String, indices::Array)
+    # LEAP parameters from config file
+    params = IOlib.parse_input_file(file)
+    base_year = params["years"]["start"]
+    final_year = params["years"]["end"]
+
+    # connects program to LEAP
+    LEAP = connecttoleap()
+	if ismissing(LEAP)
+		error("Cannot connect to LEAP. Is it installed?")
+	end
+
+    # Set ActiveView
+    LEAP.ActiveView = "Analysis"
+
+	branch_data = Dict(:branch => String[], :variable => String[], :last_historical_year => Int64[], :col => Int64[])
+	col = 1
+	append!(branch_data[:branch], [params["GDP-branch"]["branch"]])
+	append!(branch_data[:variable], [params["GDP-branch"]["variable"]])
+	append!(branch_data[:last_historical_year], [params["GDP-branch"]["last_historical_year"]])
+	append!(branch_data[:col], [col])
+
+	for leap_sector in params["LEAP-sectors"]
+		col += 1
+		for branch in leap_sector["branches"]
+			append!(branch_data[:branch], [branch["branch"]])
+			append!(branch_data[:variable], [branch["variable"]])
+			append!(branch_data[:last_historical_year], [branch["last_historical_year"]])
+			append!(branch_data[:col], [col])
+		end
+	end
+
+	branch_df = DataFrame(branch_data)
+
+    # send outputs to LEAP
+    ndxrows = final_year - base_year + 1
+    for i = 1:size(branch_df, 1) # loops through each branch path
+        branch = branch_df[i,:branch]
+        variable = branch_df[i,:variable]
+        lasthistoricalyear = branch_df[i,:last_historical_year]
+        col = branch_df[i,:col]
+        start_ndx = (1+(col*ndxrows))
+        end_ndx = (col+1)*ndxrows
+
+        if lasthistoricalyear > base_year
+            newexpression = interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
+        else
+            newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
+        end
+        setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
+    end
+	disconnectfromleap(LEAP)
+end
+
+"""
+    connecttoleap()
+
+Connect to the currently running instance of LEAP, if one exists; otherwise starts an instance of LEAP.
+
+Return a `PyObject` corresponding to the instance.
+If LEAP cannot be started, return `missing`
+"""
+function connecttoleap()
+	try
+		return pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
+	catch
+		return missing
+	end
+end  # connecttoleap
+
+"""
+    disconnectfromleap(LEAPPyObj)
+
+Wrapper for PyCall's pydecref(obj)
+"""
+function disconnectfromleap(LEAPPyObj)
+	pydecref(LEAPPyObj)
+end
+
+"""
+    interp_expression(base_year::Int64, newdata::Array; lasthistoricalyear::Int64=0)
+
+Create LEAP Interp expression from an array of values.
+"""
+function interp_expression(base_year::Int64, newdata::Array; lasthistoricalyear::Int64=0)
+    # Creates start of expression. Includes historical data if available
+    if lasthistoricalyear > 0
+        newexpression = string("If(year <= ", lasthistoricalyear, ", ScenarioValue(Current Accounts), Value(", base_year,") * Interp(")
+        diff = lasthistoricalyear - base_year + 2
+        year = lasthistoricalyear + 1
+    else
+        newexpression = string("(Value(", base_year,") * Interp(")
+        diff = 2
+        year = base_year + 1
+    end
+
+    # Incorporates IO model data into the rest of the expression
+    for i = diff:size(newdata,1)
+        if isnan(newdata[i]) == false
+            newexpression = string(newexpression, year, ", ", newdata[i], ", ")
+        end
+        if i == size(newdata,1)
+            newexpression = newexpression[1:(lastindex(newexpression)-2)]
+            newexpression = string(newexpression, "))")
+        end
+        year = year + 1
+    end
+    return newexpression
+end
+
+"""
+    setbranchvar_expression(leapapplication::PyObject, branch::String, variable::String, newexpression::String; region::String = "", scenario::String = "")
+
+Set a LEAP branch-variable expression.
+
+The region and scenario arguments can be omitted by leaving them as empty strings.
+Note that performance is best if neither region nor scenario is specified.
+"""
+function setbranchvar_expression(leapapplication::PyObject, branch::String, variable::String, newexpression::String; region::String = "", scenario::String = "")
+    # Set ActiveRegion and ActiveScenario as Julia doesn't allow a function call (ExpressionRS) to be set to a value
+    if region != ""
+        leapapplication.ActiveRegion = region
+    end
+
+    if scenario != ""
+        leapapplication.ActiveScenario = scenario
+    end
+
+    # Set expression
+    leapapplication.Branch(branch).Variable(variable).Expression = newexpression
+
+    # Refresh LEAP display
+    leapapplication.Refresh()
+end  # setbranchvarexpression
+
+"""
+    calculateleap(scen_name::String)
+
+Calculate the LEAP model, returning results for the specified scenario.
+"""
+function calculateleap(scen_name::String)
+    # connects program to LEAP
+    LEAP = connecttoleap()
+	if ismissing(LEAP)
+		error("Cannot connect to LEAP. Is it installed?")
+	end
+	LEAP.Scenario(scen_name).ResultsShown = true
+    LEAP.Calculate()
+	disconnectfromleap(LEAP)
+end
+
+"""
+    energyinvestment(file::String, run::Int64)
+
+Obtain energy investment data from the LEAP model.
+"""
+function energyinvestment(file::String, run::Int64)
+    # LEAP parameters from config file
+    params = IOlib.parse_input_file(file)
+    base_year = params["years"]["start"]
+    final_year = params["years"]["end"]
+
+    # connects program to LEAP
+    LEAP = connecttoleap()
+	if ismissing(LEAP)
+		error("Cannot connect to LEAP. Is it installed?")
+	end
+
+    # Set ActiveView and ActiveScenario
+    LEAP.ActiveView = "Results"
+    LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
+
+    nrows = (final_year - base_year) + 1
+    I_en = Array{Float64}(undef, nrows)
+    I_en_temp = Array{Float64}(undef, nrows)
+
+    for b in LEAP.Branches
+        if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
+            for y = base_year:final_year
+                I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
+            end
+            I_en = hcat(I_en, I_en_temp)
+        end
+    end
+
+	disconnectfromleap(LEAP)
+
+    I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
+    writedlm(string("outputs/I_en_",run,".csv"), I_en, ',')
+
+    return I_en
+end
+
+end
