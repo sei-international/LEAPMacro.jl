@@ -18,7 +18,7 @@ function output_var(values, filename, index, rowlabel, mode)
 	else
 		usevalue = values
 	end
-	open(string("outputs/", filename, "_", index,".csv"), mode) do io
+	open(string("results/", filename, "_", index,".csv"), mode) do io
 		write(io, string(rowlabel, ',', usevalue, '\n'))
 	end
 end
@@ -90,9 +90,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 			mkdir("diagnostics")
 		end
 
-		if params["clear-folders"]["outputs"]
-			for f in readdir("outputs/")
-				rm(joinpath("outputs/", f))
+		if params["clear-folders"]["results"]
+			for f in readdir("results/")
+				rm(joinpath("results/", f))
 			end
 		end
 		if params["clear-folders"]["calibration"]
@@ -638,7 +638,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     for t = 1:ntime
         indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
     end
-    open(string("outputs/indices_",run,".csv"), "w") do io
+    open(string("results/indices_",run,".csv"), "w") do io
                writedlm(io, reshape(labels, 1, :), ',')
                writedlm(io, indices, ',')
            end;
@@ -654,8 +654,8 @@ Indices are specified in the YAML configuration file.
 """
 function resultcomparison(run::Int64)
     # Obtains data from indices files for current run and previous run
-    file1 = string("outputs/indices_",run,".csv")
-    file2 = string("outputs/indices_",run-1,".csv")
+    file1 = string("results/indices_",run,".csv")
+    file2 = string("results/indices_",run-1,".csv")
 
     file1_dat = CSV.read(file1, header=1, missingstring=["0"], DataFrame)
     file2_dat = CSV.read(file2, header=1, missingstring=["0"], DataFrame)

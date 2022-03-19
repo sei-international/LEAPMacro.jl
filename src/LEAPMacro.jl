@@ -24,8 +24,8 @@ function run(params_file = nothing)
 	if !isdir("inputs")
 		throw(ErrorException("The \"inputs\" folder is needed, but does not exist"))
 	end
-	if !isdir("outputs")
-		mkdir("outputs")
+	if !isdir("results")
+		mkdir("results")
 	end
 	if !isdir("calibration")
 		mkdir("calibration")

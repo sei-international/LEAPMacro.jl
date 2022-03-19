@@ -59,7 +59,7 @@ function outputtoleap(file::String, indices::Array)
 
 	branch_df = DataFrame(branch_data)
 
-    # send outputs to LEAP
+    # send results to LEAP
     ndxrows = final_year - base_year + 1
     for i = 1:size(branch_df, 1) # loops through each branch path
         branch = branch_df[i,:branch]
@@ -213,7 +213,7 @@ function energyinvestment(file::String, run::Int64)
 	disconnectfromleap(LEAP)
 
     I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
-    writedlm(string("outputs/I_en_",run,".csv"), I_en, ',')
+    writedlm(string("results/I_en_",run,".csv"), I_en, ',')
 
     return I_en
 end
