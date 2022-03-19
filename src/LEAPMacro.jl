@@ -24,12 +24,6 @@ function run(params_file = nothing)
 	if !isdir("inputs")
 		throw(ErrorException("The \"inputs\" folder is needed, but does not exist"))
 	end
-	if !isdir("results")
-		mkdir("results")
-	end
-	if !isdir("calibration")
-		mkdir("calibration")
-	end
 
 	if isnothing(params_file)
 		params_file = "LEAP_Macro_params.yml"

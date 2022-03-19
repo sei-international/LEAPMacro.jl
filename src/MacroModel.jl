@@ -8,17 +8,17 @@ include("./LEAPfunctions.jl")
 using .IOlib, .LEAPfunctions
 
 """
-    output_var(values, filename, index, rowlabel, mode)
+    output_var(params, values, filename, index, rowlabel, mode)
 
 Report output values by writing to specified CSV files.
 """
-function output_var(values, filename, index, rowlabel, mode)
+function output_var(params, values, filename, index, rowlabel, mode)
 	if isa(values, Array)
 		usevalue = join(values, ',')
 	else
 		usevalue = values
 	end
-	open(string("results/", filename, "_", index,".csv"), mode) do io
+	open(string(params["results_path"], filename, "_", index,".csv"), mode) do io
 		write(io, string(rowlabel, ',', usevalue, '\n'))
 	end
 end
@@ -86,23 +86,25 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 
 	# Clean up folders if requested
 	if run == 0
-		if params["report-diagnostics"] & !isdir("diagnostics")
-			mkdir("diagnostics")
+		mkpath(params["results_path"])
+		mkpath(params["calibration_path"])
+		if params["report-diagnostics"]
+			mkpath(params["diagnostics_path"])
 		end
 
 		if params["clear-folders"]["results"]
-			for f in readdir("results/")
-				rm(joinpath("results/", f))
+			for f in readdir(params["results_path"])
+				rm(joinpath(params["results_path"], f))
 			end
 		end
 		if params["clear-folders"]["calibration"]
-			for f in readdir("calibration/")
-				rm(joinpath("calibration/", f))
+			for f in readdir(params["calibration_path"])
+				rm(joinpath(params["calibration_path"], f))
 			end
 		end
 		if params["clear-folders"]["diagnostics"] & isdir("diagnostics")
-			for f in readdir("diagnostics/")
-				rm(joinpath("diagnostics/", f))
+			for f in readdir(params["diagnostics_path"])
+				rm(joinpath(params["diagnostics_path"], f))
 			end
 		end
 	end
@@ -323,7 +325,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Calibration run
     #------------------------------------------
 	if params["report-diagnostics"]
-		open(string("diagnostics/model_", run, "_calib_1", ".txt"), "w") do f
+		open(joinpath(params["diagnostics_path"], "model_", run, "_calib_1", ".txt"), "w") do f
 			print(f, mdl)
 		end
 	end
@@ -336,21 +338,21 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     status = primal_status(mdl)
     @info "Calibrating: $status"
 
-    writedlm(string("calibration/u_",run,".csv"), value.(u), ',')
-    writedlm(string("calibration/X_",run,".csv"), value.(X), ',')
-    writedlm(string("calibration/F_",run,".csv"), value.(F), ',')
-    writedlm(string("calibration/M_",run,".csv"), value.(M), ',')
-    writedlm(string("calibration/qs_",run,".csv"), value.(qs), ',')
-    writedlm(string("calibration/qd_",run,".csv"), value.(qd), ',')
-    writedlm(string("calibration/pd_",run,".csv"), param_pd, ',')
-    writedlm(string("calibration/pb_",run,".csv"), param_pb, ',')
-    writedlm(string("calibration/g_",run,".csv"), value.(u) .* z, ',')
-    writedlm(string("calibration/margins_neg_",run,".csv"), value.(margins_neg), ',')
-    writedlm(string("calibration/margins_pos_",run,".csv"), value.(margins_pos), ',')
+    writedlm(joinpath(params["calibration_path"], "u_",run,".csv"), value.(u), ',')
+    writedlm(joinpath(params["calibration_path"], "X_",run,".csv"), value.(X), ',')
+    writedlm(joinpath(params["calibration_path"], "F_",run,".csv"), value.(F), ',')
+    writedlm(joinpath(params["calibration_path"], "M_",run,".csv"), value.(M), ',')
+    writedlm(joinpath(params["calibration_path"], "qs_",run,".csv"), value.(qs), ',')
+    writedlm(joinpath(params["calibration_path"], "qd_",run,".csv"), value.(qd), ',')
+    writedlm(joinpath(params["calibration_path"], "pd_",run,".csv"), param_pd, ',')
+    writedlm(joinpath(params["calibration_path"], "pb_",run,".csv"), param_pb, ',')
+    writedlm(joinpath(params["calibration_path"], "g_",run,".csv"), value.(u) .* z, ',')
+    writedlm(joinpath(params["calibration_path"], "margins_neg_",run,".csv"), value.(margins_neg), ',')
+    writedlm(joinpath(params["calibration_path"], "margins_pos_",run,".csv"), value.(margins_pos), ',')
     # Not calculated by the model, but report:
-    writedlm(string("calibration/wageshare_",run,".csv"), ω, ',')
-    writedlm(string("calibration/marg_pos_ratio_",run,".csv"),  io.marg_pos_ratio, ',')
-	writedlm(string("calibration/capital_output_ratio",run,".csv"), capital_output_ratio, ',')
+    writedlm(joinpath(params["calibration_path"], "wageshare_",run,".csv"), ω, ',')
+    writedlm(joinpath(params["calibration_path"], "marg_pos_ratio_",run,".csv"),  io.marg_pos_ratio, ',')
+	writedlm(joinpath(params["calibration_path"], "capital_output_ratio",run,".csv"), capital_output_ratio, ',')
 
     # First run is calibration -- now set Xmax and Fmax based on solution and run again
     Xmax = max.(Xmax, value.(X))
@@ -362,7 +364,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		set_normalized_coefficient(eq_F[i], fshare[i], -param_Fmax[i])
 	end
 	if params["report-diagnostics"]
-		open(string("diagnostics/model_", run, "_calib_2", ".txt"), "w") do f
+		open(joinpath(params["diagnostics_path"], "model_", run, "_calib_2", ".txt"), "w") do f
 			print(f, mdl)
 		end
 	end
@@ -404,21 +406,21 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	to_quoted_string_vec(product_names)
 
 	# Create files for sector variables
-	output_var(sector_names, "g", run, "", "w")
-	output_var(sector_names, "z", run, "", "w")
-	output_var(sector_names, "u", run, "", "w")
-	output_var(sector_names, "real_value_added", run, "", "w")
-	output_var(sector_names, "profit_rate", run, "", "w")
+	output_var(params, sector_names, "g", run, "", "w")
+	output_var(params, sector_names, "z", run, "", "w")
+	output_var(params, sector_names, "u", run, "", "w")
+	output_var(params, sector_names, "real_value_added", run, "", "w")
+	output_var(params, sector_names, "profit_rate", run, "", "w")
 	# Create files for product variables
-	output_var(product_names, "F", run, "", "w")
-	output_var(product_names, "X", run, "", "w")
-	output_var(product_names, "pb", run, "", "w")
+	output_var(params, product_names, "F", run, "", "w")
+	output_var(params, product_names, "X", run, "", "w")
+	output_var(params, product_names, "pb", run, "", "w")
 	# Create a file to hold scalar variables
 	scalar_var_list = ["curr acct surplus", "real GDP", "GDP deflator", "average utilization",
 						"labor productivity gr", "labor force gr", "wage rate gr", "wage per eff. worker gr",
 						"real investment", "investment import share", "central bank rate"]
 	to_quoted_string_vec(scalar_var_list)
-	output_var(scalar_var_list, "collected_variables", run, "", "w")
+	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
 
 	#############################################################################
 	#
@@ -549,19 +551,19 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		u_ave = sum(prices.pb .* g)/sum(prices.pb .* z)
 
 		# Sector variables
-		output_var(g, "g", run, year, "a")
-		output_var(z, "z", run, year, "a")
-		output_var(value.(u), "u", run, year, "a")
-		output_var(value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
-		output_var(profit_rate, "profit_rate", run, year, "a")
+		output_var(params, g, "g", run, year, "a")
+		output_var(params, z, "z", run, year, "a")
+		output_var(params, value.(u), "u", run, year, "a")
+		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
+		output_var(params, profit_rate, "profit_rate", run, year, "a")
 		# Product variables
-		output_var(value.(F), "F", run, year, "a")
-		output_var(value.(X), "X", run, year, "a")
-		output_var(param_pb, "pb", run, year, "a")
+		output_var(params, value.(F), "F", run, year, "a")
+		output_var(params, value.(X), "X", run, year, "a")
+		output_var(params, param_pb, "pb", run, year, "a")
 		# Scalar variables
 		scalar_var_vals = [CA_surplus, GDP, GDP_deflator, u_ave, λ_gr, L_gr,
 							w_gr, ω_gr, value.(I_tot), inv_imp_share, i_bank]
-		output_var(scalar_var_vals, "collected_variables", run, year, "a")
+		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
 
 		#--------------------------------
 		# Update Taylor rule
@@ -611,7 +613,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		fix(I_tot, param_I_tot)
 
 		if params["report-diagnostics"]
-			open(string("diagnostics/model_", run, "_", year, ".txt"), "w") do f
+			open(joinpath(params["diagnostics_path"], "model_", run, "_", year, ".txt"), "w") do f
 				print(f, mdl)
 			end
 		end
@@ -638,7 +640,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     for t = 1:ntime
         indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
     end
-    open(string("results/indices_",run,".csv"), "w") do io
+    open(joinpath(params["results_path"], "indices_",run,".csv"), "w") do io
                writedlm(io, reshape(labels, 1, :), ',')
                writedlm(io, indices, ',')
            end;
@@ -654,8 +656,8 @@ Indices are specified in the YAML configuration file.
 """
 function resultcomparison(run::Int64)
     # Obtains data from indices files for current run and previous run
-    file1 = string("results/indices_",run,".csv")
-    file2 = string("results/indices_",run-1,".csv")
+    file1 = joinpath(params["results_path"], "indices_",run,".csv")
+    file2 = joinpath(params["results_path"], "indices_",run-1,".csv")
 
     file1_dat = CSV.read(file1, header=1, missingstring=["0"], DataFrame)
     file2_dat = CSV.read(file2, header=1, missingstring=["0"], DataFrame)

@@ -213,7 +213,7 @@ function energyinvestment(file::String, run::Int64)
 	disconnectfromleap(LEAP)
 
     I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
-    writedlm(string("results/I_en_",run,".csv"), I_en, ',')
+    writedlm(joinpath(params["results_path"],I_en_",run,".csv"), I_en, ',')
 
     return I_en
 end
