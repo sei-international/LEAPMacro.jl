@@ -18,7 +18,7 @@ function output_var(params, values, filename, index, rowlabel, mode)
 	else
 		usevalue = values
 	end
-	open(string(params["results_path"], filename, "_", index,".csv"), mode) do io
+	open(string(params["results_path"], string(filename, "_", index,".csv")), mode) do io
 		write(io, string(rowlabel, ',', usevalue, '\n'))
 	end
 end
