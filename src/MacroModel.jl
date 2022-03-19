@@ -325,7 +325,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Calibration run
     #------------------------------------------
 	if params["report-diagnostics"]
-		open(joinpath(params["diagnostics_path"], "model_", run, "_calib_1", ".txt"), "w") do f
+		open(joinpath(params["diagnostics_path"], string("model_", run, "_calib_1", ".txt")), "w") do f
 			print(f, mdl)
 		end
 	end
@@ -338,21 +338,21 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     status = primal_status(mdl)
     @info "Calibrating: $status"
 
-    writedlm(joinpath(params["calibration_path"], "u_",run,".csv"), value.(u), ',')
-    writedlm(joinpath(params["calibration_path"], "X_",run,".csv"), value.(X), ',')
-    writedlm(joinpath(params["calibration_path"], "F_",run,".csv"), value.(F), ',')
-    writedlm(joinpath(params["calibration_path"], "M_",run,".csv"), value.(M), ',')
-    writedlm(joinpath(params["calibration_path"], "qs_",run,".csv"), value.(qs), ',')
-    writedlm(joinpath(params["calibration_path"], "qd_",run,".csv"), value.(qd), ',')
-    writedlm(joinpath(params["calibration_path"], "pd_",run,".csv"), param_pd, ',')
-    writedlm(joinpath(params["calibration_path"], "pb_",run,".csv"), param_pb, ',')
-    writedlm(joinpath(params["calibration_path"], "g_",run,".csv"), value.(u) .* z, ',')
-    writedlm(joinpath(params["calibration_path"], "margins_neg_",run,".csv"), value.(margins_neg), ',')
-    writedlm(joinpath(params["calibration_path"], "margins_pos_",run,".csv"), value.(margins_pos), ',')
+    writedlm(joinpath(params["calibration_path"], string("u_",run,".csv")), value.(u), ',')
+    writedlm(joinpath(params["calibration_path"], string("X_",run,".csv")), value.(X), ',')
+    writedlm(joinpath(params["calibration_path"], string("F_",run,".csv")), value.(F), ',')
+    writedlm(joinpath(params["calibration_path"], string("M_",run,".csv")), value.(M), ',')
+    writedlm(joinpath(params["calibration_path"], string("qs_",run,".csv")), value.(qs), ',')
+    writedlm(joinpath(params["calibration_path"], string("qd_",run,".csv")), value.(qd), ',')
+    writedlm(joinpath(params["calibration_path"], string("pd_",run,".csv")), param_pd, ',')
+    writedlm(joinpath(params["calibration_path"], string("pb_",run,".csv")), param_pb, ',')
+    writedlm(joinpath(params["calibration_path"], string("g_",run,".csv")), value.(u) .* z, ',')
+    writedlm(joinpath(params["calibration_path"], string("margins_neg_",run,".csv")), value.(margins_neg), ',')
+    writedlm(joinpath(params["calibration_path"], string("margins_pos_",run,".csv")), value.(margins_pos), ',')
     # Not calculated by the model, but report:
-    writedlm(joinpath(params["calibration_path"], "wageshare_",run,".csv"), ω, ',')
-    writedlm(joinpath(params["calibration_path"], "marg_pos_ratio_",run,".csv"),  io.marg_pos_ratio, ',')
-	writedlm(joinpath(params["calibration_path"], "capital_output_ratio",run,".csv"), capital_output_ratio, ',')
+    writedlm(joinpath(params["calibration_path"], string("wageshare_",run,".csv")), ω, ',')
+    writedlm(joinpath(params["calibration_path"], string("marg_pos_ratio_",run,".csv")),  io.marg_pos_ratio, ',')
+	writedlm(joinpath(params["calibration_path"], string("capital_output_ratio",run,".csv")), capital_output_ratio, ',')
 
     # First run is calibration -- now set Xmax and Fmax based on solution and run again
     Xmax = max.(Xmax, value.(X))
@@ -364,7 +364,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		set_normalized_coefficient(eq_F[i], fshare[i], -param_Fmax[i])
 	end
 	if params["report-diagnostics"]
-		open(joinpath(params["diagnostics_path"], "model_", run, "_calib_2", ".txt"), "w") do f
+		open(joinpath(params["diagnostics_path"], string("model_", run, "_calib_2", ".txt")), "w") do f
 			print(f, mdl)
 		end
 	end
@@ -613,7 +613,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		fix(I_tot, param_I_tot)
 
 		if params["report-diagnostics"]
-			open(joinpath(params["diagnostics_path"], "model_", run, "_", year, ".txt"), "w") do f
+			open(joinpath(params["diagnostics_path"], string("model_", run, "_", year, ".txt")), "w") do f
 				print(f, mdl)
 			end
 		end
@@ -640,7 +640,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     for t = 1:ntime
         indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
     end
-    open(joinpath(params["results_path"], "indices_",run,".csv"), "w") do io
+    open(joinpath(params["results_path"], string("indices_",run,".csv")), "w") do io
                writedlm(io, reshape(labels, 1, :), ',')
                writedlm(io, indices, ',')
            end;
@@ -656,8 +656,8 @@ Indices are specified in the YAML configuration file.
 """
 function resultcomparison(run::Int64)
     # Obtains data from indices files for current run and previous run
-    file1 = joinpath(params["results_path"], "indices_",run,".csv")
-    file2 = joinpath(params["results_path"], "indices_",run-1,".csv")
+    file1 = joinpath(params["results_path"], string("indices_",run,".csv"))
+    file2 = joinpath(params["results_path"], string("indices_",run-1,".csv"))
 
     file1_dat = CSV.read(file1, header=1, missingstring=["0"], DataFrame)
     file2_dat = CSV.read(file2, header=1, missingstring=["0"], DataFrame)
