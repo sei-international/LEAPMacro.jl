@@ -155,9 +155,9 @@ function parse_input_file(YAML_file::String)
 
     global_params = YAML.load_file(YAML_file)
 
-    global_params["results_path"] = joinpath("outputs/", params["output_folder"], "results")
-    global_params["calibration_path"] = joinpath("outputs/", params["output_folder"], "calibration")
-    global_params["diagnostics_path"] = joinpath("outputs/", params["output_folder"], "diagnostics")
+    global_params["results_path"] = joinpath("outputs/", global_params["output_folder"], "results")
+    global_params["calibration_path"] = joinpath("outputs/", global_params["output_folder"], "calibration")
+    global_params["diagnostics_path"] = joinpath("outputs/", global_params["output_folder"], "diagnostics")
 
 	# First, check if any sectors or products should be excluded because production is zero (or effectively zero, for products)
 	SUT_df = CSV.read(joinpath("inputs",global_params["files"]["SUT"]), header=false, DataFrame)
