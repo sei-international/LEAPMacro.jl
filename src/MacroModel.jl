@@ -649,12 +649,12 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 end # ModelCalculations
 
 """
-    resultcomparison(run::Int64)
+    resultcomparison(params, run::Int64)
 
 Compare the GDP and value added indices generated from different runs and calculate the maximum difference.
 Indices are specified in the YAML configuration file.
 """
-function resultcomparison(run::Int64)
+function resultcomparison(params, run::Int64)
     # Obtains data from indices files for current run and previous run
     file1 = joinpath(params["results_path"], string("indices_",run,".csv"))
     file2 = joinpath(params["results_path"], string("indices_",run-1,".csv"))
@@ -714,7 +714,7 @@ function runleapmacromodel(file::String, logfile::IOStream)
 
         ## Compare run results
         if run >= 1
-            tolerance = resultcomparison(run)
+            tolerance = resultcomparison(params, run)
             if tolerance <= max_tolerance
                 @info @sprintf("Convergence in run number %d at %.2f%% ≤ %.2f%% target...", run, tolerance, max_tolerance)
                 return
