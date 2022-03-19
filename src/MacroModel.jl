@@ -352,7 +352,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Not calculated by the model, but report:
     writedlm(joinpath(params["calibration_path"], string("wageshare_",run,".csv")), ω, ',')
     writedlm(joinpath(params["calibration_path"], string("marg_pos_ratio_",run,".csv")),  io.marg_pos_ratio, ',')
-	writedlm(joinpath(params["calibration_path"], string("capital_output_ratio",run,".csv")), capital_output_ratio, ',')
+	writedlm(joinpath(params["calibration_path"], string("capital_output_ratio_",run,".csv")), capital_output_ratio, ',')
 
     # First run is calibration -- now set Xmax and Fmax based on solution and run again
     Xmax = max.(Xmax, value.(X))
