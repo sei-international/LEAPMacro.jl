@@ -521,7 +521,7 @@ function supplyusedata(param_file::String)
 	M = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["imports"])[product_ndxs,:], dims=2))
 	M_stat_adj = sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["imports"])[terr_adj_product_ndx,:])
     M = M * (1.0 + M_stat_adj/(sum(M) + ϵ))
-    M[global_params["non-tradeable-range"]] = 0.0 # If it is declared non-tradeable, set imports to zero
+    M[global_params["non-tradeable-range"]] .= 0.0 # If it is declared non-tradeable, set imports to zero
 	retval.M = M
 
 	#--------------------------------
@@ -530,7 +530,7 @@ function supplyusedata(param_file::String)
 	X = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["exports"])[product_ndxs,:], dims=2))
 	X_stat_adj = sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["exports"])[terr_adj_product_ndx,:])
     X = X * (1.0 + X_stat_adj/(sum(X) + ϵ))
-    X[global_params["non-tradeable-range"]] = 0.0 # If it is declared non-tradeable, set exports to zero
+    X[global_params["non-tradeable-range"]] .= 0.0 # If it is declared non-tradeable, set exports to zero
 	retval.X = X
 
 	#--------------------------------
