@@ -321,7 +321,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	# Total supply
 	@constraint(mdl, eq_totsupply[i = 1:np], qs[i] == qd[i] - margins_pos[i] + margins_neg[i] + X[i] + F[i] + θ[i] * I_dom - M[i])
 	# Imports
-	@constraint(mdl, eq_M[i = 1:np], M[i] == io.m_frac[i] * (qd[i] + F[i]) + param_prevM[i] * ψ_imp[i] + θ_imp[i] * I_imp)
+	@constraint(mdl, eq_M[i = 1:np], M[i] <= io.m_frac[i] * (qd[i] + F[i]) + param_prevM[i] * ψ_imp[i] + θ_imp[i] * I_imp)
 	# Margins
 	@constraint(mdl, eq_margpos[i = 1:np], margins_pos[i] == io.marg_pos_ratio[i] * (qs[i] + M[i]))
 	@constraint(mdl, eq_margneg[i = 1:np], margins_neg[i] == io.marg_neg_share[i] * sum(margins_pos[j] for j in 1:np))
