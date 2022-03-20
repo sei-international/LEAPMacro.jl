@@ -406,14 +406,13 @@ function energy_nonenergy_link_measure(param_file::String)
 	V = transpose(supply_table)
 	qs = vec(sum(V, dims=1))
 	g = vec(sum(V, dims=2))
-	S = V * Diagonal(1.0 ./ qs)
-    replace!(S, NaN=>0)
+	S = V * Diagonal(1.0 ./ (qs .+ ϵ))
 
 	#--------------------------------
 	# Compute D matrix
 	#--------------------------------
 	use_table = excel_range_to_mat(SUT_df, params["SUT_ranges"]["use_table"])[full_product_ndxs,full_sector_ndxs]
-	D = use_table * Diagonal(1.0 ./ g)
+	D = use_table * Diagonal(1.0 ./ (g .+ ϵ))
 
 	#--------------------------------
 	# Compute A matrix and Leontief matrix

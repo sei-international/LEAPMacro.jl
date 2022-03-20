@@ -421,9 +421,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	output_var(params, product_names, "X", run, "", "w")
 	output_var(params, product_names, "pb", run, "", "w")
 	# Create a file to hold scalar variables
-	scalar_var_list = ["curr acct surplus", "real GDP", "GDP deflator", "average utilization",
-						"labor productivity gr", "labor force gr", "wage rate gr", "wage per eff. worker gr",
-						"real investment", "investment import share", "central bank rate"]
+	scalar_var_list = ["curr acct surplus", "real GDP", "GDP deflator", "labor productivity gr",
+					   "labor force gr", "wage rate gr", "wage per eff. worker gr", "real investment",
+					   "investment import share", "central bank rate"]
 	to_quoted_string_vec(scalar_var_list)
 	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
 
@@ -553,7 +553,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# These variables are only reported, not used
 		CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
 		inv_imp_share = value.(I_imp)/value.(I_tot)
-		u_ave = sum(prices.pb .* g)/sum(prices.pb .* z)
 
 		# Sector variables
 		output_var(params, g, "g", run, year, "a")
@@ -566,7 +565,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		output_var(params, value.(X), "X", run, year, "a")
 		output_var(params, param_pb, "pb", run, year, "a")
 		# Scalar variables
-		scalar_var_vals = [CA_surplus, GDP, GDP_deflator, u_ave, λ_gr, L_gr,
+		scalar_var_vals = [CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, value.(I_tot), inv_imp_share, i_bank]
 		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
 
