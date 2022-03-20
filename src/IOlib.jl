@@ -165,7 +165,7 @@ function parse_input_file(YAML_file::String)
 	supply_table = excel_range_to_mat(SUT_df, global_params["SUT_ranges"]["supply_table"])
 	qs = vec(sum(supply_table, dims=2))
 	g = vec(sum(supply_table, dims=1))
-    M_equiv = V * Diagonal(1 ./ (qs .+ ϵ)) * M
+    M_equiv = transpose(supply_table) * Diagonal(1 ./ (qs .+ ϵ)) * M
     # Remove all sectors for which there is negligible domestic production relative to imports
 	θ = global_params["domestic_production_share_threshold"]/100
 	zero_domprod_ndxs = findall(x -> x < 0, (1 - θ) * g - θ * M_equiv)
