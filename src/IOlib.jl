@@ -165,9 +165,12 @@ function parse_input_file(YAML_file::String)
 	supply_table = excel_range_to_mat(SUT_df, global_params["SUT_ranges"]["supply_table"])
 	qs = vec(sum(supply_table, dims=2))
 	g = vec(sum(supply_table, dims=1))
-	zero_secprod_ndxs = findall(x -> x == 0, g)
+    M_equiv = V * Diagonal(1 ./ (qs .+ ϵ)) * M
+    # Remove all sectors for which there is negligible domestic production relative to imports
 	θ = global_params["domestic_production_share_threshold"]/100
-	zero_domprod_ndxs = findall(x -> x < 0, (1 - θ) * qs - θ * M)
+	zero_domprod_ndxs = findall(x -> x < 0, (1 - θ) * g - θ * M_equiv)
+    # Remove all products for which there is negligible total supply (domestic + imported) relative to total domestic output
+	zero_prod_ndxs = findall(x -> abs(x) < ϵ, (qs + M)/sum(g))
 
 	all_sectors = CSV.read(joinpath("inputs",global_params["files"]["sector_info"]), header=1, types=Dict(:code => String, :name => String), select=[:code,:name], NamedTuple)
 	all_products = CSV.read(joinpath("inputs",global_params["files"]["product_info"]), header=1, types=Dict(:code => String, :name => String), select=[:code,:name], NamedTuple)
@@ -183,13 +186,13 @@ function parse_input_file(YAML_file::String)
 	# These are the indexes used for the Macro model
 	user_defined_sector_ndxs = findall(.!in(excluded_sectors).(sector_codes))
 	user_defined_product_ndxs = findall(.!in(excluded_products).(product_codes))
-	global_params["sector-indexes"] = sort(setdiff(user_defined_sector_ndxs, zero_secprod_ndxs))
-	global_params["product-indexes"] = sort(setdiff(user_defined_product_ndxs, zero_domprod_ndxs))
+	global_params["sector-indexes"] = sort(setdiff(user_defined_sector_ndxs, zero_domprod_ndxs))
+	global_params["product-indexes"] = sort(setdiff(user_defined_product_ndxs, zero_prod_ndxs))
 
 	user_defined_energy_sector_ndxs = findall(in(global_params["excluded_sectors"]["energy"]).(sector_codes))
 	user_defined_energy_product_ndxs = findall(in(global_params["excluded_products"]["energy"]).(sector_codes))
-	global_params["energy-sector-indexes"] = sort(setdiff(user_defined_energy_sector_ndxs, zero_secprod_ndxs))
-	global_params["energy-product-indexes"] = sort(setdiff(user_defined_energy_product_ndxs, zero_domprod_ndxs))
+	global_params["energy-sector-indexes"] = sort(setdiff(user_defined_energy_sector_ndxs, zero_domprod_ndxs))
+	global_params["energy-product-indexes"] = sort(setdiff(user_defined_energy_product_ndxs, zero_prod_ndxs))
 
 	global_params["terr-adj-sector-indexes"] = findall(in(global_params["excluded_sectors"]["territorial_adjustment"]).(sector_codes))
 	global_params["terr-adj-product-indexes"] = findall(in(global_params["excluded_products"]["territorial_adjustment"]).(sector_codes))
