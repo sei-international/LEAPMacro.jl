@@ -406,7 +406,7 @@ function energy_nonenergy_link_measure(param_file::String)
 	V = transpose(supply_table)
 	qs = vec(sum(V, dims=1))
 	g = vec(sum(V, dims=2))
-	S = V * Diagonal(1.0 ./ qs)
+	S = V * Diagonal(1.0 ./ (qs .+ ϵ))
 
 	#--------------------------------
 	# Compute D matrix
@@ -483,7 +483,7 @@ function supplyusedata(param_file::String)
 	supply_table = excel_range_to_mat(SUT_df, params["SUT_ranges"]["supply_table"])[product_ndxs,sector_ndxs]
 	V = transpose(supply_table)
 	qs = vec(sum(V, dims=1))
-	retval.S = V * Diagonal(1 ./ qs)
+	retval.S = V * Diagonal(1 ./ (qs .+ ϵ))
     retval.g = vec(sum(V, dims=2))
 	retval.Vnorm = Diagonal(1 ./ retval.g) * V
 
