@@ -86,27 +86,29 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 
 	# Clean up folders if requested
 	if run == 0
+		if params["clear-folders"]["results"] & isdir(params["results_path"])
+			for f in readdir(params["results_path"])
+				rm(joinpath(params["results_path"], f))
+			end
+		end
+		if params["clear-folders"]["calibration"] & isdir(params["calibration_path"])
+			for f in readdir(params["calibration_path"])
+				rm(joinpath(params["calibration_path"], f))
+			end
+		end
+		if params["clear-folders"]["diagnostics"] & isdir(params["diagnostics_path"])
+			for f in readdir(params["diagnostics_path"])
+				rm(joinpath(params["diagnostics_path"], f))
+			end
+		end
+
+		# Ensure that they exist
 		mkpath(params["results_path"])
 		mkpath(params["calibration_path"])
 		if params["report-diagnostics"]
 			mkpath(params["diagnostics_path"])
 		end
 
-		if params["clear-folders"]["results"]
-			for f in readdir(params["results_path"])
-				rm(joinpath(params["results_path"], f))
-			end
-		end
-		if params["clear-folders"]["calibration"]
-			for f in readdir(params["calibration_path"])
-				rm(joinpath(params["calibration_path"], f))
-			end
-		end
-		if params["clear-folders"]["diagnostics"] & isdir("diagnostics")
-			for f in readdir(params["diagnostics_path"])
-				rm(joinpath(params["diagnostics_path"], f))
-			end
-		end
 	end
 
 	io, np, ns = IOlib.supplyusedata(file)
