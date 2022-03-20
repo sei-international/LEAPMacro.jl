@@ -406,7 +406,8 @@ function energy_nonenergy_link_measure(param_file::String)
 	V = transpose(supply_table)
 	qs = vec(sum(V, dims=1))
 	g = vec(sum(V, dims=2))
-	S = V * Diagonal(1.0 ./ (qs .+ ϵ))
+	S = V * Diagonal(1.0 ./ qs)
+    replace!(S, NaN=>0)
 
 	#--------------------------------
 	# Compute D matrix
