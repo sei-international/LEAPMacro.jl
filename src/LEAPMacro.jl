@@ -19,7 +19,7 @@ include("./LEAPfunctions.jl")
 include("./MacroModel.jl")
 using .IOlib, .LEAPfunctions, .MacroModel
 
-function run(params_file = nothing)
+function run(;params_file = nothing, dump_err_stack = false)
 	# Ensure needed folders exist
 	if !isdir("inputs")
 		throw(ErrorException("The \"inputs\" folder is needed, but does not exist"))
@@ -38,7 +38,9 @@ function run(params_file = nothing)
 		MacroModel.runleapmacromodel(params_file, logfile)
 	catch err
 		@error err
-		@error stacktrace(catch_backtrace())
+		if dump_err_stack
+			@error stacktrace(catch_backtrace())
+		end
 	end
 	@info now()
 	close(logfile)
