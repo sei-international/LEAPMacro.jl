@@ -563,7 +563,7 @@ function supplyusedata(param_file::String)
 	intermed = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_intermediate_supply"])[product_ndxs,:], dims=2))
     # The fraction m_frac applies to imports excluding imported investment goods
     dom_noninv = intermed + retval.F
-    retval.m_frac = retval.M .* (1 .- retval.I ./ (dom_noninv + retval.I)) ./ dom_noninv
+    retval.m_frac = min.(1, retval.M .* (1 .- retval.I ./ (dom_noninv + retval.I)) ./ dom_noninv)
 
 	#--------------------------------
 	# Wages
