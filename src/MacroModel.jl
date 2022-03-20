@@ -100,6 +100,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 			for f in readdir(params["diagnostics_path"])
 				rm(joinpath(params["diagnostics_path"], f))
 			end
+			if !params["report-diagnostics"]
+				rm(params["diagnostics_path"])
+			end
 		end
 
 		# Ensure that they exist
