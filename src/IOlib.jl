@@ -548,22 +548,22 @@ function supplyusedata(param_file::String)
 	retval.I = I
 
 	#--------------------------------
-	# Correct demands
-	#--------------------------------
-	stock_change = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["stock_change"])[product_ndxs,:], dims=2))
-    # Correct for stock changes and tax leakage
-    corr = (stock_change - taxes) ./ (retval.F + retval.I + retval.X + ϵ * ones(np))
-    retval.F = (ones(np) + corr) .* retval.F
-    retval.X = (ones(np) + corr) .* retval.X
-    retval.I = (ones(np) + corr) .* retval.I
-
-	#--------------------------------
 	# Allocate imports (by a common fraction for each product) to final demand and intermediate demand
 	#--------------------------------
 	intermed = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_intermediate_supply"])[product_ndxs,:], dims=2))
     # The fraction m_frac applies to imports excluding imported investment goods
     dom_noninv = intermed + retval.F
     retval.m_frac = retval.M .* (1 .- retval.I ./ (dom_noninv + retval.I)) ./ dom_noninv
+
+	#--------------------------------
+	# Correct demands
+	#--------------------------------
+	stock_change = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["stock_change"])[product_ndxs,:], dims=2))
+    # Correct for stock changes and tax leakage
+    corr = 1 .+ (stock_change - taxes) ./ (retval.F + retval.I + retval.X .+ ϵ)
+    retval.F = corr .* retval.F
+    retval.X = corr .* retval.X
+    retval.I = corr .* retval.I
 
 	#--------------------------------
 	# Wages
