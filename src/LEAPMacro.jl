@@ -19,7 +19,7 @@ include("./LEAPfunctions.jl")
 include("./MacroModel.jl")
 using .IOlib, .LEAPfunctions, .MacroModel
 
-function run(params_file::String = nothing, dump_err_stack::Bool = false)
+function run(params_file::String = nothing; dump_err_stack::Bool = false)
 	# Ensure needed folders exist
 	if !isdir("inputs")
 		throw(ErrorException("The \"inputs\" folder is needed, but does not exist"))
