@@ -561,7 +561,9 @@ function supplyusedata(param_file::String)
 	# Allocate imports (by a common fraction for each product) to final demand and intermediate demand
 	#--------------------------------
 	intermed = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_intermediate_supply"])[product_ndxs,:], dims=2))
-    retval.m_frac = retval.M ./ (intermed + retval.F)
+    # The fraction m_frac applies to imports excluding imported investment goods
+    dom_noninv = intermed + retval.F
+    retval.m_frac = retval.M .* (1 .- retval.I ./ (dom_noninv + retval.I)) ./ dom_noninv
 
 	#--------------------------------
 	# Wages
