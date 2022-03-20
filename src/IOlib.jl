@@ -577,7 +577,7 @@ function supplyusedata(param_file::String)
 	#--------------------------------
 	tot_int_dmd = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_intermediate_demand"])[:,sector_ndxs], dims=1))
 	profit = max.(retval.g - tot_int_dmd - retval.W,zeros(ns))
-	retval.μ = retval.g ./ (retval.g - profit + ϵ * ones(ns))
+	retval.μ = retval.g ./ (retval.g - profit .+ ϵ)
 
     if params["report-diagnostics"]
         writedlm(joinpath(params["diagnostics_path"],"qs.csv"),  qs, ',')
@@ -594,6 +594,8 @@ function supplyusedata(param_file::String)
         writedlm(joinpath(params["diagnostics_path"],"qd_alt2.csv"), retval.D * retval.g, ',')
         writedlm(joinpath(params["diagnostics_path"],"S.csv"), retval.S, ',')
         writedlm(joinpath(params["diagnostics_path"],"D.csv"), retval.D, ',')
+        writedlm(joinpath(params["diagnostics_path"],"profmargin.csv"), retval.μ, ',')
+        writedlm(joinpath(params["diagnostics_path"],"taxrate.csv"), retval.τd, ',')
 		open(joinpath(params["diagnostics_path"],"nonenergy_energy_link_measure.txt"), "w") do fhndl
 			R = 100 .* energy_nonenergy_link_measure(param_file)
 			A_NE_metric_string = @sprintf("This value should be small: %.2f%%.", R)
