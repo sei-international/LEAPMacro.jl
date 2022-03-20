@@ -270,9 +270,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     @variable(mdl, 0 <= ugap[i in 1:ns] <= 1)
     @variable(mdl, 0 <= fgap[i in 1:np] <= 1)
     @variable(mdl, 0 <= xgap[i in 1:np] <= 1)
-    @variable(mdl, 0 <= ψ_xcs_imp[i in 1:np] <= 1) # Excess over desired imports (as a relative amount)
-    @variable(mdl, 0 <= ψ_def_imp[i in 1:np] <= 1) # Deficit below desired imports (as a relative amount)
-   # Supply and demand quantities
+    @variable(mdl, 0 <= ψ_imp[i in 1:np] <= 1) # Excess over desired imports (as a relative amount)
+    # Supply and demand quantities
     @variable(mdl, qs[i in 1:np] >= 0)
     @variable(mdl, qd[i in 1:np] >= 0)
     # Final demand
@@ -298,7 +297,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     @objective(mdl, Min, wu * sum(u_sector_wt[i] * ugap[i] for i in 1:ns) +
 					     wf * sum(f_sector_wt[i] * fgap[i] for i in 1:np) +
 						 wx * sum(x_sector_wt[i] * xgap[i] for i in 1:np) +
-						 wm * (sum(ψ_xcs_imp[i] + ψ_def_imp[i] for i in 1:np) + ψ_inv))
+						 wm * (sum(ψ_imp[i] for i in 1:np) + ψ_inv))
 
     #----------------------------------
     # Constraints
@@ -322,7 +321,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	# Total supply
 	@constraint(mdl, eq_totsupply[i = 1:np], qs[i] == qd[i] - margins_pos[i] + margins_neg[i] + X[i] + F[i] + θ[i] * I_dom - M[i])
 	# Imports
-	@constraint(mdl, eq_M[i = 1:np], M[i] == io.m_frac[i] * (qd[i] + F[i]) + param_prevM[i] * (ψ_xcs_imp[i] - ψ_def_imp[i]) + θ_imp[i] * I_imp)
+	@constraint(mdl, eq_M[i = 1:np], M[i] == io.m_frac[i] * (qd[i] + F[i]) + param_prevM[i] * ψ_imp[i] + θ_imp[i] * I_imp)
 	# Margins
 	@constraint(mdl, eq_margpos[i = 1:np], margins_pos[i] == io.marg_pos_ratio[i] * (qs[i] + M[i]))
 	@constraint(mdl, eq_margneg[i = 1:np], margins_neg[i] == io.marg_neg_share[i] * sum(margins_pos[j] for j in 1:np))
@@ -612,8 +611,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		for i in 1:np
 			set_normalized_coefficient(eq_X[i], xshare[i], -param_Xmax[i])
 			set_normalized_coefficient(eq_F[i], fshare[i], -param_Fmax[i])
-			set_normalized_coefficient(eq_M[i], ψ_xcs_imp[i], -param_prevM[i])
-			set_normalized_coefficient(eq_M[i], ψ_def_imp[i], param_prevM[i])
+			set_normalized_coefficient(eq_M[i], ψ_imp[i], -param_prevM[i])
 		end
 		set_normalized_coefficient(eq_inv_imp_mult, ψ_inv, param_prev_I_tot)
 		fix(I_tot, param_I_tot)
