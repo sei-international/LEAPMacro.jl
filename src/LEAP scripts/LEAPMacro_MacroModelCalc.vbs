@@ -1,5 +1,8 @@
 cls
 
+macrodir = LEAP.ActiveArea.Directory & "Macro\"
+macrofile = "LEAP-Macro-run.jl"
+
 function GetJuliaPath()
 	Dim shell
 	Dim PathEV
@@ -55,11 +58,7 @@ juliapath = GetJuliaPath()
 If IsNull(juliapath) Then
 	Wscript.echo "Could not locate the Julia executable in the PATH environment variable or in AppData\Local\Programs"
 Else
-	macrodir = LEAP.ActiveArea.Directory & "Macro\"
-	macrofile = "LEAP-Macro-Maroc.jl"
-	paramfile = "LEAPMacro_params_BASELINE.yml"
-
-	path = Chr(34) & juliapath & Chr(34) & " " & Chr(34) & macrodir & macrofile & Chr(34) & " "  & Chr(34) & paramfile & Chr(34)
+	path = Chr(34) & juliapath & Chr(34) & " " & Chr(34) & macrodir & macrofile & Chr(34) & " "  & Chr(34)
 
 	errorcode = shell.Run(path, style, waitTillComplete)
 End If
