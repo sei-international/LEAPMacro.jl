@@ -26,7 +26,7 @@ function run(params_file::String = nothing; dump_err_stack::Bool = false)
 	end
 
 	if isnothing(params_file)
-		params_file = "LEAP_Macro_params.yml"
+		params_file = "LEAPMacro_params.yml"
 	end
 	# Enable logging
 	logfile = open("LEAPMacro_log.txt", "w+")
@@ -34,16 +34,20 @@ function run(params_file::String = nothing; dump_err_stack::Bool = false)
 	global_logger(logger)
 	@info now()
 	@info "Parameter file: '$params_file'"
+	exit_status = 0
 	try
 		MacroModel.runleapmacromodel(params_file, logfile)
 	catch err
+		exit_status = 1
 		@error err
 		if dump_err_stack
 			@error stacktrace(catch_backtrace())
 		end
+	finally
+		@info now()
+		close(logfile)
+		return(exit_status)
 	end
-	@info now()
-	close(logfile)
 end # function run
 
 end #module

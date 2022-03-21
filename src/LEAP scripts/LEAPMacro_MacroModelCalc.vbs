@@ -57,7 +57,7 @@ If IsNull(juliapath) Then
 Else
 	macrodir = LEAP.ActiveArea.Directory & "Macro\"
 	macrofile = "LEAP-Macro-Maroc.jl"
-	paramfile = "LEAP_Macro_params_BASELINE.yml"
+	paramfile = "LEAPMacro_params_BASELINE.yml"
 
 	path = Chr(34) & juliapath & Chr(34) & " " & Chr(34) & macrodir & macrofile & Chr(34) & " "  & Chr(34) & paramfile & Chr(34)
 
