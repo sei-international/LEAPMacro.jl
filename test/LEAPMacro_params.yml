@@ -193,6 +193,12 @@ GDP-branch:
     variable: Activity Level
     last_historical_year: 2010
 
+Employment-branch:
+    name: Employment
+    branch: Key\Employment
+    variable: Activity Level
+    last_historical_year: 2010
+
 LEAP-sectors:
  - {
     name: Iron and Steel,

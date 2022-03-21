@@ -41,11 +41,21 @@ function outputtoleap(file::String, indices::Array)
     LEAP.ActiveView = "Analysis"
 
 	branch_data = Dict(:branch => String[], :variable => String[], :last_historical_year => Int64[], :col => Int64[])
-	col = 1
-	append!(branch_data[:branch], [params["GDP-branch"]["branch"]])
-	append!(branch_data[:variable], [params["GDP-branch"]["variable"]])
-	append!(branch_data[:last_historical_year], [params["GDP-branch"]["last_historical_year"]])
-	append!(branch_data[:col], [col])
+	col = 0
+    if haskey(params, "GDP-branch")
+        col += 1
+        append!(branch_data[:branch], [params["GDP-branch"]["branch"]])
+        append!(branch_data[:variable], [params["GDP-branch"]["variable"]])
+        append!(branch_data[:last_historical_year], [params["GDP-branch"]["last_historical_year"]])
+        append!(branch_data[:col], [col])
+    end
+    if haskey(params, "Employment-branch")
+        col += 1
+        append!(branch_data[:branch], [params["Employment-branch"]["branch"]])
+        append!(branch_data[:variable], [params["Employment-branch"]["variable"]])
+        append!(branch_data[:last_historical_year], [params["Employment-branch"]["last_historical_year"]])
+        append!(branch_data[:col], [col])
+    end
 
 	for leap_sector in params["LEAP-sectors"]
 		col += 1

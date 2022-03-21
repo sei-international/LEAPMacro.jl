@@ -394,12 +394,21 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     prev_GDP_gr = neutral_growth
     prev_πg = params["global-params"]["infl_default"]
 
+	lab_force_index = 1
+
     year = base_year
 
 	#--------------------------------
 	# Initialize array of indices to pass to LEAP
 	#--------------------------------
-	labels = vcat(["Year";params["GDP-branch"]["name"]], params["LEAP_sector_names"])
+	labels = ["Year"]
+	if haskey(params, "GDP-branch")
+		labels = vcat(labels, params["GDP-branch"]["name"])
+	end
+	if haskey(params, "Employment-branch")
+		labels = vcat(labels, params["Employment-branch"]["name"])
+	end
+	labels = vcat(labels, params["LEAP_sector_names"])
     indices = Array{Float64}(undef, ntime, length(labels))
 
 	#------------------------------------------
@@ -497,6 +506,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		λ_gr = iovar.αKV[t] * GDP_gr + iovar.βKV[t] # Kaldor-Verdoorn equation for labor productivity
 		L_gr = GDP_gr - λ_gr # Labor force growth rate
 
+		lab_force_index *= 1 + L_gr
+
 		w_gr = infl_passthrough * πGDP + λ_gr * (1.0 + lab_constr_coeff * (L_gr - iovar.working_age_grs[t]))
 		ω_gr = w_gr - λ_gr - πg
 		ω = (1.0 + ω_gr) * ω
@@ -542,11 +553,20 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Calculate indices to pass to LEAP
 		#--------------------------------
         indices[t,1] = year
-        indices[t,2] = GDP
-		for i in 1:length(LEAP_indices)
-			indices[t, 2 + i] = 0
+		curr_index = 1
+		if haskey(params, "GDP-branch")
+			curr_index += 1
+			indices[t,curr_index] = GDP
+		end
+		if haskey(params, "Employment-branch")
+			curr_index += 1
+			indices[t,curr_index] = lab_force_index
+		end
+	
+ 		for i in 1:length(LEAP_indices)
+			indices[t, curr_index + i] = 0
 			for j in LEAP_indices[i]
-				indices[t, 2 + i] += g[j]
+				indices[t, curr_index + i] += g[j]
 			end
 		end
 
