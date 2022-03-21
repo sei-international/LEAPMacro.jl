@@ -554,9 +554,7 @@ function supplyusedata(param_file::String)
 	#--------------------------------
 	tot_int_sup = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_intermediate_supply"])[product_ndxs,:], dims=2))
     # The fraction m_frac applies to imports excluding imported investment goods
-    dom_noninv = tot_int_sup + retval.F
-    retval.m_frac = retval.M .* (1 .- retval.I ./ (dom_noninv + retval.I)) ./ dom_noninv
-
+    retval.m_frac = retval.M ./ (tot_int_sup + retval.F + retval.I)
 	#--------------------------------
 	# Correct demands
 	#--------------------------------

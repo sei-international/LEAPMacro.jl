@@ -253,7 +253,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	#----------------------------------
 	# A filter for products that are domestically supplied
 	#----------------------------------
-	dom_production = vec(sum(io.S, dims=1)) .!= 0
+	no_dom_production = vec(sum(io.S, dims=1)) .== 0
 
 	#----------------------------------
     # Dynamic parameters
@@ -324,9 +324,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	fix(I_tot, param_I_tot)
 	@constraint(mdl, eq_inv_imp_mult, ψ_inv * param_prev_I_tot == I_imp)
 	# Total supply
-	@constraint(mdl, eq_totsupply[i = 1:np], qs[i] == dom_production[i] * (qd[i] - margins_pos[i] + margins_neg[i] + X[i] + F[i] + θ[i] * I_dom - M[i]))
+	@constraint(mdl, eq_totsupply[i = 1:np], qs[i] == qd[i] - margins_pos[i] + margins_neg[i] + X[i] + F[i] + θ[i] * I_dom - M[i])
+	@constraint(mdl, eq_no_dom_prod[i = 1:np], qs[i] * no_dom_production[i] == 0)
 	# Imports
-	@constraint(mdl, eq_M[i = 1:np], M[i] == io.m_frac[i] * (qd[i] + F[i]) + param_prevM[i] * ψ_imp[i] + θ_imp[i] * I_imp)
+	@constraint(mdl, eq_M[i = 1:np], M[i] == io.m_frac[i] * (qd[i] + F[i] + θ_imp[i] * I_imp) + param_prevM[i] * ψ_imp[i])
 	# Margins
 	@constraint(mdl, eq_margpos[i = 1:np], margins_pos[i] == io.marg_pos_ratio[i] * (qs[i] + M[i]))
 	@constraint(mdl, eq_margneg[i = 1:np], margins_neg[i] == io.marg_neg_share[i] * sum(margins_pos[j] for j in 1:np))
