@@ -197,6 +197,8 @@ function energyinvestment(file::String, run::Int64)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
+    println(params["output_folder"])
+
     # connects program to LEAP
     LEAP = connecttoleap()
 	if ismissing(LEAP)
