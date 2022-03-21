@@ -170,7 +170,7 @@ SUT_ranges:
     stock_change: AD21:AD34
     tot_intermediate_supply: X21:X34
     # Rows indexed by sector -- groups of rows will be summed together
-    tot_intermediate_demand: J31:W31
+    tot_intermediate_demand: J35:W35
     wages: J37:W38
 
 #---------------------------------------------------------------------------
