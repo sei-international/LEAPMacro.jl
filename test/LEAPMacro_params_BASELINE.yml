@@ -1,0 +1,251 @@
+#---------------------------------------------------------------------------
+# Folder inside the "outputs" folder to store calibration, results, and diagnostics
+#---------------------------------------------------------------------------
+output_folder: BASELINE
+#---------------------------------------------------------------------------
+# Supply-use table and supplementary tables as CSV files
+#---------------------------------------------------------------------------
+# Macro model data files
+files:
+    SUT: Freedonia_SUT.csv
+    sector_info: sector_parameters.csv
+    product_info: product_parameters.csv
+    time_series: time_series.csv
+
+# Say whether to clear the contents of the results, calibration, and diagnostic folders before the run
+clear-folders:
+    results: true
+    calibration: true
+    diagnostics: true
+# Set to "true" to send results to the diagnostics folder, including dumps of the linear goal program
+report-diagnostics: true
+
+model:
+    # Set run_leap to "false" to do a single run of the Macro model without calling LEAP
+    run_leap: true
+    # Hide LEAP while running to (possibly) improve performance
+    hide_leap: false
+    # Maximum number of iterations before stopping (ignored if run_leap = false)
+    max_runs: 7
+    # Tolerance in percentage difference between values for indices between runs
+    max_tolerance: 1 # percent
+
+#---------------------------------------------------------------------------
+# Start and end years for the simulation
+#   Note: the supply-use table above must be appropriate for the start year
+#---------------------------------------------------------------------------
+years:
+    start:  2010
+    end:    2040
+
+#---------------------------------------------------------------------------
+# Adjustment parameters for initializing variables
+#---------------------------------------------------------------------------
+# These factors are expressed as a fractional addition/subtraction to the estimate: set to zero to accept the default estimate
+calib:
+    # Calibration factor for estimating the first-period profit rate and capital productivity
+    nextper_inv_adj_factor: 0.05
+    # Adjustment factor for maximum export demand in the initial year
+    max_export_adj_factor: 0.00
+    # Adjustment factor for maximum household demand in the initial year
+    max_hh_dmd_adj_factor: 0.00
+    # Potential output relative to actual output in the base year
+    pot_output_adj_factor: 0.05
+    
+#---------------------------------------------------------------------------
+# Global economy parameters
+#---------------------------------------------------------------------------
+global-params:
+    # Default world inflation rate
+    infl_default: 0.02
+    # Default world growth rate
+    gr_default: 0.015
+
+#---------------------------------------------------------------------------
+# Parameters for setting the central bank lending rate (Taylor rule)
+#---------------------------------------------------------------------------
+taylor-fcn:
+    # Target interest rate (as a fraction, e.g., 2%/year = 0.02)
+    target_intrate: 0.02
+    # Target inflation rate
+    target_infl: 0.02
+    # Response of the central bank rate to a change in the GDP growth rate
+    gr_resp: 0.50
+    # Response of the central bank rate to a change in the inflation rate
+    infl_resp: 0.50
+
+#---------------------------------------------------------------------------
+# Parameters for the investment function
+#---------------------------------------------------------------------------
+investment-fcn:
+    # Starting point for the autonomous investment growth rate: also the target GDP growth rate for the Taylor rule
+    neutral_growth: 0.060
+    # Change in induced investment with a change in utilization
+    util_sens:  0.05
+    # Change in induced investment with a change in the profit rate
+    profit_sens: 0.10
+    # Change in induced investment with a change in the central bank lending rate
+    intrate_sens: 0.20
+    # Rate of adjustment of the autonomous investment rate towards the actual investment rate
+    growth_adj: 0.20
+
+#---------------------------------------------------------------------------
+# Parameters for the labor productivity and labor force model
+#---------------------------------------------------------------------------
+labor-prod-fcn:
+    # Default Kaldor-Verdoorn coefficient
+    KV_coeff_default: 0.50
+    # Default Kaldor-Verdoorn intercept
+    KV_intercept_default: 0.00
+wage-fcn:
+    # Inflation pass-through
+    infl_passthrough: 0.85
+    # Labor supply constraint coefficent
+    lab_constr_coeff: 0.5
+
+#---------------------------------------------------------------------------
+# Demand model parameters
+#---------------------------------------------------------------------------
+# For exports, with respect to world GDP
+export_elast_demand:
+    min:   0.1
+    max:   2.0
+    decay: 0.01
+    
+# For wages, with respect to the wage bill
+wage_elast_demand:
+    min:   0.1
+    max:   1.5
+    decay: 0.01
+    engel_prods: [agric, foodpr]
+    engel_asympt_elast: 0.7
+
+#---------------------------------------------------------------------------
+# Paramters for implementing the (goal program) obective function
+#---------------------------------------------------------------------------
+objective-fcn:
+    # Category weights on deviations from normal levels
+    category_weights:
+        utilization: 8.00
+        fin_dmd_cov: 4.00
+        exports_cov: 2.00
+        imports_cov: 1.00
+    # Product & sector weights are defined by: φ * value share + (1 - φ) * 1/number of sectors or products; this is φ
+    product_sector_weight_factors:
+        utilization: 0.5
+        fin_dmd_cov: 0.5
+        exports_cov: 0.5
+
+#---------------------------------------------------------------------------
+# Structure of the supply-use table
+#---------------------------------------------------------------------------
+# NOTE: Both supply and use tables must have sectors labeling columns and products labeling rows
+excluded_sectors:
+    energy: [coal, petr, util]
+    territorial_adjustment: []
+    others: []
+
+excluded_products:
+    energy: [coal, petr, util]
+    territorial_adjustment: []
+    others: []
+    
+non_tradeable_products: [constr, comm]
+
+# Domestic production as a % share of the total of imports and domestic production must exceed this value
+domestic_production_share_threshold: 1 # percent
+    
+SUT_ranges:
+    # Matrices arranged product (rows) x sector (columns)
+    supply_table: J3:W16
+    use_table: J21:W34
+    # Columns indexed by products -- groups of columns will be summed together
+    supply_tot: I3:I16
+    margins: D3:E16
+    taxes: F3:H16
+    imports: Y3:Y16
+    exports: Y21:Y34
+    fin_dmd: Z21:AB34
+    investment: AC21:AC34
+    stock_change: AD21:AD34
+    tot_intermediate_supply: X21:X34
+    # Rows indexed by sector -- groups of rows will be summed together
+    tot_intermediate_demand: J31:W31
+    wages: J37:W38
+
+#---------------------------------------------------------------------------
+# Parameters for running LEAP with the Macro model (LEAP-Macro)
+#---------------------------------------------------------------------------
+LEAP-info:
+    # This can be, e.g., a baseline scenario
+    input_scenario: Baseline
+    # This is the scenario from which LEAP results are drawn
+    result_scenario: Baseline
+    # Currency units for investment costs
+    inv_costs_unit: U.S. Dollar
+    # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
+    inv_costs_scale: 1.0e+6
+
+# Association between LEAP and supply-use sectors
+GDP-branch:
+    name: GDP
+    branch: Key\GDP
+    variable: Activity Level
+    last_historical_year: 2010
+
+LEAP-sectors:
+ - {
+    name: Iron and Steel,
+    codes: [ironstl],
+    branches: [
+        {
+         branch: Demand\Industry\Iron and Steel,
+         variable: Activity Level,
+         last_historical_year: 2010
+        }
+    ]
+   }
+ - {
+    name: Pulp and Paper,
+    codes: [pulppr],
+    branches: [
+        {
+         branch: Demand\Industry\Pulp and Paper,
+         variable: Activity Level,
+         last_historical_year: 2010
+        }
+    ]
+   }
+ - {
+    name: Other Industry,
+    codes: [foodpr, hvymach, othind],
+    branches: [
+        {
+         branch: Demand\Industry\Other Industry,
+         variable: Activity Level,
+         last_historical_year: 2010
+        }
+    ]
+   }
+ - {
+    name: Transport,
+    codes: [transp],
+    branches: [
+        {
+         branch: Demand\Transport\Freight,
+         variable: Activity Level,
+         last_historical_year: 2010
+        }
+    ]
+   }
+ - {
+    name: Commercial,
+    codes: [comm, othsrv],
+    branches: [
+        {
+         branch: Demand\Commercial,
+         variable: Activity Level,
+         last_historical_year: 2010
+        }
+    ]
+   }
