@@ -1,7 +1,7 @@
 module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
-export supplyusedata, inputoutputcalc, prices_init, parse_input_file, reset_global_params, IOdata, PriceData, IOvarParams
+export supplyusedata, inputoutputcalc, prices_init, parse_input_file, IOdata, PriceData, IOvarParams
 
 "Global variable to store the result of parsing the configuration file"
 global_params = nothing
@@ -142,25 +142,15 @@ function excel_range_to_mat(df, str)
 end
 
 """
-    reset_params()
-
-Reset the params file to "nothing"
-"""
-function reset_global_params()
-    global global_params
-    
-    global_params = nothing
-end
-
-"""
-    parse_input_file(YAML_file::String)
+    parse_input_file(YAML_file::String; force = false)
 
 Read in YAML input file and convert ranges if necessary.
+Force: reset global_params
 """
-function parse_input_file(YAML_file::String)
+function parse_input_file(YAML_file::String; force = false)
 	global global_params
 
-	if !isnothing(global_params)
+	if !force & !isnothing(global_params)
 		return global_params
 	end
 
