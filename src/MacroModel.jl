@@ -710,6 +710,9 @@ end
 Iteratively run the Macro model and LEAP until convergence.
 """
 function runleapmacromodel(file::String, logfile::IOStream)
+
+	## Make sure to start fresh with global_params
+	IOlib.reset_global_params()
 	
     ## get base_year and final_year
     params = IOlib.parse_input_file(file)

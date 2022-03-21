@@ -1,7 +1,7 @@
 module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
-export supplyusedata, inputoutputcalc, prices_init, parse_input_file, IOdata, PriceData, IOvarParams
+export supplyusedata, inputoutputcalc, prices_init, parse_input_file, reset_global_params, IOdata, PriceData, IOvarParams
 
 "Global variable to store the result of parsing the configuration file"
 global_params = nothing
@@ -139,6 +139,17 @@ Extract a range in Excel format from a dataframe and return a numeric matrix
 function excel_range_to_mat(df, str)
 	rng = excel_range_to_rowcol_pair(str)
 	return df_to_mat(df[rng[1][1]:rng[2][1],rng[1][2]:rng[2][2]])
+end
+
+"""
+    reset_params()
+
+Reset the params file to "nothing"
+"""
+function reset_global_params()
+    global global_params
+    
+    global_params = nothing
 end
 
 """
