@@ -552,9 +552,9 @@ function supplyusedata(param_file::String)
 	#--------------------------------
 	# Allocate imports (by a common fraction for each product) to final demand and intermediate demand
 	#--------------------------------
-	intermed = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_intermediate_supply"])[product_ndxs,:], dims=2))
+	tot_int_sup = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_intermediate_supply"])[product_ndxs,:], dims=2))
     # The fraction m_frac applies to imports excluding imported investment goods
-    dom_noninv = intermed + retval.F
+    dom_noninv = tot_int_sup + retval.F
     retval.m_frac = retval.M .* (1 .- retval.I ./ (dom_noninv + retval.I)) ./ dom_noninv
 
 	#--------------------------------
@@ -585,7 +585,9 @@ function supplyusedata(param_file::String)
         writedlm(joinpath(params["diagnostics_path"],"marg.csv"),  margins, ',')
 		writedlm(joinpath(params["diagnostics_path"],"import_frac.csv"),  retval.m_frac, ',')
         writedlm(joinpath(params["diagnostics_path"],"qd.csv"),  vec(sum(use_table, dims=2)), ',')
-        writedlm(joinpath(params["diagnostics_path"],"qd_alt.csv"),  intermed, ',')
+        writedlm(joinpath(params["diagnostics_path"],"tot_int_sup.csv"),  tot_int_sup, ',')
+        writedlm(joinpath(params["diagnostics_path"],"tot_int_dmd.csv"),  tot_int_dmd, ',')
+        writedlm(joinpath(params["diagnostics_path"],"W.csv"),  retval.W, ',')
         writedlm(joinpath(params["diagnostics_path"],"X.csv"),  retval.X, ',')
         writedlm(joinpath(params["diagnostics_path"],"F.csv"),  retval.F, ',')
         writedlm(joinpath(params["diagnostics_path"],"I.csv"),  retval.I, ',')
