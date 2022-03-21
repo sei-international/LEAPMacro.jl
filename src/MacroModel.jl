@@ -766,7 +766,7 @@ function runleapmacromodel(file::String, logfile::IOStream)
             #------------status
             @info "Sending Macro output to LEAP..."
             #------------status
-            LEAPfunctions.outputtoleap(file, indices)
+            LEAPfunctions.outputtoleap(file, indices, run)
 
             ## Run LEAP model
             #------------status

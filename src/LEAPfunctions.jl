@@ -25,9 +25,13 @@ end
 
 First obtain LEAP branch info from the YAML config file and then send Macro model results to LEAP.
 """
-function outputtoleap(file::String, indices::Array)
+function outputtoleap(file::String, indices::Array, run::Int64)
     # LEAP parameters from config file
-    params = IOlib.parse_input_file(file, force = true)
+    if run == 0
+        params = IOlib.parse_input_file(file, force = true)
+    else
+        params = IOlib.parse_input_file(file)
+    end
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
@@ -193,7 +197,11 @@ Obtain energy investment data from the LEAP model.
 """
 function energyinvestment(file::String, run::Int64)
     # LEAP parameters from config file
-    params = IOlib.parse_input_file(file, force = true)
+    if run == 0
+        params = IOlib.parse_input_file(file, force = true)
+    else
+        params = IOlib.parse_input_file(file)
+    end
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
