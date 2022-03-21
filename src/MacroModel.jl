@@ -191,8 +191,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     I_ne = I_total - I_en[1]
     # Share of supply of investment goods
     θ = io.I / sum(io.I)
-	# Share of supply of imported investment goods (which excludes non-tradeables, e.g., construction)
-	θ_imp = (io.I .* tradeables)/sum(io.I .* tradeables)
 	# Investment function parameter -- make a vector
     util_sens = util_sens_scalar * ones(ns)
 	# Initial values: These will change endogenously over time
@@ -286,9 +284,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     @variable(mdl, 0 <= M_share[i in 1:np] <= 1)
     @variable(mdl, X[i in 1:np] >= 0)
     @variable(mdl, 0 <= xshare[i in 1:np] <= 1)
-	@variable(mdl, I_imp >= 0)
-	@variable(mdl, I_dom >= 0)
 	@variable(mdl, I_tot) # Fix to equal param_I_tot
+	@variable(mdl, I_supply[i in 1:np]) # Supply of investment goods by product
 	@variable(mdl, 0 <= ψ_inv <= 1)
     # Output
     @variable(mdl, 0 <= u[i in 1:ns] <= 1)
@@ -302,7 +299,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     @objective(mdl, Min, wu * sum(u_sector_wt[i] * ugap[i] for i in 1:ns) +
 					     wf * sum(f_sector_wt[i] * fgap[i] for i in 1:np) +
 						 wx * sum(x_sector_wt[i] * xgap[i] for i in 1:np) +
-						 wm * (sum(ψ_imp[i] for i in 1:np) + ψ_inv))
+						 wm * (sum(ψ_imp[i] for i in 1:np)))
 
     #----------------------------------
     # Constraints
@@ -320,14 +317,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	# Intermediate demand
 	@constraint(mdl, eq_intdmd[i = 1:np], qd[i] - sum(io.D[i,j] * u[j] * param_z[j] for j in 1:ns) == 0)
 	# Investment
-	@constraint(mdl, eq_investment, I_dom + I_imp == I_tot)
 	fix(I_tot, param_I_tot)
-	@constraint(mdl, eq_inv_imp_mult, ψ_inv * param_prev_I_tot == I_imp)
+	@constraint(mdl, eq_inv_supply[i = 1:np], I_supply[i] == θ[i] * I_tot)
 	# Total supply
-	@constraint(mdl, eq_totsupply[i = 1:np], qs[i] == qd[i] - margins_pos[i] + margins_neg[i] + X[i] + F[i] + θ[i] * I_dom - M[i])
+	@constraint(mdl, eq_totsupply[i = 1:np], qs[i] == qd[i] - margins_pos[i] + margins_neg[i] + X[i] + F[i] + I_supply[i] - M[i])
 	@constraint(mdl, eq_no_dom_prod[i = 1:np], qs[i] * no_dom_production[i] == 0)
 	# Imports
-	@constraint(mdl, eq_M[i = 1:np], M[i] == io.m_frac[i] * (qd[i] + F[i] + θ_imp[i] * I_imp) + param_prevM[i] * ψ_imp[i])
+	@constraint(mdl, eq_M[i = 1:np], M[i] == io.m_frac[i] * (qd[i] + F[i] + I_supply[i]) + param_prevM[i] * ψ_imp[i])
 	# Margins
 	@constraint(mdl, eq_margpos[i = 1:np], margins_pos[i] == io.marg_pos_ratio[i] * (qs[i] + M[i]))
 	@constraint(mdl, eq_margneg[i = 1:np], margins_neg[i] == io.marg_neg_share[i] * sum(margins_pos[j] for j in 1:np))
@@ -424,12 +420,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	output_var(params, sector_names, "profit_rate", run, "", "w")
 	# Create files for product variables
 	output_var(params, product_names, "F", run, "", "w")
+	output_var(params, product_names, "M", run, "", "w")
 	output_var(params, product_names, "X", run, "", "w")
 	output_var(params, product_names, "pb", run, "", "w")
 	# Create a file to hold scalar variables
 	scalar_var_list = ["curr acct surplus", "real GDP", "GDP deflator", "labor productivity gr",
 					   "labor force gr", "wage rate gr", "wage per eff. worker gr", "real investment",
-					   "investment import share", "central bank rate"]
+					   "central bank rate"]
 	to_quoted_string_vec(scalar_var_list)
 	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
 
@@ -468,7 +465,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	        πb = (param_pb - pb_prev) ./ pb_prev
             πg = sum(g_share .* πb)
             prev_πg = πg
-			val_findmd = (ones(np) + io.τd) .* pd_prev .* (value.(X) + value.(F) + θ * value.(I_dom))
+			val_findmd = (ones(np) + io.τd) .* pd_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
 	        val_findmd_share = val_findmd/sum(val_findmd)
             πGDP = sum(val_findmd_share .* πd)
             pd_prev = param_pd
@@ -558,7 +555,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# These variables are only reported, not used
 		CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
-		inv_imp_share = value.(I_imp)/value.(I_tot)
 
 		# Sector variables
 		output_var(params, g, "g", run, year, "a")
@@ -568,11 +564,12 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		output_var(params, profit_rate, "profit_rate", run, year, "a")
 		# Product variables
 		output_var(params, value.(F), "F", run, year, "a")
+		output_var(params, value.(M), "M", run, year, "a")
 		output_var(params, value.(X), "X", run, year, "a")
 		output_var(params, param_pb, "pb", run, year, "a")
 		# Scalar variables
 		scalar_var_vals = [CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
-							w_gr, ω_gr, value.(I_tot), inv_imp_share, i_bank]
+							w_gr, ω_gr, value.(I_tot), i_bank]
 		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
 
 		#--------------------------------
@@ -621,7 +618,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 				set_normalized_coefficient(eq_intdmd[i], u[j], -io.D[i,j] * param_z[j])
 			end
 		end
-		set_normalized_coefficient(eq_inv_imp_mult, ψ_inv, param_prev_I_tot)
 		fix(I_tot, param_I_tot)
 
 		if params["report-diagnostics"]
