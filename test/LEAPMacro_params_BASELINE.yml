@@ -22,7 +22,7 @@ report-diagnostics: true
 
 model:
     # Set run_leap to "false" to do a single run of the Macro model without calling LEAP
-    run_leap: true
+    run_leap: false
     # Hide LEAP while running to (possibly) improve performance
     hide_leap: false
     # Maximum number of iterations before stopping (ignored if run_leap = false)
