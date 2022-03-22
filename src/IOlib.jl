@@ -270,6 +270,7 @@ function get_var_params(param_file::String)
     export_elast_demand0 = min.(convert(Array,export_elast_demand0), max_export_elast_demand * ones(length(export_elast_demand0)))
 
     # Household demand
+    # TODO: Remove min & max demand elasticity cutoffs -- just take from file
     min_wage_elast_demand = params["wage_elast_demand"]["min"]
     max_wage_elast_demand = params["wage_elast_demand"]["max"]
     wage_elast_decay = params["wage_elast_demand"]["decay"]
@@ -578,6 +579,7 @@ function supplyusedata(param_file::String)
 	profit = max.(retval.g - tot_int_dmd - retval.W,zeros(ns))
 	retval.μ = retval.g ./ (retval.g - profit .+ ϵ)
 
+    # TODO: Replace these with understandable file names and add product/sector labels
     if params["report-diagnostics"]
         writedlm(joinpath(params["diagnostics_path"],"qs.csv"),  qs, ',')
         writedlm(joinpath(params["diagnostics_path"],"M.csv"),  M, ',')

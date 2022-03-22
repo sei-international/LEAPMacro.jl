@@ -345,6 +345,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     status = primal_status(mdl)
     @info "Calibrating: $status"
 
+	# TODO: Replace these with understandable filenames and add sector/product labels
     writedlm(joinpath(params["calibration_path"], string("u_",run,".csv")), value.(u), ',')
     writedlm(joinpath(params["calibration_path"], string("X_",run,".csv")), value.(X), ',')
     writedlm(joinpath(params["calibration_path"], string("F_",run,".csv")), value.(F), ',')
@@ -421,6 +422,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	to_quoted_string_vec(sector_names)
 	to_quoted_string_vec(product_names)
 
+	# TODO: Rpelace these with understandable filenames
 	# Create files for sector variables
 	output_var(params, sector_names, "g", run, "", "w")
 	output_var(params, sector_names, "z", run, "", "w")
