@@ -134,11 +134,11 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     growth_adj = params["investment-fcn"]["growth_adj"]
 	# Linear program objective function
     wu = params["objective-fcn"]["category_weights"]["utilization"]
-    wf = params["objective-fcn"]["category_weights"]["fin_dmd_cov"]
+    wf = params["objective-fcn"]["category_weights"]["final_demand_cov"]
     wx = params["objective-fcn"]["category_weights"]["exports_cov"]
     wm = params["objective-fcn"]["category_weights"]["imports_cov"]
 	ϕu = params["objective-fcn"]["product_sector_weight_factors"]["utilization"]
-	ϕf = params["objective-fcn"]["product_sector_weight_factors"]["fin_dmd_cov"]
+	ϕf = params["objective-fcn"]["product_sector_weight_factors"]["final_demand_cov"]
 	ϕx = params["objective-fcn"]["product_sector_weight_factors"]["exports_cov"]
 	# Taylor function
     tf_i_targ = params["taylor-fcn"]["target_intrate"]
