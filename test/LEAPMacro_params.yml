@@ -108,14 +108,10 @@ wage-fcn:
 #---------------------------------------------------------------------------
 # For exports, with respect to world GDP
 export_elast_demand:
-    min:   0.1
-    max:   2.0
     decay: 0.01
     
 # For wages, with respect to the wage bill
 wage_elast_demand:
-    min:   0.1
-    max:   1.5
     decay: 0.02
     engel_prods: [agric, foodpr]
     engel_asympt_elast: 0.7

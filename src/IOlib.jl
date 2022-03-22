@@ -258,21 +258,13 @@ function get_var_params(param_file::String)
     #--- Demand model parameters
     # Note, these are used later to make time-varying parameters
     # Export demand
-    min_export_elast_demand = params["export_elast_demand"]["min"]
-    max_export_elast_demand = params["export_elast_demand"]["max"]
     export_elast_decay = params["export_elast_demand"]["decay"]
     # Get initial value
     export_elast_demand0 = product_info[prod_ndxs,:export_elast_demand0]
     # Constrain to grow with global economy in the long run (with elasticity 1.0)
     asympt_export_elast = min.(convert(Array,export_elast_demand0), 1.0 * ones(length(export_elast_demand0)))
-    # Then, bound by min & max
-    export_elast_demand0 = max.(convert(Array,export_elast_demand0), min_export_elast_demand * ones(length(export_elast_demand0)))
-    export_elast_demand0 = min.(convert(Array,export_elast_demand0), max_export_elast_demand * ones(length(export_elast_demand0)))
 
     # Household demand
-    # TODO: Remove min & max demand elasticity cutoffs -- just take from file
-    min_wage_elast_demand = params["wage_elast_demand"]["min"]
-    max_wage_elast_demand = params["wage_elast_demand"]["max"]
     wage_elast_decay = params["wage_elast_demand"]["decay"]
     # Get initial value
     wage_elast_demand0 = product_info[prod_ndxs,:wage_elast_demand0]
@@ -282,9 +274,6 @@ function get_var_params(param_file::String)
     engel_products = params["wage_elast_demand"]["engel_prods"]
     engel_ndxs = findall(x -> x in engel_products, prod_codes)
     asympt_wage_elast[engel_ndxs] = params["wage_elast_demand"]["engel_asympt_elast"] * ones(length(engel_products))
-    # Next, bound
-    wage_elast_demand0 = max.(convert(Array,wage_elast_demand0), min_wage_elast_demand * ones(length(wage_elast_demand0)))
-    wage_elast_demand0 = min.(convert(Array,wage_elast_demand0), max_wage_elast_demand * ones(length(wage_elast_demand0)))
 
     #--------------------------------------------------------------------------------------
     # Time series
