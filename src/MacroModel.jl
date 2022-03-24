@@ -346,7 +346,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     @info "Calibrating: $status"
 
 	# Sector variables
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("utilization_",run,".csv")), value.(u), "utilization", params["included_sector_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
     IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("sector_output_",run,".csv")), value.(u) .* z, "sector output", params["included_sector_codes"])
     IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("wage_share_",run,".csv")), ω, "wage share", params["included_sector_codes"])
 	IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capital_output_ratio_",run,".csv")), capital_output_ratio, "capital-output ratio", params["included_sector_codes"])
@@ -421,21 +421,20 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	to_quoted_string_vec(sector_names)
 	to_quoted_string_vec(product_names)
 
-	# TODO: Rpelace these with understandable filenames
 	# Create files for sector variables
-	output_var(params, sector_names, "g", run, "", "w")
-	output_var(params, sector_names, "z", run, "", "w")
-	output_var(params, sector_names, "u", run, "", "w")
+	output_var(params, sector_names, "sector_output", run, "", "w")
+	output_var(params, sector_names, "potential_sector_output", run, "", "w")
+	output_var(params, sector_names, "capacity_utilization", run, "", "w")
 	output_var(params, sector_names, "real_value_added", run, "", "w")
 	output_var(params, sector_names, "profit_rate", run, "", "w")
 	# Create files for product variables
-	output_var(params, product_names, "F", run, "", "w")
-	output_var(params, product_names, "M", run, "", "w")
-	output_var(params, product_names, "X", run, "", "w")
-	output_var(params, product_names, "pb", run, "", "w")
+	output_var(params, product_names, "final_demand", run, "", "w")
+	output_var(params, product_names, "imports", run, "", "w")
+	output_var(params, product_names, "exports", run, "", "w")
+	output_var(params, product_names, "basic_prices", run, "", "w")
 	# Create a file to hold scalar variables
 	scalar_var_list = ["curr acct surplus", "real GDP", "GDP deflator", "labor productivity gr",
-					   "labor force gr", "wage rate gr", "wage per eff. worker gr", "real investment",
+					   "labor force gr", "wage rate gr", "wage per effective worker gr", "real investment",
 					   "central bank rate"]
 	to_quoted_string_vec(scalar_var_list)
 	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
@@ -578,16 +577,16 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
 
 		# Sector variables
-		output_var(params, g, "g", run, year, "a")
-		output_var(params, z, "z", run, year, "a")
-		output_var(params, value.(u), "u", run, year, "a")
+		output_var(params, g, "sector_output", run, year, "a")
+		output_var(params, z, "potential_sector_output", run, year, "a")
+		output_var(params, value.(u), "capacity_utilization_", run, year, "a")
 		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
 		output_var(params, profit_rate, "profit_rate", run, year, "a")
 		# Product variables
-		output_var(params, value.(F), "F", run, year, "a")
-		output_var(params, value.(M), "M", run, year, "a")
-		output_var(params, value.(X), "X", run, year, "a")
-		output_var(params, param_pb, "pb", run, year, "a")
+		output_var(params, value.(F), "final_demand", run, year, "a")
+		output_var(params, value.(M), "imports", run, year, "a")
+		output_var(params, value.(X), "exports", run, year, "a")
+		output_var(params, param_pb, "basic_prices", run, year, "a")
 		# Scalar variables
 		scalar_var_vals = [CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, value.(I_tot), i_bank]
