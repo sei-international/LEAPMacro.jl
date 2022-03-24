@@ -2,7 +2,7 @@ module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
 export supplyusedata, inputoutputcalc, prices_init, parse_input_file, write_matrix_to_csv, write_vector_to_csv,
-       IOdata, PriceData, IOvarParams
+       IOdata, PriceData, ExogParams
 
 "Global variable to store the result of parsing the configuration file"
 global_params = nothing
@@ -39,7 +39,7 @@ mutable struct PriceData
 end
 
 "User-specified parameters"
-mutable struct IOvarParams
+mutable struct ExogParams
     πw::Array{Float64,1} # World inflation rate x year
     world_grs::Array{Float64,1} # Real world GDP growth rate x year
 	working_age_grs::Array{Float64,1} # Growth rate of the working age population x year
@@ -254,8 +254,8 @@ end
 Pull in user-specified parameters from different CSV input files with filenames specified in the YAML configuration file.
 """
 function get_var_params(param_file::String)
-    # Return an IOvarParams struct
-    retval = IOvarParams(
+    # Return an ExogParams struct
+    retval = ExogParams(
                     Array{Float64}(undef, 0), # πw
                     Array{Float64}(undef, 0), # world_grs
 					Array{Float64}(undef, 0), # working_age_grs

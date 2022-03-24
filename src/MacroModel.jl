@@ -53,11 +53,11 @@ function calc_sraffa_inverse(np::Int64, ns::Int64, tradeables::Array{Bool,1}, io
 end
 
 """
-    calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, iovar::IOvarParams)
+    calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, exog::ExogParams)
 
 Calculate the Sraffa right-hand side expression, which is multiplied by the Sraffa inverse matrix to give domestic prices
 """
-function calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, iovar::IOvarParams)
+function calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, exog::ExogParams)
 	sraffa_wage_vector = Array{Float64}(undef, np)
 	sraffa_wage_vector .= 0.0 # Initialize to zero
 	for i in findall(.!tradeables)
@@ -66,7 +66,7 @@ function calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, t
 	# Initialize prices.pd
 	sraffa_RHS = prices.Pg * sraffa_wage_vector
 	for i in findall(tradeables)
-		sraffa_RHS[i] = iovar.xr[t] * prices.pw[i]
+		sraffa_RHS[i] = exog.xr[t] * prices.pw[i]
 	end
 	return sraffa_RHS
 end
@@ -165,9 +165,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	#----------------------------------
     # Read in exogenous time-varying parameters and sector-specific parameters
     #----------------------------------
-	iovar = IOlib.get_var_params(file)
+	exog = IOlib.get_var_params(file)
 	# Convert pw into global currency
-	prices.pw = prices.pw/iovar.xr[1]
+	prices.pw = prices.pw/exog.xr[1]
 
 	#############################################################################
 	#
@@ -209,7 +209,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Domestic prices using a Sraffian price system
     #----------------------------------
 	sraffa_inverse = calc_sraffa_inverse(np, ns, tradeables, io)
-    prices.pd = sraffa_inverse * calc_sraffa_RHS(1, np, ns, ω, tradeables, prices, io, iovar)
+    prices.pd = sraffa_inverse * calc_sraffa_RHS(1, np, ns, ω, tradeables, prices, io, exog)
 	prices.pb = prices.pd
 
 	#----------------------------------
@@ -220,7 +220,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	price_of_capital = dot(θ,(ones(np) + io.τd) .* prices.pd)
 	I_nextper = (1 + neutral_growth) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
 	profit_share_rel_capprice = (1/price_of_capital) * profit_per_output
-	incr_profit = sum((γ_0 + iovar.δ) .* io.g .* profit_share_rel_capprice)
+	incr_profit = sum((γ_0 + exog.δ) .* io.g .* profit_share_rel_capprice)
     incr_profit_rate = incr_profit/I_nextper
 	# Capital productivity
     capital_output_ratio = profit_share_rel_capprice / incr_profit_rate
@@ -484,7 +484,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         prev_GDP_deflator = (1 + πGDP) * prev_GDP_deflator
 
 		if tf_π_targ_use_πw
-			tf_π_targ = iovar.πw[t]
+			tf_π_targ = exog.πw[t]
 		end
 
 		#--------------------------------
@@ -503,12 +503,12 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Wages and the labor force
 		#--------------------------------
-		λ_gr = iovar.αKV[t] * GDP_gr + iovar.βKV[t] # Kaldor-Verdoorn equation for labor productivity
+		λ_gr = exog.αKV[t] * GDP_gr + exog.βKV[t] # Kaldor-Verdoorn equation for labor productivity
 		L_gr = GDP_gr - λ_gr # Labor force growth rate
 
 		lab_force_index *= 1 + L_gr
 
-		w_gr = infl_passthrough * πGDP + λ_gr * (1.0 + lab_constr_coeff * (L_gr - iovar.working_age_grs[t]))
+		w_gr = infl_passthrough * πGDP + λ_gr * (1.0 + lab_constr_coeff * (L_gr - exog.working_age_grs[t]))
 		ω_gr = w_gr - λ_gr - πg
 		ω = (1.0 + ω_gr) * ω
 
@@ -526,9 +526,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		γ_u = util_sens .* (value.(u) .- 1)
 		γ_r = profit_sens * (profit_rate .- targ_profit_rate)
 		γ_i = -intrate_sens * (i_bank - tf_i_targ) * ones(ns)
-        γ = max.(γ_0 + γ_u + γ_r + γ_i, -iovar.δ)
+        γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
 		# Non-energy investment, by sector and total
-        I_ne_disag = z .* (γ + iovar.δ) .* capital_output_ratio
+        I_ne_disag = z .* (γ + exog.δ) .* capital_output_ratio
         I_ne = sum(I_ne_disag)
 		# Combine with energy investment
         I_total = I_ne + I_en[t]
@@ -538,7 +538,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Export demand
 		#--------------------------------
-        Xmax = Xmax .* (1 + iovar.world_grs[t]).^iovar.export_elast_demand[t]
+        Xmax = Xmax .* (1 + exog.world_grs[t]).^exog.export_elast_demand[t]
 
 		#--------------------------------
 		# Final domestic consumption demand
@@ -547,7 +547,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		W_curr = sum(W)
         W = ((1 + w_gr)/(1 + λ_gr)) * W .* (1 .+ γ)
         wage_ratio = (1/(1 + πg)) * sum(W)/W_curr
-        Fmax = Fmax .* wage_ratio.^iovar.wage_elast_demand[t]
+        Fmax = Fmax .* wage_ratio.^exog.wage_elast_demand[t]
 
 		#--------------------------------
 		# Calculate indices to pass to LEAP
@@ -606,8 +606,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Update prices
 		#--------------------------------
 		prices.Pg = (1 + πg) * prices.Pg
-		prices.pw = prices.pw * (1 + iovar.πw[t])
-		prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, iovar)
+		prices.pw = prices.pw * (1 + exog.πw[t])
+		prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, exog)
 		prices.pb = prices.pd
 
 		#--------------------------------
