@@ -345,22 +345,21 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     status = primal_status(mdl)
     @info "Calibrating: $status"
 
-	# TODO: Replace these with understandable filenames and add sector/product labels
-    writedlm(joinpath(params["calibration_path"], string("u_",run,".csv")), value.(u), ',')
-    writedlm(joinpath(params["calibration_path"], string("X_",run,".csv")), value.(X), ',')
-    writedlm(joinpath(params["calibration_path"], string("F_",run,".csv")), value.(F), ',')
-    writedlm(joinpath(params["calibration_path"], string("M_",run,".csv")), value.(M), ',')
-    writedlm(joinpath(params["calibration_path"], string("qs_",run,".csv")), value.(qs), ',')
-    writedlm(joinpath(params["calibration_path"], string("qd_",run,".csv")), value.(qd), ',')
-    writedlm(joinpath(params["calibration_path"], string("pd_",run,".csv")), param_pd, ',')
-    writedlm(joinpath(params["calibration_path"], string("pb_",run,".csv")), param_pb, ',')
-    writedlm(joinpath(params["calibration_path"], string("g_",run,".csv")), value.(u) .* z, ',')
-    writedlm(joinpath(params["calibration_path"], string("margins_neg_",run,".csv")), value.(margins_neg), ',')
-    writedlm(joinpath(params["calibration_path"], string("margins_pos_",run,".csv")), value.(margins_pos), ',')
-    # Not calculated by the model, but report:
-    writedlm(joinpath(params["calibration_path"], string("wageshare_",run,".csv")), ω, ',')
-    writedlm(joinpath(params["calibration_path"], string("marg_pos_ratio_",run,".csv")),  io.marg_pos_ratio, ',')
-	writedlm(joinpath(params["calibration_path"], string("capital_output_ratio_",run,".csv")), capital_output_ratio, ',')
+	# Sector variables
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("utilization_",run,".csv")), value.(u), "utilization", params["included_sector_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("sector_output_",run,".csv")), value.(u) .* z, "sector output", params["included_sector_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("wage_share_",run,".csv")), ω, "wage share", params["included_sector_codes"])
+	IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capital_output_ratio_",run,".csv")), capital_output_ratio, "capital-output ratio", params["included_sector_codes"])
+    
+	# Product variables
+	IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("exports_",run,".csv")), value.(X), "exports", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("final_demand_",run,".csv")), value.(F), "final demand", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("imports_",run,".csv")), value.(M), "imports", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("domestic_production_",run,".csv")), value.(qs), "domestic production", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("tot_intermediate_supply_non-energy_sectors_",run,".csv")), value.(qd), "intermediate supply from non-energy sectors", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("basic_prices_",run,".csv")), param_pb, "basic prices", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_neg_",run,".csv")), value.(margins_neg), "negative margins", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_pos_",run,".csv")), value.(margins_pos), "positive margins", params["included_product_codes"])
 
     # First run is calibration -- now set Xmax and Fmax based on solution and run again
     Xmax = max.(Xmax, value.(X))

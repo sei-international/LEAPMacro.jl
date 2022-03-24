@@ -1,7 +1,8 @@
 module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
-export supplyusedata, inputoutputcalc, prices_init, parse_input_file, IOdata, PriceData, IOvarParams
+export supplyusedata, inputoutputcalc, prices_init, parse_input_file, write_matrix_to_csv, write_vector_to_csv,
+       IOdata, PriceData, IOvarParams
 
 "Global variable to store the result of parsing the configuration file"
 global_params = nothing
@@ -600,12 +601,13 @@ function supplyusedata(param_file::String)
 	retval.μ = retval.g ./ (retval.g - profit .+ ϵ)
 
     if params["report-diagnostics"]
+        qd = vec(sum(use_table, dims=2)) # Assign to a variable for clarity
         # Values by product
         write_vector_to_csv(joinpath(params["diagnostics_path"],"domestic_production.csv"), qs, "domestic production", params["included_product_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"imports.csv"),  M, "imports", params["included_product_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"margins.csv"),  margins, "margins", params["included_product_codes"])
 		write_vector_to_csv(joinpath(params["diagnostics_path"],"imported_fraction.csv"),  retval.m_frac, "imported fraction", params["included_product_codes"])
-        write_vector_to_csv(joinpath(params["diagnostics_path"],"tot_intermediate_supply_non-energy_sectors.csv"),  vec(sum(use_table, dims=2)), "intermediate supply from non-energy sectors", params["included_product_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"tot_intermediate_supply_non-energy_sectors.csv"), qd, "intermediate supply from non-energy sectors", params["included_product_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"tot_intermediate_supply_all_sectors.csv"),  tot_int_sup, "intermediate supply", params["included_product_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"exports.csv"),  retval.X, "exports", params["included_product_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"final_demand.csv"),  retval.F, "final demand", params["included_product_codes"])
