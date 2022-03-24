@@ -108,14 +108,10 @@ wage-fcn:
 #---------------------------------------------------------------------------
 # For exports, with respect to world GDP
 export_elast_demand:
-    min:   0.1
-    max:   2.0
     decay: 0.01
     
 # For wages, with respect to the wage bill
 wage_elast_demand:
-    min:   0.1
-    max:   1.5
     decay: 0.02
     engel_prods: [agric, foodpr]
     engel_asympt_elast: 0.7
@@ -127,13 +123,13 @@ objective-fcn:
     # Category weights on deviations from normal levels
     category_weights:
         utilization: 8.00
-        fin_dmd_cov: 4.00
+        final_demand_cov: 4.00
         exports_cov: 2.00
         imports_cov: 1.00
     # Product & sector weights are defined by: φ * value share + (1 - φ) * 1/number of sectors or products; this is φ
     product_sector_weight_factors:
         utilization: 0.5
-        fin_dmd_cov: 0.5
+        final_demand_cov: 0.5
         exports_cov: 0.5
 
 #---------------------------------------------------------------------------
@@ -165,7 +161,7 @@ SUT_ranges:
     taxes: F3:H16
     imports: Y3:Y16
     exports: Y21:Y34
-    fin_dmd: Z21:AB34
+    final_demand: Z21:AB34
     investment: AC21:AC34
     stock_change: AD21:AD34
     tot_intermediate_supply: X21:X34

@@ -53,11 +53,11 @@ function calc_sraffa_inverse(np::Int64, ns::Int64, tradeables::Array{Bool,1}, io
 end
 
 """
-    calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, iovar::IOvarParams)
+    calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, exog::ExogParams)
 
 Calculate the Sraffa right-hand side expression, which is multiplied by the Sraffa inverse matrix to give domestic prices
 """
-function calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, iovar::IOvarParams)
+function calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, exog::ExogParams)
 	sraffa_wage_vector = Array{Float64}(undef, np)
 	sraffa_wage_vector .= 0.0 # Initialize to zero
 	for i in findall(.!tradeables)
@@ -66,7 +66,7 @@ function calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, t
 	# Initialize prices.pd
 	sraffa_RHS = prices.Pg * sraffa_wage_vector
 	for i in findall(tradeables)
-		sraffa_RHS[i] = iovar.xr[t] * prices.pw[i]
+		sraffa_RHS[i] = exog.xr[t] * prices.pw[i]
 	end
 	return sraffa_RHS
 end
@@ -134,11 +134,11 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     growth_adj = params["investment-fcn"]["growth_adj"]
 	# Linear program objective function
     wu = params["objective-fcn"]["category_weights"]["utilization"]
-    wf = params["objective-fcn"]["category_weights"]["fin_dmd_cov"]
+    wf = params["objective-fcn"]["category_weights"]["final_demand_cov"]
     wx = params["objective-fcn"]["category_weights"]["exports_cov"]
     wm = params["objective-fcn"]["category_weights"]["imports_cov"]
 	ϕu = params["objective-fcn"]["product_sector_weight_factors"]["utilization"]
-	ϕf = params["objective-fcn"]["product_sector_weight_factors"]["fin_dmd_cov"]
+	ϕf = params["objective-fcn"]["product_sector_weight_factors"]["final_demand_cov"]
 	ϕx = params["objective-fcn"]["product_sector_weight_factors"]["exports_cov"]
 	# Taylor function
     tf_i_targ = params["taylor-fcn"]["target_intrate"]
@@ -165,9 +165,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	#----------------------------------
     # Read in exogenous time-varying parameters and sector-specific parameters
     #----------------------------------
-	iovar = IOlib.get_var_params(file)
+	exog = IOlib.get_var_params(file)
 	# Convert pw into global currency
-	prices.pw = prices.pw/iovar.xr[1]
+	prices.pw = prices.pw/exog.xr[1]
 
 	#############################################################################
 	#
@@ -209,7 +209,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Domestic prices using a Sraffian price system
     #----------------------------------
 	sraffa_inverse = calc_sraffa_inverse(np, ns, tradeables, io)
-    prices.pd = sraffa_inverse * calc_sraffa_RHS(1, np, ns, ω, tradeables, prices, io, iovar)
+    prices.pd = sraffa_inverse * calc_sraffa_RHS(1, np, ns, ω, tradeables, prices, io, exog)
 	prices.pb = prices.pd
 
 	#----------------------------------
@@ -220,7 +220,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	price_of_capital = dot(θ,(ones(np) + io.τd) .* prices.pd)
 	I_nextper = (1 + neutral_growth) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
 	profit_share_rel_capprice = (1/price_of_capital) * profit_per_output
-	incr_profit = sum((γ_0 + iovar.δ) .* io.g .* profit_share_rel_capprice)
+	incr_profit = sum((γ_0 + exog.δ) .* io.g .* profit_share_rel_capprice)
     incr_profit_rate = incr_profit/I_nextper
 	# Capital productivity
     capital_output_ratio = profit_share_rel_capprice / incr_profit_rate
@@ -345,22 +345,21 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     status = primal_status(mdl)
     @info "Calibrating: $status"
 
-	# TODO: Replace these with understandable filenames and add sector/product labels
-    writedlm(joinpath(params["calibration_path"], string("u_",run,".csv")), value.(u), ',')
-    writedlm(joinpath(params["calibration_path"], string("X_",run,".csv")), value.(X), ',')
-    writedlm(joinpath(params["calibration_path"], string("F_",run,".csv")), value.(F), ',')
-    writedlm(joinpath(params["calibration_path"], string("M_",run,".csv")), value.(M), ',')
-    writedlm(joinpath(params["calibration_path"], string("qs_",run,".csv")), value.(qs), ',')
-    writedlm(joinpath(params["calibration_path"], string("qd_",run,".csv")), value.(qd), ',')
-    writedlm(joinpath(params["calibration_path"], string("pd_",run,".csv")), param_pd, ',')
-    writedlm(joinpath(params["calibration_path"], string("pb_",run,".csv")), param_pb, ',')
-    writedlm(joinpath(params["calibration_path"], string("g_",run,".csv")), value.(u) .* z, ',')
-    writedlm(joinpath(params["calibration_path"], string("margins_neg_",run,".csv")), value.(margins_neg), ',')
-    writedlm(joinpath(params["calibration_path"], string("margins_pos_",run,".csv")), value.(margins_pos), ',')
-    # Not calculated by the model, but report:
-    writedlm(joinpath(params["calibration_path"], string("wageshare_",run,".csv")), ω, ',')
-    writedlm(joinpath(params["calibration_path"], string("marg_pos_ratio_",run,".csv")),  io.marg_pos_ratio, ',')
-	writedlm(joinpath(params["calibration_path"], string("capital_output_ratio_",run,".csv")), capital_output_ratio, ',')
+	# Sector variables
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("sector_output_",run,".csv")), value.(u) .* z, "sector output", params["included_sector_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("wage_share_",run,".csv")), ω, "wage share", params["included_sector_codes"])
+	IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capital_output_ratio_",run,".csv")), capital_output_ratio, "capital-output ratio", params["included_sector_codes"])
+    
+	# Product variables
+	IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("exports_",run,".csv")), value.(X), "exports", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("final_demand_",run,".csv")), value.(F), "final demand", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("imports_",run,".csv")), value.(M), "imports", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("domestic_production_",run,".csv")), value.(qs), "domestic production", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("tot_intermediate_supply_non-energy_sectors_",run,".csv")), value.(qd), "intermediate supply from non-energy sectors", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("basic_prices_",run,".csv")), param_pb, "basic prices", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_neg_",run,".csv")), value.(margins_neg), "negative margins", params["included_product_codes"])
+    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_pos_",run,".csv")), value.(margins_pos), "positive margins", params["included_product_codes"])
 
     # First run is calibration -- now set Xmax and Fmax based on solution and run again
     Xmax = max.(Xmax, value.(X))
@@ -422,21 +421,20 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	to_quoted_string_vec(sector_names)
 	to_quoted_string_vec(product_names)
 
-	# TODO: Rpelace these with understandable filenames
 	# Create files for sector variables
-	output_var(params, sector_names, "g", run, "", "w")
-	output_var(params, sector_names, "z", run, "", "w")
-	output_var(params, sector_names, "u", run, "", "w")
+	output_var(params, sector_names, "sector_output", run, "", "w")
+	output_var(params, sector_names, "potential_sector_output", run, "", "w")
+	output_var(params, sector_names, "capacity_utilization", run, "", "w")
 	output_var(params, sector_names, "real_value_added", run, "", "w")
 	output_var(params, sector_names, "profit_rate", run, "", "w")
 	# Create files for product variables
-	output_var(params, product_names, "F", run, "", "w")
-	output_var(params, product_names, "M", run, "", "w")
-	output_var(params, product_names, "X", run, "", "w")
-	output_var(params, product_names, "pb", run, "", "w")
+	output_var(params, product_names, "final_demand", run, "", "w")
+	output_var(params, product_names, "imports", run, "", "w")
+	output_var(params, product_names, "exports", run, "", "w")
+	output_var(params, product_names, "basic_prices", run, "", "w")
 	# Create a file to hold scalar variables
 	scalar_var_list = ["curr acct surplus", "real GDP", "GDP deflator", "labor productivity gr",
-					   "labor force gr", "wage rate gr", "wage per eff. worker gr", "real investment",
+					   "labor force gr", "wage rate gr", "wage per effective worker gr", "real investment",
 					   "central bank rate"]
 	to_quoted_string_vec(scalar_var_list)
 	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
@@ -486,7 +484,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         prev_GDP_deflator = (1 + πGDP) * prev_GDP_deflator
 
 		if tf_π_targ_use_πw
-			tf_π_targ = iovar.πw[t]
+			tf_π_targ = exog.πw[t]
 		end
 
 		#--------------------------------
@@ -505,12 +503,12 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Wages and the labor force
 		#--------------------------------
-		λ_gr = iovar.αKV[t] * GDP_gr + iovar.βKV[t] # Kaldor-Verdoorn equation for labor productivity
+		λ_gr = exog.αKV[t] * GDP_gr + exog.βKV[t] # Kaldor-Verdoorn equation for labor productivity
 		L_gr = GDP_gr - λ_gr # Labor force growth rate
 
 		lab_force_index *= 1 + L_gr
 
-		w_gr = infl_passthrough * πGDP + λ_gr * (1.0 + lab_constr_coeff * (L_gr - iovar.working_age_grs[t]))
+		w_gr = infl_passthrough * πGDP + λ_gr * (1.0 + lab_constr_coeff * (L_gr - exog.working_age_grs[t]))
 		ω_gr = w_gr - λ_gr - πg
 		ω = (1.0 + ω_gr) * ω
 
@@ -528,9 +526,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		γ_u = util_sens .* (value.(u) .- 1)
 		γ_r = profit_sens * (profit_rate .- targ_profit_rate)
 		γ_i = -intrate_sens * (i_bank - tf_i_targ) * ones(ns)
-        γ = max.(γ_0 + γ_u + γ_r + γ_i, -iovar.δ)
+        γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
 		# Non-energy investment, by sector and total
-        I_ne_disag = z .* (γ + iovar.δ) .* capital_output_ratio
+        I_ne_disag = z .* (γ + exog.δ) .* capital_output_ratio
         I_ne = sum(I_ne_disag)
 		# Combine with energy investment
         I_total = I_ne + I_en[t]
@@ -540,7 +538,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Export demand
 		#--------------------------------
-        Xmax = Xmax .* (1 + iovar.world_grs[t]).^iovar.export_elast_demand[t]
+        Xmax = Xmax .* (1 + exog.world_grs[t]).^exog.export_elast_demand[t]
 
 		#--------------------------------
 		# Final domestic consumption demand
@@ -549,7 +547,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		W_curr = sum(W)
         W = ((1 + w_gr)/(1 + λ_gr)) * W .* (1 .+ γ)
         wage_ratio = (1/(1 + πg)) * sum(W)/W_curr
-        Fmax = Fmax .* wage_ratio.^iovar.wage_elast_demand[t]
+        Fmax = Fmax .* wage_ratio.^exog.wage_elast_demand[t]
 
 		#--------------------------------
 		# Calculate indices to pass to LEAP
@@ -579,16 +577,16 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
 
 		# Sector variables
-		output_var(params, g, "g", run, year, "a")
-		output_var(params, z, "z", run, year, "a")
-		output_var(params, value.(u), "u", run, year, "a")
+		output_var(params, g, "sector_output", run, year, "a")
+		output_var(params, z, "potential_sector_output", run, year, "a")
+		output_var(params, value.(u), "capacity_utilization_", run, year, "a")
 		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
 		output_var(params, profit_rate, "profit_rate", run, year, "a")
 		# Product variables
-		output_var(params, value.(F), "F", run, year, "a")
-		output_var(params, value.(M), "M", run, year, "a")
-		output_var(params, value.(X), "X", run, year, "a")
-		output_var(params, param_pb, "pb", run, year, "a")
+		output_var(params, value.(F), "final_demand", run, year, "a")
+		output_var(params, value.(M), "imports", run, year, "a")
+		output_var(params, value.(X), "exports", run, year, "a")
+		output_var(params, param_pb, "basic_prices", run, year, "a")
 		# Scalar variables
 		scalar_var_vals = [CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, value.(I_tot), i_bank]
@@ -608,8 +606,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Update prices
 		#--------------------------------
 		prices.Pg = (1 + πg) * prices.Pg
-		prices.pw = prices.pw * (1 + iovar.πw[t])
-		prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, iovar)
+		prices.pw = prices.pw * (1 + exog.πw[t])
+		prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, exog)
 		prices.pb = prices.pd
 
 		#--------------------------------

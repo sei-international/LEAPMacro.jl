@@ -1,7 +1,8 @@
 module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
-export supplyusedata, inputoutputcalc, prices_init, parse_input_file, IOdata, PriceData, IOvarParams
+export supplyusedata, inputoutputcalc, prices_init, parse_input_file, write_matrix_to_csv, write_vector_to_csv,
+       IOdata, PriceData, ExogParams
 
 "Global variable to store the result of parsing the configuration file"
 global_params = nothing
@@ -38,7 +39,7 @@ mutable struct PriceData
 end
 
 "User-specified parameters"
-mutable struct IOvarParams
+mutable struct ExogParams
     πw::Array{Float64,1} # World inflation rate x year
     world_grs::Array{Float64,1} # Real world GDP growth rate x year
 	working_age_grs::Array{Float64,1} # Growth rate of the working age population x year
@@ -48,6 +49,37 @@ mutable struct IOvarParams
     δ::Array{Float64,1} # ns
     export_elast_demand::Array{Any,1} # np x year
     wage_elast_demand::Array{Any,1} # np x year
+end
+
+"""
+    write_matrix_to_csv(filename, array, colnames, rownames)
+
+Write a matrix to a CSV file.
+"""
+function write_matrix_to_csv(filename, array, rownames, colnames)
+	open(filename, "w") do io
+        # Write header
+		write(io, string("", ',', join(colnames, ','), '\n'))
+        # Write each row
+        for i in 1:length(rownames)
+            write(io, string(rownames[i], ',', join(array[i,:], ','), '\n'))
+        end
+	end
+end
+
+"""
+    write_vector_to_csv(filename, vector, varname, rownames)
+
+Write a vector to a CSV file.
+"""
+function write_vector_to_csv(filename, vector, varname, rownames)
+	open(filename, "w") do io
+        # Write header
+		write(io, string("", ',', varname, '\n'))
+        for i in 1:length(rownames)
+            write(io, string(rownames[i], ',', vector[i], '\n'))
+        end
+	end
 end
 
 """
@@ -222,8 +254,8 @@ end
 Pull in user-specified parameters from different CSV input files with filenames specified in the YAML configuration file.
 """
 function get_var_params(param_file::String)
-    # Return an IOvarParams struct
-    retval = IOvarParams(
+    # Return an ExogParams struct
+    retval = ExogParams(
                     Array{Float64}(undef, 0), # πw
                     Array{Float64}(undef, 0), # world_grs
 					Array{Float64}(undef, 0), # working_age_grs
@@ -258,21 +290,13 @@ function get_var_params(param_file::String)
     #--- Demand model parameters
     # Note, these are used later to make time-varying parameters
     # Export demand
-    min_export_elast_demand = params["export_elast_demand"]["min"]
-    max_export_elast_demand = params["export_elast_demand"]["max"]
     export_elast_decay = params["export_elast_demand"]["decay"]
     # Get initial value
     export_elast_demand0 = product_info[prod_ndxs,:export_elast_demand0]
     # Constrain to grow with global economy in the long run (with elasticity 1.0)
     asympt_export_elast = min.(convert(Array,export_elast_demand0), 1.0 * ones(length(export_elast_demand0)))
-    # Then, bound by min & max
-    export_elast_demand0 = max.(convert(Array,export_elast_demand0), min_export_elast_demand * ones(length(export_elast_demand0)))
-    export_elast_demand0 = min.(convert(Array,export_elast_demand0), max_export_elast_demand * ones(length(export_elast_demand0)))
 
     # Household demand
-    # TODO: Remove min & max demand elasticity cutoffs -- just take from file
-    min_wage_elast_demand = params["wage_elast_demand"]["min"]
-    max_wage_elast_demand = params["wage_elast_demand"]["max"]
     wage_elast_decay = params["wage_elast_demand"]["decay"]
     # Get initial value
     wage_elast_demand0 = product_info[prod_ndxs,:wage_elast_demand0]
@@ -282,9 +306,6 @@ function get_var_params(param_file::String)
     engel_products = params["wage_elast_demand"]["engel_prods"]
     engel_ndxs = findall(x -> x in engel_products, prod_codes)
     asympt_wage_elast[engel_ndxs] = params["wage_elast_demand"]["engel_asympt_elast"] * ones(length(engel_products))
-    # Next, bound
-    wage_elast_demand0 = max.(convert(Array,wage_elast_demand0), min_wage_elast_demand * ones(length(wage_elast_demand0)))
-    wage_elast_demand0 = min.(convert(Array,wage_elast_demand0), max_wage_elast_demand * ones(length(wage_elast_demand0)))
 
     #--------------------------------------------------------------------------------------
     # Time series
@@ -538,8 +559,8 @@ function supplyusedata(param_file::String)
 	#--------------------------------
 	# Final demand -- will be adjusted later
 	#--------------------------------
-	F = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["fin_dmd"])[product_ndxs,:], dims=2))
-	F_stat_adj = sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["fin_dmd"])[terr_adj_product_ndx,:])
+	F = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["final_demand"])[product_ndxs,:], dims=2))
+	F_stat_adj = sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["final_demand"])[terr_adj_product_ndx,:])
     F = F * (1.0 + F_stat_adj/(sum(F) + ϵ))
 	retval.F = F
 
@@ -579,27 +600,29 @@ function supplyusedata(param_file::String)
 	profit = max.(retval.g - tot_int_dmd - retval.W,zeros(ns))
 	retval.μ = retval.g ./ (retval.g - profit .+ ϵ)
 
-    # TODO: Replace these with understandable file names and add product/sector labels
     if params["report-diagnostics"]
-        writedlm(joinpath(params["diagnostics_path"],"qs.csv"),  qs, ',')
-        writedlm(joinpath(params["diagnostics_path"],"M.csv"),  M, ',')
-        writedlm(joinpath(params["diagnostics_path"],"marg.csv"),  margins, ',')
-		writedlm(joinpath(params["diagnostics_path"],"import_frac.csv"),  retval.m_frac, ',')
-        writedlm(joinpath(params["diagnostics_path"],"qd.csv"),  vec(sum(use_table, dims=2)), ',')
-        writedlm(joinpath(params["diagnostics_path"],"tot_int_sup.csv"),  tot_int_sup, ',')
-        writedlm(joinpath(params["diagnostics_path"],"tot_int_dmd.csv"),  tot_int_dmd, ',')
-        writedlm(joinpath(params["diagnostics_path"],"W.csv"),  retval.W, ',')
-        writedlm(joinpath(params["diagnostics_path"],"X.csv"),  retval.X, ',')
-        writedlm(joinpath(params["diagnostics_path"],"F.csv"),  retval.F, ',')
-        writedlm(joinpath(params["diagnostics_path"],"I.csv"),  retval.I, ',')
-        writedlm(joinpath(params["diagnostics_path"],"g.csv"), retval.g, ',')
-        writedlm(joinpath(params["diagnostics_path"],"g_alt.csv"), retval.S * qs, ',')
-        writedlm(joinpath(params["diagnostics_path"],"qd_alt2.csv"), retval.D * retval.g, ',')
-        writedlm(joinpath(params["diagnostics_path"],"S.csv"), retval.S, ',')
-        writedlm(joinpath(params["diagnostics_path"],"D.csv"), retval.D, ',')
-        writedlm(joinpath(params["diagnostics_path"],"profmargin.csv"), retval.μ, ',')
-        writedlm(joinpath(params["diagnostics_path"],"taxrate.csv"), retval.τd, ',')
-		open(joinpath(params["diagnostics_path"],"nonenergy_energy_link_measure.txt"), "w") do fhndl
+        qd = vec(sum(use_table, dims=2)) # Assign to a variable for clarity
+        # Values by product
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"domestic_production.csv"), qs, "domestic production", params["included_product_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"imports.csv"),  M, "imports", params["included_product_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"margins.csv"),  margins, "margins", params["included_product_codes"])
+		write_vector_to_csv(joinpath(params["diagnostics_path"],"imported_fraction.csv"),  retval.m_frac, "imported fraction", params["included_product_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"tot_intermediate_supply_non-energy_sectors.csv"), qd, "intermediate supply from non-energy sectors", params["included_product_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"tot_intermediate_supply_all_sectors.csv"),  tot_int_sup, "intermediate supply", params["included_product_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"exports.csv"),  retval.X, "exports", params["included_product_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"final_demand.csv"),  retval.F, "final demand", params["included_product_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"investment.csv"),  retval.I, "investment", params["included_product_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"tax_rate.csv"), retval.τd, "taxes on products", params["included_product_codes"])
+        # Values by sector
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"sector_output.csv"), retval.g, "output", params["included_sector_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"tot_intermediate_demand_all_products.csv"),  tot_int_dmd, "intermediate demand", params["included_sector_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"wages.csv"),  retval.W, "wages", params["included_sector_codes"])
+        write_vector_to_csv(joinpath(params["diagnostics_path"],"profit_margins.csv"), retval.μ, "profit margins", params["included_sector_codes"])
+        # Matrices
+        write_matrix_to_csv(joinpath(params["diagnostics_path"],"supply_fractions.csv"), retval.S, params["included_sector_codes"], params["included_product_codes"])
+        write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients.csv"), retval.D, params["included_product_codes"], params["included_sector_codes"])
+		# Write out nonenergy-energy link metric
+        open(joinpath(params["diagnostics_path"],"nonenergy_energy_link_measure.txt"), "w") do fhndl
 			R = 100 .* energy_nonenergy_link_measure(param_file)
 			A_NE_metric_string = @sprintf("This value should be small: %.2f%%.", R)
 			println(fhndl, "Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:")
