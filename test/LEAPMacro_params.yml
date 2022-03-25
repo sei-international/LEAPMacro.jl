@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------------
 # Folder inside the "outputs" folder to store calibration, results, and diagnostics
 #---------------------------------------------------------------------------
-output_folder: BASELINE
+output_folder: DEFAULT
 #---------------------------------------------------------------------------
 # Supply-use table and supplementary tables as CSV files
 #---------------------------------------------------------------------------
