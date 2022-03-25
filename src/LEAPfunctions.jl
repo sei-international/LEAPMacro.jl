@@ -219,18 +219,24 @@ function energyinvestment(file::String, run::Int64)
     I_en = Array{Float64}(undef, nrows)
     I_en_temp = Array{Float64}(undef, nrows)
 
+    n_energy = 0
     for b in LEAP.Branches
         if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
             for y = base_year:final_year
                 I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
             end
             I_en = hcat(I_en, I_en_temp)
+            n_energy += 1
         end
     end
 
 	disconnectfromleap(LEAP)
 
-    I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
+    if n_energy > 0
+        I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
+    else
+        I_en .= 0.0
+    end
     writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), I_en, ',')
 
     return I_en
