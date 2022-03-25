@@ -50,7 +50,7 @@ calib:
     # Adjustment factor for maximum household demand in the initial year
     max_hh_dmd_adj_factor: 0.00
     # Potential output relative to actual output in the base year
-    pot_output_adj_factor: 0.05
+    pot_output_adj_factor: -0.05
     
 #---------------------------------------------------------------------------
 # Global economy parameters
@@ -83,11 +83,11 @@ investment-fcn:
     # Change in induced investment with a change in utilization
     util_sens:  0.05
     # Change in induced investment with a change in the profit rate
-    profit_sens: 0.10
+    profit_sens: 0.05
     # Change in induced investment with a change in the central bank lending rate
     intrate_sens: 0.20
     # Rate of adjustment of the autonomous investment rate towards the actual investment rate
-    growth_adj: 0.20
+    growth_adj: 0.10
 
 #---------------------------------------------------------------------------
 # Parameters for the labor productivity and labor force model
