@@ -579,7 +579,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Sector variables
 		output_var(params, g, "sector_output", run, year, "a")
 		output_var(params, z, "potential_sector_output", run, year, "a")
-		output_var(params, value.(u), "capacity_utilization_", run, year, "a")
+		output_var(params, value.(u), "capacity_utilization", run, year, "a")
 		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
 		output_var(params, profit_rate, "profit_rate", run, year, "a")
 		# Product variables
