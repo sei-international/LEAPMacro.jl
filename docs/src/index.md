@@ -2,14 +2,17 @@
 CurrentModule = LEAPMacro
 ```
 
+# [LEAP-Macro](@id introduction)
 This documentation explains how to use **LEAP-Macro** to build a linked energy-economic model.
 
 The energy system in a LEAP-Macro application is represented in [LEAP](https://leap.sei.org/), the Low Emissions Analysis Platform. The economy is represented in a macroeconomic model called **Macro**. This documentation will explain how to build a Macro model and link LEAP to Macro, but not how to build the LEAP model.
 
 > To learn how to build LEAP models, go to the [LEAP](https://leap.sei.org/) website to access [documentation](https://leap.sei.org/help/leap.htm#t=Concepts%2FIntroduction.htm) and other learning materials.
 
-The link between the LEAP energy model and the Macro economic model is shown in the diagram below. Nearly all of the development of each model can be done separately. That allows energy experts to work on LEAP and economists to work on Macro, collaborating only where the models interact. The combined model is solved iteratively.
+LEAP-Macro is a demand-led growth model[^1] for an open, multi-sector economy. It takes supply-use tables[^2] or social accounting matrices[^3] as inputs.
 
-The Macro model is run first, generating economic activity levels as inputs to LEAP. LEAP is then run to determine needed investment in energy supply, demand for primary energy sources, and trade in energy carriers. LEAP’s investment demand is an input to the Macro model. The Macro model is run again, and the iteration proceeds until the maximum percent difference in economic activity levels in subsequent runs falls below a user-specified tolerance. In practice, only a few iterations (2 to 3) should be sufficient.
+To simplify model development and maintenance, LEAP-Macro assumes that energy is a crucial input into the rest of the economy, but is not a major source of demand for the products and services supplied by the rest of the economy. That is true for most countries, but is not true for major energy exporters. If energy production dominates GDP or employment, then a fully integrated energy-economy model is more appropriate.
 
-![The diagram](assets/images/LEAP-Macro-diagram.svg)
+[^1]: <https://www.e-elgar.com/shop/usd/the-economics-of-demand-led-growth-9781840641776.html> _The Economics of Demand-Led Growth_ by Mark Setterfield
+[^2]: <https://unstats.un.org/unsd/nationalaccount/docs/SUT_IOT_HB_Final_Cover.pdf> _Handbook on Supply and Use Tables and Input-Output Tables with Extensions and Applications_ from UN Statistics
+[^3]: <https://www.ifpri.org/publication/social-accounting-matrices-and-multiplier-analysis> _Social accounting matrices and multiplier analysis: An introduction with exercises_ from the International Food Policy Research Institute
