@@ -127,7 +127,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 	# Investment function
-    neutral_growth = params["investment-fcn"]["neutral_growth"]
+    neutral_growth = params["investment-fcn"]["init_neutral_growth"]
     util_sens_scalar = params["investment-fcn"]["util_sens"]
     profit_sens = params["investment-fcn"]["profit_sens"]
     intrate_sens = params["investment-fcn"]["intrate_sens"]
@@ -141,6 +141,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	ϕf = params["objective-fcn"]["product_sector_weight_factors"]["final_demand_cov"]
 	ϕx = params["objective-fcn"]["product_sector_weight_factors"]["exports_cov"]
 	# Taylor function
+	tf_γ0 = neutral_growth
+	tf_min_γ0 = params["taylor-fcn"]["neutral_growth_band"][1]
+	tf_max_γ0 = params["taylor-fcn"]["neutral_growth_band"][2]
     tf_i_targ = params["taylor-fcn"]["target_intrate"]
     tf_gr_resp = params["taylor-fcn"]["gr_resp"]
     tf_π_targ = params["taylor-fcn"]["target_infl"]
@@ -595,7 +598,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Update Taylor rule
 		#--------------------------------
-        i_bank = tf_i_targ + tf_gr_resp * (GDP_gr - neutral_growth) + tf_infl_resp * (πGDP - tf_π_targ)
+        i_bank = tf_i_targ + tf_gr_resp * (GDP_gr - tf_γ0) + tf_infl_resp * (πGDP - tf_π_targ)
+		# Apply adaptive expectations, then bound
+		tf_γ0 = min(max(tf_γ0 + growth_adj * (GDP_gr - tf_γ0), tf_min_γ0), tf_max_γ0)
 
 		#--------------------------------
 		# Update potential output

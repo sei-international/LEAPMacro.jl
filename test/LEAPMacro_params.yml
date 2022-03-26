@@ -65,6 +65,8 @@ global-params:
 # Parameters for setting the central bank lending rate (Taylor rule)
 #---------------------------------------------------------------------------
 taylor-fcn:
+    # Allowable range for neutral growth
+    neutral_growth_band: [0.02, 0.06]
     # Target interest rate (as a fraction, e.g., 2%/year = 0.02)
     target_intrate: 0.02
     # Target inflation rate
@@ -78,8 +80,8 @@ taylor-fcn:
 # Parameters for the investment function
 #---------------------------------------------------------------------------
 investment-fcn:
-    # Starting point for the autonomous investment growth rate: also the target GDP growth rate for the Taylor rule
-    neutral_growth: 0.060
+    # Starting point for the autonomous investment growth rate: also the initial target GDP growth rate for the Taylor rule
+    init_neutral_growth: 0.060
     # Change in induced investment with a change in utilization
     util_sens:  0.05
     # Change in induced investment with a change in the profit rate
