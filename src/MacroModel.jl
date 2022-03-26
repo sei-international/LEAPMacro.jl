@@ -27,11 +27,13 @@ end
     to_quoted_string_vec(svec)
 
 Convert a vector of strings by wrapping each string in quotes (for putting into CSV files).
-This function converts `svec` in-place, so only run once.
+This function converts `svec` in-place, so should only be run once. Double quotation marks
+are removed to avoid that problem.
 """
 function to_quoted_string_vec(svec)
 	for i in 1:length(svec)
 		svec[i] = string('\"', svec[i], '\"')
+		replace(svec[i], "\"\"" => "\"")
 	end
 end
 
