@@ -32,8 +32,7 @@ are removed to avoid that problem.
 """
 function to_quoted_string_vec(svec)
 	for i in 1:length(svec)
-		svec[i] = string('\"', svec[i], '\"')
-		replace(svec[i], "\"\"" => "\"")
+		svec[i] = replace(string('\"', svec[i], '\"'), "\"\"" => "\"")
 	end
 end
 
