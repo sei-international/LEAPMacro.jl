@@ -511,7 +511,7 @@ function supplyusedata(param_file::String)
 	retval.Vnorm = Diagonal(1 ./ retval.g) * V
 
 	# Get total supply column
-	supply_tot = excel_range_to_mat(SUT_df, params["SUT_ranges"]["supply_tot"])[product_ndxs]
+	tot_supply = excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_supply"])[product_ndxs]
 
 	#--------------------------------
 	# Use table
@@ -529,14 +529,14 @@ function supplyusedata(param_file::String)
     margins_pos = margins_pos * (1.0 + margins_stat_adj/sum(margins_pos))
     margins_neg = max.(-margins, zeros(np))
     margins_neg = margins_neg * (1.0 - margins_stat_adj/sum(margins_neg))
-	retval.marg_pos_ratio = margins_pos ./ supply_tot
+	retval.marg_pos_ratio = margins_pos ./ tot_supply
 	retval.marg_neg_share = margins_neg / sum(margins_neg)
 
 	#--------------------------------
 	# Taxes
 	#--------------------------------
 	taxes = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["taxes"])[product_ndxs,:], dims=2))
-	retval.τd = taxes ./ supply_tot
+	retval.τd = taxes ./ tot_supply
 
 	#--------------------------------
 	# Imports

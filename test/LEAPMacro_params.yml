@@ -158,7 +158,7 @@ SUT_ranges:
     supply_table: J3:W16
     use_table: J21:W34
     # Columns indexed by products -- groups of columns will be summed together
-    supply_tot: I3:I16
+    tot_supply: I3:I16
     margins: D3:E16
     taxes: F3:H16
     imports: Y3:Y16
