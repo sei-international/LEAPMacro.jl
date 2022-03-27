@@ -76,3 +76,4 @@ otuputs
 There is a great deal of information in the files. The configuration file and the output files are described in greater detail elsewhere in this documentation.
 
 ## Running with LEAP
+The best guide to running with LEAP is the LEAP exercise for the LEAP-Macro plugin.
