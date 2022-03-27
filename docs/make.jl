@@ -18,4 +18,4 @@ makedocs(
     ]
 )
 
-# deploydocs(repo = "https://github.com/sei-international/LEAPMacro.git")
+deploydocs(repo = "https://github.com/sei-international/LEAPMacro.git")
