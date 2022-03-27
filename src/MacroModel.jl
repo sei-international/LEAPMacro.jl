@@ -431,6 +431,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	output_var(params, sector_names, "capacity_utilization", run, "", "w")
 	output_var(params, sector_names, "real_value_added", run, "", "w")
 	output_var(params, sector_names, "profit_rate", run, "", "w")
+	output_var(params, sector_names, "autonomous_investment_rate", run, "", "w")
 	# Create files for product variables
 	output_var(params, product_names, "final_demand", run, "", "w")
 	output_var(params, product_names, "imports", run, "", "w")
@@ -586,7 +587,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		output_var(params, value.(u), "capacity_utilization", run, year, "a")
 		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
 		output_var(params, profit_rate, "profit_rate", run, year, "a")
-		# Product variables
+		output_var(params, γ_0, "autonomous_investment_rate", run, year, "a")
+	# Product variables
 		output_var(params, value.(F), "final_demand", run, year, "a")
 		output_var(params, value.(M), "imports", run, year, "a")
 		output_var(params, value.(X), "exports", run, year, "a")
