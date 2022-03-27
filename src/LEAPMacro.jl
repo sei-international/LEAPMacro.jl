@@ -33,7 +33,7 @@ function run(params_file = nothing; dump_err_stack::Bool = false)
 	logger = ConsoleLogger(logfile)
 	global_logger(logger)
 	@info now()
-	@info "Parameter file: '$params_file'"
+	@info "Configuration file: '$params_file'"
 	exit_status = 0
 	try
 		MacroModel.runleapmacromodel(params_file, logfile)
