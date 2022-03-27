@@ -4,16 +4,16 @@ CurrentModule = LEAPMacro
 
 # [Quick start](@id quick-start)
 
-## Running without LEAP
-The quickest way to get started with LEAP-Macro is by running the demonstration model that is part of the GitHub distribution.
+This documentation explains how to quickly run Macro without linking it to LEAP. To learn how to run Macro with LEAP, see the LEAP exercise for the LEAP-Macro plugin available to registered users on the [LEAP](https://leap.sei.org/) website.
+
+The quickest way to get started with Macro is by running the demonstration model that is part of the GitHub distribution.
 ```@raw html
 <p>First, <a href="https://downgit.github.io/#/home?url=https://github.com/sei-international/LEAPMacro/tree/main/test&rootDirectory=false" target="_blank">Download the demonstration files</a> as a zip file from GitHub and save it to the folder of your choice. (Clicking on the link will open a new window, where the zip file can be downloaded.)</p>
 ```
 Next:
 1. Unzip the `test.zip` file
 2. Go the folder where you unzipped it (it will have a file in it named `LEAPMacro_params.yml`)
-3. Start Julia, and
-4. Run the demo model:
+3. Start Julia and run the demo model:
 ```
 julia> import LEAPMacro
 
@@ -25,7 +25,7 @@ If you see `Macro model run (0)...completed` followed by `0` then the model ran 
 
 All of the interesting output is in files. You should see a new file called `LEAPMacro_log.txt` and a new `outputs` folder.
 
-### The log file
+## The log file
 The log file should show something like:
 ```
 [ Info: 2022-03-25T11:55:23.846
@@ -52,7 +52,7 @@ The log file should show something like:
 ```
 The time stamps at the start and end show that the model ran in 34 seconds. The repeated `FEASIBLE_POINT` for each year means that the model in each year yielded a feasible solution to the linear program.
 
-### The outputs folder
+## The outputs folder
 The `outputs` folder should have a subfolder called `DEFAULT`. Inside that folder are three other folders, with CSV files containing diagnostic information and the results of the model run:
 ```
 otuputs 
@@ -74,6 +74,3 @@ otuputs
         │   sector_output_0.csv
 ```
 There is a great deal of information in the files. The configuration file and the output files are described in greater detail elsewhere in this documentation.
-
-## Running with LEAP
-The best guide to running with LEAP is the LEAP exercise for the LEAP-Macro plugin.
