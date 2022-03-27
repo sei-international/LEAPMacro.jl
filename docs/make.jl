@@ -11,23 +11,23 @@ makedocs(
         ]
         "Model overview" => [
             "LEAP-Macro link" => "leap-macro-link.md"
-            "Configuration file" => "config.md"
-            "Output files" => "model-outputs.md"
-            "About demand-led growth" => "demand-led-growth.md"
+            "Configuration file" => "config.md" # TODO: config file
+            "Output files" => "model-outputs.md" # TODO: model outputs
+            "About demand-led growth" => "demand-led-growth.md" # TODO: about demand-led growth
             "Uses and limitations" => "uses-limitations.md"
         ]
         "Model detail" => [
-            "Variables" => "variables.md"
-            "Linear goal program" => "lgp.md"
-            "Dynamics" => "dynamics.md"
+            "Variables" => "variables.md" # TODO: variables
+            "Linear goal program" => "lgp.md" # TODO: LGP
+            "Dynamics" => "dynamics.md" # TODO: dynamics
         ]
         "Building a model" => [
-            "Preparing supply-use tables" => "prep-sut.md"
-            "Preparing exogenous parameters" => "prep-params.md"
-            "Preparing the configuration file" => "prep-config.md"
-            "Calibrating the model" => "calib.md"
-            "Troubleshooting" => "troubleshoot.md"
-            "Linking to LEAP" => "link-to-leap.md"
+            "Preparing supply-use tables" => "prep-sut.md" # TODO: prep SUT
+            "Preparing exogenous parameters" => "prep-params.md" # TODO: prep params
+            "Preparing the configuration file" => "prep-config.md" # TODO: prep config
+            "Calibrating the model" => "calib.md" # TODO: calibration
+            "Troubleshooting" => "troubleshoot.md" # TODO: troubleshooting
+            "Linking to LEAP" => "link-to-leap.md" # TODO: linking to LEAP
         ]
     ]
 )
