@@ -116,4 +116,3 @@ Investment rates are determined by the autonomous investment rate, the profit ra
 
 Assumptions regarding prices in Macro are fairly simple (see the [Limitations of the model](@ref limitations)). For that reason, prices for different products tend to follow similar trajectories. However, they are reported for completeness:
   * `basic_prices_#.csv`
-
