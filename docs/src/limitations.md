@@ -7,7 +7,7 @@ The LEAP-Macro plugin is designed so that a detailed energy systems model, built
 
 The goal of making a reasonably flexible model entails some trade-offs. Some of the most important missing elements are listed below.
 
-## Changes in the terms of trade
+## [Changes in the terms of trade](@id terms-of-trade)
 The Macro model applies a uniform inflation rate to global prices. For traded goods, whether imports or exports, the model economy is assumed to be a price taker. For domestic goods, prices are determined as a markup on the costs of labor and of intermediate goods.
 
 This means that international prices can interact with purely domestic prices through the cost of intermediates. Moreover, the terms of trade can change to the extent that the basket of imported or exported goods changes. However, the model does not allow for changing relative prices for traded goods.

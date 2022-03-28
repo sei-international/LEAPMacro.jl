@@ -13,7 +13,7 @@ makedocs(
             "LEAP-Macro link" => "leap-macro-link.md"
             "Configuration file" => "config.md"
             "Output files" => "model-outputs.md"
-            "About demand-led growth" => "demand-led-growth.md" # TODO: about demand-led growth
+            "About demand-led growth" => "demand-led-growth.md"
             "Limitations of the model" => "limitations.md"
         ]
         "Model detail" => [
