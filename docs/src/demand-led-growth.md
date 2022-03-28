@@ -16,9 +16,9 @@ Prices for goods and services may be treated with greater or lesser sophisticati
 ## Demand in the Macro model
 Demand in the Macro model comes from three sources: final demand (made up of households, non-profits serving households, and government); exports net of imports; and investment expenditure.
 
-Final demand is assumed to grow with total wages, adjusted by an elasticity for each product. So, for example, household demand for processed food in a developing country might rise faster than household demand for agricultural produce as wages rise. The particularly simple structure of final demand in the model means that wages are a proxy for all components of final demand, including by government.
+Final demand is assumed to grow with total wages, adjusted by an elasticity for each product. The elasticities account for different responses to rising income. For example, household demand for processed food in a developing country might rise faster than demand for agricultural produce as wages rise. Because household and government expenditure are combined in the Macro model, wages are assumed to drive all components of final demand.
 
-Exports are driven by global GDP growth, adjusted by an elasticity for each product. If global demand for a country's products is expected to grow particularly fast, for example from export promotion policies, then the elasticity can be set to a high value.
+Exports are driven by global GDP growth, adjusted by an elasticity for each product. The growth rate of global GDP is set outside the model in the `time_series.csv` [parameter file](@ref prep-params). If global demand for a country's products is expected to grow particularly fast, for example from export promotion policies, then the elasticity can be set to a high value.
 
 Imports are calculated in the model based on patterns seen in the supply-use tables but adjusted in order to meet the goals in the [linear goal program](@ref lgp).
 
@@ -40,5 +40,4 @@ Domestic prices for goods and services are determined as a mark-up on cost of la
 
 Wages rise more or less in proportion to inflation (with a proportionality factor set in the [configuration file](@ref config)) and in response to the difference between the growth rate of the demand for labor and the growth rate of the working-age population, which is set in the `time_series.csv` [parameter file](@ref prep-params).
 
-The central bank rate is set using a Taylor rule-type bank reaction function. The interest rate rises when the economy grows faster than a target and falls when it grows more slowly. It also rises when inflation exceeds a target and falls when inflation is below the target. The parameters are set in the [configuration file](@ref config).
-
+The central bank rate is set using what is known as a "Taylor rule". Under such a rule, the interest rate is raised when the economy grows faster than a target rate in order to "cool off" an expansion and reduced when it grows more slowly. It is also raised when inflation exceeds a target, on the assumption that inflation is driven by an economic expansion, and reduced when inflation is below the target. The Taylor rule parameters are set in the [configuration file](@ref config).
