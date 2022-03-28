@@ -14,7 +14,7 @@ LEAP-Macro is a [demand-led growth model](@ref demand-led-growth) for an open, m
 LEAP-Macro was developed with two purposes in mind:
 1. To provide economic drivers to LEAP that are grounded in the structure of the economy;
 2. To estimate the impact of different energy investment scenarios on output and employment outside the energy sector.
-What is more, it is intended to be used in a wide range of contexts. To meet these goals, some compromises had to be made while developing the model. These are summarized in [Uses and limitations](@ref uses-limitations).
+What is more, it is intended to be used in a wide range of contexts. To meet these goals, some compromises had to be made while developing the model. These are summarized in [Limitations of the model](@ref limitations).
 
 To simplify model development and maintenance, LEAP-Macro assumes that energy is a crucial input into the rest of the economy, but is not a major source of demand for the products and services supplied by the rest of the economy. That is true for most countries, but is not true for major energy exporters. If energy production dominates GDP or employment, then a fully integrated energy-economy model is more appropriate.
 

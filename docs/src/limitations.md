@@ -2,7 +2,7 @@
 CurrentModule = LEAPMacro
 ```
 
-# [Uses and limitations](@id uses-limitations)
+# [Limitations of the model](@id limitations)
 The LEAP-Macro plugin is designed so that a detailed energy systems model, built in LEAP, can be paired with a moderately complex economic model. It is offered as an improvement over simply entering economic drivers by hand. It is most useful in LEAP models that track energy investment costs. In that case, the investment expenditure (in LEAP) helps drive economic activity (in Macro), which then drives energy consumption (in LEAP). The LEAP-Macro plugin will iteratively solve LEAP and Macro until the results converge to within a user-specified tolerance.
 
 The goal of making a reasonably flexible model entails some trade-offs. Some of the most important missing elements are listed below.

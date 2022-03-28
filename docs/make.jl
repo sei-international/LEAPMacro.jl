@@ -14,7 +14,7 @@ makedocs(
             "Configuration file" => "config.md" # TODO: config file
             "Output files" => "model-outputs.md" # TODO: model outputs
             "About demand-led growth" => "demand-led-growth.md" # TODO: about demand-led growth
-            "Uses and limitations" => "uses-limitations.md"
+            "Limitations of the model" => "limitations.md"
         ]
         "Model detail" => [
             "Variables" => "variables.md" # TODO: variables
