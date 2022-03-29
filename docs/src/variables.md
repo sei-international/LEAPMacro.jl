@@ -31,6 +31,7 @@ Variables and parameters are labeled with the following dimensions:
 | ``\psi^\text{imp}_k`` | Excess goods imports as a multiplier on a reference level for product ``k``                     |
 | ``X_k``               | Exports of product ``k``                                                                        |
 | ``F_k``               | Final demand for product ``k``                                                                  |
+| ``I_k``               | Investment demand for product ``k``                                                             |
 | ``M_k``               | Imports of product ``k``                                                                        |
 | ``q_{s,k}``           | Domestic production of product ``k``                                                            |
 | ``q_{d,k}``           | Intermediate demand for product ``k``                                                           |
@@ -71,37 +72,42 @@ Variables and parameters are labeled with the following dimensions:
 | ``\gamma^\text{wage}`` | Growth rate of the total wage bill                                                            |
 
 ## [Exogenous parameters](@id exog-param-vars)
-| Symbol                               | Definition                                                                                                |
-|:-------------------------------------|:----------------------------------------------------------------------------------------------------------|
-| ``\underline{w}_u``                  | In the [linear goal program](@ref lgp), the category weight penalizing low utilization                    |
-| ``\underline{w}_X``                  | In the [linear goal program](@ref lgp), the category weight penalizing departure from normal exports      |
-| ``\underline{w}_F``                  | In the [linear goal program](@ref lgp), the category weight penalizing departure from normal final demand |
-| ``\underline{w}_M``                  | In the [linear goal program](@ref lgp), the category weight penalizing imports over domestic supply       |
-| ``\underline{\sigma}^u_i``           | Sector weight for utilization for sector ``i``                                                            |
-| ``\underline{\sigma}^X_k``           | Product weight for exports for product ``k``                                                              |
-| ``\underline{\sigma}^F_k``           | Product weight for final consumption demand for product ``k``                                             |
-| ``\underline{S}_{ik}``               | Sector ``i``'s share of domestic production of product ``k``                                              |
-| ``\underline{D}_{ki}``               | Intermediate demand for product ``k`` per unit of output from sector ``i``                                |
-| ``\underline{e}``                    | Exchange rate                                                                                             |
-| ``\underline{\pi}_{w,k}``            | Inflation rate for the world price of product ``k`` (currently the same across all products)              |
-| ``\underline{\tau}_{d,k}``           | Tax rate on domestic supply of product ``k``                                                              |
-| ``\underline{\mu}_i``                | Profit margin in sector ``i`` over total costs                                                            |
-| ``\underline{\alpha}_\text{KV}``     | Kaldor-Verdoorn law coefficient                                                                           |
-| ``\underline{\beta}_\text{KV}``      | Kaldor-Verdoorn law intercept                                                                             |
-| ``\underline{h}``                    | Inflation pass-through from the price of goods to the increase in the nominal wage                        |
-| ``\underline{k}``                    | Response of the real wage to labor supply constraints                                                     |
-| ``\underline{\hat{N}}``              | Growth rate of the working-age population                                                                 |
-| ``\underline{\chi}^\pm_k``           | Allocation coefficients for positive ``(+)`` and negative ``(-)`` margins for product ``k``               |
-| ``\underline{\xi}``                  | Rate of adjustment of autonomous demand to realized growth rate                                           |
-| ``\underline{i}_{b0}``               | Central bank interest rate when GDP growth and inflation are at their targets                             |
-| ``\underline{\rho}_Y``               | Taylor coefficient on the GDP growth rate                                                                 |
-| ``\underline{\rho}_\pi``             | Taylor coefficient on the inflation rate                                                                  |
-| ``\underline{\alpha}_\text{util}``   | Change in induced investment from a change in utilization (utilization investment sensitivity)            |
-| ``\underline{\alpha}_\text{profit}`` | Change in induced investment from a change in profit rate (profit rate investment sensitivity)            |
-| ``\underline{\alpha}_\text{bank}``   | Change in induced investment from a change in borrowing costs (interest rate investment sensitivity)      |
-| ``\underline{\delta}_i``             | Depreciation rate for sector ``i``                                                                        |
-| ``\underline{v}_i``                  | Capital-output ratio in sector ``i``                                                                      |
-| ``\underline{\theta}_k``             | Share of product ``k`` in the total supply of investment goods                                            |
-| ``\underline{\gamma}^\text{world}``  | Growth rate of world GDP (also termed gross world product, GWP)                                           |
-| ``\underline{\eta}^\text{exp}_k``    | Elasticity of normal export demand for product ``k`` with respect to a change in GWP                      |
-| ``\underline{\eta}^\text{wage}_k``   | Elasticity of normal final demand for product ``k`` with respect to a change in the wage bill             |
+| Symbol                               | Definition                                                                                                   |
+|:-------------------------------------|:-------------------------------------------------------------------------------------------------------------|
+| ``\underline{w}_u``                  | In the [linear goal program](@ref lgp), the category weight penalizing low utilization                       |
+| ``\underline{w}_X``                  | In the [linear goal program](@ref lgp), the category weight penalizing departure from normal exports         |
+| ``\underline{w}_F``                  | In the [linear goal program](@ref lgp), the category weight penalizing departure from normal final demand    |
+| ``\underline{w}_M``                  | In the [linear goal program](@ref lgp), the category weight penalizing imports over domestic supply          |
+| ``\underline{\sigma}^u_i``           | Sector weight for utilization for sector ``i``                                                               |
+| ``\underline{\sigma}^X_k``           | Product weight for exports for product ``k``                                                                 |
+| ``\underline{\sigma}^F_k``           | Product weight for final consumption demand for product ``k``                                                |
+| ``\underline{\varphi}_u``            | For utilization sector weights, weight of value share vs. constant share                                     |
+| ``\underline{\varphi}_X``            | For export sector weights, weight of value share vs. constant share                                          |
+| ``\underline{\varphi}_F``            | For final demand sector weights, weight of value share vs. constant share                                    |
+| ``\underline{f}_k``                  | Normal level of imports of good ``k`` as a fraction of domestic demand (intermediate, final, and investment) |
+| ``\underline{S}_{ik}``               | Sector ``i``'s share of domestic production of product ``k``                                                 |
+| ``\underline{D}_{ki}``               | Intermediate demand for product ``k`` per unit of output from sector ``i``                                   |
+| ``\underline{d}_k``                  | Domestic production filter for product ``k``, equal to one if the country does _not_ produce the product     |
+| ``\underline{e}``                    | Exchange rate                                                                                                |
+| ``\underline{\pi}_{w,k}``            | Inflation rate for the world price of product ``k`` (currently the same across all products)                 |
+| ``\underline{\tau}_{d,k}``           | Tax rate on domestic supply of product ``k``                                                                 |
+| ``\underline{\mu}_i``                | Profit margin in sector ``i`` over total costs                                                               |
+| ``\underline{\alpha}_\text{KV}``     | Kaldor-Verdoorn law coefficient                                                                              |
+| ``\underline{\beta}_\text{KV}``      | Kaldor-Verdoorn law intercept                                                                                |
+| ``\underline{h}``                    | Inflation pass-through from the price of goods to the increase in the nominal wage                           |
+| ``\underline{k}``                    | Response of the real wage to labor supply constraints                                                        |
+| ``\underline{\hat{N}}``              | Growth rate of the working-age population                                                                    |
+| ``\underline{\chi}^\pm_k``           | Allocation coefficients for positive ``(+)`` and negative ``(-)`` margins for product ``k``                  |
+| ``\underline{\xi}``                  | Rate of adjustment of autonomous demand to realized growth rate                                              |
+| ``\underline{i}_{b0}``               | Central bank interest rate when GDP growth and inflation are at their targets                                |
+| ``\underline{\rho}_Y``               | Taylor coefficient on the GDP growth rate                                                                    |
+| ``\underline{\rho}_\pi``             | Taylor coefficient on the inflation rate                                                                     |
+| ``\underline{\alpha}_\text{util}``   | Change in induced investment from a change in utilization (utilization investment sensitivity)               |
+| ``\underline{\alpha}_\text{profit}`` | Change in induced investment from a change in profit rate (profit rate investment sensitivity)               |
+| ``\underline{\alpha}_\text{bank}``   | Change in induced investment from a change in borrowing costs (interest rate investment sensitivity)         |
+| ``\underline{\delta}_i``             | Depreciation rate for sector ``i``                                                                           |
+| ``\underline{v}_i``                  | Capital-output ratio in sector ``i``                                                                         |
+| ``\underline{\theta}_k``             | Share of product ``k`` in the total supply of investment goods                                               |
+| ``\underline{\gamma}^\text{world}``  | Growth rate of world GDP (also termed gross world product, GWP)                                              |
+| ``\underline{\eta}^\text{exp}_k``    | Elasticity of normal export demand for product ``k`` with respect to a change in GWP                         |
+| ``\underline{\eta}^\text{wage}_k``   | Elasticity of normal final demand for product ``k`` with respect to a change in the wage bill                |

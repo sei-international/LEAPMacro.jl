@@ -17,7 +17,7 @@ makedocs(
             "Limitations of the model" => "limitations.md"
         ]
         "Model detail" => [
-            "Variables" => "variables.md" # TODO: variables
+            "Variables" => "variables.md"
             "Linear goal program" => "lgp.md" # TODO: LGP
             "Dynamics" => "dynamics.md" # TODO: dynamics
         ]
