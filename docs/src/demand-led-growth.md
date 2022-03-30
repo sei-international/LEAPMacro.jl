@@ -3,7 +3,7 @@ CurrentModule = LEAPMacro
 ```
 
 # [About demand-led growth](@id demand-led-growth)
-Macro is a demand-led growth model.[^1] In such models, the growth rate of the economy is _endogenous_. That is, it is determined by the model's own dynamics. Firms are assumed to invest in new productive capacity because they anticipate future demand. They base their assessment on past growth, profitability, and the utilization rate of their current capacity. Once they decide to buy new machinery, equipment, and buildings -- that is, new capital -- those purchases add to total demand.
+Macro is a demand-led growth model[^1] built along structuralist lines[^2]. In such models, the growth rate of the economy is _endogenous_. That is, it is determined by the model's own dynamics. Firms are assumed to invest in new productive capacity because they anticipate future demand. They base their assessment on past growth, profitability, and the utilization rate of their current capacity. Once they decide to buy new machinery, equipment, and buildings -- that is, new capital -- those purchases add to total demand.
 
 In demand-led growth models, capacity utilization is a key adjusting variable. If firms' expectations are not met, then their capacity utilization will be either below or above what they anticipated. If demand is high and they are already producing at capacity, then they will be unable to satisfy all of the demand, and imports may rise.
 
@@ -11,7 +11,8 @@ Demand-led growth models can be contrasted with the more common supply-led growt
 
 Prices for goods and services may be treated with greater or lesser sophistication in demand-led models, but they play a less central role than in supply-led models. In general, demand for products is considered to be more responsive to income than to price, and firms are assumed to set prices by mark-up. More emphasis is placed on "macroeconomic prices", including wage rates, the interest rate set by the central bank, and the exchange rate.
 
-[^1]: E.g., see [_The Economics of Demand-Led Growth_](https://www.e-elgar.com/shop/usd/the-economics-of-demand-led-growth-9781840641776.html) by Mark Setterfield
+[^1]: E.g., see: [_The Economics of Demand-Led Growth_](https://www.e-elgar.com/shop/usd/the-economics-of-demand-led-growth-9781840641776.html) by Mark Setterfield.
+[^2]: See: [_Socially Relevant Policy Analysis: Structuralist Computable General Equilibrium Models for the Developing World_](https://mitpress.mit.edu/books/socially-relevant-policy-analysis) and [_Reconstructing Macroeconomics: Structuralist Proposals and Critiques of the Mainstream_](https://www.hup.harvard.edu/catalog.php?isbn=9780674010734) by Lance Taylor; [_Growth and Policy in Developing Countries: A Structuralist Approach_](https://cup.columbia.edu/book/growth-and-policy-in-developing-countries/9780231150149) by Jose Ocampo, Codrina Rada, and Lance Taylor.
 
 ## Demand in the Macro model
 Demand in the Macro model comes from three sources: final demand (made up of households, non-profits serving households, and government); exports net of imports; and investment expenditure.

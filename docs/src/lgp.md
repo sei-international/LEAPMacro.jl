@@ -36,7 +36,7 @@ Subject to
  eq_util[4] : ugap[4] + u[4] == 1.0
 ...
 ```
-Each equation is labeled, for example by `eq_util`. For reference, the equation labels are provided below along with the mathematical expressions.
+Each equation is labeled, for example by `eq_util`. For reference, for each equation listed below, the label is provided along with a motivation and a mathematical expression.
 
 ## Domestic goods market equilibrium
 `eq_totsupply`: Equilibrium in the domestic goods market is met when domestic supply equals total demand (the sum of final demand and demand for intermediate goods, exports, and investment goods), net of imports, and corrected by margins. This is enforced by the condition
