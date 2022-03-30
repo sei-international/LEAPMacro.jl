@@ -93,7 +93,7 @@ s_{X,k} + \Delta s_{X,k} = 1, \quad 0\leq s_{X,k}, \Delta s_{X,k} \leq 1.
 
 `eq_M`: Imports are given by a multiplier applied to total domestic demand, plus a possible deviation:
 ```math
-M_k = f_k\left(q_{d,k} + F_k + I_k\right) + \psi_k \overline{M}^\text{ref}_k.
+M_k = \underline{f}_k\left(q_{d,k} + F_k + I_k\right) + \psi_k \overline{M}^\text{ref}_k.
 ```
 
 ## Margins

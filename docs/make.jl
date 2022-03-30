@@ -18,7 +18,7 @@ makedocs(
         ]
         "Model detail" => [
             "Variables" => "variables.md"
-            "Linear goal program" => "lgp.md" # TODO: LGP
+            "Linear goal program" => "lgp.md"
             "Dynamics" => "dynamics.md" # TODO: dynamics
         ]
         "Building a model" => [

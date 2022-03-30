@@ -11,7 +11,7 @@ Demand-led growth models can be contrasted with the more common supply-led growt
 
 Prices for goods and services may be treated with greater or lesser sophistication in demand-led models, but they play a less central role than in supply-led models. In general, demand for products is considered to be more responsive to income than to price, and firms are assumed to set prices by mark-up. More emphasis is placed on "macroeconomic prices", including wage rates, the interest rate set by the central bank, and the exchange rate.
 
-[^1]: E.g., see <https://www.e-elgar.com/shop/usd/the-economics-of-demand-led-growth-9781840641776.html> _The Economics of Demand-Led Growth_ by Mark Setterfield
+[^1]: E.g., see [_The Economics of Demand-Led Growth_](https://www.e-elgar.com/shop/usd/the-economics-of-demand-led-growth-9781840641776.html) by Mark Setterfield
 
 ## Demand in the Macro model
 Demand in the Macro model comes from three sources: final demand (made up of households, non-profits serving households, and government); exports net of imports; and investment expenditure.
