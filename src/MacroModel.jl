@@ -224,13 +224,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	price_of_capital = dot(θ,(ones(np) + io.τd) .* prices.pd)
 	I_nextper = (1 + neutral_growth) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
 	profit_share_rel_capprice = (1/price_of_capital) * profit_per_output
-	incr_profit = sum((γ_0 + exog.δ) .* io.g .* profit_share_rel_capprice)
-    incr_profit_rate = incr_profit/I_nextper
+	init_profit = sum((γ_0 + exog.δ) .* io.g .* profit_share_rel_capprice)
+    init_profit_rate = init_profit/I_nextper
 	# Capital productivity
-    capital_output_ratio = profit_share_rel_capprice / incr_profit_rate
+    capital_output_ratio = profit_share_rel_capprice / init_profit_rate
 	replace!(capital_output_ratio, NaN=>0) # replace NaN with 0
 	# Initialize for the investment function
-	targ_profit_rate = incr_profit_rate
+	targ_profit_rate = init_profit_rate
 
 	#############################################################################
 	#
