@@ -590,7 +590,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
 		output_var(params, profit_rate, "profit_rate", run, year, "a")
 		output_var(params, γ_0, "autonomous_investment_rate", run, year, "a")
-	# Product variables
+	    # Product variables
 		output_var(params, value.(F), "final_demand", run, year, "a")
 		output_var(params, value.(M), "imports", run, year, "a")
 		output_var(params, value.(X), "exports", run, year, "a")
