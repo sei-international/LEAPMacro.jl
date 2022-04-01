@@ -68,6 +68,7 @@ Variables and parameters are labeled with the following dimensions:
 | ``\gamma_{i0}``        | The autonomous (smoothed) component of the rate of net investment demand in sector ``i``      |
 | ``i_b``                | Central bank interest rate                                                                    |
 | ``r_i``                | Gross rate of profit in sector ``i``                                                          |
+| ``r^*``                | Target rate of gross profit (in the investment function)                                      |
 | ``\Pi_i``              | Gross profits in sector ``i``                                                                 |
 | ``\gamma^\text{wage}`` | Growth rate of the total wage bill                                                            |
 
@@ -102,6 +103,10 @@ Variables and parameters are labeled with the following dimensions:
 | ``\underline{i}_{b0}``               | Central bank interest rate when GDP growth and inflation are at their targets                                                       |
 | ``\underline{\rho}_Y``               | Taylor coefficient on the GDP growth rate                                                                                           |
 | ``\underline{\rho}_\pi``             | Taylor coefficient on the inflation rate                                                                                            |
+| ``\hat{\underline{Y}}^*_\text{min}`` | Taylor rule minimum target growth rate                                                                                              |     
+| ``\hat{\underline{Y}}^*_\text{max}`` | Taylor rule maximum target growth rate                                                                                              |     
+| ``\underline{\pi}^*``                | Taylor rule target inflation rate                                                                                                   |
+| ``\underline{\gamma}_0``             | Initial autonomous invedtment rate in the investment function                                                                       |
 | ``\underline{\alpha}_\text{util}``   | Change in induced investment from a change in utilization (utilization investment sensitivity)                                      |
 | ``\underline{\alpha}_\text{profit}`` | Change in induced investment from a change in profit rate (profit rate investment sensitivity)                                      |
 | ``\underline{\alpha}_\text{bank}``   | Change in induced investment from a change in borrowing costs (interest rate investment sensitivity)                                |

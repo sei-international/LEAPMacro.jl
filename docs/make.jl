@@ -19,7 +19,7 @@ makedocs(
         "Model detail" => [
             "Variables" => "variables.md"
             "Linear goal program" => "lgp.md"
-            "Dynamics" => "dynamics.md" # TODO: dynamics
+            "Dynamics" => "dynamics.md"
             "Isolating the energy sector" => "isolate-energy.md" # TODO: isolating energy sector
             "Processing the supply-use table" => "process-sut.md" # TODO: processing the SUT
         ]
