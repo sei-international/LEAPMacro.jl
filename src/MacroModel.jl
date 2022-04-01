@@ -520,6 +520,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Profits
 		#--------------------------------
+		# First, update the Vnorm matrix
+		io.Vnorm = Diagonal(1 ./ g) * io.S * Diagonal(value.(qs))
 		profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* ω +  transpose(io.D) * ((ones(np) + io.τd) .* prices.pd))
 		pK = dot(θ,(ones(np) + io.τd) .* prices.pd)
 		profit_rate = profit_per_output ./ (pK * capital_output_ratio)
