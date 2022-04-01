@@ -553,7 +553,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Wage ratio drives increase in quantity, so use real wage increase, deflate by Pg
 		W_curr = sum(W)
         W = ((1 + w_gr)/(1 + λ_gr)) * W .* (1 .+ γ)
-        wage_ratio = (1/(1 + πg)) * sum(W)/W_curr
+        wage_ratio = (1/(1 + πGDP)) * sum(W)/W_curr
         Fmax = Fmax .* wage_ratio.^exog.wage_elast_demand[t]
 
 		#--------------------------------
