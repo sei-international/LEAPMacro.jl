@@ -5,7 +5,7 @@ coal,Coal Mining,1.2,1
 petr,Petroleum and Natural Gas,1.2,1.5
 ironstl,Iron and Steel,1.5,1.2
 pulppr,Pulp and Paper,1.2,1.2
-foodpr,Food Processing,2,1.5
+foodpr,Food Processing,1.5,1.2
 hvymach,Heavy machinery,1.5,1
 othind,Other Industry,3,1.5
 util,"Electricity, Water, and Sewage",1,1.5
