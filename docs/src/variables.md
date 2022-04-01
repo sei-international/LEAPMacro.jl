@@ -8,7 +8,7 @@ The Macro model contains three types of variables:
   * The [goal program variables](@ref lgp-vars) are solved in each time step (equal to one year) using a [linear goal program](@ref lgp).
   * The [dynamic parameters](@ref dynamic-param-vars) appear as parameters the goal program, but are updated between runs. They are shown with an overline to make them easier to identify in the equations.
   * As the dynamic parameters are calculated, additional [intermediate variables](@ref intermed-vars) are introduced to simplify the equations.
-In addition to model variables, there are [exogenous parameters](@ref exog-param-vars), which might or might not change over time. They are shown with an underline to make them easier to identify in the equations.
+In addition to model variables, there are [exogenous parameters](@ref exog-param-vars), which might or might not change over time. They are shown with an underline to make them easier to identify in the equations. Some "exogenous" parameters, such as the target profit rate ``\underline{r}^*``, are in fact calculated from a combination of initial values and exogenous parameters, but are then held fixed.
 
 Variables and parameters are labeled with the following dimensions:
 
@@ -68,7 +68,6 @@ Variables and parameters are labeled with the following dimensions:
 | ``\gamma_{i0}``        | The autonomous (smoothed) component of the rate of net investment demand in sector ``i``      |
 | ``i_b``                | Central bank interest rate                                                                    |
 | ``r_i``                | Gross rate of profit in sector ``i``                                                          |
-| ``r^*``                | Target rate of gross profit (in the investment function)                                      |
 | ``\Pi_i``              | Gross profits in sector ``i``                                                                 |
 | ``\gamma^\text{wage}`` | Growth rate of the total wage bill                                                            |
 
@@ -106,10 +105,11 @@ Variables and parameters are labeled with the following dimensions:
 | ``\hat{\underline{Y}}^*_\text{min}`` | Taylor rule minimum target growth rate                                                                                              |     
 | ``\hat{\underline{Y}}^*_\text{max}`` | Taylor rule maximum target growth rate                                                                                              |     
 | ``\underline{\pi}^*``                | Taylor rule target inflation rate                                                                                                   |
-| ``\underline{\gamma}_0``             | Initial autonomous invedtment rate in the investment function                                                                       |
+| ``\underline{\gamma}_0``             | Initial autonomous investment rate in the investment function                                                                       |
 | ``\underline{\alpha}_\text{util}``   | Change in induced investment from a change in utilization (utilization investment sensitivity)                                      |
 | ``\underline{\alpha}_\text{profit}`` | Change in induced investment from a change in profit rate (profit rate investment sensitivity)                                      |
 | ``\underline{\alpha}_\text{bank}``   | Change in induced investment from a change in borrowing costs (interest rate investment sensitivity)                                |
+| ``\underline{r}^*``                  | Target rate of gross profit (in the investment function)                                                                            |
 | ``\underline{\delta}_i``             | Depreciation rate for sector ``i``                                                                                                  |
 | ``\underline{v}_i``                  | Capital-output ratio in sector ``i``                                                                                                |
 | ``\underline{\theta}_k``             | Share of product ``k`` in the total supply of investment goods                                                                      |

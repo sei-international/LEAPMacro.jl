@@ -105,11 +105,11 @@ Capital-output ratios are initialized using a procedure described below in [Dema
 Net potential output in sector ``i`` (that is, accounting for depreciation) grows at a rate ``\gamma_i``. The value is given by an investment function that responss to utilization, profitability, and borrowing costs as proxied by the central bank lending rate. The model assumes no active disinvestment, so the net growth rate is not allowed to fall below (the negative of) the depreciation rate,
 ```math
 \gamma_i = \max\left[\gamma_{i0} + \underline{\alpha}_\text{util}\left(u_i - 1\right) +
-           \underline{\alpha}_\text{profit}\left(r_i - r^*\right) +
+           \underline{\alpha}_\text{profit}\left(r_i - \underline{r}^*\right) +
            -\underline{\alpha}_\text{bank}\left(i_b - \underline{i}_{b0}\right),
            -\underline{\delta}_i\right].
 ```
-The first term ``\gamma_{i0}`` is "autonomous investment". It represents long-run expectations. The other terms make up "induced investment" due to short-term changes in utilization, profits, and borrowing costs. The target value for utilization is full utilization, ``u_i = 1``, while for the bank rate it is the neutral bank rate that enters the Taylor function, ``\underline{i}_{b0}`` (see below). The target for the profit rate, ``r^*``, is calculated by Macro during an internal calibration step to be consistent with starting values for investment and profits, using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).
+The first term ``\gamma_{i0}`` is "autonomous investment". It represents long-run expectations. The other terms make up "induced investment" due to short-term changes in utilization, profits, and borrowing costs. The target value for utilization is full utilization, ``u_i = 1``, while for the bank rate it is the neutral bank rate that enters the Taylor function, ``\underline{i}_{b0}`` (see below). The target for the profit rate, ``\underline{r}^*``, is calculated by Macro during an internal calibration step to be consistent with starting values for investment and profits, using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).
 
 Potential output grows at the calculated rate,
 ```math
@@ -140,19 +140,19 @@ Total next-period demand for investment goods ``\overline{I}_{+1}`` is given by 
 ```
 The total is then allocated across investment goods supply shares ``\underline{\theta}_k``.
 
-Values for sectoral capital-output ratios ``v_i`` and the target profit rate ``r^*`` are calculated using the equation for investment demand combined with the expression for the profit rate. Rearranging the equation for the profit rate gives
+Values for sectoral capital-output ratios ``\underline{v}_i`` and the target profit rate ``\underline{r}^*`` are calculated using the equation for investment demand combined with the expression for the profit rate. Rearranging the equation for the profit rate gives
 ```math
-v_i = \frac{\Pi_i}{p_K r_i}.
+\underline{v}_i = \frac{\Pi_i}{p_K r_i}.
 ```
-The calibration is carried out by assuming that all sectors have the same profit rate, and that it is the target profit rate, ``r^*``, so that
+The calibration is carried out by assuming that all sectors have the same profit rate, and that it is the target profit rate, ``\underline{r}^*``, so that
 ```math
-v_i = \frac{\Pi_i}{p_K r^*}.
+\underline{v}_i = \frac{\Pi_i}{p_K \underline{r}^*}.
 ```
-Substituting this expression into the equation for investment demand and solving for ``r^*`` gives
+Substituting this expression into the equation for investment demand and solving for ``\underline{r}^*`` gives
 ```math
-r^* = \frac{1}{p_K\overline{I}_{+1}}\sum_{i=1}^{n_s} \Pi_i \overline{z}_i \left(\gamma_i + \underline{\delta}_i\right)
+\underline{r}^* = \frac{1}{p_K\overline{I}_{+1}}\sum_{i=1}^{n_s} \Pi_i \overline{z}_i \left(\gamma_i + \underline{\delta}_i\right)
 ```
-The calibrated value for ``r^*`` is found by setting ``\overline{z}_i = g_i`` and ``\gamma_i = \underline{\gamma}_0``. That value is then used to calculate capital-output ratios.
+The calibrated value for ``\underline{r}^*`` is found by setting ``\overline{z}_i = g_i`` and ``\gamma_i = \underline{\gamma}_0``. That value is then used to calculate capital-output ratios.
 
 ## Normal export demand
 The normal level of export demand grows with global GDP (or gross world product, GWP) to a goods-specific elasticity,
