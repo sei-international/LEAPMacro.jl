@@ -29,15 +29,15 @@ otuputs
 
 In addition, Macro writes a log file to the main folder. It is overwritten each time Macro is run, so to save a log file, it should be renamed. However, normally it is not needed to save log files, because they are most useful when developing and debugging a model. If the model fails, then the error message will be written to the log file.
 
-## The `diagnostics` folder
+## [The `diagnostics` folder](@id model-outputs-diagnostics)
 When the `report-diagnostics` parameter is set to `true`, a variety of diagnostic outputs are reported.
 
 One crucial diagnostic indicator is given in the file `nonenergy_energy_link_measure.txt`. It contains a message like the following:
 ```
 Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:
-This value should be small: 3.55%.
+This value should be small: 2.43%.
 ```
-Whether the estimated parameter is sufficiently small or not depends on the purposes of the analysis. For the Freedonia sample model, it suggests that excluding the demand by the energy sector of non-energy goods and services could lead to a roughly 4% discrepancy.
+Whether the estimated parameter is sufficiently small or not depends on the purposes of the analysis. For the Freedonia sample model, it suggests that excluding the demand by the energy sector of non-energy goods and services could lead to a 2.4% discrepancy.
 
 An additional set of files with names such as `model_0_2010.txt` provide an export of the [linear goal program](@ref lgp) prepared by the Macro model. Examining these files can sometimes be helpful when the log file indicates an error in JuMP (the Julia mathematical programming library). The file offers an explicit formulation of the model, with the estimated parameters:
 ```
