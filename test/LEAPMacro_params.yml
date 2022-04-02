@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------------
 # Folder inside the "outputs" folder to store calibration, results, and diagnostics
 #---------------------------------------------------------------------------
-output_folder: DEFAULT
+output_folder: Baseline
 #---------------------------------------------------------------------------
 # Supply-use table and supplementary tables as CSV files
 #---------------------------------------------------------------------------
@@ -50,7 +50,7 @@ calib:
     # Adjustment factor for maximum household demand in the initial year
     max_hh_dmd_adj_factor: 0.00
     # Potential output relative to actual output in the base year
-    pot_output_adj_factor: -0.05
+    pot_output_adj_factor: 0.10
     
 #---------------------------------------------------------------------------
 # Global economy parameters
@@ -83,7 +83,7 @@ investment-fcn:
     # Starting point for the autonomous investment growth rate: also the initial target GDP growth rate for the Taylor rule
     init_neutral_growth: 0.060
     # Change in induced investment with a change in utilization
-    util_sens:  0.05
+    util_sens:  0.10
     # Change in induced investment with a change in the profit rate
     profit_sens: 0.05
     # Change in induced investment with a change in the central bank lending rate
@@ -101,7 +101,7 @@ labor-prod-fcn:
     KV_intercept_default: 0.00
 wage-fcn:
     # Inflation pass-through
-    infl_passthrough: 0.85
+    infl_passthrough: 1.00
     # Labor supply constraint coefficent
     lab_constr_coeff: 0.5
 
@@ -114,7 +114,7 @@ export_elast_demand:
     
 # For wages, with respect to the wage bill
 wage_elast_demand:
-    decay: 0.02
+    decay: 0.01
     engel_prods: [agric, foodpr]
     engel_asympt_elast: 0.7
 

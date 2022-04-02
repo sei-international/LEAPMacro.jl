@@ -269,7 +269,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	param_pd = prices.pd
 	param_Pg = prices.Pg
 	param_pb = prices.pb
-	param_prevM = 2 * io.M # Allow for some extra slack -- this just sets a scale
+	param_Mref = 2 * io.M # Allow for some extra slack -- this just sets a scale
+	param_mfrac = io.m_frac
     #----------------------------------
     # Variables
     #----------------------------------
@@ -277,7 +278,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     @variable(mdl, 0 <= ugap[i in 1:ns] <= 1)
     @variable(mdl, 0 <= fgap[i in 1:np] <= 1)
     @variable(mdl, 0 <= xgap[i in 1:np] <= 1)
-    @variable(mdl, 0 <= ψ_imp[i in 1:np] <= 1) # Excess over desired imports (as a relative amount)
+    @variable(mdl, 0 <= ψ_pos[i in 1:np] <= 1) # Excess over target imports (as a relative amount)
+    @variable(mdl, 0 <= ψ_neg[i in 1:np] <= 1) # Deficit below target imports (as a relative amount)
     # Supply and demand quantities
     @variable(mdl, qs[i in 1:np] >= 0)
     @variable(mdl, qd[i in 1:np] >= 0)
@@ -290,7 +292,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     @variable(mdl, 0 <= xshare[i in 1:np] <= 1)
 	@variable(mdl, I_tot) # Fix to equal param_I_tot
 	@variable(mdl, I_supply[i in 1:np]) # Supply of investment goods by product
-	@variable(mdl, 0 <= ψ_inv <= 1)
     # Output
     @variable(mdl, 0 <= u[i in 1:ns] <= 1)
     # Margins
@@ -303,7 +304,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     @objective(mdl, Min, wu * sum(u_sector_wt[i] * ugap[i] for i in 1:ns) +
 					     wf * sum(f_sector_wt[i] * fgap[i] for i in 1:np) +
 						 wx * sum(x_sector_wt[i] * xgap[i] for i in 1:np) +
-						 wm * (sum(ψ_imp[i] for i in 1:np)))
+						 wm * (sum(ψ_pos[i] + ψ_neg[i] for i in 1:np)))
 
     #----------------------------------
     # Constraints
@@ -327,7 +328,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	@constraint(mdl, eq_totsupply[i = 1:np], qs[i] == qd[i] - margins_pos[i] + margins_neg[i] + X[i] + F[i] + I_supply[i] - M[i])
 	@constraint(mdl, eq_no_dom_prod[i = 1:np], qs[i] * no_dom_production[i] == 0)
 	# Imports
-	@constraint(mdl, eq_M[i = 1:np], M[i] == io.m_frac[i] * (qd[i] + F[i] + I_supply[i]) + param_prevM[i] * ψ_imp[i])
+	@constraint(mdl, eq_M[i = 1:np], M[i] == param_mfrac[i] * (qd[i] + F[i] + I_supply[i]) + param_Mref[i] * (ψ_pos[i] - ψ_neg[i]))
 	# Margins
 	@constraint(mdl, eq_margpos[i = 1:np], margins_pos[i] == io.marg_pos_ratio[i] * (qs[i] + M[i]))
 	@constraint(mdl, eq_margneg[i = 1:np], margins_neg[i] == io.marg_neg_share[i] * sum(margins_pos[j] for j in 1:np))
@@ -624,7 +625,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Update the linear goal program
 		#--------------------------------
-		param_prevM = 2 * value.(M) # Allow for some extra slack -- this just sets a scale
+		param_Mref = 2 * value.(M) # Allow for some extra slack -- this just sets a scale
 		param_Pg = prices.Pg
 		param_Xmax = Xmax
 		param_Fmax = Fmax
@@ -634,6 +635,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_pd = prices.pd
 		param_pb = prices.pb
 		param_z = z
+		param_mfrac = value.(M) ./ (value.(qd) + value.(F) + value.(I_supply))
 
 		for i in 1:ns
 			set_normalized_coefficient(eq_io[i], u[i], -param_Pg * param_z[i])
@@ -644,7 +646,11 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		for i in 1:np
 			set_normalized_coefficient(eq_X[i], xshare[i], -param_Xmax[i])
 			set_normalized_coefficient(eq_F[i], fshare[i], -param_Fmax[i])
-			set_normalized_coefficient(eq_M[i], ψ_imp[i], -param_prevM[i])
+			set_normalized_coefficient(eq_M[i], ψ_pos[i], -param_Mref[i])
+			set_normalized_coefficient(eq_M[i], ψ_neg[i], param_Mref[i])
+			set_normalized_coefficient(eq_M[i], qd[i], -param_mfrac[i])
+			set_normalized_coefficient(eq_M[i], F[i], -param_mfrac[i])
+			set_normalized_coefficient(eq_M[i], I_supply[i], -param_mfrac[i])
 			for j in 1:ns
 				set_normalized_coefficient(eq_intdmd[i], u[j], -io.D[i,j] * param_z[j])
 			end
