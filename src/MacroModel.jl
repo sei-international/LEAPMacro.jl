@@ -392,7 +392,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	#--------------------------------
     pd_prev = prices.pd/(1 + params["global-params"]["infl_default"])
     pb_prev = param_pb/(1 + params["global-params"]["infl_default"])
-    prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)
+    prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/(1 + neutral_growth)
 
 	prev_GDP_deflator = 1
     prev_GDP_gr = neutral_growth
@@ -438,9 +438,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	output_var(params, product_names, "exports", run, "", "w")
 	output_var(params, product_names, "basic_prices", run, "", "w")
 	# Create a file to hold scalar variables
-	scalar_var_list = ["curr acct surplus", "real GDP", "GDP deflator", "labor productivity gr",
-					   "labor force gr", "wage rate gr", "wage per effective worker gr", "real investment",
-					   "central bank rate"]
+	scalar_var_list = ["GDP gr", "curr acct surplus to GDP ratio", "curr acct surplus", "real GDP",
+					   "GDP deflator", "labor productivity gr", "labor force gr", "wage rate gr",
+					   "wage per effective worker gr", "real investment", "central bank rate"]
 	to_quoted_string_vec(scalar_var_list)
 	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
 
@@ -582,6 +582,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# These variables are only reported, not used
 		CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
+		CA_to_GDP_ratio = CA_surplus/GDP
 
 		# Sector variables
 		output_var(params, g, "sector_output", run, year, "a")
@@ -596,7 +597,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		output_var(params, value.(X), "exports", run, year, "a")
 		output_var(params, param_pb, "basic_prices", run, year, "a")
 		# Scalar variables
-		scalar_var_vals = [CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
+		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, value.(I_tot), i_bank]
 		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
 
