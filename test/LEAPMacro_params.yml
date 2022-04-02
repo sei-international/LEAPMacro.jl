@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------------
 # Folder inside the "outputs" folder to store calibration, results, and diagnostics
 #---------------------------------------------------------------------------
-output_folder: DEFAULT
+output_folder: Baseline
 #---------------------------------------------------------------------------
 # Supply-use table and supplementary tables as CSV files
 #---------------------------------------------------------------------------
@@ -50,7 +50,7 @@ calib:
     # Adjustment factor for maximum household demand in the initial year
     max_hh_dmd_adj_factor: 0.00
     # Potential output relative to actual output in the base year
-    pot_output_adj_factor: 0.05
+    pot_output_adj_factor: 0.10
     
 #---------------------------------------------------------------------------
 # Global economy parameters
@@ -85,7 +85,7 @@ investment-fcn:
     # Change in induced investment with a change in utilization
     util_sens:  0.10
     # Change in induced investment with a change in the profit rate
-    profit_sens: 0.075
+    profit_sens: 0.05
     # Change in induced investment with a change in the central bank lending rate
     intrate_sens: 0.20
     # Rate of adjustment of the autonomous investment rate towards the actual investment rate
