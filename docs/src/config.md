@@ -15,7 +15,7 @@ The first block names a subfolder for storing outputs. It will be created inside
 #---------------------------------------------------------------------------
 # Folder inside the "outputs" folder to store calibration, results, and diagnostics
 #---------------------------------------------------------------------------
-output_folder: DEFAULT
+output_folder: Baseline
 ```
 
 The next block specifies the input files. In many cases, these will be the same across a set of scenarios. However, it is possible that they might differ. For example, the supply-use table, given by the `SUT` parameter, could be drawn from different years for calibration purposes, and different `time_series` might distinguish different scenarios.

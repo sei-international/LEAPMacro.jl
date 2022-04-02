@@ -53,10 +53,10 @@ The log file should show something like:
 The time stamps at the start and end show that the model ran in 34 seconds. The repeated `FEASIBLE_POINT` for each year means that the model in each year yielded a feasible solution to the linear program.
 
 ## The outputs folder
-The `outputs` folder should have a subfolder called `DEFAULT`. Inside that folder are three other folders, with CSV files containing diagnostic information and the results of the model run:
+The `outputs` folder should have a subfolder called `Baseline`. Inside that folder are three other folders, with CSV files containing diagnostic information and the results of the model run:
 ```
 otuputs 
-└───DEFAULT
+└───Baseline
     └───calibration
         │   basic_prices_0.csv
         │   capacity_utilization_0.csv
@@ -68,9 +68,9 @@ otuputs
         │   ...
         │   wages.csv
     └───results
+        │   autonomous_investment_rate_0.csv
         │   basic_prices_0.csv
-        │   capacity_utilization_0.csv
         │   ...
         │   sector_output_0.csv
 ```
-There is a great deal of information in the files. The configuration file and the output files are described in greater detail elsewhere in this documentation.
+There is a great deal of information in the files: see the pages on the [configuration file](@ref config) and the [output files](@ref model-outputs).

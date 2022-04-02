@@ -37,7 +37,7 @@ One crucial diagnostic indicator is given in the file `nonenergy_energy_link_mea
 Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:
 This value should be small: 2.43%.
 ```
-Whether the estimated parameter is sufficiently small or not depends on the purposes of the analysis. For the Freedonia sample model, it suggests that excluding the demand by the energy sector of non-energy goods and services could lead to a 2.4% discrepancy.
+Whether the estimated parameter is sufficiently small or not depends on the purposes of the analysis. For the Freedonia sample model, it suggests that excluding the demand by the energy sector of non-energy goods and services could lead to a 2.43% discrepancy.
 
 An additional set of files with names such as `model_0_2010.txt` provide an export of the [linear goal program](@ref lgp) prepared by the Macro model. Examining these files can sometimes be helpful when the log file indicates an error in JuMP (the Julia mathematical programming library). The file offers an explicit formulation of the model, with the estimated parameters:
 ```
