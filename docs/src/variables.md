@@ -20,36 +20,37 @@ Variables and parameters are labeled with the following dimensions:
 | ``k``, ``l`` | Product indices, taking values from ``1\ldots n_p`` |
 
 ## [Goal program variables](@id lgp-vars)
-| Symbol                | Definition                                                                                      |
-| :-------------------- | :---------------------------------------------------------------------------------------------- |
-| ``u_i``               | Capacity utilization in sector ``i``                                                            |
-| ``\Delta u_i``        | Gap between full and realized utilization in sector ``i``                                       |
-| ``s_{X,k}``           | Exports relative to the normal level for product ``k``                                          |
-| ``\Delta s_{X,k}``    | Gap between normal and realized exports as a share for product ``k``                            |
-| ``s_{F,k}``           | Final demand (household and government combined) relative to the normal level for product ``k`` |
-| ``\Delta s_{F,k}``    | Gap between normal and realized final demand as a share for product ``k``                       |
-| ``\psi^\text{imp}_k`` | Excess goods imports as a multiplier on a reference level for product ``k``                     |
-| ``X_k``               | Exports of product ``k``                                                                        |
-| ``F_k``               | Final demand for product ``k``                                                                  |
-| ``I_k``               | Investment demand for product ``k``                                                             |
-| ``M_k``               | Imports of product ``k``                                                                        |
-| ``q_{s,k}``           | Domestic production of product ``k``                                                            |
-| ``q_{d,k}``           | Intermediate demand for product ``k``                                                           |
-| ``m^\pm_k``           | Positive ``(+)`` and negative ``(-)`` margins for product ``k``                                 |
+| Symbol             | Definition                                                                                                                     |
+|:-------------------|:-------------------------------------------------------------------------------------------------------------------------------|
+| ``u_i``            | Capacity utilization in sector ``i``                                                                                           |
+| ``\Delta u_i``     | Gap between full and realized utilization in sector ``i``                                                                      |
+| ``s_{X,k}``        | Exports relative to the normal level for product ``k``                                                                         |
+| ``\Delta s_{X,k}`` | Gap between normal and realized exports as a share for product ``k``                                                           |
+| ``s_{F,k}``        | Final demand (household and government combined) relative to the normal level for product ``k``                                |
+| ``\Delta s_{F,k}`` | Gap between normal and realized final demand as a share for product ``k``                                                      |
+| ``\psi^\pm_k``     | Import excess ``(+)`` or deficit ``(-)`` relative to the normal level as a multiplier on the reference level for product ``k`` |
+| ``X_k``            | Exports of product ``k``                                                                                                       |
+| ``F_k``            | Final demand for product ``k``                                                                                                 |
+| ``I_k``            | Investment demand for product ``k``                                                                                            |
+| ``M_k``            | Imports of product ``k``                                                                                                       |
+| ``q_{s,k}``        | Domestic production of product ``k``                                                                                           |
+| ``q_{d,k}``        | Intermediate demand for product ``k``                                                                                          |
+| ``m^\pm_k``        | Positive ``(+)`` and negative ``(-)`` margins for product ``k``                                                                |
 
 ## [Dynamic parameters](@id dynamic-param-vars)
-| Symbol                         | Definition                                                                |
-|:-------------------------------|:--------------------------------------------------------------------------|
-| ``\overline{z}_i``             | Potential output for sector ``i``                                         |
-| ``\overline{W}_i``             | Nominal wage bill in sector ``i``                                         |
-| ``\overline{p}_{b,k}``         | Basic price for product ``k`` as an index relative to the initial year    |
-| ``\overline{P}_g``             | Price level of output as an index relative to the initial year            |
-| ``\overline{I}``               | Demand for investment goods                                               |
-| ``\overline{X}^\text{norm}_k`` | Normal level of export demand for product ``k``                           |
-| ``\overline{F}^\text{norm}_k`` | Normal level of final demand for product ``k``                            |
-| ``\overline{M}^\text{ref}_k``  | Reference level of imports for product ``k``                              |
-| ``\overline{p}_{d,k}``         | Producer price for product ``k`` as an index relative to the initial year |
-| ``\overline{p}_{w,k}``         | World price index for product ``k``                                       |
+| Symbol                         | Definition                                                                                                   |
+|:-------------------------------|:-------------------------------------------------------------------------------------------------------------|
+| ``\overline{z}_i``             | Potential output for sector ``i``                                                                            |
+| ``\overline{W}_i``             | Nominal wage bill in sector ``i``                                                                            |
+| ``\overline{p}_{b,k}``         | Basic price for product ``k`` as an index relative to the initial year                                       |
+| ``\overline{P}_g``             | Price level of output as an index relative to the initial year                                               |
+| ``\overline{I}``               | Demand for investment goods                                                                                  |
+| ``\overline{X}^\text{norm}_k`` | Normal level of export demand for product ``k``                                                              |
+| ``\overline{F}^\text{norm}_k`` | Normal level of final demand for product ``k``                                                               |
+| ``\overline{M}^\text{ref}_k``  | Reference level of imports for product ``k``                                                                 |
+| ``\overline{f}_k``             | Normal level of imports of good ``k`` as a fraction of domestic demand (intermediate, final, and investment) |
+| ``\overline{p}_{d,k}``         | Producer price for product ``k`` as an index relative to the initial year                                    |
+| ``\overline{p}_{w,k}``         | World price index for product ``k``                                                                          |
 
 ## [Intermediate variables](@id intermed-vars)
 | Symbol                 | Definition                                                                                    |
@@ -84,7 +85,6 @@ Variables and parameters are labeled with the following dimensions:
 | ``\underline{\varphi}_u``            | For utilization sector weights, weight of value share vs. constant share                                                            |
 | ``\underline{\varphi}_X``            | For export sector weights, weight of value share vs. constant share                                                                 |
 | ``\underline{\varphi}_F``            | For final demand sector weights, weight of value share vs. constant share                                                           |
-| ``\underline{f}_k``                  | Normal level of imports of good ``k`` as a fraction of domestic demand (intermediate, final, and investment)                        |
 | ``\underline{S}_{ik}``               | Sector ``i``'s share of domestic production of product ``k``                                                                        |
 | ``\underline{D}_{ki}``               | Intermediate demand for product ``k`` per unit of output from sector ``i``                                                          |
 | ``\underline{d}_k``                  | Equal to ``\underline{d}_k = 1`` if the country does _not_ produce product ``k`` and  ``\underline{d}_k = 0`` if it does produce it |

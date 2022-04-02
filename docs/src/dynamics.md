@@ -53,12 +53,24 @@ Basic prices are the average prices of domestic goods and imports. They are trac
 \overline{p}_{b,k} = \overline{p}_{d,k}.
 ```
 
+## Imports
+The reference import demand is set equal to twice the calculated volume of imports from the [linear goal program](@ref lgp),
+```math
+\overline{M}^\text{ref}_k = 2 M_k.
+```
+This formulation is not problematic because the reference level only sets a scale.
+
+The normal level of imports of good ``k`` as a fraction of domestic demand (intermediate, final, and investment) is updated based on the calculated values,
+```math
+\overline{f}_k = \frac{M_k}{q_{d,k} + F_k + I_k}.
+```
+
 ## Wages and labor productivity
 The wage share ``\omega_i`` in sector ``i`` is defined as
 ```math
-\omega_i = \frac{\underline{W}_i}{g_i}.
+\omega_i = \frac{\overline{W}_i}{g_i}.
 ```
-The wage bill ``\underline{W}_i`` is by definition equal to the wage rate ``w_i`` multiplied by sectoral employment ``L_i``, while output ``g_i`` is by definition equal to real labor productivity ``\lambda_i`` muliplied by the price level of output ``\overline{P}_g`` and sectoral employment. So, the wage share can also be written as
+The wage bill ``\overline{W}_i`` is by definition equal to the wage rate ``w_i`` multiplied by sectoral employment ``L_i``, while output ``g_i`` is by definition equal to real labor productivity ``\lambda_i`` muliplied by the price level of output ``\overline{P}_g`` and sectoral employment. So, the wage share can also be written as
 ```math
 \omega_i = \frac{w_i L_i}{\overline{P}_g\lambda_i L_i} = \frac{1}{\overline{P}_g}\frac{w_i}{\lambda_i}.
 ```

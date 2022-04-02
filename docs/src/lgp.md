@@ -17,7 +17,7 @@ Specifically, the objective function is
 \min \underline{w}_u\sum_{i = 1}^{n_s} \underline{\sigma}^u_i\Delta u_i +
      \underline{w}_X\sum_{k = 1}^{n_p} \underline{\sigma}^K_k\Delta s_{X,k} +
      \underline{w}_F\sum_{k = 1}^{n_p} \underline{\sigma}^F_k\Delta s_{F,k} +
-     \underline{w}_M\sum_{k = 1}^{n_p} \psi_k.
+     \underline{w}_M\sum_{k = 1}^{n_p} \left(\psi^+_k + \psi^-_k\right).
 ```
 !!! note "Sector and product specific weights vs. category weights"
     In the objective function, there are four "category weights", ``\underline{w}_u``, ``\underline{w}_X``, ``\underline{w}_F``, and ``\underline{w}_M``. The category weights are specified in the [configuration file](@ref config).
@@ -93,7 +93,7 @@ s_{X,k} + \Delta s_{X,k} = 1, \quad 0\leq s_{X,k}, \Delta s_{X,k} \leq 1.
 
 `eq_M`: Imports are given by a multiplier applied to total domestic demand, plus a possible deviation:
 ```math
-M_k = \underline{f}_k\left(q_{d,k} + F_k + I_k\right) + \psi_k \overline{M}^\text{ref}_k.
+M_k = \overline{f}_k\left(q_{d,k} + F_k + I_k\right) + \left(\psi^+_k - \psi^-_k\right) \overline{M}^\text{ref}_k.
 ```
 
 ## Margins
