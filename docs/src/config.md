@@ -6,11 +6,9 @@ CurrentModule = LEAPMacro
 
 The configuration file is written in YAML syntax and has a `.yml` extension. By default, Macro assumes the configuration file will be called `LEAPMacro_params.yml`, but other names are possible, and in fact encouraged, because each configuration file corresponds to a different scenario.
 
-The configuration file is made up of several blocks. This overview will cover a few of them. More detail is available in the page on [preparing a configuration file](@ref prep-config).
-
 ## High-level settings
 
-The first block names a subfolder for storing outputs. It will be created inside an `outputs` folder. Different configuration files should be given different output folders so that different scenarios can be distinguished.
+The configuration file is made up of several blocks. The first block names a subfolder for storing outputs. It will be created inside an `outputs` folder. Different configuration files should be given different output folders so that different scenarios can be distinguished.
 ```yaml
 #---------------------------------------------------------------------------
 # Folder inside the "outputs" folder to store calibration, results, and diagnostics
@@ -53,10 +51,11 @@ years:
     end:    2040
 ```
 
-## Linking to the supply-use table
-The following several blocks contain technical parameters. These are described in more detail in the page on [preparing a configuration file](@ref prep-config).
+## Model parameters
+<!-- TODO: Fill in model parameters -->
 
-Farther down the table is the block for specifying the structure of the supply-use table and how it relates to Macro.
+## Linking to the supply-use table
+The next block is for specifying the structure of the supply-use table and how it relates to Macro.
 
 The first section of this block specifies sectors and products that are excluded from the simulation. There are three categories:
 1. First, and most important, are energy sectors and products. Those are excluded from the Macro calculation because the energy sector analysis is handled on a physical basis within LEAP.
@@ -109,7 +108,7 @@ SUT_ranges:
     wages: J37:W38
 ```
 
-## Linking Macro to LEAP
+## [Linking Macro to LEAP](@id config-link-LEAP)
 The next, and final, block specifies how LEAP and Macro are linked.
 
 The first section says which LEAP scenario to use for inputs to the Macro model, the LEAP scenario to which Macro returns its results, and currency unit for investment costs, and a scaling factor. For example, if entries in the Macro model input files are in millions of US dollars, and investment costs are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).

@@ -11,25 +11,22 @@ makedocs(
         ]
         "Model overview" => [
             "LEAP-Macro link" => "leap-macro-link.md"
-            "Configuration file" => "config.md"
-            "Output files" => "model-outputs.md"
             "About demand-led growth" => "demand-led-growth.md"
             "Limitations of the model" => "limitations.md"
         ]
-        "Model detail" => [
+        "Using LEAP-Macro" => [
+            "Configuration file" => "config.md"
+            "External parameter files" => "params.md"
+            "Output files" => "model-outputs.md"
+            "Preparing a model" => "prep-model.md"
+            "Troubleshooting" => "troubleshoot.md"
+         ]
+        "Technical details" => [
             "Variables" => "variables.md"
             "Linear goal program" => "lgp.md"
             "Dynamics" => "dynamics.md"
             "Isolating the energy sector" => "isolate-energy.md"
             "Processing the supply-use table" => "process-sut.md"
-        ]
-        "Building a model" => [
-            "Preparing supply-use tables" => "prep-sut.md" # TODO: prep SUT
-            "Preparing exogenous parameters" => "prep-params.md" # TODO: prep params
-            "Preparing the configuration file" => "prep-config.md" # TODO: prep config
-            "Calibrating the model" => "calib.md" # TODO: calibration
-            "Troubleshooting" => "troubleshoot.md" # TODO: troubleshooting
-            "Linking to LEAP" => "link-to-leap.md" # TODO: linking to LEAP
         ]
     ]
 )

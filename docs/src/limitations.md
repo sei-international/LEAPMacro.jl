@@ -17,7 +17,7 @@ Most developing countries face chronic challenges with their current account bal
 
 While this is an important issue, policies to respond to adverse current accounts movements differ between countries, and over time within the same country. For this reason, the Macro model does not try to estimate international investor response to current account deficits.
 
-However, Macro does estimate and report the current account balance (for the non-energy economy) in a file called `collected_variables_#.csv`, where `#` is the model run number. The reported figures can be used to check whether the scenario seems reasonable. If the balance is persistently negative and, in particular, if the deficit grows faster than GDP, then it may signal some problems with the parameter assumptions in the [configuration file](@ref prep-config) or [exogenous parameters file](@ref prep-params).
+However, Macro does estimate and report the current account balance (for the non-energy economy) in a file called `collected_variables_#.csv`, where `#` is the model run number. The reported figures can be used to check whether the scenario seems reasonable. If the balance is persistently negative and, in particular, if the deficit grows faster than GDP, then it may signal some problems with the parameter assumptions in the [configuration file](@ref config) or [exogenous parameters file](@ref params).
 
 ## Financial stocks
 Macro is a "real-economy" model that estimates flows of expenditure. In the model, the value of those flows depends on prior flows and exogenous parameters.
