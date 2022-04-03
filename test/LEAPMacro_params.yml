@@ -112,7 +112,7 @@ wage-fcn:
 export_elast_demand:
     decay: 0.01
     
-# For wages, with respect to the wage bill
+# For final demand, with respect to the wage bill
 wage_elast_demand:
     decay: 0.01
     engel_prods: [agric, foodpr]

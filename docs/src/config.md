@@ -6,7 +6,12 @@ CurrentModule = LEAPMacro
 
 The configuration file is written in YAML syntax and has a `.yml` extension. By default, Macro assumes the configuration file will be called `LEAPMacro_params.yml`, but other names are possible, and in fact encouraged, because each configuration file corresponds to a different scenario.
 
-## High-level settings
+```@contents
+Pages = ["config.md"]
+Depth = 3
+```
+
+## General settings
 
 The configuration file is made up of several blocks. The first block names a subfolder for storing outputs. It will be created inside an `outputs` folder. Different configuration files should be given different output folders so that different scenarios can be distinguished.
 ```yaml
@@ -52,7 +57,175 @@ years:
 ```
 
 ## Model parameters
-<!-- TODO: Fill in model parameters -->
+The next several blocks contain some of the [exogenous parameters](@ref exog-param-vars) for the Macro model.
+
+### Initial value adjustments
+The first block of model parameters contains adjustments that are applied to the initial values. This can help adjust if, for example, the economy was recovering from a recession in the first year. These values should normally be adjusted last when calibrating a model.
+```yaml
+#---------------------------------------------------------------------------
+# Adjustment parameters for initializing variables
+#---------------------------------------------------------------------------
+# These factors are expressed as a fractional addition/subtraction to the estimate: set to zero to accept the default estimate
+calib:
+    # Calibration factor for estimating the first-period profit rate and capital productivity
+    nextper_inv_adj_factor: 0.00
+    # Adjustment factor for maximum export demand in the initial year
+    max_export_adj_factor: 0.00
+    # Adjustment factor for maximum household demand in the initial year
+    max_hh_dmd_adj_factor: 0.00
+    # Potential output relative to actual output in the base year
+    pot_output_adj_factor: 0.10
+```
+
+### Default values for the global economy
+The second block of model parameters provides default values for the global inflation rate and growth rate of global GDP (or gross world product, GWP). These are applied only if they are not specified for some year in the [external parameter files](@ref params).
+
+The correspondence between the parameters and the model variables is:
+  * `infl_default` : ``\underline{\pi}_{w,k}`` (assumed to be the same for all products ``k``)
+  * `gr_default` : ``\underline{\gamma}^\text{world}``
+```yaml
+#---------------------------------------------------------------------------
+# Global economy parameters
+#---------------------------------------------------------------------------
+global-params:
+    # Default world inflation rate
+    infl_default: 0.02
+    # Default world growth rate
+    gr_default: 0.015
+```
+
+### Taylor rule coefficients
+The next block contains the parameters for implementing a "Taylor rule", which adjusts the central bank interest rate in response to inflation and economic growth. See the page on [model dynamics](@ref dynamics-taylor-rule) for details.
+
+The correspondence between the parameters and the model variables is:
+  * `neutral_growth_band` : ``[\hat{\underline{Y}}^*_\text{min},\hat{\underline{Y}}^*_\text{max}]``
+  * `target_intrate` : ``\underline{i}_{b0}``
+  * `target_infl` : ``\underline{\pi}^*``
+  * `gr_resp` : ``\underline{\rho}_Y``
+  * `infl_resp` : ``\underline{\rho}_\pi``
+```yaml
+#---------------------------------------------------------------------------
+# Parameters for setting the central bank lending rate (Taylor rule)
+#---------------------------------------------------------------------------
+taylor-fcn:
+    # Allowable range for neutral growth
+    neutral_growth_band: [0.02, 0.06]
+    # Target interest rate (as a fraction, e.g., 2%/year = 0.02)
+    target_intrate: 0.02
+    # Target inflation rate
+    target_infl: 0.02
+    # Response of the central bank rate to a change in the GDP growth rate
+    gr_resp: 0.50
+    # Response of the central bank rate to a change in the inflation rate
+    infl_resp: 0.50
+```
+
+### Investment function coefficients
+The next block contains the parameters for the investment function. As explained in the page on [model dynamics](@ref dynamics-inv-dmd), the investment function calculates the demand for investment goods as a function of capacity utilization, profitability, and borrowing costs.
+
+The correspondence between the parameters and the model variables is:
+  * `init_neutral_growth`: Initial value of ``\gamma_{i0}`` for every sector ``i``
+  * `util_sens` : ``\underline{\alpha}_\text{util}``
+  * `profit_sens` : ``\underline{\alpha}_\text{profit}``
+  * `intrate_sens` : ``\underline{\alpha}_\text{bank}``
+  * `growth_adj` : ``\underline{\xi}``
+```yaml
+#---------------------------------------------------------------------------
+# Parameters for the investment function
+#---------------------------------------------------------------------------
+investment-fcn:
+    # Starting point for the autonomous investment growth rate: also the initial target GDP growth rate for the Taylor rule
+    init_neutral_growth: 0.060
+    # Change in induced investment with a change in utilization
+    util_sens:  0.07
+    # Change in induced investment with a change in the profit rate
+    profit_sens: 0.05
+    # Change in induced investment with a change in the central bank lending rate
+    intrate_sens: 0.20
+    # Rate of adjustment of the autonomous investment rate towards the actual investment rate
+    growth_adj: 0.10
+```
+
+### Employment and labor productivity
+The next block contains default parameters for the labor productivity function and for the function that determines the growth rate of the wage. See the page on [model dynamics](@ref dynamics-wages-labor-prod) for details. The default productivity parameters are used if they are not specified for some year in the [external parameter files](@ref params).
+
+The correspondence between the parameters and the model variables is:
+  * For labor productivity:
+    - `KV_coeff_default` : ``\underline{\alpha}_\text{KV}``
+    - `KV_intercept_default` : ``\underline{\beta}_\text{KV}``
+  * For the wage:
+    - `infl_passthrough` : ``\underline{h}``
+    - `lab_constr_coeff` : ``\underline{k}``
+```yaml
+#---------------------------------------------------------------------------
+# Parameters for the labor productivity and labor force model
+#---------------------------------------------------------------------------
+labor-prod-fcn:
+    # Default Kaldor-Verdoorn coefficient
+    KV_coeff_default: 0.50
+    # Default Kaldor-Verdoorn intercept
+    KV_intercept_default: 0.00
+wage-fcn:
+    # Inflation pass-through
+    infl_passthrough: 1.00
+    # Labor supply constraint coefficent
+    lab_constr_coeff: 0.5
+```
+
+### Long-run demand elasticities
+Initial values for demand elasticities for products with respect to global GDP (for exports) and the wage bill (for domestic final demand excluding investment) are specified in the [external parameter files](@ref params). The way that the elasticities enter into the model is described in the page on [model dynamics](@ref dynamics-demand-fcns).
+
+For products that are not labeled as "Engel products" (given by the parameter `engel-prods`):
+  * If the initial elasticity is less than one, then it remains at its starting level;
+  * If the initial elasticity is greater than one, it asymptotically approaches a value of one over time;
+For products labeled as Engel products:
+  * The elasticity approaches the `engel_asympt_elast` over time.
+The rate of convergence on the long-run values is given by the `decay` parameter, with the possibility of a different rate of convergence for exports and final demand.
+```yaml
+#---------------------------------------------------------------------------
+# Demand model parameters
+#---------------------------------------------------------------------------
+# For exports, with respect to world GDP
+export_elast_demand:
+    decay: 0.01
+    
+# For final demand, with respect to the wage bill
+wage_elast_demand:
+    decay: 0.01
+    engel_prods: [agric, foodpr]
+    engel_asympt_elast: 0.7
+```
+
+### Linear goal program weights
+The Macro model solves a linear goal program for each year of the simulation. As described in the documentation for the [linear goal program](@ref lgp), the objective function contains weights, which are specified in the next block.
+
+The correspondence between the parameters and the model variables is:
+  * For category weights:
+    - `utilization` : ``\underline{w}_u``
+    - `final_demand_cov` : ``\underline{w}_F``
+    - `exports_cov` : ``\underline{w}_X``
+    - `imports_cov` : ``\underline{w}_M``
+  * For product and sector weights:
+    - `utilization` : ``\underline{\varphi}_u``
+    - `final_demand_cov` : ``\underline{\varphi}_F``
+    - `exports_cov` : ``\underline{\varphi}_X``
+```yaml
+#---------------------------------------------------------------------------
+# Paramters for implementing the (goal program) obective function
+#---------------------------------------------------------------------------
+objective-fcn:
+    # Category weights on deviations from normal levels
+    category_weights:
+        utilization: 8.00
+        final_demand_cov: 4.00
+        exports_cov: 2.00
+        imports_cov: 1.00
+    # Product & sector weights are defined by: φ * value share + (1 - φ) * 1/number of sectors or products; this is φ
+    product_sector_weight_factors:
+        utilization: 0.5
+        final_demand_cov: 0.5
+        exports_cov: 0.5
+```
 
 ## Linking to the supply-use table
 The next block is for specifying the structure of the supply-use table and how it relates to Macro.

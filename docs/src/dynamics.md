@@ -65,7 +65,7 @@ The normal level of imports of good ``k`` as a fraction of domestic demand (inte
 \overline{f}_k = \frac{M_k}{q_{d,k} + F_k + I_k}.
 ```
 
-## Wages and labor productivity
+## [Wages and labor productivity](@id dynamics-wages-labor-prod)
 The wage share ``\omega_i`` in sector ``i`` is defined as
 ```math
 \omega_i = \frac{\overline{W}_i}{g_i}.
@@ -132,7 +132,7 @@ Autonomous investment follows adaptive expectations, with an initial value ``\ga
 \gamma_{i0,+1} = \gamma_{i0} + \underline{\xi}\left(\gamma_i - \gamma_{i0}\right).
 ```
 
-## Taylor rule
+## [Taylor rule](@id dynamics-taylor-rule)
 The central bank lending rate is updated through a Taylor rule of the form
 ```math
 i_b = \underline{i}_{b0} + \underline{\rho}_Y\left(\hat{Y} - \hat{Y}^*\right) + \underline{\rho}_\pi\left(\pi_\text{GDP} - \underline{\pi}^*\right).
@@ -166,16 +166,12 @@ Substituting this expression into the equation for investment demand and solving
 ```
 The calibrated value for ``\underline{r}^*`` is found by setting ``\overline{z}_i = g_i`` and ``\gamma_i = \underline{\gamma}_0``. That value is then used to calculate capital-output ratios.
 
-## Normal export demand
+## [Export demand and final demand](@id dynamics-demand-fcns)
 The normal level of export demand grows with global GDP (or gross world product, GWP) to a goods-specific elasticity,
 ```math
 \overline{X}^\text{norm}_{k,+1} = \left(1 + \underline{\gamma}^\text{world}\right)^{\underline{\eta}^\text{exp}_k}\overline{X}^\text{norm}_k.
 ```
-
-## Normal final demand
-Normal final demand grows with the real wage bill to a goods-specific elasticity.
-
-The next-period nominal wage bill in sector ``i`` is calculated using variables and parameters introduced above,
+Normal final demand grows with the real wage bill to a goods-specific elasticity. The next-period nominal wage bill in sector ``i`` is calculated using variables and parameters introduced above,
 ```math
 \overline{W}_{i,+1} = \frac{1 + \hat{w}}{1 + \hat{\lambda}}\left(1 + \gamma_i\right)\overline{W}_i.
 ```

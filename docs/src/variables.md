@@ -76,15 +76,15 @@ Variables and parameters are labeled with the following dimensions:
 | Symbol                               | Definition                                                                                                                          |
 |:-------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------|
 | ``\underline{w}_u``                  | In the [linear goal program](@ref lgp), the category weight penalizing low utilization                                              |
-| ``\underline{w}_X``                  | In the [linear goal program](@ref lgp), the category weight penalizing departure from normal exports                                |
 | ``\underline{w}_F``                  | In the [linear goal program](@ref lgp), the category weight penalizing departure from normal final demand                           |
+| ``\underline{w}_X``                  | In the [linear goal program](@ref lgp), the category weight penalizing departure from normal exports                                |
 | ``\underline{w}_M``                  | In the [linear goal program](@ref lgp), the category weight penalizing imports over domestic supply                                 |
 | ``\underline{\sigma}^u_i``           | Sector weight for utilization for sector ``i``                                                                                      |
 | ``\underline{\sigma}^X_k``           | Product weight for exports for product ``k``                                                                                        |
 | ``\underline{\sigma}^F_k``           | Product weight for final consumption demand for product ``k``                                                                       |
 | ``\underline{\varphi}_u``            | For utilization sector weights, weight of value share vs. constant share                                                            |
-| ``\underline{\varphi}_X``            | For export sector weights, weight of value share vs. constant share                                                                 |
 | ``\underline{\varphi}_F``            | For final demand sector weights, weight of value share vs. constant share                                                           |
+| ``\underline{\varphi}_X``            | For export sector weights, weight of value share vs. constant share                                                                 |
 | ``\underline{S}_{ik}``               | Sector ``i``'s share of domestic production of product ``k``                                                                        |
 | ``\underline{D}_{ki}``               | Intermediate demand for product ``k`` per unit of output from sector ``i``                                                          |
 | ``\underline{d}_k``                  | Equal to ``\underline{d}_k = 1`` if the country does _not_ produce product ``k`` and  ``\underline{d}_k = 0`` if it does produce it |
