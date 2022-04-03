@@ -83,7 +83,7 @@ investment-fcn:
     # Starting point for the autonomous investment growth rate: also the initial target GDP growth rate for the Taylor rule
     init_neutral_growth: 0.060
     # Change in induced investment with a change in utilization
-    util_sens:  0.10
+    util_sens:  0.07
     # Change in induced investment with a change in the profit rate
     profit_sens: 0.05
     # Change in induced investment with a change in the central bank lending rate
