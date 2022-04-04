@@ -16,9 +16,12 @@ Total sales by businesses, net of intermediate payments, is "value added". In th
 [^1]: Specifically, it is GDP at market prices. Subtracting taxes on production activities and adding subsidies (so-called "indirect" taxes such as registration fees, rather than direct taxes and subsidies on products) gives GDP at factor cost.
 
 !!! tip "Social accounting matrices from the International Food Policy Research Institute"
-    Unlike GDP, which is updated at least each year, and sometimes more frequently, supply-use tables are calculated infrequently. In some countries the national statistical office may not report supply-use tables at all. If none is available, then the Macro model cannot be applied. However, by now a large number of countries do have at least one set of supply-use tables, whether reported specifically as a set of supply and use tables or as part of a social accounting matrix (SAM).
+    Unlike GDP, which is updated at least each year, and sometimes more frequently, supply-use tables are calculated infrequently. In some countries the national statistical office may not report supply-use tables at all. If none is available, then the Macro model cannot be applied. However, by now a large number of countries do have at least one set of supply-use tables, either explicitly labeled as supply and use tables or as part of a social accounting matrix (SAM).
     
     The International Food Policy Research Institute (IFPRI) has been assisting countries with constructing SAMs. They make the datasets and documentation available on the [IFPRI Dataverse](https://dataverse.harvard.edu/dataverse/IFPRI?q=&fq2=seriesName_s%3A%22Social+Accounting+Matrix+%28SAM%29%22&fq0=subtreePaths%3A%22%2F99%22&fq1=dvObjectType%3A%28dataverses+OR+datasets%29&types=dataverses%3Adatasets&sort=dateSort&order=).
+
+      * For more information on supply-use tables, see [_Handbook on Supply and Use Tables and Input-Output Tables with Extensions and Applications_](https://unstats.un.org/unsd/nationalaccount/docs/SUT_IOT_HB_Final_Cover.pdf) from UN Statistics
+      * For more information on SAMs, see [_Social accounting matrices and multiplier analysis: An introduction with exercises_](https://www.ifpri.org/publication/social-accounting-matrices-and-multiplier-analysis) from the International Food Policy Research Institute.
 
 ## Format of the supply-use table
 The supply-use table is the most flexible of the Macro model input files. That is because supply-use tables vary widely in their level of detail and layout. However, Macro does have some restrictions, so some processing is normally required:
@@ -46,11 +49,11 @@ See the Freedonia sample model for an example: instructions for downloading the 
 !!! info "Terminology for supply-use tables"
     There are standard short-hand terms used in economic modeling that are named more descriptively in most supply-use tables or social accounting matrices. For example, "investment" is usually reported as "gross fixed capital formation" (GFCF), to distinguish it from net fixed capital formation (net of depreciation) and additions to inventories. Here is a partial list:
 
-    | Term in the Macro model | Other terms you might see                         |
-    |:------------------------|:--------------------------------------------------|
-    | sectors                 | industries, activities                            |
-    | products                | commodities, goods and services                   |
-    | wages                   | wages and other compensation, labor (as a factor) |
-    | profits                 | gross operating surplus, surplus                  |
-    | investment              | gross fixed capital formation, GFCF               |
-    | stock changes           | changes in inventories                            |
+    | Term in the Macro model | Other terms you might see                               |
+    |:------------------------|:--------------------------------------------------------|
+    | sectors                 | industries, activities                                  |
+    | products                | commodities, goods and services                         |
+    | wages                   | wages and other compensation, labor (as a factor)       |
+    | profits                 | gross operating surplus, surplus, capital (as a factor) |
+    | investment              | gross fixed capital formation, GFCF                     |
+    | stock changes           | changes in inventories                                  |
