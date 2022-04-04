@@ -16,6 +16,7 @@ makedocs(
         ]
         "Using LEAP-Macro" => [
             "Configuration file" => "config.md"
+            "Supply-use table" => "sut.md"
             "External parameter files" => "params.md"
             "Output files" => "model-outputs.md"
             "Preparing a model" => "prep-model.md"
