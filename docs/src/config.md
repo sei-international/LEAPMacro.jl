@@ -45,6 +45,18 @@ clear-folders:
 report-diagnostics: true
 ```
 
+The next block has settings for running LEAP. To develop the Macro model independently of LEAP, set `run_leap` to `false`. To reduce the time spent while running LEAP and Macro together, set `hide_leap` to `true`. The `max_runs` parameter can be left at the default value; it is quite unusual to go that far before convergence. The `max_tolerance` is the percent difference in Macro model outputs between runs. The tolerance can be tightened (a smaller value) or loosened (a larger value) depending on the needs of the analysis.
+```yaml
+model:
+    # Set run_leap to "false" to do a single run of the Macro model without calling LEAP
+    run_leap: false
+    # Hide LEAP while running to (possibly) improve performance
+    hide_leap: false
+    # Maximum number of iterations before stopping (ignored if run_leap = false)
+    max_runs: 7
+    # Tolerance in percentage difference between values for indices between runs
+    max_tolerance: 1 # percent
+```
 The next block sets the start and end years for the simulation. These should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data. Also, the end year can be set closer to the start year, but Macro normally runs quickly, so that is rarely necessary for performance.
 ```yaml
 #---------------------------------------------------------------------------
@@ -56,10 +68,10 @@ years:
     end:    2040
 ```
 
-## Model parameters
+## [Model parameters](@id config-model-params)
 The next several blocks contain some of the [exogenous parameters](@ref exog-param-vars) for the Macro model.
 
-### Initial value adjustments
+### [Initial value adjustments](@id config-init-val-adj)
 The first block of model parameters contains adjustments that are applied to the initial values. This can help adjust if, for example, the economy was recovering from a recession in the first year. These values should normally be adjusted last when calibrating a model.
 ```yaml
 #---------------------------------------------------------------------------

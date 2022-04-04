@@ -9,5 +9,5 @@ The Macro model is run first, generating economic activity levels as inputs to L
 
 ![The LEAP-Macro process diagram](assets/images/LEAP-Macro-diagram.svg)
 
-The Macro model requires a [supply-use table](@ref prep-model-finding-sut) and some [parameter files](@ref params) as inputs, as well as a [configuration file](@ref config). The [LEAP-Macro link](@ref config-link-LEAP) is managed through the configuration file.
+The Macro model requires a [supply-use table](@ref sut) and some [parameter files](@ref params) as inputs, as well as a [configuration file](@ref config). The [LEAP-Macro link](@ref config-link-LEAP) is managed through the configuration file.
 

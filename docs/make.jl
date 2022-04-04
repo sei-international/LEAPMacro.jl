@@ -20,7 +20,6 @@ makedocs(
             "External parameter files" => "params.md"
             "Output files" => "model-outputs.md"
             "Preparing a model" => "prep-model.md"
-            "Troubleshooting" => "troubleshoot.md"
          ]
         "Technical details" => [
             "Variables" => "variables.md"

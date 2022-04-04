@@ -3,9 +3,25 @@ CurrentModule = LEAPMacro
 ```
 
 # [Preparing a model](@id prep-model)
-```@raw html
-<!-- TODO: Write Preparing a model file -->
-```
+Preparing a macroeconomic model is always complicated. The Macro model was built to reduce the complexities to some extent, but they cannot be entirely eliminated.
 
-## [Finding a supply-use table](@id prep-model-finding-sut)
-See [_Handbook on Supply and Use Tables and Input-Output Tables with Extensions and Applications_](https://unstats.un.org/unsd/nationalaccount/docs/SUT_IOT_HB_Final_Cover.pdf) from UN Statistics; A social accounting matrix (SAM) is also suitable: see [_Social accounting matrices and multiplier analysis: An introduction with exercises_](https://www.ifpri.org/publication/social-accounting-matrices-and-multiplier-analysis) from the International Food Policy Research Institute.
+With that in mind, here are some proposed steps. It is best to start with an existing [configuration file](@ref config):
+  1. Prepare the [supply-use table](@ref sut);
+  1. Estimate or assume [external parameters](@ref params);
+  1. Set the `run_leap` value to `false` in the configuration file [general settings](@ref config-general-settings);
+  1. Set the list of excluded `energy` sectors and products to an empty list `[]` in the [configuration file](@ref config-sut);
+  1. Set the [initial value adjustments](@ref config-init-val-adj) to zero;
+  1. Set to run for one year by changing the final year in the [configuration file](@ref config-general-settings);
+  1. Run the model and troubleshoot using the [`diagnostics` files](@ref model-outputs-diagnostics);
+  1. Decide on a reasonable number of years for calibration (e.g., based on availability of historical data or other forward-looking studies);
+  1. Adjust [model parameters](@ref config-model-params) systematically to calibrate and set them in the [configuration file](@ref config-general-settings);
+  1. If needed, adjust [initial values](@ref config-init-val-adj) to fine-tune the calibration.
+
+When calibrating, note the possible "sanity checks" listed in the page on [output files](@ref model-outputs).
+
+To link to LEAP:
+  1. Set the list of excluded `energy` sectors to ones relevant to the analysis;
+  1. Ensure that the link between the Macro model and LEAP is set correctly in the [configuration file](@ref config-link-LEAP);
+  1. Set `run_leap` to `true`;
+  1. Follow the instructions in the LEAP tutorial for running LEAP-Macro to place the files and scripts correctly;
+  1. Run the Macro model from LEAP.
