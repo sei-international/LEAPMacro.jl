@@ -227,8 +227,8 @@ objective-fcn:
         exports_cov: 0.5
 ```
 
-## Linking to the supply-use table
-The next block is for specifying the structure of the supply-use table and how it relates to Macro.
+## [Linking to the supply-use table](@id config-sut)
+The next block is for specifying the structure of the [supply-use table](@ref sut) and how it relates to Macro.
 
 The first section of this block specifies sectors and products that are excluded from the simulation. There are three categories:
 1. First, and most important, are energy sectors and products. Those are excluded from the Macro calculation because the energy sector analysis is handled on a physical basis within LEAP.
