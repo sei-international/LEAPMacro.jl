@@ -132,7 +132,7 @@ Autonomous investment follows adaptive expectations, with an initial value ``\ga
 \gamma_{i0,+1} = \gamma_{i0} + \underline{\xi}\left(\gamma_i - \gamma_{i0}\right).
 ```
 
-## [Taylor rule](@id dynamics-taylor-rule)
+## [Central bank lending rate](@id dynamics-taylor-rule)
 The central bank lending rate is updated through a Taylor rule of the form
 ```math
 i_b = \underline{i}_{b0} + \underline{\rho}_Y\left(\hat{Y} - \hat{Y}^*\right) + \underline{\rho}_\pi\left(\pi_\text{GDP} - \underline{\pi}^*\right).
