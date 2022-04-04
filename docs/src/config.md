@@ -11,7 +11,7 @@ Pages = ["config.md"]
 Depth = 3
 ```
 
-## General settings
+## [General settings](@id config-general-settings)
 
 The configuration file is made up of several blocks. The first block names a subfolder for storing outputs. It will be created inside an `outputs` folder. Different configuration files should be given different output folders so that different scenarios can be distinguished.
 ```yaml
@@ -172,7 +172,7 @@ wage-fcn:
     lab_constr_coeff: 0.5
 ```
 
-### Long-run demand elasticities
+### [Long-run demand elasticities](@id config-longrun-demand-elast)
 Initial values for demand elasticities for products with respect to global GDP (for exports) and the wage bill (for domestic final demand excluding investment) are specified in the [external parameter files](@ref params). The way that the elasticities enter into the model is described in the page on [model dynamics](@ref dynamics-demand-fcns).
 
 For products that are not labeled as "Engel products" (given by the parameter `engel-prods`):
