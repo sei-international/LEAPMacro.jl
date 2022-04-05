@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: papeloto/action-zip@v1
+        with:
+          files: test/
+          dest: docs/src/assets/demo.zip
       - uses: julia-actions/setup-julia@latest
         with:
           version: '1'
