@@ -8,7 +8,7 @@ on:
       - 'test/**'
 
 jobs:
-  build:
+  zip-demo:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,3 +16,7 @@ jobs:
         with:
           files: test/
           dest: demo.zip
+      - uses: actions/upload-artifact@v1
+        with:
+          name: demo-model
+          path: ${{ github.workspace }}/docs/src/assets/demo.zip
