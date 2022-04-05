@@ -7,7 +7,7 @@ makedocs(
         "Introduction" => "index.md"
         "Getting started" => [
             "Installation" => "installation.md"
-            "Quickstart" => "quickstart.md"
+            "Quick start" => "quickstart.md"
         ]
         "Model overview" => [
             "LEAP-Macro link" => "leap-macro-link.md"
