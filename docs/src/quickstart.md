@@ -6,14 +6,11 @@ CurrentModule = LEAPMacro
 
 This documentation explains how to quickly run Macro without linking it to LEAP. To learn how to run Macro with LEAP, see the LEAP exercise for the LEAP-Macro plugin available to registered users on the [LEAP](https://leap.sei.org/) website.
 
-The quickest way to get started with Macro is by running the "Freedonia" sample model that is part of the GitHub distribution.
-```@raw html
-<p>First, <a href="https://downgit.github.io/#/home?url=https://github.com/sei-international/LEAPMacro/tree/main/test&rootDirectory=false" target="_blank">Download the demonstration files</a> as a zip file from GitHub and save it to the folder of your choice. (Clicking on the link will open a new window, where the zip file can be downloaded.)</p>
-```
-Next:
+The quickest way to get started with Macro is by running the "Freedonia" sample model:
+1. Download the [demonstration files](assets/demo.zip) as a zip file and save it to the folder of your choice
 1. Unzip the `test.zip` file
-2. Go the folder where you unzipped it (it will have a file in it named `LEAPMacro_params.yml`)
-3. Start Julia and run the demo model:
+1. Go the folder where you unzipped it (it will have a file in it named `LEAPMacro_params.yml`)
+1. Start Julia and run the demo model:
 ```
 julia> import LEAPMacro
 
