@@ -1,5 +1,6 @@
 # LEAPMacro
 
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sei-international.github.io/NemoMod.jl/stable)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://sei-international.github.io/LEAPMacro/dev)
 
 LEAP-Macro is an economic extension, the **Macro** model, to the Low Emissions Analysis Platform, [LEAP](https://leap.sei.org/).
