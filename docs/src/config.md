@@ -11,6 +11,7 @@ Pages = ["config.md"]
 Depth = 3
 ```
 
+
 ## [General settings](@id config-general-settings)
 
 The configuration file is made up of several blocks. The first block names a subfolder for storing outputs. It will be created inside an `outputs` folder. Different configuration files should be given different output folders so that different scenarios can be distinguished.
