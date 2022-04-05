@@ -1,6 +1,8 @@
 # LEAPMacro
 
-# [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sei-international.github.io/LEAPMacro/stable)
+```@raw html
+<!-- [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sei-international.github.io/LEAPMacro/stable) -->
+```
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://sei-international.github.io/LEAPMacro/dev)
 
 LEAP-Macro is an economic extension -- the Macro model -- to an energy planning model, [LEAP](https://leap.sei.org/), the Low Emissions Analysis Platform. The Macro model, which is written in [Julia](https://julialang.org/), provides economic drivers to LEAP. LEAP provides energy-related investment expenditure to Macro. The two models are run iteratively until they converge, which normally happens within 2-3 cycles.
