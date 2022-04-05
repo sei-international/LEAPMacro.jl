@@ -23,7 +23,7 @@ end  # Documenter.Writers.HTMLWriter.analytics_script(tracking_id::AbstractStrin
 
 makedocs(
     sitename = "LEAP-Macro",
-    format = Documenter.HTML(analytics="G-515LD56GHH"),
+    format = Documenter.HTML(analytics="G-MRXNRDG14H"),
     pages = [
         "Introduction" => "index.md"
         "Getting started" => [
