@@ -59,10 +59,10 @@ Write a matrix to a CSV file.
 function write_matrix_to_csv(filename, array, rownames, colnames)
 	open(filename, "w") do io
         # Write header
-		write(io, string("", ',', join(colnames, ','), '\n'))
+		write(io, string("", ',', join(colnames, ','), "\r\n"))
         # Write each row
         for i in 1:length(rownames)
-            write(io, string(rownames[i], ',', join(array[i,:], ','), '\n'))
+            write(io, string(rownames[i], ',', join(array[i,:], ','), "\r\n"))
         end
 	end
 end
@@ -75,9 +75,9 @@ Write a vector to a CSV file.
 function write_vector_to_csv(filename, vector, varname, rownames)
 	open(filename, "w") do io
         # Write header
-		write(io, string("", ',', varname, '\n'))
+		write(io, string("", ',', varname, "\r\n"))
         for i in 1:length(rownames)
-            write(io, string(rownames[i], ',', vector[i], '\n'))
+            write(io, string(rownames[i], ',', vector[i], "\r\n"))
         end
 	end
 end

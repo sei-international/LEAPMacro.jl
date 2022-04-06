@@ -19,7 +19,7 @@ function output_var(params, values, filename, index, rowlabel, mode)
 		usevalue = values
 	end
 	open(joinpath(params["results_path"], string(filename, "_", index,".csv")), mode) do io
-		write(io, string(rowlabel, ',', usevalue, '\n'))
+		write(io, string(rowlabel, ',', usevalue, "\r\n"))
 	end
 end
 
