@@ -199,9 +199,9 @@ function parse_input_file(YAML_file::String; force = false)
 	qs = vec(sum(supply_table, dims=2))
 	g = vec(sum(supply_table, dims=1))
     M_equiv = transpose(supply_table) * Diagonal(1 ./ (qs .+ ϵ)) * M
-    # Remove all sectors for which there is negligible domestic production relative to imports
+    # Remove all sectors for which there is negligible domestic production relative to imports or where g = 0
 	θ = global_params["domestic_production_share_threshold"]/100
-	zero_domprod_ndxs = findall(x -> x < 0, (1 - θ) * g - θ * M_equiv)
+	zero_domprod_ndxs = findall(x -> x <= 0, min(g, (1 - θ) * g - θ * M_equiv))
     # Remove all products for which there is negligible total supply (domestic + imported) relative to total domestic output
 	zero_prod_ndxs = findall(x -> abs(x) < ϵ, (qs + M)/sum(g))
 
