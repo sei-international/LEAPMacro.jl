@@ -42,6 +42,50 @@ function GetJuliaPath()
 			End If
 		Next
 	End If
+	
+	' Then check for registry keys created during NEMO/Julia installation
+	on error resume next
+
+	' JuliaPath recorded during NEMO installation
+	If IsNull(GetJuliaPath) Then
+		GetJuliaPath = shell.RegRead("HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{4EEC991C-8D33-4773-84D3-7FE4162EEF82}\JuliaPath")
+	End If
+	
+	' Keys created during Julia installation (some common versions)
+	If IsNull(GetJuliaPath) Then
+		GetJuliaPath = shell.RegRead("HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Julia-1.7.2_is1\DisplayIcon")
+	End If
+
+	If IsNull(GetJuliaPath) Then
+		GetJuliaPath = shell.RegRead("HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Julia-1.7.2_is1\DisplayIcon")
+	End If
+
+	If IsNull(GetJuliaPath) Then
+		GetJuliaPath = shell.RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\Julia-1.7.2_is1\DisplayIcon")
+	End If
+
+	If IsNull(GetJuliaPath) Then
+		GetJuliaPath = shell.RegRead("HKCU\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Julia-1.7.2_is1\DisplayIcon")
+	End If
+
+	If IsNull(GetJuliaPath) Then
+		GetJuliaPath = shell.RegRead("HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\{054B4BC6-BD30-45C8-A623-8F5BA6EBD55D}_is1\DisplayIcon")
+	End If
+
+	If IsNull(GetJuliaPath) Then
+		GetJuliaPath = shell.RegRead("HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{054B4BC6-BD30-45C8-A623-8F5BA6EBD55D}_is1\DisplayIcon")
+	End If
+
+	If IsNull(GetJuliaPath) Then
+		GetJuliaPath = shell.RegRead("HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\{054B4BC6-BD30-45C8-A623-8F5BA6EBD55D}_is1\DisplayIcon")
+	End If
+
+	If IsNull(GetJuliaPath) Then
+		GetJuliaPath = shell.RegRead("HKCU\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{054B4BC6-BD30-45C8-A623-8F5BA6EBD55D}_is1\DisplayIcon")
+	End If
+
+	on error goto 0
+
 End Function
 
 Dim shell
@@ -56,7 +100,8 @@ juliapath = GetJuliaPath()
 
 ' If Julia found, then execute
 If IsNull(juliapath) Then
-	Wscript.echo "Could not locate the Julia executable in the PATH environment variable or in AppData\Local\Programs"
+	' Wscript.echo doesn't work when using LEAP 64-bit
+	msgbox("Could not locate the Julia executable. Try adding the path to the executable to the Windows environment variable named 'Path'.")
 Else
 	path = Chr(34) & juliapath & Chr(34) & " " & Chr(34) & macrodir & macrofile & Chr(34) & " "  & Chr(34)
 
