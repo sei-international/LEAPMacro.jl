@@ -2,7 +2,7 @@ module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
 export supplyusedata, inputoutputcalc, prices_init, parse_input_file, write_matrix_to_csv, write_vector_to_csv,
-       IOdata, PriceData, ExogParams
+       IOdata, PriceData, ExogParams, ϵ
 
 "Global variable to store the result of parsing the configuration file"
 global_params = nothing

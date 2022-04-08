@@ -635,7 +635,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_pd = prices.pd
 		param_pb = prices.pb
 		param_z = z
-		param_mfrac = value.(M) ./ (value.(qd) + value.(F) + value.(I_supply))
+		param_mfrac = value.(M) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
 
 		for i in 1:ns
 			set_normalized_coefficient(eq_io[i], u[i], -param_Pg * param_z[i])
