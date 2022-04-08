@@ -635,7 +635,14 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_pd = prices.pd
 		param_pb = prices.pb
 		param_z = z
-		param_mfrac = value.(M) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
+		tot_dom_dmd = value.(qd) + value.(F) + value.(I_supply)
+		for i in 1:np
+			@assert tot_dom_dmd[i] >= 0.0 "Total domestic demand should be non-negative"
+			# If the denominator is identically zero (or within ϵ) retain previous value
+			if tot_dom_dmd[i] > IOlib.ϵ
+				param_mfrac[i] = value.(M)[i] / tot_dom_dmd[i]
+			end
+		end
 
 		for i in 1:ns
 			set_normalized_coefficient(eq_io[i], u[i], -param_Pg * param_z[i])
