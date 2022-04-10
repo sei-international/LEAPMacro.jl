@@ -41,6 +41,11 @@ function outputtoleap(file::String, indices::Array, run::Int64)
 		error("Cannot connect to LEAP. Is it installed?")
 	end
 
+    # First make sure LEAP is ready
+    while LEAP.IsCalculating
+        sleep(5)
+    end
+
     # Set ActiveView
     LEAP.ActiveView = "Analysis"
 
