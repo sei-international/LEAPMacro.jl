@@ -187,9 +187,6 @@ function calculateleap(scen_name::String)
 	end
 	LEAP.Scenario(scen_name).ResultsShown = true
     LEAP.Calculate()
-    while LEAP.IsCalculating
-        sleep(5)
-    end
 	disconnectfromleap(LEAP)
 end
 
