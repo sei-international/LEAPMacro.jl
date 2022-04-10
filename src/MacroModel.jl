@@ -657,6 +657,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		end
 		fix(I_tot, param_I_tot)
 
+		if isempty(mdl)
+			@info "Linear goal program is empty"
+		end
 		if params["report-diagnostics"]
 			open(joinpath(params["diagnostics_path"], string("model_", run, "_", year, ".txt")), "w") do f
 				print(f, mdl)
@@ -689,6 +692,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
                writedlm(io, reshape(labels, 1, :), ',')
                writedlm(io, indices, ',')
            end;
+
+	# Release the model
+	mdl = nothing
 
     return indices
 end # ModelCalculations
