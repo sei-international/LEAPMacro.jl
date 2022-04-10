@@ -792,25 +792,27 @@ function runleapmacromodel(file::String, logfile::IOStream)
             LEAPfunctions.outputtoleap(file, indices, run)
 
             ## Run LEAP model
-            #------------status
-            @info "Running LEAP model..."
-			flush(logfile)
-            #------------status
-            LEAPfunctions.calculateleap(params["LEAP-info"]["result_scenario"])
-
-            ## Obtain energy investment data from LEAP
-            #------------status
-            @info "Obtaining LEAP results..."
-            #------------status
-            I_en = LEAPfunctions.energyinvestment(file, run)
-
-			if params["model"]["hide_leap"]
+			try
 				#------------status
-				@info "Restoring LEAP..."
+				@info "Running LEAP model..."
+				flush(logfile)
 				#------------status
-				LEAPfunctions.visible(true)
+				LEAPfunctions.calculateleap(params["LEAP-info"]["result_scenario"])
+
+				## Obtain energy investment data from LEAP
+				#------------status
+				@info "Obtaining LEAP results..."
+				#------------status
+				I_en = LEAPfunctions.energyinvestment(file, run)
+			finally
+				if params["model"]["hide_leap"]
+					#------------status
+					@info "Restoring LEAP..."
+					#------------status
+					LEAPfunctions.visible(true)
+				end
+				flush(logfile)
 			end
-			flush(logfile)
         end
 		#------------status
 		println("completed")
