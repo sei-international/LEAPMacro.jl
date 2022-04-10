@@ -164,6 +164,8 @@ function setbranchvar_expression(leapapplication::PyObject, branch::String, vari
     end
 
     if scenario != ""
+        println(leapapplication.ActiveView)
+        println(leapapplication.ActiveScenario)
         leapapplication.ActiveScenario = scenario
     end
 
