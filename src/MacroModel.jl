@@ -799,6 +799,7 @@ function runleapmacromodel(file::String, logfile::IOStream)
 				## Obtain energy investment data from LEAP
 				#------------status
 				@info "Obtaining LEAP results..."
+				flush(logfile)
 				#------------status
 				I_en = LEAPfunctions.energyinvestment(file, run)
 			finally
