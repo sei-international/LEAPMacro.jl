@@ -1,5 +1,5 @@
 module LEAPfunctions
-using DelimitedFiles, PyCall, DataFrames, CSV
+using DelimitedFiles, PyCall, DataFrames, CSV, Logging
 
 export visible, outputtoleap, calculateleap, energyinvestment
 
@@ -211,6 +211,8 @@ function energyinvestment(file::String, run::Int64)
 		error("Cannot connect to LEAP. Is it installed?")
 	end
 
+    @info "Starting energy investment calculations"
+
     # Set ActiveView and ActiveScenario
     LEAP.ActiveView = "Results"
     LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
@@ -221,7 +223,9 @@ function energyinvestment(file::String, run::Int64)
 
     n_energy = 0
     for b in LEAP.Branches
+        println(b.FullName)
         if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
+            println("=== HAS INVESTMENT COSTS ===")
             for y = base_year:final_year
                 I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
             end
@@ -230,6 +234,7 @@ function energyinvestment(file::String, run::Int64)
         end
     end
 
+    @info "Disconnecting from LEAP"
 	disconnectfromleap(LEAP)
 
     if n_energy > 0
@@ -237,7 +242,9 @@ function energyinvestment(file::String, run::Int64)
     else
         I_en .= 0.0
     end
+    @info string("Writing energy file I_en_",run,".csv...")
     writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), I_en, ',')
+    @info string("...finished writing energy file I_en_",run,".csv")
 
     return I_en
 end
