@@ -41,11 +41,6 @@ function outputtoleap(file::String, indices::Array, run::Int64)
 		error("Cannot connect to LEAP. Is it installed?")
 	end
 
-    # First make sure LEAP is ready
-    while LEAP.IsCalculating
-        sleep(5)
-    end
-
     # Set ActiveView
     LEAP.ActiveView = "Analysis"
 
@@ -227,7 +222,6 @@ function energyinvestment(file::String, run::Int64)
     n_energy = 0
     for b in LEAP.Branches
         if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
-            println(b.FullName)
             for y = base_year:final_year
                 I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
             end

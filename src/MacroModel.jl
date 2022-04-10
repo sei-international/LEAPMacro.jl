@@ -670,6 +670,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		end
         status = primal_status(mdl)
         @info "Simulating for $year: $status"
+		flush(logfile)
         previous_failed = status != MOI.FEASIBLE_POINT
         if previous_failed
 			finndx = length(LEAP_indices) + 2 # Adds column for year and for GDP
