@@ -670,7 +670,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		end
         status = primal_status(mdl)
         @info "Simulating for $year: $status"
-		println("Simulating for $year: $status")
         previous_failed = status != MOI.FEASIBLE_POINT
         if previous_failed
 			finndx = length(LEAP_indices) + 2 # Adds column for year and for GDP
@@ -763,6 +762,7 @@ function runleapmacromodel(file::String, logfile::IOStream)
 
         ## Compare run results
         if run >= 1
+			return
             tolerance = resultcomparison(params, run)
             if tolerance <= max_tolerance
                 @info @sprintf("Convergence in run number %d at %.2f%% ≤ %.2f%% target...", run, tolerance, max_tolerance)
