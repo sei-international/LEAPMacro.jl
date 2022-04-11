@@ -762,7 +762,6 @@ function runleapmacromodel(file::String, logfile::IOStream)
 
         ## Compare run results
         if run >= 1
-			return
             tolerance = resultcomparison(params, run)
             if tolerance <= max_tolerance
                 @info @sprintf("Convergence in run number %d at %.2f%% ≤ %.2f%% target...", run, tolerance, max_tolerance)
