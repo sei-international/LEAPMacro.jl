@@ -115,7 +115,7 @@ end  # connecttoleap
 Wrapper for PyCall's pydecref(obj)
 """
 function disconnectfromleap(LEAPPyObj)
-	pydecref(LEAPPyObj)
+	# pydecref(LEAPPyObj)
 end
 
 """
