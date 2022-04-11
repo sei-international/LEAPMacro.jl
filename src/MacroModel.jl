@@ -758,6 +758,9 @@ function runleapmacromodel(file::String, logfile::IOStream)
 		print("Macro model run ($run)...")
         @info "Macro model run ($run)..."
         #------------status
+		if run >= 1
+			return
+		end
         indices = ModelCalculations(file, I_en, run)
 
         ## Compare run results
