@@ -75,29 +75,25 @@ function outputtoleap(file::String, indices::Array, run::Int64)
 
     # send results to LEAP
     ndxrows = final_year - base_year + 1
-    try
-        for i = 1:size(branch_df, 1) # loops through each branch path
-            branch = branch_df[i,:branch]
-            variable = branch_df[i,:variable]
-            lasthistoricalyear = branch_df[i,:last_historical_year]
-            col = branch_df[i,:col]
-            start_ndx = (1+(col*ndxrows))
-            end_ndx = (col+1)*ndxrows
+    for i = 1:size(branch_df, 1) # loops through each branch path
+        branch = branch_df[i,:branch]
+        variable = branch_df[i,:variable]
+        lasthistoricalyear = branch_df[i,:last_historical_year]
+        col = branch_df[i,:col]
+        start_ndx = (1+(col*ndxrows))
+        end_ndx = (col+1)*ndxrows
 
-            if lasthistoricalyear > base_year
-                newexpression = interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
-            else
-                newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
-            end
-            setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
+        if lasthistoricalyear > base_year
+            newexpression = interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
+        else
+            newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
         end
-    catch
-        quitleap(LEAP)
-    finally
-        LEAP.SaveArea()
-        disconnectfromleap(LEAP)
+        setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
     end
+
+	disconnectfromleap(LEAP)
 end
+
 """
     connecttoleap()
 
@@ -120,19 +116,8 @@ end  # connecttoleap
 Wrapper for PyCall's pydecref(obj), after saving
 """
 function disconnectfromleap(LEAPPyObj)
+    LEAPPyObj.SaveArea()
 	pydecref(LEAPPyObj)
-end
-
-"""
-    quitleap(LEAPPyObj)
-
-Safely quit LEAP
-"""
-function quitleap(LEAPPyObj)
-    while !LEAPPyObj.CanQuit
-        sleep(5)
-    end
-    LEAPPyObj.Quit
 end
 
 """
@@ -202,15 +187,9 @@ function calculateleap(scen_name::String)
 	if ismissing(LEAP)
 		error("Cannot connect to LEAP. Is it installed?")
 	end
-    try
-        LEAP.Scenario(scen_name).ResultsShown = true
-        LEAP.Calculate()
-    catch
-        quitleap(LEAP)
-    finally
-        LEAP.SaveArea()
-	    disconnectfromleap(LEAP)
-    end
+	LEAP.Scenario(scen_name).ResultsShown = true
+    LEAP.Calculate()
+	disconnectfromleap(LEAP)
 end
 
 """
@@ -243,22 +222,17 @@ function energyinvestment(file::String, run::Int64)
     I_en_temp = Array{Float64}(undef, nrows)
 
     n_energy = 0
-    try
-        for b in LEAP.Branches
-            if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
-                for y = base_year:final_year
-                    I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
-                end
-                I_en = hcat(I_en, I_en_temp)
-                n_energy += 1
+    for b in LEAP.Branches
+        if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
+            for y = base_year:final_year
+                I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
             end
+            I_en = hcat(I_en, I_en_temp)
+            n_energy += 1
         end
-    catch
-        quitleap(LEAP)
-    finally
-        LEAP.SaveArea()
-    	disconnectfromleap(LEAP)
     end
+
+	disconnectfromleap(LEAP)
 
     if n_energy > 0
         I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
