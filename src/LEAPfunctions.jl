@@ -93,9 +93,10 @@ function outputtoleap(file::String, indices::Array, run::Int64)
         end
     catch
         quitleap(LEAP)
+    finally
+        LEAP.SaveArea()
+        disconnectfromleap(LEAP)
     end
-    LEAP.SaveArea()
-    disconnectfromleap(LEAP)
 end
 """
     connecttoleap()
@@ -206,9 +207,10 @@ function calculateleap(scen_name::String)
         LEAP.Calculate()
     catch
         quitleap(LEAP)
+    finally
+        LEAP.SaveArea()
+	    disconnectfromleap(LEAP)
     end
-    LEAP.SaveArea()
-    disconnectfromleap(LEAP)
 end
 
 """
@@ -253,9 +255,10 @@ function energyinvestment(file::String, run::Int64)
         end
     catch
         quitleap(LEAP)
+    finally
+        LEAP.SaveArea()
+    	disconnectfromleap(LEAP)
     end
-    LEAP.SaveArea()
-    disconnectfromleap(LEAP)
 
     if n_energy > 0
         I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
