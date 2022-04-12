@@ -1,5 +1,5 @@
 module LEAPfunctions
-using DelimitedFiles, PyCall, DataFrames, CSV
+using DelimitedFiles, PyCall, DataFrames, CSV, Dates
 
 export visible, outputtoleap, calculateleap, energyinvestment
 
@@ -102,6 +102,7 @@ Return a `PyObject` corresponding to the instance.
 If LEAP cannot be started, return `missing`
 """
 function connecttoleap()
+    println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 	try
 		return pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
 	catch
@@ -115,6 +116,7 @@ end  # connecttoleap
 Wrapper for PyCall's pydecref(obj)
 """
 function disconnectfromleap(LEAPPyObj)
+    println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 	pydecref(LEAPPyObj)
 end
 
