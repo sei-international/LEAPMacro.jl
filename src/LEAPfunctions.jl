@@ -192,6 +192,7 @@ function calculateleap(scen_name::String)
 	end
 	LEAP.Scenario(scen_name).ResultsShown = true
     LEAP.Calculate()
+    LEAP.SaveArea
 	disconnectfromleap(LEAP)
 end
 
