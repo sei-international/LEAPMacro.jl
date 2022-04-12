@@ -90,6 +90,9 @@ function outputtoleap(file::String, indices::Array, run::Int64)
         end
         setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
     end
+
+    LEAP.SaveArea
+
 	disconnectfromleap(LEAP)
 end
 
