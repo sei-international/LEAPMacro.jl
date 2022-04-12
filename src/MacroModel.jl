@@ -792,7 +792,9 @@ function runleapmacromodel(file::String, logfile::IOStream)
 			println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
             LEAPfunctions.outputtoleap(file, indices, run)
 			println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
-
+			# TESTING
+			flush(logfile)
+			return
             ## Run LEAP model
 			try
 				#------------status
