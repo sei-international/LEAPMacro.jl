@@ -192,7 +192,9 @@ function calculateleap(scen_name::String)
 	end
 	LEAP.Scenario(scen_name).ResultsShown = true
     LEAP.Calculate()
+    println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
     LEAP.SaveArea
+    println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 	disconnectfromleap(LEAP)
 end
 
