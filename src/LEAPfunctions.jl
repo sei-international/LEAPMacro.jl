@@ -1,5 +1,5 @@
 module LEAPfunctions
-using DelimitedFiles, PyCall, DataFrames, CSV, Dates
+using DelimitedFiles, PyCall, DataFrames, CSV
 
 export visible, outputtoleap, calculateleap, energyinvestment
 

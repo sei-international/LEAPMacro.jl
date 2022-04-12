@@ -1,5 +1,5 @@
 module MacroModel
-using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Printf, Suppressor, Dates
+using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Printf, Suppressor
 
 export runleapmacromodel
 
