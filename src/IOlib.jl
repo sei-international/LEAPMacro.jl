@@ -174,12 +174,12 @@ function excel_range_to_mat(df, str)
 end
 
 """
-    parse_input_file(YAML_file::String; force = false)
+    parse_input_file(YAML_file::String; force::Bool = false, include_energy_sectors::Bool = false)
 
 Read in YAML input file and convert ranges if necessary.
 Force: reset global_params
 """
-function parse_input_file(YAML_file::String; force = false)
+function parse_input_file(YAML_file::String; force::Bool = false, include_energy_sectors::Bool = false)
 	global global_params
 
 	if !force & !isnothing(global_params)
@@ -188,9 +188,14 @@ function parse_input_file(YAML_file::String; force = false)
 
     global_params = YAML.load_file(YAML_file)
 
-    global_params["results_path"] = joinpath("outputs/", global_params["output_folder"], "results")
-    global_params["calibration_path"] = joinpath("outputs/", global_params["output_folder"], "calibration")
-    global_params["diagnostics_path"] = joinpath("outputs/", global_params["output_folder"], "diagnostics")
+    if include_energy_sectors
+        output_folder_name = string(global_params["output_folder"], "_full")
+    else
+        output_folder_name = global_params["output_folder"]
+    end
+    global_params["results_path"] = joinpath("outputs/", output_folder_name, "results")
+    global_params["calibration_path"] = joinpath("outputs/", output_folder_name, "calibration")
+    global_params["diagnostics_path"] = joinpath("outputs/", output_folder_name, "diagnostics")
 
 	# First, check if any sectors or products should be excluded because production is zero (or effectively zero, for products)
 	SUT_df = CSV.read(joinpath("inputs",global_params["files"]["SUT"]), header=false, DataFrame)
@@ -211,11 +216,13 @@ function parse_input_file(YAML_file::String; force = false)
     product_codes = all_products[:code]
 
 	excluded_sectors = vcat(global_params["excluded_sectors"]["territorial_adjustment"],
-							global_params["excluded_sectors"]["others"],
-							global_params["excluded_sectors"]["energy"])
-	excluded_products = vcat(global_params["excluded_products"]["territorial_adjustment"],
-							 global_params["excluded_products"]["others"],
-							 global_params["excluded_products"]["energy"])
+							global_params["excluded_sectors"]["others"])
+    excluded_products = vcat(global_params["excluded_products"]["territorial_adjustment"],
+                            global_params["excluded_products"]["others"])
+   if !include_energy_sectors
+        excluded_sectors = vcat(excluded_sectors, global_params["excluded_sectors"]["energy"])
+        excluded_products = vcat(excluded_products, global_params["excluded_products"]["energy"])
+    end
 	# These are the indexes used for the Macro model
 	user_defined_sector_ndxs = findall(.!in(excluded_sectors).(sector_codes))
 	user_defined_product_ndxs = findall(.!in(excluded_products).(product_codes))

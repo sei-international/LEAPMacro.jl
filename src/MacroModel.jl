@@ -725,14 +725,14 @@ function resultcomparison(params, run::Int64)
 end
 
 """
-    runleapmacromodel(file::String, logile::IOStream)
+    runleapmacromodel(file::String, logile::IOStream, include_energy_sectors::Bool = false)
 
 Iteratively run the Macro model and LEAP until convergence.
 """
-function runleapmacromodel(file::String, logfile::IOStream)
+function runleapmacromodel(file::String, logfile::IOStream, include_energy_sectors::Bool = false)
 
     ## get base_year and final_year, and force fresh start with global_params
-    params = IOlib.parse_input_file(file, force = true)
+    params = IOlib.parse_input_file(file, force = true, include_energy_sectors = include_energy_sectors)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
     ntime = 1 + (final_year - base_year)
