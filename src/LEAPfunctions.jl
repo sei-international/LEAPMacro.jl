@@ -190,6 +190,7 @@ function calculateleap(scen_name::String)
 	if ismissing(LEAP)
 		error("Cannot connect to LEAP. Is it installed?")
 	end
+    LEAP.Scenarios.ResultsShown = false
 	LEAP.Scenario(scen_name).ResultsShown = true
     LEAP.Calculate()
     println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
