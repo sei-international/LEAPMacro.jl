@@ -91,7 +91,7 @@ function outputtoleap(file::String, indices::Array, run::Int64)
         setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
     end
 
-    LEAP.SaveArea
+    LEAP.SaveArea()
 
 	disconnectfromleap(LEAP)
 end
@@ -193,7 +193,7 @@ function calculateleap(scen_name::String)
 	LEAP.Scenario(scen_name).ResultsShown = true
     LEAP.Calculate()
     println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
-    LEAP.SaveArea
+    LEAP.SaveArea()
     println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 	disconnectfromleap(LEAP)
 end
