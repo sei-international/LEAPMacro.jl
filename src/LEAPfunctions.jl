@@ -90,7 +90,6 @@ function outputtoleap(file::String, indices::Array, run::Int64)
                 newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
             end
             setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
-            @assert false "TESTING"
         end
     catch
         quitleap(LEAP)
