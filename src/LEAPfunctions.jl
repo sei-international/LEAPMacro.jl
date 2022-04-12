@@ -91,8 +91,6 @@ function outputtoleap(file::String, indices::Array, run::Int64)
         setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
     end
 
-    LEAP.SaveArea()
-
 	disconnectfromleap(LEAP)
 end
 
@@ -115,9 +113,10 @@ end  # connecttoleap
 """
     disconnectfromleap(LEAPPyObj)
 
-Wrapper for PyCall's pydecref(obj)
+Wrapper for PyCall's pydecref(obj), after saving
 """
 function disconnectfromleap(LEAPPyObj)
+    LEAPPyObj.SaveArea()
 	pydecref(LEAPPyObj)
 end
 
@@ -190,7 +189,6 @@ function calculateleap(scen_name::String)
 	end
 	LEAP.Scenario(scen_name).ResultsShown = true
     LEAP.Calculate()
-    LEAP.SaveArea()
 	disconnectfromleap(LEAP)
 end
 
