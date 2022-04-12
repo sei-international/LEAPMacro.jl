@@ -662,7 +662,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 				print(f, mdl)
 			end
 		end
-		println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 		optim_output = @capture_out begin
 			optimize!(mdl)
 		end
@@ -759,9 +758,7 @@ function runleapmacromodel(file::String, logfile::IOStream)
 		print("Macro model run ($run)...")
         @info "Macro model run ($run)..."
         #------------status
-		println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
         indices = ModelCalculations(file, I_en, run)
-		println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 
         ## Compare run results
         if run >= 1
@@ -789,27 +786,21 @@ function runleapmacromodel(file::String, logfile::IOStream)
             #------------status
             @info "Sending Macro output to LEAP..."
             #------------status
-			println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
             LEAPfunctions.outputtoleap(file, indices, run)
-			println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
             ## Run LEAP model
 			try
 				#------------status
 				@info "Running LEAP model..."
 				flush(logfile)
 				#------------status
-				println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 				LEAPfunctions.calculateleap(params["LEAP-info"]["result_scenario"])
-				println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 
 				## Obtain energy investment data from LEAP
 				#------------status
 				@info "Obtaining LEAP results..."
 				flush(logfile)
 				#------------status
-				println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 				I_en = LEAPfunctions.energyinvestment(file, run)
-				println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 			finally
 				if params["model"]["hide_leap"]
 					#------------status

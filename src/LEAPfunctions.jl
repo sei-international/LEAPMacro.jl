@@ -105,7 +105,6 @@ Return a `PyObject` corresponding to the instance.
 If LEAP cannot be started, return `missing`
 """
 function connecttoleap()
-    println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 	try
 		return pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
 	catch
@@ -119,7 +118,6 @@ end  # connecttoleap
 Wrapper for PyCall's pydecref(obj)
 """
 function disconnectfromleap(LEAPPyObj)
-    println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 	pydecref(LEAPPyObj)
 end
 
@@ -192,9 +190,7 @@ function calculateleap(scen_name::String)
 	end
 	LEAP.Scenario(scen_name).ResultsShown = true
     LEAP.Calculate()
-    println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
     LEAP.SaveArea()
-    println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 	disconnectfromleap(LEAP)
 end
 

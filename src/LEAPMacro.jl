@@ -38,9 +38,7 @@ function run(params_file = nothing; dump_err_stack::Bool = false)
 	@info "Configuration file: '$params_file'"
 	exit_status = 0
 	try
-		println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 		MacroModel.runleapmacromodel(params_file, logfile)
-		println(string(now(), ": ", @__LINE__, ": ", basename(@__FILE__)))
 	catch err
 		exit_status = 1
 		@error err
