@@ -12,7 +12,7 @@ Copyright ©2019-2022 Stockholm Environment Institute
 
 module LEAPMacro
 
-using Logging, Dates
+using Logging, Dates, YAML
 
 include("./IOlib.jl")
 include("./LEAPfunctions.jl")
@@ -28,8 +28,10 @@ function run(params_file = nothing; dump_err_stack::Bool = false)
 	if isnothing(params_file)
 		params_file = "LEAPMacro_params.yml"
 	end
+	params = YAML.load_file(params_file)
+
 	# Enable logging
-	logfile = open("LEAPMacro_log.txt", "w+")
+	logfile = open(string("LEAPMacro_log_", params["output_folder"], ".txt"), "w+")
 	logger = ConsoleLogger(logfile)
 	global_logger(logger)
 	@info now()
