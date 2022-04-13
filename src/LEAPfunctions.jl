@@ -109,6 +109,8 @@ function connecttoleap()
         if !LEAPPyObj.ProgramStarted
             error("LEAP is not responding.")
             return missing
+        else
+            return LEAPPyObj
         end
 	catch
         error("Cannot connect to LEAP. Is it installed?")
