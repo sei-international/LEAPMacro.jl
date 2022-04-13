@@ -13,9 +13,6 @@ Hide or show LEAP by setting visibility.
 """
 function visible(state::Bool)
 	LEAP = connecttoleap()
-	if ismissing(LEAP)
-		error("Cannot connect to LEAP. Is it installed?")
-	end
 	LEAP.Visible = state
 	disconnectfromleap(LEAP)
 end
@@ -37,9 +34,6 @@ function outputtoleap(file::String, indices::Array, run::Int64)
 
     # connects program to LEAP
     LEAP = connecttoleap()
-	if ismissing(LEAP)
-		error("Cannot connect to LEAP. Is it installed?")
-	end
 
     # Set ActiveView
     LEAP.ActiveView = "Analysis"
@@ -75,23 +69,25 @@ function outputtoleap(file::String, indices::Array, run::Int64)
 
     # send results to LEAP
     ndxrows = final_year - base_year + 1
-    for i = 1:size(branch_df, 1) # loops through each branch path
-        branch = branch_df[i,:branch]
-        variable = branch_df[i,:variable]
-        lasthistoricalyear = branch_df[i,:last_historical_year]
-        col = branch_df[i,:col]
-        start_ndx = (1+(col*ndxrows))
-        end_ndx = (col+1)*ndxrows
+    try
+        for i = 1:size(branch_df, 1) # loops through each branch path
+            branch = branch_df[i,:branch]
+            variable = branch_df[i,:variable]
+            lasthistoricalyear = branch_df[i,:last_historical_year]
+            col = branch_df[i,:col]
+            start_ndx = (1+(col*ndxrows))
+            end_ndx = (col+1)*ndxrows
 
-        if lasthistoricalyear > base_year
-            newexpression = interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
-        else
-            newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
+            if lasthistoricalyear > base_year
+                newexpression = interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
+            else
+                newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
+            end
+            setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
         end
-        setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
+    finally
+	    disconnectfromleap(LEAP)
     end
-
-	disconnectfromleap(LEAP)
 end
 
 """
@@ -104,8 +100,18 @@ If LEAP cannot be started, return `missing`
 """
 function connecttoleap()
 	try
-		return pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
+		LEAPPyObj = pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
+        max_loops = 5
+        while !LEAPPyObj.ProgramStarted & max_loops > 0
+            sleep(5)
+            max_loops -= 1
+        end
+        if !LEAPPyObj.ProgramStarted
+            error("LEAP is not responding.")
+            return missing
+        end
 	catch
+        error("Cannot connect to LEAP. Is it installed?")
 		return missing
 	end
 end  # connecttoleap
@@ -184,12 +190,12 @@ Calculate the LEAP model, returning results for the specified scenario.
 function calculateleap(scen_name::String)
     # connects program to LEAP
     LEAP = connecttoleap()
-	if ismissing(LEAP)
-		error("Cannot connect to LEAP. Is it installed?")
-	end
-	LEAP.Scenario(scen_name).ResultsShown = true
-    LEAP.Calculate()
-	disconnectfromleap(LEAP)
+    try
+        LEAP.Scenario(scen_name).ResultsShown = true
+        LEAP.Calculate()
+    finally
+	    disconnectfromleap(LEAP)
+    end
 end
 
 """
@@ -209,9 +215,6 @@ function energyinvestment(file::String, run::Int64)
 
     # connects program to LEAP
     LEAP = connecttoleap()
-	if ismissing(LEAP)
-		error("Cannot connect to LEAP. Is it installed?")
-	end
 
     # Set ActiveView and ActiveScenario
     LEAP.ActiveView = "Results"
@@ -222,17 +225,19 @@ function energyinvestment(file::String, run::Int64)
     I_en_temp = Array{Float64}(undef, nrows)
 
     n_energy = 0
-    for b in LEAP.Branches
-        if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
-            for y = base_year:final_year
-                I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
+    try
+        for b in LEAP.Branches
+            if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
+                for y = base_year:final_year
+                    I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
+                end
+                I_en = hcat(I_en, I_en_temp)
+                n_energy += 1
             end
-            I_en = hcat(I_en, I_en_temp)
-            n_energy += 1
         end
+    finally
+    	disconnectfromleap(LEAP)
     end
-
-	disconnectfromleap(LEAP)
 
     if n_energy > 0
         I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
