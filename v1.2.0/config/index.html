@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Configuration file · LEAP-Macro</title><!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VFCCCS3YR4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-VFCCCS3YR4');
+</script><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">LEAP-Macro</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><span class="tocitem">Getting started</span><ul><li><a class="tocitem" href="../installation/">Installation</a></li><li><a class="tocitem" href="../quickstart/">Quick start</a></li></ul></li><li><span class="tocitem">Model overview</span><ul><li><a class="tocitem" href="../leap-macro-link/">LEAP-Macro link</a></li><li><a class="tocitem" href="../demand-led-growth/">About demand-led growth</a></li><li><a class="tocitem" href="../limitations/">Limitations of the model</a></li></ul></li><li><span class="tocitem">Using LEAP-Macro</span><ul><li class="is-active"><a class="tocitem" href>Configuration file</a><ul class="internal"><li><a class="tocitem" href="#config-general-settings"><span>General settings</span></a></li><li><a class="tocitem" href="#config-model-params"><span>Model parameters</span></a></li><li><a class="tocitem" href="#config-sut"><span>Linking to the supply-use table</span></a></li><li><a class="tocitem" href="#config-link-LEAP"><span>Linking Macro to LEAP</span></a></li></ul></li><li><a class="tocitem" href="../sut/">Supply-use table</a></li><li><a class="tocitem" href="../params/">External parameter files</a></li><li><a class="tocitem" href="../model-outputs/">Output files</a></li><li><a class="tocitem" href="../prep-model/">Preparing a model</a></li></ul></li><li><span class="tocitem">Technical details</span><ul><li><a class="tocitem" href="../variables/">Variables</a></li><li><a class="tocitem" href="../lgp/">Linear goal program</a></li><li><a class="tocitem" href="../dynamics/">Dynamics</a></li><li><a class="tocitem" href="../isolate-energy/">Isolating the energy sector</a></li><li><a class="tocitem" href="../process-sut/">Processing the supply-use table</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Using LEAP-Macro</a></li><li class="is-active"><a href>Configuration file</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Configuration file</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/sei-international/LEAPMacro/blob/master/docs/src/config.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="config"><a class="docs-heading-anchor" href="#config">Configuration file</a><a id="config-1"></a><a class="docs-heading-anchor-permalink" href="#config" title="Permalink"></a></h1><p>The configuration file is written in YAML syntax and has a <code>.yml</code> extension. By default, Macro assumes the configuration file will be called <code>LEAPMacro_params.yml</code>, but other names are possible, and in fact encouraged, because each configuration file corresponds to a different scenario.</p><ul><li><a href="#config">Configuration file</a></li><li class="no-marker"><ul><li><a href="#config-general-settings">General settings</a></li><li><a href="#config-model-params">Model parameters</a></li><li class="no-marker"><ul><li><a href="#config-init-val-adj">Initial value adjustments</a></li><li><a href="#Default-values-for-the-global-economy">Default values for the global economy</a></li><li><a href="#Taylor-rule-coefficients">Taylor rule coefficients</a></li><li><a href="#Investment-function-coefficients">Investment function coefficients</a></li><li><a href="#Employment-and-labor-productivity">Employment and labor productivity</a></li><li><a href="#config-longrun-demand-elast">Long-run demand elasticities</a></li><li><a href="#Linear-goal-program-weights">Linear goal program weights</a></li></ul></li><li><a href="#config-sut">Linking to the supply-use table</a></li><li><a href="#config-link-LEAP">Linking Macro to LEAP</a></li></ul></li></ul><h2 id="config-general-settings"><a class="docs-heading-anchor" href="#config-general-settings">General settings</a><a id="config-general-settings-1"></a><a class="docs-heading-anchor-permalink" href="#config-general-settings" title="Permalink"></a></h2><p>The configuration file is made up of several blocks. The first block names a subfolder for storing outputs. It will be created inside an <code>outputs</code> folder. Different configuration files should be given different output folders so that different scenarios can be distinguished.</p><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Folder inside the &quot;outputs&quot; folder to store calibration, results, and diagnostics
+#---------------------------------------------------------------------------
+output_folder: Baseline</code></pre><p>The next block specifies the input files. In many cases, these will be the same across a set of scenarios. However, it is possible that they might differ. For example, the supply-use table, given by the <code>SUT</code> parameter, could be drawn from different years for calibration purposes, and different <code>time_series</code> might distinguish different scenarios.</p><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Supply-use table and supplementary tables as CSV files
+#---------------------------------------------------------------------------
+# Macro model data files
+files:
+    SUT: Freedonia_SUT.csv
+    sector_info: sector_parameters.csv
+    product_info: product_parameters.csv
+    time_series: time_series.csv</code></pre><p>The following block says how to manage the output folders. Reporting diagnostics is optional. It is highly recommended while developing a model, but <code>report-diagnostics</code> can be set to <code>false</code> for a model in active use. Ordinarily it is useful to clear the folders with each run, since files will be overwritten. Sometimes during model development it is useful set <code>clear-folders</code> to <code>false</code> temporarily. Output files from one run can be renamed, so they are not overwritten in a subsequent run and the results compared.</p><pre><code class="language-yaml hljs"># Say whether to clear the contents of the results, calibration, and diagnostic folders before the run
+clear-folders:
+    results: true
+    calibration: true
+    diagnostics: true
+# Set to &quot;true&quot; to send results to the diagnostics folder, including dumps of the linear goal program
+report-diagnostics: true</code></pre><p>The next block has settings for running LEAP. To develop the Macro model independently of LEAP, set <code>run_leap</code> to <code>false</code>. To reduce the time spent while running LEAP and Macro together, set <code>hide_leap</code> to <code>true</code>. The <code>max_runs</code> parameter can be left at the default value; it is quite unusual to go that far before convergence. The <code>max_tolerance</code> is the percent difference in Macro model outputs between runs. The tolerance can be tightened (a smaller value) or loosened (a larger value) depending on the needs of the analysis.</p><pre><code class="language-yaml hljs">model:
+    # Set run_leap to &quot;false&quot; to do a single run of the Macro model without calling LEAP
+    run_leap: false
+    # Hide LEAP while running to (possibly) improve performance
+    hide_leap: false
+    # Maximum number of iterations before stopping (ignored if run_leap = false)
+    max_runs: 7
+    # Tolerance in percentage difference between values for indices between runs
+    max_tolerance: 1 # percent</code></pre><p>The next block sets the start and end years for the simulation. These should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data. Also, the end year can be set closer to the start year, but Macro normally runs quickly, so that is rarely necessary for performance.</p><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Start and end years for the simulation
+#   Note: the supply-use table above must be appropriate for the start year
+#---------------------------------------------------------------------------
+years:
+    start:  2010
+    end:    2040</code></pre><h2 id="config-model-params"><a class="docs-heading-anchor" href="#config-model-params">Model parameters</a><a id="config-model-params-1"></a><a class="docs-heading-anchor-permalink" href="#config-model-params" title="Permalink"></a></h2><p>The next several blocks contain some of the <a href="../variables/#exog-param-vars">exogenous parameters</a> for the Macro model.</p><h3 id="config-init-val-adj"><a class="docs-heading-anchor" href="#config-init-val-adj">Initial value adjustments</a><a id="config-init-val-adj-1"></a><a class="docs-heading-anchor-permalink" href="#config-init-val-adj" title="Permalink"></a></h3><p>The first block of model parameters contains adjustments that are applied to the initial values. This can help adjust if, for example, the economy was recovering from a recession in the first year. These values should normally be adjusted last when calibrating a model.</p><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Adjustment parameters for initializing variables
+#---------------------------------------------------------------------------
+# These factors are expressed as a fractional addition/subtraction to the estimate: set to zero to accept the default estimate
+calib:
+    # Calibration factor for estimating the first-period profit rate and capital productivity
+    nextper_inv_adj_factor: 0.00
+    # Adjustment factor for maximum export demand in the initial year
+    max_export_adj_factor: 0.00
+    # Adjustment factor for maximum household demand in the initial year
+    max_hh_dmd_adj_factor: 0.00
+    # Potential output relative to actual output in the base year
+    pot_output_adj_factor: 0.10</code></pre><h3 id="Default-values-for-the-global-economy"><a class="docs-heading-anchor" href="#Default-values-for-the-global-economy">Default values for the global economy</a><a id="Default-values-for-the-global-economy-1"></a><a class="docs-heading-anchor-permalink" href="#Default-values-for-the-global-economy" title="Permalink"></a></h3><p>The second block of model parameters provides default values for the global inflation rate and growth rate of global GDP (or gross world product, GWP). These are applied only if they are not specified for some year in the <a href="../params/#params">external parameter files</a>.</p><p>The correspondence between the parameters and the model variables is:</p><ul><li><code>infl_default</code> : <span>$\underline{\pi}_{w,k}$</span> (assumed to be the same for all products <span>$k$</span>)</li><li><code>gr_default</code> : <span>$\underline{\gamma}^\text{world}$</span></li></ul><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Global economy parameters
+#---------------------------------------------------------------------------
+global-params:
+    # Default world inflation rate
+    infl_default: 0.02
+    # Default world growth rate
+    gr_default: 0.015</code></pre><h3 id="Taylor-rule-coefficients"><a class="docs-heading-anchor" href="#Taylor-rule-coefficients">Taylor rule coefficients</a><a id="Taylor-rule-coefficients-1"></a><a class="docs-heading-anchor-permalink" href="#Taylor-rule-coefficients" title="Permalink"></a></h3><p>The next block contains the parameters for implementing a &quot;Taylor rule&quot;, which adjusts the central bank interest rate in response to inflation and economic growth. See the page on <a href="../dynamics/#dynamics-taylor-rule">model dynamics</a> for details.</p><p>The correspondence between the parameters and the model variables is:</p><ul><li><code>neutral_growth_band</code> : <span>$[\hat{\underline{Y}}^*_\text{min},\hat{\underline{Y}}^*_\text{max}]$</span></li><li><code>target_intrate</code> : <span>$\underline{i}_{b0}$</span></li><li><code>target_infl</code> : <span>$\underline{\pi}^*$</span></li><li><code>gr_resp</code> : <span>$\underline{\rho}_Y$</span></li><li><code>infl_resp</code> : <span>$\underline{\rho}_\pi$</span></li></ul><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Parameters for setting the central bank lending rate (Taylor rule)
+#---------------------------------------------------------------------------
+taylor-fcn:
+    # Allowable range for neutral growth
+    neutral_growth_band: [0.02, 0.06]
+    # Target interest rate (as a fraction, e.g., 2%/year = 0.02)
+    target_intrate: 0.02
+    # Target inflation rate
+    target_infl: 0.02
+    # Response of the central bank rate to a change in the GDP growth rate
+    gr_resp: 0.50
+    # Response of the central bank rate to a change in the inflation rate
+    infl_resp: 0.50</code></pre><h3 id="Investment-function-coefficients"><a class="docs-heading-anchor" href="#Investment-function-coefficients">Investment function coefficients</a><a id="Investment-function-coefficients-1"></a><a class="docs-heading-anchor-permalink" href="#Investment-function-coefficients" title="Permalink"></a></h3><p>The next block contains the parameters for the investment function. As explained in the page on <a href="../dynamics/#dynamics-inv-dmd">model dynamics</a>, the investment function calculates the demand for investment goods as a function of capacity utilization, profitability, and borrowing costs.</p><p>The correspondence between the parameters and the model variables is:</p><ul><li><code>init_neutral_growth</code>: Initial value of <span>$\gamma_{i0}$</span> for every sector <span>$i$</span></li><li><code>util_sens</code> : <span>$\underline{\alpha}_\text{util}$</span></li><li><code>profit_sens</code> : <span>$\underline{\alpha}_\text{profit}$</span></li><li><code>intrate_sens</code> : <span>$\underline{\alpha}_\text{bank}$</span></li><li><code>growth_adj</code> : <span>$\underline{\xi}$</span></li></ul><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Parameters for the investment function
+#---------------------------------------------------------------------------
+investment-fcn:
+    # Starting point for the autonomous investment growth rate: also the initial target GDP growth rate for the Taylor rule
+    init_neutral_growth: 0.060
+    # Change in induced investment with a change in utilization
+    util_sens:  0.07
+    # Change in induced investment with a change in the profit rate
+    profit_sens: 0.05
+    # Change in induced investment with a change in the central bank lending rate
+    intrate_sens: 0.20
+    # Rate of adjustment of the autonomous investment rate towards the actual investment rate
+    growth_adj: 0.10</code></pre><h3 id="Employment-and-labor-productivity"><a class="docs-heading-anchor" href="#Employment-and-labor-productivity">Employment and labor productivity</a><a id="Employment-and-labor-productivity-1"></a><a class="docs-heading-anchor-permalink" href="#Employment-and-labor-productivity" title="Permalink"></a></h3><p>The next block contains default parameters for the labor productivity function and for the function that determines the growth rate of the wage. See the page on <a href="../dynamics/#dynamics-wages-labor-prod">model dynamics</a> for details. The default productivity parameters are used if they are not specified for some year in the <a href="../params/#params">external parameter files</a>.</p><p>The correspondence between the parameters and the model variables is:</p><ul><li>For labor productivity:<ul><li><code>KV_coeff_default</code> : <span>$\underline{\alpha}_\text{KV}$</span></li><li><code>KV_intercept_default</code> : <span>$\underline{\beta}_\text{KV}$</span></li></ul></li><li>For the wage:<ul><li><code>infl_passthrough</code> : <span>$\underline{h}$</span></li><li><code>lab_constr_coeff</code> : <span>$\underline{k}$</span></li></ul></li></ul><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Parameters for the labor productivity and labor force model
+#---------------------------------------------------------------------------
+labor-prod-fcn:
+    # Default Kaldor-Verdoorn coefficient
+    KV_coeff_default: 0.50
+    # Default Kaldor-Verdoorn intercept
+    KV_intercept_default: 0.00
+wage-fcn:
+    # Inflation pass-through
+    infl_passthrough: 1.00
+    # Labor supply constraint coefficent
+    lab_constr_coeff: 0.5</code></pre><h3 id="config-longrun-demand-elast"><a class="docs-heading-anchor" href="#config-longrun-demand-elast">Long-run demand elasticities</a><a id="config-longrun-demand-elast-1"></a><a class="docs-heading-anchor-permalink" href="#config-longrun-demand-elast" title="Permalink"></a></h3><p>Initial values for demand elasticities for products with respect to global GDP (for exports) and the wage bill (for domestic final demand excluding investment) are specified in the <a href="../params/#params">external parameter files</a>. The way that the elasticities enter into the model is described in the page on <a href="../dynamics/#dynamics-demand-fcns">model dynamics</a>.</p><p>For products that are not labeled as &quot;Engel products&quot; (given by the parameter <code>engel-prods</code>):</p><ul><li>If the initial elasticity is less than one, then it remains at its starting level;</li><li>If the initial elasticity is greater than one, it asymptotically approaches a value of one over time;</li></ul><p>For products labeled as Engel products:</p><ul><li>The elasticity approaches the <code>engel_asympt_elast</code> over time.</li></ul><p>The rate of convergence on the long-run values is given by the <code>decay</code> parameter, with the possibility of a different rate of convergence for exports and final demand.</p><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Demand model parameters
+#---------------------------------------------------------------------------
+# For exports, with respect to world GDP
+export_elast_demand:
+    decay: 0.01
+    
+# For final demand, with respect to the wage bill
+wage_elast_demand:
+    decay: 0.01
+    engel_prods: [agric, foodpr]
+    engel_asympt_elast: 0.7</code></pre><h3 id="Linear-goal-program-weights"><a class="docs-heading-anchor" href="#Linear-goal-program-weights">Linear goal program weights</a><a id="Linear-goal-program-weights-1"></a><a class="docs-heading-anchor-permalink" href="#Linear-goal-program-weights" title="Permalink"></a></h3><p>The Macro model solves a linear goal program for each year of the simulation. As described in the documentation for the <a href="../lgp/#lgp">linear goal program</a>, the objective function contains weights, which are specified in the next block.</p><p>The correspondence between the parameters and the model variables is:</p><ul><li>For category weights:<ul><li><code>utilization</code> : <span>$\underline{w}_u$</span></li><li><code>final_demand_cov</code> : <span>$\underline{w}_F$</span></li><li><code>exports_cov</code> : <span>$\underline{w}_X$</span></li><li><code>imports_cov</code> : <span>$\underline{w}_M$</span></li></ul></li><li>For product and sector weights:<ul><li><code>utilization</code> : <span>$\underline{\varphi}_u$</span></li><li><code>final_demand_cov</code> : <span>$\underline{\varphi}_F$</span></li><li><code>exports_cov</code> : <span>$\underline{\varphi}_X$</span></li></ul></li></ul><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Paramters for implementing the (goal program) obective function
+#---------------------------------------------------------------------------
+objective-fcn:
+    # Category weights on deviations from normal levels
+    category_weights:
+        utilization: 8.00
+        final_demand_cov: 4.00
+        exports_cov: 2.00
+        imports_cov: 1.00
+    # Product &amp; sector weights are defined by: φ * value share + (1 - φ) * 1/number of sectors or products; this is φ
+    product_sector_weight_factors:
+        utilization: 0.5
+        final_demand_cov: 0.5
+        exports_cov: 0.5</code></pre><h2 id="config-sut"><a class="docs-heading-anchor" href="#config-sut">Linking to the supply-use table</a><a id="config-sut-1"></a><a class="docs-heading-anchor-permalink" href="#config-sut" title="Permalink"></a></h2><p>The next block is for specifying the structure of the <a href="../sut/#sut">supply-use table</a> and how it relates to Macro.</p><p>The first section of this block specifies sectors and products that are excluded from the simulation. There are three categories:</p><ol><li>First, and most important, are energy sectors and products. Those are excluded from the Macro calculation because the energy sector analysis is handled on a physical basis within LEAP.</li><li>Second are any territorial adjustments. Macro recalculates some parameters to take account of those entries. If none are present in the supply-use table, then an empty list <code>[]</code> can be entered for this parameter, as in the sample Freedonia model.</li><li>Finally are any other excluded sectors and products. For example, some tables may have a &quot;fictitious&quot; product or sector entry.</li></ol><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Structure of the supply-use table
+#---------------------------------------------------------------------------
+# NOTE: Both supply and use tables must have sectors labeling columns and products labeling rows
+excluded_sectors:
+    energy: [coal, petr, util]
+    territorial_adjustment: []
+    others: []
+
+excluded_products:
+    energy: [coal, petr, util]
+    territorial_adjustment: []
+    others: []</code></pre><p>Following that is a list of non-tradeable products and a domestic production share threshold. Imports and exports of products declared non-tradeable are maintained at zero within the Macro model. Furthermore, their prices are determined endogenously by the Macro model.</p><p>Other products may be almost entirely imported. That can sometimes cause difficulties. If the domestic share of the total of imports and domestic production falls below the threshold specified in the configuration file, then the corresponding sector is excluded during the simulation.</p><pre><code class="language-yaml hljs">non_tradeable_products: [constr, comm]
+
+# Domestic production as a % share of the total of imports and domestic production must exceed this value
+domestic_production_share_threshold: 1 # percent</code></pre><p>The following section specifies where to find the data needed by Macro within the supply-use table (a <code>CSV</code> file). Ranges are specified in standard spreadsheet form.</p><pre><code class="language-yaml hljs">SUT_ranges:
+    # Matrices arranged product (rows) x sector (columns)
+    supply_table: J3:W16
+    use_table: J21:W34
+    # Columns indexed by products -- groups of columns will be summed together
+    tot_supply: I3:I16
+    margins: D3:E16
+    taxes: F3:H16
+    imports: Y3:Y16
+    exports: Y21:Y34
+    final_demand: Z21:AB34
+    investment: AC21:AC34
+    stock_change: AD21:AD34
+    tot_intermediate_supply: X21:X34
+    # Rows indexed by sector -- groups of rows will be summed together
+    tot_intermediate_demand: J35:W35
+    wages: J37:W38</code></pre><h2 id="config-link-LEAP"><a class="docs-heading-anchor" href="#config-link-LEAP">Linking Macro to LEAP</a><a id="config-link-LEAP-1"></a><a class="docs-heading-anchor-permalink" href="#config-link-LEAP" title="Permalink"></a></h2><p>The next, and final, block specifies how LEAP and Macro are linked.</p><p>The first section says which LEAP scenario to use for inputs to the Macro model, the LEAP scenario to which Macro returns its results, and currency unit for investment costs, and a scaling factor. For example, if entries in the Macro model input files are in millions of US dollars, and investment costs are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).</p><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Parameters for running LEAP with the Macro model (LEAP-Macro)
+#---------------------------------------------------------------------------
+LEAP-info:
+    # This can be, e.g., a baseline scenario
+    input_scenario: Baseline
+    # This is the scenario from which LEAP results are drawn
+    result_scenario: Baseline
+    # Currency units for investment costs
+    inv_costs_unit: U.S. Dollar
+    # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
+    inv_costs_scale: 1.0e+6</code></pre><p>The remaining sections specify where in LEAP to put indices as calculated by Macro. The indices start at 1 in the <code>start</code> year specified earlier in the configuration file.</p><p>The first index, which is optional, is for GDP. It gives the name for the index to be reported in an <code>indices</code> output file. Then, it gives the LEAP branch and variable where the index should be inserted and, to cover cases where the last historical year is after the base year, the last historical year.</p><pre><code class="language-yaml hljs"># Association between LEAP and supply-use sectors
+GDP-branch:
+    name: GDP
+    branch: Key\GDP
+    variable: Activity Level
+    last_historical_year: 2010</code></pre><p>The second index, for employment, is also optional. It has the same structure as for GDP.</p><pre><code class="language-yaml hljs">Employment-branch:
+    name: Employment
+    branch: Key\Employment
+    variable: Activity Level
+    last_historical_year: 2010</code></pre><p>Finally, the <code>LEAP-sectors</code> parameter contains a list of indices. For each of these, Macro will sum up sector production across all of the sector codes listed. It will then calculate an index starting in the base year, and insert the index into the specified branches. In some cases, the same index might be applied to different branches. For example, if the supply-use table has a &quot;services&quot; sector but no transport, while LEAP has both a services and a commercial transport sector, the same index could be used to drive both.</p><p>While the GDP and Employment entries can be omitted from the file if they are not needed, to exclude the <code>LEAP-sectors</code> entry, simply set it to an empty list: <code>LEAP-sectors: []</code>.</p><pre><code class="language-yaml hljs">LEAP-sectors:
+ - {
+    name: Iron and Steel,
+    codes: [ironstl],
+    branches: [
+        {
+         branch: Demand\Industry\Iron and Steel,
+         variable: Activity Level,
+         last_historical_year: 2010
+        }
+    ]
+   }
+ - {
+    name: Other Industry,
+    codes: [foodpr, hvymach, othind],
+    branches: [
+        {
+         branch: Demand\Industry\Other Industry,
+         variable: Activity Level,
+         last_historical_year: 2010
+        }
+    ]
+   }
+   ...</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../limitations/">« Limitations of the model</a><a class="docs-footer-nextpage" href="../sut/">Supply-use table »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.15 on <span class="colophon-date" title="Thursday 14 April 2022 13:35">Thursday 14 April 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
