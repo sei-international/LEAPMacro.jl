@@ -84,7 +84,9 @@ function outputtoleap(file::String, indices::Array, run::Int64)
                 newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
             end
             setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
+
         end
+        LEAP.SaveArea()
     finally
 	    disconnectfromleap(LEAP)
     end
@@ -124,7 +126,6 @@ end  # connecttoleap
 Wrapper for PyCall's pydecref(obj), after saving
 """
 function disconnectfromleap(LEAPPyObj)
-    LEAPPyObj.SaveArea()
 	pydecref(LEAPPyObj)
 end
 
@@ -195,6 +196,7 @@ function calculateleap(scen_name::String)
     try
         LEAP.Scenario(scen_name).ResultsShown = true
         LEAP.Calculate()
+        LEAP.SaveArea()
     finally
 	    disconnectfromleap(LEAP)
     end
