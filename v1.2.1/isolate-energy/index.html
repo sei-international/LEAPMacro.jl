@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Isolating the energy sector · LEAP-Macro</title><!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VFCCCS3YR4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-VFCCCS3YR4');
+</script><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">LEAP-Macro</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><span class="tocitem">Getting started</span><ul><li><a class="tocitem" href="../installation/">Installation</a></li><li><a class="tocitem" href="../quickstart/">Quick start</a></li></ul></li><li><span class="tocitem">Model overview</span><ul><li><a class="tocitem" href="../leap-macro-link/">LEAP-Macro link</a></li><li><a class="tocitem" href="../demand-led-growth/">About demand-led growth</a></li><li><a class="tocitem" href="../limitations/">Limitations of the model</a></li></ul></li><li><span class="tocitem">Using LEAP-Macro</span><ul><li><a class="tocitem" href="../config/">Configuration file</a></li><li><a class="tocitem" href="../sut/">Supply-use table</a></li><li><a class="tocitem" href="../params/">External parameter files</a></li><li><a class="tocitem" href="../model-outputs/">Output files</a></li><li><a class="tocitem" href="../prep-model/">Preparing a model</a></li></ul></li><li><span class="tocitem">Technical details</span><ul><li><a class="tocitem" href="../variables/">Variables</a></li><li><a class="tocitem" href="../lgp/">Linear goal program</a></li><li><a class="tocitem" href="../dynamics/">Dynamics</a></li><li class="is-active"><a class="tocitem" href>Isolating the energy sector</a></li><li><a class="tocitem" href="../process-sut/">Processing the supply-use table</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Technical details</a></li><li class="is-active"><a href>Isolating the energy sector</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Isolating the energy sector</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/sei-international/LEAPMacro/blob/master/docs/src/isolate-energy.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="isolate-energy"><a class="docs-heading-anchor" href="#isolate-energy">Isolating the energy sector</a><a id="isolate-energy-1"></a><a class="docs-heading-anchor-permalink" href="#isolate-energy" title="Permalink"></a></h1><p>The Macro model uses an approximation to a full input-output system that includes both energy and non-energy sectors.</p><p>To explain the approximation, start with the full system written in matrix form. Total output is given by a vector <span>$\mathbf{g}$</span>, technical (inter-industry) coefficients by a matrix <span>$\mathbf{A}$</span>, a further set of technical coefficients matching final demand to different supplying sectors <span>$\mathbf{S}$</span>, combined household and government final demand <span>$\mathbf{F}$</span>, investment demand <span>$\mathbf{I}$</span>, exports <span>$\mathbf{X}$</span>, imports <span>$\mathbf{M}$</span>, and margins<sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup> <span>$\mathbf{m}$</span>. Separating into sub-matrices for energy (<span>$E$</span>) and non-energy (<span>$N$</span>) sectors, the system can be written</p><p class="math-container">\[\left(
+    \begin{array}{c}
+        \mathbf{g}_E \\
+        \mathbf{g}_N
+    \end{array}
+\right)
+=
+\left(
+    \begin{array}{c c}
+        \mathbf{A}_{EE} &amp; \mathbf{A}_{EN} \\
+        \mathbf{A}_{NE} &amp; \mathbf{A}_{NN}
+    \end{array}
+\right)
+\left(
+    \begin{array}{c}
+        \mathbf{g}_E \\
+        \mathbf{g}_N
+    \end{array}
+\right)
++
+\left(
+    \begin{array}{c c}
+        \mathbf{S}_{EE} &amp; \mathbf{0} \\
+        \mathbf{0} &amp; \mathbf{S}_{NN}
+    \end{array}
+\right)
+\left[
+    \left(
+        \begin{array}{c}
+            \mathbf{F}_E \\
+            \mathbf{F}_N
+        \end{array}
+    \right)
+    +
+    \left(
+        \begin{array}{c}
+            \mathbf{0} \\
+            \mathbf{I}_N
+        \end{array}
+    \right)
+    +
+    \left(
+        \begin{array}{c}
+            \mathbf{X}_E - \mathbf{M}_E \\
+            \mathbf{X}_N - \mathbf{M}_N
+        \end{array}
+    \right)
+    -
+    \left(
+        \begin{array}{c}
+            \mathbf{m}_E \\
+            \mathbf{m}_N
+        \end{array}
+    \right)
+\right].\]</p><p>Investment goods are produced only by the non-energy sector, so only one non-zero vector appears in the equations above, <span>$\mathbf{I}_N$</span>. However, demand can originate in either the energy or non-energy sectors. The sectoral source of demand is distinguished by superscripts,</p><p class="math-container">\[\mathbf{I}_N = \mathbf{I}^N_N + \mathbf{I}^E_N.\]</p><div class="admonition is-info"><header class="admonition-header">LEAP as an input-output system</header><div class="admonition-body"><p>The full system above can be written in terms of two linked systems. The balance for the energy system is</p><p class="math-container">\[\left(\mathbb{I} - \mathbf{A}_{EE}\right)\cdot\mathbf{g}_E = \mathbf{A}_{EN}\cdot\mathbf{g}_N +
+    \mathbf{S}_{EE}\cdot\left(\mathbf{F}_E + \mathbf{X}_E - \mathbf{M}_E - \mathbf{m}_E\right).\]</p><p>This is essentially the system that LEAP solves: it takes final demand for energy, adds it to demand for energy from non-energy economic sectors, and takes account of transfers of energy between energy production and transformation sub-sectors.</p></div></div><p>The non-energy system is</p><p class="math-container">\[\left(\mathbb{I} - \mathbf{A}_{NN}\right)\cdot\mathbf{g}_N = \mathbf{A}_{NE}\cdot\mathbf{g}_E +
+    \mathbf{S}_{NN}\cdot\left(\mathbf{F}_N + \mathbf{I}_N + \mathbf{X}_N - \mathbf{M}_N - \mathbf{m}_N\right).\]</p><p>In principle this can be solved together with the LEAP calculation in an iterative manner. That would give a solution to the full input-output system. However, it raises some complications.</p><p>The term <span>$\mathbf{A}_{NE}\cdot\mathbf{g}_E$</span> is demand for non-energy goods from the energy sector. But the energy sectors in LEAP, which should appear in <span>$\mathbf{g}_E$</span>, are different from the list of energy sectors in the national accounts, which appear in <span>$\mathbf{A}_{NE}$</span>. That means that LEAP&#39;s energy sectors must be mapped to the national accounts through a combination of aggregation and (possible) disaggregation. That mapping would have to change every time the energy sectors in LEAP are changed.</p><p>The mapping between the non-energy sectors in the Macro model and the non-energy drivers in LEAP is less problematic. Because LEAP is an energy planning model, the energy sector is developed in detail and the structure can change with the introduction of alternative energy scenarios. Other sectors are normally treated with much less detail and are less likely to change.</p><p>Fortunately, the <span>$\mathbf{A}_{NE}\cdot\mathbf{g}_E$</span> term can often be neglected. It is ncessary only when the energy sector has a high level of demand for domestic non-energy goods and services. That is most likely when energy is a major source of output and employment. For example, an oil exporter might provide professional services and manufactured parts to the oil sector, and these inputs might be important for employment and economic output. For most countries, however, the coupling will be small, and can be neglected.</p><div class="admonition is-info"><header class="admonition-header">Measuring the significance to the economy of the supply of non-energy goods and services to the energy sector</header><div class="admonition-body"><p>A measure of how significant non-energy supply to the energy sector is for the economy is calculated within the Macro model. It is reported when the flag to report diagnostics is set in the Macro configuration file: see the documentation on the <a href="../model-outputs/#model-outputs-diagnostics">diagnostics output files</a>.</p></div></div><p>The measure of the importance of energy sector demand for non-energy products is calculated by the following algorithm. First, a Leontief inverse matrix for the full inter-industry matrix, <span>$\mathbf{L}^\text{full}$</span>, is calculated,</p><p class="math-container">\[\mathbf{L}^\text{full} = \left[
+    \left(
+        \begin{array}{c c}
+            \mathbb{I}_{EE} &amp; \mathbf{0} \\
+            \mathbf{0} &amp; \mathbb{I}_{NN}
+        \end{array}
+    \right)
+    -
+    \left(
+        \begin{array}{c c}
+            \mathbf{A}_{EE} &amp; \mathbf{A}_{EN} \\
+            \mathbf{A}_{NE} &amp; \mathbf{A}_{NN}
+        \end{array}
+    \right)
+\right]^{-1}\]</p><p>Second, a &quot;reduced&quot; Leontief matrix <span>$\mathbf{L}^\text{red}$</span> is calculated, with <span>$\mathbf{A}_{NE}$</span> set to zero,</p><p class="math-container">\[\mathbf{L}^\text{red} = \left[
+    \left(
+        \begin{array}{c c}
+            \mathbb{I}_{EE} &amp; \mathbf{0} \\
+            \mathbf{0} &amp; \mathbb{I}_{NN}
+        \end{array}
+    \right)
+    -
+    \left(
+        \begin{array}{c c}
+            \mathbf{A}_{EE} &amp; \mathbf{A}_{EN} \\
+            \mathbf{0} &amp; \mathbf{A}_{NN}
+        \end{array}
+    \right)
+\right]^{-1}\]</p><p>Finally, the measure <span>$R$</span>, is calculated as</p><p class="math-container">\[R = 1 - \frac{\sum_{i=1}^{n_s}\sum_{j=1}^{n_s} L^\text{red}_{ij}}{\sum_{i=1}^{n_s}\sum_{j=1}^{n_s} L^\text{full}_{ij}}.\]</p><p>This measure provides an order of magnitude estimate of the relative change in economic output in the non-energy sectors when <span>$\mathbf{A}_{NE}$</span> is set to zero if demand is increased by the same amount for the output of all sectors. The economic interpretation of <span>$R$</span> is that it is the relative change in total non-energy output when energy sector demand for non-energy products is neglected.</p><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>Trade and transport margins correct for value assigned to sectors that merely convey goods. For example, it subtracts the value of trucked goods from the road transport sector (e.g., vegetables) and adds it to the corresponding goods-producing sector (e.g., agriculture). Margins sum to zero by construction.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../dynamics/">« Dynamics</a><a class="docs-footer-nextpage" href="../process-sut/">Processing the supply-use table »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.15 on <span class="colophon-date" title="Thursday 14 April 2022 15:07">Thursday 14 April 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
