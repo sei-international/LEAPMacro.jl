@@ -20,7 +20,7 @@ Macro model run (0)...completed
 ```
 If you see `Macro model run (0)...completed` followed by `0` then the model ran without any errors.
 
-All of the interesting output is in files. You should see a new file called `LEAPMacro_log.txt` and a new `outputs` folder.
+All of the interesting output is in files. You should see a new file called `LEAPMacro_log_Baseline.txt` and a new `outputs` folder.
 
 ## The log file
 The log file should show something like:

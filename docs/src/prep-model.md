@@ -13,7 +13,7 @@ With that in mind, here are some proposed steps. It is best to start with an exi
   1. Set the [initial value adjustments](@ref config-init-val-adj) to zero;
   1. Set to run for one year by changing the final year in the [configuration file](@ref config-general-settings);
   1. Run the model by calling `LEAPMacro.run()`, using the sample `LEAP-Macro-run.jl` file as a guide;
-  1. If there is an error, check the `LEAPMacro_log.txt` logfile for the error message;
+  1. If there is an error, check the `LEAPMacro_log_XXXX.txt` logfile for the error message, where `XXXX` is the name of the output folder;
   1. Troubleshoot using the [`diagnostics` files](@ref model-outputs-diagnostics);
   1. Decide on a reasonable number of years for calibration (e.g., based on availability of historical data or other forward-looking studies);
   1. Adjust [model parameters](@ref config-model-params) systematically to calibrate and set them in the [configuration file](@ref config-general-settings);

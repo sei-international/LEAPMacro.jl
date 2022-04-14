@@ -27,7 +27,7 @@ otuputs
 ...
 ```
 
-In addition, Macro writes a log file called `LEAPMacro_log.txt` to the main folder. It is overwritten each time Macro is run, so to save a log file, it should be renamed. However, normally it is not needed to save log files, because they are most useful when developing and debugging a model. If the model fails, then the error message will be written to the log file.
+In addition, Macro writes a log file called `LEAPMacro_log_XXXX.txt` to the main folder, where `XXXX` is the `output_folder` specified in the [configuration file](@ref config-general-settings). If the model fails, then the error message will be written to the log file.
 
 ## [The `diagnostics` folder](@id model-outputs-diagnostics)
 When the `report-diagnostics` parameter is set to `true`, a variety of diagnostic outputs are reported.
