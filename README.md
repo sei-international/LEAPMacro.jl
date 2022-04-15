@@ -1,7 +1,7 @@
 # LEAPMacro
 
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sei-international.github.io/LEAPMacro/stable)
-[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://sei-international.github.io/LEAPMacro/dev)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sei-international.github.io/LEAPMacro.jl/stable)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://sei-international.github.io/LEAPMacro.jl/dev)
 
 LEAP-Macro is an economic extension, the **Macro** model, to the Low Emissions Analysis Platform, [LEAP](https://leap.sei.org/).
 
@@ -11,7 +11,7 @@ Development of LEAP-Macro is led by the [Stockholm Environment Institute (SEI)](
 
 # Getting started with LEAP-Macro
 
-For instructions on installing and using LEAP-Macro, see the [documentation](https://sei-international.github.io/LEAPMacro/).
+For instructions on installing and using LEAP-Macro, see the [documentation](https://sei-international.github.io/LEAPMacro.jl/).
 
 # Contributing to LEAP-Macro
 
