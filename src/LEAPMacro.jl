@@ -19,16 +19,13 @@ include("./LEAPfunctions.jl")
 include("./MacroModel.jl")
 using .IOlib, .LEAPfunctions, .MacroModel
 
-function run(params_file = nothing; dump_err_stack::Bool = false, include_energy_sectors::Bool = false)
+function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stack::Bool = false, include_energy_sectors::Bool = false)
 	# Ensure needed folders exist
 	if !isdir("inputs")
 		throw(ErrorException("The \"inputs\" folder is needed, but does not exist"))
 	end
 
-	if isnothing(params_file)
-		params_file = "LEAPMacro_params.yml"
-	end
-	params = YAML.load_file(params_file)
+	params = YAML.load_file(config_file)
 
 	# Enable logging
 	if include_energy_sectors
@@ -40,12 +37,13 @@ function run(params_file = nothing; dump_err_stack::Bool = false, include_energy
 	logger = ConsoleLogger(logfile)
 	global_logger(logger)
 	@info now()
-	@info "Configuration file: '$params_file'"
+	@info "Configuration file: '$config_file'"
 	exit_status = 0
 	try
-		MacroModel.runleapmacromodel(params_file, logfile, include_energy_sectors)
+		MacroModel.runleapmacromodel(config_file, logfile, include_energy_sectors)
 	catch err
 		exit_status = 1
+		println(string("Macro exited with an error: Please check the log file '", logfilename,"'"))
 		@error err
 		if dump_err_stack
 			@error stacktrace(catch_backtrace())
