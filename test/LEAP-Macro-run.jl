@@ -4,6 +4,6 @@ curr_working_dir = pwd()
 cd(@__DIR__)
 
 println("Running Baseline...")
-LEAPMacro.run("LEAPMacro_params.yml", dump_err_stack = false)
+LEAPMacro.run()
 
 cd(curr_working_dir)
