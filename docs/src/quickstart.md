@@ -11,7 +11,7 @@ The quickest way to get started with Macro is by running the "Freedonia" sample 
 1. Unzip the `test.zip` file
 1. Go the folder where you unzipped it (it will have a file in it named `LEAPMacro_params.yml`)
 1. Start Julia and run the demo model:
-```
+```julia
 julia> import LEAPMacro
 
 julia> LEAPMacro.run()

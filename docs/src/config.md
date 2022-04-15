@@ -243,7 +243,7 @@ objective-fcn:
 The next block is for specifying the structure of the [supply-use table](@ref sut) and how it relates to Macro.
 
 The first section of this block specifies sectors and products that are excluded from the simulation. There are three categories:
-1. First, and most important, are energy sectors and products. Those are excluded from the Macro calculation because the energy sector analysis is handled on a physical basis within LEAP.
+1. First, and most important, are energy sectors and products. Those are excluded from the Macro calculation because the energy sector analysis is handled on a physical basis within LEAP, although they can optionally be included when [running the model](@ref running-macro) in stand-alone mode, without LEAP.
 2. Second are any territorial adjustments. Macro recalculates some parameters to take account of those entries. If none are present in the supply-use table, then an empty list `[]` can be entered for this parameter, as in the sample Freedonia model.
 3. Finally are any other excluded sectors and products. For example, some tables may have a "fictitious" product or sector entry.
 ```yaml

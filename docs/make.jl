@@ -39,6 +39,7 @@ makedocs(
             "Configuration file" => "config.md"
             "Supply-use table" => "sut.md"
             "External parameter files" => "params.md"
+            "Running the Macro model" => "running-macro.md"
             "Output files" => "model-outputs.md"
             "Preparing a model" => "prep-model.md"
          ]
