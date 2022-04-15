@@ -10,7 +10,7 @@ Once Julia is set up, start a Julia session and add the LEAP-Macro package (name
 ```julia
 julia> ]
 
-pkg> add https://github.com/sei-international/LEAPMacro
+pkg> add https://github.com/sei-international/LEAPMacro.jl
 ```
 
 This will install the latest LEAP-Macro code from GitHub. To update to the newest code after LEAP-Macro is installed:
