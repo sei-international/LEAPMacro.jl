@@ -54,5 +54,5 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/sei-international/LEAPMacro.git"
+    repo = "github.com/sei-international/LEAPMacro.jl.git"
 )
