@@ -231,7 +231,7 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
 
     global_params["energy-sector-indexes"] = []
     global_params["energy-product-indexes"] = []
-    if include_energy_sectors
+    if !include_energy_sectors
         user_defined_energy_sector_ndxs = findall(in(global_params["excluded_sectors"]["energy"]).(sector_codes))
         user_defined_energy_product_ndxs = findall(in(global_params["excluded_products"]["energy"]).(sector_codes))
         global_params["energy-sector-indexes"] = sort(setdiff(user_defined_energy_sector_ndxs, zero_domprod_ndxs))
