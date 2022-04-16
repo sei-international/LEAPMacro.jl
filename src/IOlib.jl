@@ -229,10 +229,14 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
 	global_params["sector-indexes"] = sort(setdiff(user_defined_sector_ndxs, zero_domprod_ndxs))
 	global_params["product-indexes"] = sort(setdiff(user_defined_product_ndxs, zero_prod_ndxs))
 
-	user_defined_energy_sector_ndxs = findall(in(global_params["excluded_sectors"]["energy"]).(sector_codes))
-	user_defined_energy_product_ndxs = findall(in(global_params["excluded_products"]["energy"]).(sector_codes))
-	global_params["energy-sector-indexes"] = sort(setdiff(user_defined_energy_sector_ndxs, zero_domprod_ndxs))
-	global_params["energy-product-indexes"] = sort(setdiff(user_defined_energy_product_ndxs, zero_prod_ndxs))
+    global_params["energy-sector-indexes"] = []
+    global_params["energy-product-indexes"] = []
+    if include_energy_sectors
+        user_defined_energy_sector_ndxs = findall(in(global_params["excluded_sectors"]["energy"]).(sector_codes))
+        user_defined_energy_product_ndxs = findall(in(global_params["excluded_products"]["energy"]).(sector_codes))
+        global_params["energy-sector-indexes"] = sort(setdiff(user_defined_energy_sector_ndxs, zero_domprod_ndxs))
+        global_params["energy-product-indexes"] = sort(setdiff(user_defined_energy_product_ndxs, zero_prod_ndxs))
+    end
 
 	global_params["terr-adj-sector-indexes"] = findall(in(global_params["excluded_sectors"]["territorial_adjustment"]).(sector_codes))
 	global_params["terr-adj-product-indexes"] = findall(in(global_params["excluded_products"]["territorial_adjustment"]).(sector_codes))
