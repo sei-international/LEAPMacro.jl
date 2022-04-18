@@ -21,7 +21,7 @@ With that in mind, here are some proposed steps. It is best to start with an exi
     When calibrating, the start and end years for the simulation should:
 
       * Include all of the years for which there is data;
-      * Extend far enough in the future to ensure the parameter set does not create instabilities.
+      * Extend far enough in the future to ensure the parameter set [does not create instabilities](@ref limitations-recovery-from-recession).
 
 !!! tip "Run sanity checks"
     When calibrating, note the "sanity checks" listed in the page on [output files](@ref model-outputs).
