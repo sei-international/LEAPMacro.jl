@@ -113,7 +113,7 @@ r_i = \frac{\Pi_i}{p_K\underline{v}_i}.
 ```
 Capital-output ratios are initialized using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).
 
-## Potential output
+## [Potential output](@id dynamics-potential-output)
 Net potential output in sector ``i`` (that is, accounting for depreciation) grows at a rate ``\gamma_i``. The value is given by an investment function that responss to utilization, profitability, and borrowing costs as proxied by the central bank lending rate. The model assumes no active disinvestment, so the net growth rate is not allowed to fall below (the negative of) the depreciation rate,
 ```math
 \gamma_i = \max\left[\gamma_{i0} + \underline{\alpha}_\text{util}\left(u_i - 1\right) +
