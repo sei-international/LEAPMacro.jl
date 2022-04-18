@@ -29,3 +29,12 @@ The Macro model calculates labor productivity and employment indices. They apply
 
 ## Non-energy strategic investment
 The LEAP-Macro model is designed to explore the macroeconomic implications of energy investment. A LEAP model will typically simulate different energy sector strategies, so LEAP-Macro captures the impact of strategic investment in the energy sector. In other sectors, investment is endogenous in the Macro model, based on profitability and capacity utilization. For that reason, the Macro model cannot represent strategic investment in non-energy sectors.
+
+## Recovery from recession
+[Demand-led growth models](@ref demand-led-growth) can become unstable. This is actually a positive feature of such models, and not a limitation, because actual economies can become unstable. Instabilities can result in either accelerating or decelerating growth due to reinforcing dynamics. A standard way to contain the instabilities is through "ceilings" that put a limit on expansion and "floors" that put a limit on recession (or depression).
+
+The Macro model assumes that the economy is mainly expanding. It therefore has multiple ceilings: capacity utilization must be less than one; [too rapid an expansion of labor demand raises labor costs](@ref dynamics-wages-labor-prod) and lowers profitability; and the [central bank reaction function](@ref dynamics-taylor-rule) raises interest rates as inflation and economic growth rates rise above their target levels, thereby raising borrowing costs. These then influence the [pace of investment](@ref dynamics-potential-output).
+
+The only floor in the model is a [lower bound of zero gross investment](@ref dynamics-potential-output), so the capital stock can only decline as fast as the depreciation rate. However, that is not a particularly robust floor, and a sufficiently large recession can deepen rapidly in the model. In reality, a deepening recession would most likely trigger a government response, but the model does not simulate that possibility.
+
+Given the limitations of the Macro model, if an instability arises when running the model, it is best to adjust parameters to remove the instability. At the same time, the appearance of an instability in the Macro model may indicate real-world challenges. The potential for instability can be explored through a separate economic analysis that focuses specifically on that question.
