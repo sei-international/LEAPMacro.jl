@@ -11,7 +11,7 @@ otuputs
     └───[diagnostics]
     └───results
 ```
-The `NAME` of the folder under `outputs` is specified by the `output_folder` parameter in the [configuration file](@ref config). The `diagnostics` folder is only present if the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config).
+The `NAME` of the folder under `outputs` is specified by the `output_folder` parameter in the [configuration file](@ref config-general-settings). The `diagnostics` folder is only present if the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config-general-settings).
 
 Different scenarios can be specified by different configuration files, with different `output_folder` parameters set. In that case, there will be several folders:
 ```
@@ -93,10 +93,10 @@ When running with LEAP, the Macro model may be run several times to converge on 
 ![Results folder contents](assets/images/results_folder_files.png)
 
 !!! warning "Results cover only non-energy sectors"
-    The Macro model reports results only for non-energy sectors. To include all sectors, in the [configuration file](@ref config), assign an empty set to the list of energy sectors and products by setting `energy: []` under both `excluded_sectors` and `excluded_products`. 
+    The Macro model reports results only for non-energy sectors. To include all sectors, set the option `include_energy_sectors = true` when [running the Macro model](@ref running-macro). 
 
 Two of the results files (with the run number indicated by `#`) contain multiple variables:
-  * `indices_#.csv`: The indices that are passed to LEAP, as specified in the [configuration file](@ref config)
+  * `indices_#.csv`: The indices that are passed to LEAP, as specified in the [configuration file](@ref config-link-LEAP)
   * `collected_variables_#.csv`: A set of key variables, such as the current accounts balance, GDP, and so on
 
 Macro is a [demand-driven model](@ref demand-led-growth), so economic growth is driven by final demand, exports net of imports, and investment. Total investment expenditure is reported in `collected_variables_#.csv`. Final demand, exports, and imports are reported by product:
@@ -110,7 +110,7 @@ Output by sector is reported as actual output and potential output (that is, out
 Real value added by sector -- that is, sector output less the cost of intermediate goods and services -- is also reported:
   * `real_value_added_#.csv`
 
-Investment rates are determined by the autonomous investment rate, the profit rate, capacity utilization, and the interest rate. The autonomous investment rate is an expectation of future growth, which gradually adjusts over time in response to realized growth (that is, the model features "adaptive expectations"). The interest rate is reported in `collected_variables_#.csv`, while the capacity utilization file was listed above. The other relevant files are:
+Investment rates are determined by the autonomous investment rate, the profit rate, capacity utilization, and the interest rate. The autonomous investment rate is an expectation of future growth, which gradually adjusts over time in response to realized growth (that is, [the model features "adaptive expectations"](@ref dynamics-potential-output)). The interest rate is reported in `collected_variables_#.csv`, while the capacity utilization file was listed above. The other relevant files are:
   * `profit_rate_#.csv`
   * `autonomous_investment_rate_#.csv`
 

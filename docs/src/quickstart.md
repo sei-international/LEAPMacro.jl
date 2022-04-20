@@ -8,9 +8,9 @@ This documentation explains how to quickly run Macro without linking it to LEAP.
 
 The quickest way to get started with Macro is by running the "Freedonia" sample model:
 1. Download the [demonstration files](assets/Macro.zip) as a zip file and save it to the folder of your choice
-1. Unzip the `test.zip` file
+1. Unzip the `Macro.zip` file
 1. Go the folder where you unzipped it (it will have a file in it named `LEAPMacro_params.yml`)
-1. Start Julia and run the demo model:
+1. Start Julia in that folder and run the demo model:
 ```julia
 julia> import LEAPMacro
 
@@ -47,7 +47,7 @@ The log file should show something like:
 [ Info: Simulating for 2040: FEASIBLE_POINT
 [ Info: 2022-03-25T11:55:57.797
 ```
-The time stamps at the start and end show that the model ran in 34 seconds. The repeated `FEASIBLE_POINT` for each year means that the model in each year yielded a feasible solution to the linear program.
+The time stamps at the start and end show that the model ran in 34 seconds. The repeated `FEASIBLE_POINT` for each year means that the model in each year yielded a feasible solution to the [linear goal program](@ref lgp).
 
 ## The outputs folder
 The `outputs` folder should have a subfolder called `Baseline`. Inside that folder are three other folders, with CSV files containing diagnostic information and the results of the model run:

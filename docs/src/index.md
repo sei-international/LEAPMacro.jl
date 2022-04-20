@@ -5,7 +5,7 @@ CurrentModule = LEAPMacro
 # [LEAP-Macro](@id introduction)
 This documentation explains how to use **LEAP-Macro** to build a linked energy-economic model.
 
-The energy system in a LEAP-Macro application is represented in [LEAP](https://leap.sei.org/), the Low Emissions Analysis Platform. The economy is represented in a macroeconomic model called **Macro**. This documentation will explain how to build a Macro model and link LEAP to Macro, but not how to build the LEAP model.
+The energy system in a LEAP-Macro application is represented in [LEAP](https://leap.sei.org/), the Low Emissions Analysis Platform. The economy is represented in a macroeconomic model called **Macro**. This documentation will explain how to build a Macro model and link LEAP to Macro. Building a LEAP model is too big a topic to cover here.
 
 !!! tip "Learning about LEAP"
     To learn how to build LEAP models, go to the [LEAP](https://leap.sei.org/) website to access [documentation](https://leap.sei.org/help/leap.htm#t=Concepts%2FIntroduction.htm) and other learning materials.

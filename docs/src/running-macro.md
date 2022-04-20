@@ -62,7 +62,7 @@ parsed_args = parse_commandline()
 LEAPMacro.run(parsed_args["config_file"], dump_err_stack = parsed_args["verbose_errors"], include_energy_sectors = parsed_args["include_energy_sectors"])
 ```
 
-## Running Macro from LEAP
+## [Running Macro from LEAP](@id running-macro-from-LEAP)
 The [Freedonia sample model](assets/Macro.zip) includes a Visual Basic script for running Macro from LEAP. Located in the `scripts` folder, and called `LEAPMacro_MacroModelCalc.vbs`, it can be placed in a LEAP Area folder and called from LEAP using LEAP's scripting feature. See the [quick start guide](@ref quick-start) for more information.
 
 The Visual Basic script assumes that the Macro model files are in a folder called `Macro` and it calls a Julia file called `LEAP-Macro-run.jl` in that folder. The version of the `LEAP-Macro-run.jl` file distributed with the Freedonia sample model looks like this:

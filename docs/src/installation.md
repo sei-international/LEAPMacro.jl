@@ -13,7 +13,7 @@ julia> ]
 pkg> add https://github.com/sei-international/LEAPMacro.jl
 ```
 
-This will install the latest LEAP-Macro code from GitHub. To update to the newest code after LEAP-Macro is installed:
+This will install the latest LEAP-Macro code from GitHub. To update to the newest code after LEAP-Macro is installed, use `update`:
 ```julia
 julia> ]
 

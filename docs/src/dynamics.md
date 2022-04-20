@@ -137,7 +137,7 @@ The central bank lending rate is updated through a Taylor rule of the form
 ```math
 i_b = \underline{i}_{b0} + \underline{\rho}_Y\left(\hat{Y} - \hat{Y}^*\right) + \underline{\rho}_\pi\left(\pi_\text{GDP} - \underline{\pi}^*\right).
 ```
-In Taylor’s original paper, the coefficients were ``i_{b0} = 2\%``/year, ``\underline{\rho}_Y = \underline{\rho}_\pi = 0.5``, but they can be set by the user in the [configuration file](@ref config), together with the target inflation rate ``\underline{\pi}^*`` and a permissible band for the target GDP growth rate, ``[\hat{\underline{Y}}^*_\text{min},\hat{\underline{Y}}^*_\text{max}]``.
+In Taylor’s original paper, the coefficients were ``i_{b0} = 2\%``/year, ``\underline{\rho}_Y = \underline{\rho}_\pi = 0.5``, but they can be set by the user in the [configuration file](@ref config-taylor-rule), together with the target inflation rate ``\underline{\pi}^*`` and a permissible band for the target GDP growth rate, ``[\hat{\underline{Y}}^*_\text{min},\hat{\underline{Y}}^*_\text{max}]``.
 
 The initial value for the target GDP growth rate is the initial value for the autonomous investment rate, ``\hat{Y}^* = \gamma_{i0}``. It then adjusts through adaptive expectations, with the same rate of adapation as for autonomous investment, while keeping within the user-specified band,
 ```math

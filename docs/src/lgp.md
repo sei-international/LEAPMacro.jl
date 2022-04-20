@@ -20,13 +20,13 @@ Specifically, the objective function is
      \underline{w}_M\sum_{k = 1}^{n_p} \left(\psi^+_k + \psi^-_k\right).
 ```
 !!! note "Sector and product specific weights vs. category weights"
-    In the objective function, there are four "category weights", ``\underline{w}_u``, ``\underline{w}_X``, ``\underline{w}_F``, and ``\underline{w}_M``. The category weights are specified in the [configuration file](@ref config).
+    In the objective function, there are four "category weights", ``\underline{w}_u``, ``\underline{w}_X``, ``\underline{w}_F``, and ``\underline{w}_M``. The category weights are specified in the [configuration file](@ref config-lgp-weights).
     
     In addition, there are sector or product-specific weights for for utilization, exports, and final demand, but not for imports. The reason is that while weights are needed to capture the relative importance of certain goods in output, the export basket, and household final demand, import flexibility simply allows for demand to be met when domestic production is insufficient, a consideration that does not privilege one sector over another.
     
-    The sector or product weights are given as weighted average of two possible weighting schemes: the base-year shares of the different sectors or products in output (for utilization), exports, or final demand, or equal weights. The allocations between the two possible weighting schemes are specified by the product and sector weight parameters ``\underline{\varphi}_u``, ``\underline{\varphi}_X``, and ``\underline{\varphi}_F``, which are also set in the [configuration file](@ref config).
+    The sector or product weights are given as weighted average of two possible weighting schemes: the base-year shares of the different sectors or products in output (for utilization), exports, or final demand, or equal weights. The allocations between the two possible weighting schemes are specified by the product and sector weight parameters ``\underline{\varphi}_u``, ``\underline{\varphi}_X``, and ``\underline{\varphi}_F``, which are also set in the [configuration file](@ref config-lgp-weights).
 
-When the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config), Macro will export the structure of the LGP for each year. The output looks something like this:
+When the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config-general-settings), Macro will export the structure of the LGP for each year. The output looks something like this:
 ```
 Min 1.7333333333333334 ugap[1] + 0.5333333333333333 ugap[2] + 0.6000000000000001 ugap[3] + ...
 Subject to

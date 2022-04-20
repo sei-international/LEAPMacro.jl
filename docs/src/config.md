@@ -34,7 +34,7 @@ files:
     time_series: time_series.csv
 ```
 
-The following block says how to manage the output folders. Reporting diagnostics is optional. It is highly recommended while developing a model, but `report-diagnostics` can be set to `false` for a model in active use. Ordinarily it is useful to clear the folders with each run, since files will be overwritten. Sometimes during model development it is useful set `clear-folders` to `false` temporarily. Output files from one run can be renamed, so they are not overwritten in a subsequent run and the results compared.
+The following block says how to manage the output folders. Reporting diagnostics is optional. It is highly recommended while developing a model, but `report-diagnostics` can be set to `false` for a model in active use. Ordinarily it is useful to clear the folders with each run, since files will be overwritten. Sometimes during model development it is useful set `clear-folders` to `false` temporarily. To compare results from different runs, make a copy of the output files so that they are not overwritten in the subsequent run.
 ```yaml
 # Say whether to clear the contents of the results, calibration, and diagnostic folders before the run
 clear-folders:
@@ -57,7 +57,7 @@ model:
     # Tolerance in percentage difference between values for indices between runs
     max_tolerance: 1 # percent
 ```
-The next block sets the start and end years for the simulation. These should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data. Also, the end year can be set closer to the start year, but Macro normally runs quickly, so that is rarely necessary for performance.
+The next block sets the start and end years for the simulation. These should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data. Also, the end year can be set closer to the start year, but Macro normally runs quickly once it is loaded, so that is rarely necessary for performance.
 ```yaml
 #---------------------------------------------------------------------------
 # Start and end years for the simulation
@@ -106,7 +106,7 @@ global-params:
     gr_default: 0.015
 ```
 
-### Taylor rule coefficients
+### [Taylor rule coefficients](@id config-taylor-rule)
 The next block contains the parameters for implementing a "Taylor rule", which adjusts the central bank interest rate in response to inflation and economic growth. See the page on [model dynamics](@ref dynamics-taylor-rule) for details.
 
 The correspondence between the parameters and the model variables is:
@@ -187,7 +187,7 @@ wage-fcn:
 ### [Long-run demand elasticities](@id config-longrun-demand-elast)
 Initial values for demand elasticities for products with respect to global GDP (for exports) and the wage bill (for domestic final demand excluding investment) are specified in the [external parameter files](@ref params). The way that the elasticities enter into the model is described in the page on [model dynamics](@ref dynamics-demand-fcns).
 
-For products that are not labeled as "Engel products" (given by the parameter `engel-prods`):
+For products that are not labeled as "Engel products"[^1] (given by the parameter `engel-prods`):
   * If the initial elasticity is less than one, then it remains at its starting level;
   * If the initial elasticity is greater than one, it asymptotically approaches a value of one over time;
 For products labeled as Engel products:
@@ -207,8 +207,9 @@ wage_elast_demand:
     engel_prods: [agric, foodpr]
     engel_asympt_elast: 0.7
 ```
+[^1]: [Engel's Law](https://www.investopedia.com/terms/e/engels-law.asp) states that as income rises, the proportion of income spent on food declines. That means that the income elasticity of expenditure on food is less than one.
 
-### Linear goal program weights
+### [Linear goal program weights](@id config-lgp-weights)
 The Macro model solves a linear goal program for each year of the simulation. As described in the documentation for the [linear goal program](@ref lgp), the objective function contains weights, which are specified in the next block.
 
 The correspondence between the parameters and the model variables is:

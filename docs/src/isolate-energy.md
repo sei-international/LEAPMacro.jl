@@ -63,10 +63,7 @@ To explain the approximation, start with the full system written in matrix form.
     \right)
 \right].
 ```
-Investment goods are produced only by the non-energy sector, so only one non-zero vector appears in the equations above, ``\mathbf{I}_N``. However, demand can originate in either the energy or non-energy sectors. The sectoral source of demand is distinguished by superscripts,
-```math
-\mathbf{I}_N = \mathbf{I}^N_N + \mathbf{I}^E_N.
-```
+Investment goods are produced only by the non-energy sector, so only one non-zero vector appears in the equations above, ``\mathbf{I}_N``. However, demand can originate in either the energy or non-energy sectors.
 
 !!! note "LEAP as an input-output system"
     The full system above can be written in terms of two linked systems. The balance for the energy system is
@@ -87,7 +84,7 @@ The term ``\mathbf{A}_{NE}\cdot\mathbf{g}_E`` is demand for non-energy goods fro
 
 The mapping between the non-energy sectors in the Macro model and the non-energy drivers in LEAP is less problematic. Because LEAP is an energy planning model, the energy sector is developed in detail and the structure can change with the introduction of alternative energy scenarios. Other sectors are normally treated with much less detail and are less likely to change.
 
-Fortunately, the ``\mathbf{A}_{NE}\cdot\mathbf{g}_E`` term can often be neglected. It is ncessary only when the energy sector has a high level of demand for domestic non-energy goods and services. That is most likely when energy is a major source of output and employment. For example, an oil exporter might provide professional services and manufactured parts to the oil sector, and these inputs might be important for employment and economic output. For most countries, however, the coupling will be small, and can be neglected.
+Fortunately, the ``\mathbf{A}_{NE}\cdot\mathbf{g}_E`` term can often be neglected. It is necessary only when the energy sector has a high level of demand for domestic non-energy goods and services. That is most likely when energy is a major source of output and employment. For example, an oil exporter might provide professional services and manufactured parts to the oil sector, and these inputs might be important for employment and economic output. For most countries, however, the coupling will be small, and can be neglected.
 
 !!! note "Measuring the significance to the economy of the supply of non-energy goods and services to the energy sector"
     A measure of how significant non-energy supply to the energy sector is for the economy is calculated within the Macro model. It is reported when the flag to report diagnostics is set in the Macro configuration file: see the documentation on the [diagnostics output files](@ref model-outputs-diagnostics).
