@@ -271,6 +271,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	param_pb = prices.pb
 	param_Mref = 2 * io.M # Allow for some extra slack -- this just sets a scale
 	param_mfrac = io.m_frac
+	param_max_util = ones(ns)
     #----------------------------------
     # Variables
     #----------------------------------
@@ -310,7 +311,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Constraints
     #----------------------------------
     # Sector constraints
-	@constraint(mdl, eq_util[i = 1:ns], u[i] + ugap[i] == 1.0)
+	@constraint(mdl, eq_util[i = 1:ns], u[i] + ugap[i] == param_max_util[i])
 	# Fundamental input-output equation
 	@constraint(mdl, eq_io[i = 1:ns], sum(io.S[i,j] * param_pb[j] * qs[j] for j in 1:np) - param_Pg * param_z[i] * u[i] == 0)
     # Product constraints
