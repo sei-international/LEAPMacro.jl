@@ -47,6 +47,9 @@ mutable struct ExogParams
 	βKV::Array{Float64,1} # Kaldor-Verdoorn intercept x year
 	xr::Array{Float64,1} # Nominal exchange rate x year
     δ::Array{Float64,1} # ns
+    I_addl::Array{Any,1} # Additional investment x year
+    exog_pot_output::Array{Any,2} # Exogenously specified potential output (converged to index)
+    exog_max_util::Array{Any,2} # Exogenous max capacity utilization (forced to lie between 0 and 1)
     export_elast_demand::Array{Any,1} # np x year
     wage_elast_demand::Array{Any,1} # np x year
 end
@@ -274,12 +277,16 @@ function get_var_params(param_file::String)
 					Array{Float64}(undef, 0), # βKV
 					Array{Float64}(undef, 0), # xr
                     Array{Float64}(undef, 0), # δ
+                    Array{Any}(undef, 0), # I_addl
+                    Array{Any}(undef, 0, 0), # exog_pot_output
+                    Array{Any}(undef, 0, 0), # exog_max_util
                     [], # export_elast_demand
                     []) # wage_elast_demand
 
     params = parse_input_file(param_file)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
+    nyears = final_year - base_year + 1
     sec_ndxs = params["sector-indexes"]
     prod_ndxs = params["product-indexes"]
 
@@ -289,6 +296,23 @@ function get_var_params(param_file::String)
     time_series = CSV.read(joinpath("inputs",params["files"]["time_series"]), DataFrame)
     prod_codes = product_info[prod_ndxs,:code]
 
+    # Optional files
+    if !isnothing(params["exog-files"]["investment"]) && isfile(joinpath("inputs",params["exog-files"]["investment"]))
+        exog_investment = CSV.read(joinpath("inputs",params["exog-files"]["investment"]), DataFrame)
+    else
+        exog_investment = nothing
+    end
+    if !isnothing(params["exog-files"]["pot_output"]) && isfile(joinpath("inputs",params["exog-files"]["pot_output"]))
+        exog_pot_output = CSV.read(joinpath("inputs",params["exog-files"]["pot_output"]), DataFrame)
+    else
+        exog_pot_output = nothing
+    end
+    if !isnothing(params["exog-files"]["max_util"]) && isfile(joinpath("inputs",params["exog-files"]["max_util"]))
+        exog_max_util = CSV.read(joinpath("inputs",params["exog-files"]["max_util"]), DataFrame)
+    else
+        exog_max_util = nothing
+    end
+    
     #--------------------------------------------------------------------------------------
     # Sector-specific
     #--------------------------------------------------------------------------------------
@@ -399,6 +423,23 @@ function get_var_params(param_file::String)
 
         wage_elast_demand_temp = wage_elast_demand0 - (1 - exp(-wage_elast_decay * deltat)) * (wage_elast_demand0 - asympt_wage_elast)
         push!(retval.wage_elast_demand, wage_elast_demand_temp)
+    end
+
+    #--------------------------------------------------------------------------------------
+    # Optional files
+    #--------------------------------------------------------------------------------------
+
+    retval.I_addl = zeros(nyears)
+    retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, length(sec_ndxs), nyears)
+    retval.exog_max_util = Array{Union{Missing, Float64}}(missing, length(sec_ndxs), nyears)
+
+    if !isnothing(exog_investment)
+        for row in eachrow(exog_investment)
+            data_year = floor(Int64, row[:year])
+            if data_year in base_year:final_year
+                retval.I_addl[data_year - base_year + 1] = row[:addl_investment]
+            end
+       end       
     end
 
     return retval

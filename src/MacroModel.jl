@@ -539,8 +539,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Non-energy investment, by sector and total
         I_ne_disag = z .* (γ + exog.δ) .* capital_output_ratio
         I_ne = sum(I_ne_disag)
-		# Combine with energy investment
-        I_total = I_ne + I_en[t]
+		# Combine with energy investment and any additional exogenous investment
+        I_total = I_ne + I_en[t] + exog.I_addl[t]
 		# Update autonomous investment term
         γ_0 = γ_0 + growth_adj * (γ - γ_0)
 
