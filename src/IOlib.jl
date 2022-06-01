@@ -321,82 +321,74 @@ function get_var_params(param_file::String)
     #--------------------------------------------------------------------------------------
     # Time series
     #--------------------------------------------------------------------------------------
+    start_year = floor(Int64, time_series[1,:year])
+    end_year = start_year + length(time_series[!,:year]) - 1
+
     # World inflation rate (apply to world prices only, others induced)
     world_infl_temp = time_series[!,:world_infl_rate]
     world_infl_default = params["global-params"]["infl_default"]
-    world_infl_start = floor(Int64, time_series[1,:year])
-    world_infl_end = world_infl_start + length(world_infl_temp) - 1
 
     # World GDP growth rate (including historical, for calibration)
     world_grs_temp = time_series[!,:world_gr]
     world_grs_default = params["global-params"]["gr_default"]
-    world_grs_start = floor(Int64, time_series[1,:year])
-    world_grs_end = world_grs_start + length(world_grs_temp) - 1
 
 	# Working age growth rate (No default -- must provide all values for specified time period)
     working_age_grs_temp = time_series[!,:working_age_gr]
-    working_age_grs_start = floor(Int64, time_series[1,:year])
-    working_age_grs_end = working_age_grs_start + length(working_age_grs_temp) - 1
 
 	# Exchange rate (No default -- must provide all values for specified time period)
     xr_temp = time_series[!,:exchange_rate]
-    xr_start = floor(Int64, time_series[1,:year])
-    xr_end = xr_start + length(xr_temp) - 1
 
     # Kaldor-Verdoorn parameters
     αKV_temp = time_series[!,:KV_coeff]
     αKV_default = params["labor-prod-fcn"]["KV_coeff_default"]
-    αKV_start = floor(Int64, time_series[1,:year])
-    αKV_end = αKV_start + length(αKV_temp) - 1
 
 	βKV_temp = time_series[!,:KV_intercept]
     βKV_default = params["labor-prod-fcn"]["KV_intercept_default"]
-    βKV_start = floor(Int64, time_series[1,:year])
-    βKV_end = βKV_start + length(βKV_temp) - 1
+
     #--------------------------------------------------------------------------------------
     # Fill in by looping over years
     #--------------------------------------------------------------------------------------
+    # TODO: Get rid of redundancies. Also check if there are missing values.
     for year in base_year:final_year
-        # creates world inflation rate array for use in the model, using model years
-        if year in world_infl_start:world_infl_end
-            push!(retval.πw, world_infl_temp[year - world_infl_start + 1])
+        if year in start_year:end_year
+            year_ndx = year - start_year + 1
+            # These have no defaults: check first
+            if !ismissing(working_age_grs_temp[year_ndx])
+                push!(retval.working_age_grs, working_age_grs_temp[year_ndx])
+            else
+                error_string = "Value for working age growth rate missing in year " * string(year) * ", with no default"
+                throw(MissingException(error_string))
+            end
+            if !ismissing(xr_temp[year_ndx])
+                push!(retval.xr, xr_temp[year_ndx])
+            else
+                error_string = "Value for exchange rate missing in year " * string(year) * ", with no default"
+                throw(MissingException(error_string))
+            end
+            # These have defaults
+            if !ismissing(world_infl_temp[year_ndx])
+                push!(retval.πw, world_infl_temp[year_ndx])
+            else
+                push!(retval.πw, world_infl_default)
+            end
+            if !ismissing(world_grs_temp[year_ndx])
+                push!(retval.world_grs, world_grs_temp[year_ndx])
+            else
+                push!(retval.world_grs, world_grs_default)
+            end
+            if !ismissing(αKV_temp[year_ndx])
+                push!(retval.αKV, αKV_temp[year_ndx])
+            else
+                push!(retval.αKV, αKV_default)
+            end
+            if !ismissing(βKV_temp[year_ndx])
+                push!(retval.βKV, βKV_temp[year_ndx])
+            else
+                push!(retval.βKV, βKV_default)
+            end
         else
-            push!(retval.πw, world_infl_default)
-        end
-
-        # creates world growth rate array for use in the model, using model years
-        if year in world_grs_start:world_grs_end
-            push!(retval.world_grs, world_grs_temp[year - world_grs_start + 1])
-        else
-            push!(retval.world_grs, world_grs_default)
-        end
-
-		# creates working age growth rate array for use in the model, using model years
-        if year in working_age_grs_start:working_age_grs_end
-            push!(retval.working_age_grs, working_age_grs_temp[year - working_age_grs_start + 1])
-        else
-			error_string = "Year is not in range " * string(working_age_grs_start) * ":" * string(working_age_grs_end) * " for working age growth rates"
+			error_string = "Year " * string(year) * " is not in time series range " * string(start_year) * ":" * string(end_year)
             throw(DomainError(year, error_string))
-        end
-
-		# creates exchange rate array for use in the model, using model years
-        if year in xr_start:xr_end
-            push!(retval.xr, xr_temp[year - xr_start + 1])
-        else
-			error_string = "Year is not in range " * string(xr_start) * ":" * string(xr_end) * " for exchange rates"
-            throw(DomainError(year, error_string))
-        end
-
-		# fill in Kaldor-Verdoorn coefficient and intercept
-        if year in αKV_start:αKV_end
-            push!(retval.αKV, αKV_temp[year - αKV_start + 1])
-        else
-            push!(retval.αKV, αKV_default)
-        end
-		if year in βKV_start:βKV_end
-            push!(retval.βKV, βKV_temp[year - βKV_start + 1])
-        else
-            push!(retval.βKV, βKV_default)
         end
 
         deltat = max(0, year - base_year + 1) # Year past the end of calibration period
