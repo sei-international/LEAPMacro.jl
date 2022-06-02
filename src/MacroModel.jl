@@ -637,9 +637,14 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_pb = prices.pb
 		param_z = z
 		param_mfrac = (value.(M) + IOlib.ϵ * param_mfrac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
+		# Set maximum utilization in multiple steps
+		param_max_util = ones(ns)
+		max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[t,:])
+		param_max_util[max_util_ndxs] .= exog.exog_max_util[t,max_util_ndxs]
 
 		for i in 1:ns
 			set_normalized_coefficient(eq_io[i], u[i], -param_Pg * param_z[i])
+			set_normalized_rhs(eq_util[i], param_max_util[i])
 			for j in 1:np
 				set_normalized_coefficient(eq_io[i], qs[j], io.S[i,j] * param_pb[j])
 			end
@@ -677,6 +682,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
             indices[t,2:finndx] = fill(NaN, (finndx - 2) + 1)
         end
 
+		# TODO: Make sure everything gets assigned to the proper year
 		year += 1
 
     end

@@ -37,7 +37,7 @@ exog-files:
     investment: exog_invest.csv # Time series of exogenous investment demand, additional to that simulated by the model
     # For the next two files, only include sectors where the values are constrained; missing values will be unconstrained
     pot_output: ~ # Potential output (converted to an index): sectors label columns; years label rows
-    max_util: ~ # Maximum capacity utilization: sectors label columns; years label rows (must lie between 0 and 1)
+    max_util: exog_max_util.csv # Maximum capacity utilization: sectors label columns; years label rows (must lie between 0 and 1)
 
 #---------------------------------------------------------------------------
 # Start and end years for the simulation

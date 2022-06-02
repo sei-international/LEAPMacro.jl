@@ -298,19 +298,19 @@ function get_var_params(param_file::String)
 
     # Optional files
     if !isnothing(params["exog-files"]["investment"]) && isfile(joinpath("inputs",params["exog-files"]["investment"]))
-        exog_investment = CSV.read(joinpath("inputs",params["exog-files"]["investment"]), DataFrame)
+        exog_investment_df = CSV.read(joinpath("inputs",params["exog-files"]["investment"]), DataFrame)
     else
-        exog_investment = nothing
+        exog_investment_df = nothing
     end
     if !isnothing(params["exog-files"]["pot_output"]) && isfile(joinpath("inputs",params["exog-files"]["pot_output"]))
-        exog_pot_output = CSV.read(joinpath("inputs",params["exog-files"]["pot_output"]), DataFrame)
+        exog_pot_output_df = CSV.read(joinpath("inputs",params["exog-files"]["pot_output"]), DataFrame)
     else
-        exog_pot_output = nothing
+        exog_pot_output_df = nothing
     end
     if !isnothing(params["exog-files"]["max_util"]) && isfile(joinpath("inputs",params["exog-files"]["max_util"]))
-        exog_max_util = CSV.read(joinpath("inputs",params["exog-files"]["max_util"]), DataFrame)
+        exog_max_util_df = CSV.read(joinpath("inputs",params["exog-files"]["max_util"]), DataFrame)
     else
-        exog_max_util = nothing
+        exog_max_util_df = nothing
     end
     
     #--------------------------------------------------------------------------------------
@@ -372,7 +372,6 @@ function get_var_params(param_file::String)
     #--------------------------------------------------------------------------------------
     # Fill in by looping over years
     #--------------------------------------------------------------------------------------
-    # TODO: Get rid of redundancies. Also check if there are missing values.
     for year in base_year:final_year
         if year in start_year:end_year
             year_ndx = year - start_year + 1
@@ -430,16 +429,27 @@ function get_var_params(param_file::String)
     #--------------------------------------------------------------------------------------
 
     retval.I_addl = zeros(nyears)
-    retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, length(sec_ndxs), nyears)
-    retval.exog_max_util = Array{Union{Missing, Float64}}(missing, length(sec_ndxs), nyears)
+    retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
+    retval.exog_max_util = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
 
-    if !isnothing(exog_investment)
-        for row in eachrow(exog_investment)
+    if !isnothing(exog_investment_df)
+        for row in eachrow(exog_investment_df)
             data_year = floor(Int64, row[:year])
             if data_year in base_year:final_year
                 retval.I_addl[data_year - base_year + 1] = row[:addl_investment]
             end
-       end       
+       end
+    end
+
+    if !isnothing(exog_max_util_df)
+        # Using findfirst: there should only be one entry per code
+        data_sec_ndxs = [findfirst(params["included_sector_codes"] .== sec_code) for sec_code in names(exog_max_util_df)[2:end]]
+        for row in eachrow(exog_max_util_df)
+            data_year = floor(Int64, row[:year])
+            if data_year in base_year:final_year
+                retval.exog_max_util[data_year - base_year + 1, data_sec_ndxs] .= Vector(row[2:end])
+            end
+       end
     end
 
     return retval
