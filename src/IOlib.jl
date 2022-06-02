@@ -297,20 +297,20 @@ function get_var_params(param_file::String)
     prod_codes = product_info[prod_ndxs,:code]
 
     # Optional files
-    if !isnothing(params["exog-files"]["investment"]) && isfile(joinpath("inputs",params["exog-files"]["investment"]))
-        exog_investment_df = CSV.read(joinpath("inputs",params["exog-files"]["investment"]), DataFrame)
-    else
-        exog_investment_df = nothing
-    end
-    if !isnothing(params["exog-files"]["pot_output"]) && isfile(joinpath("inputs",params["exog-files"]["pot_output"]))
-        exog_pot_output_df = CSV.read(joinpath("inputs",params["exog-files"]["pot_output"]), DataFrame)
-    else
-        exog_pot_output_df = nothing
-    end
-    if !isnothing(params["exog-files"]["max_util"]) && isfile(joinpath("inputs",params["exog-files"]["max_util"]))
-        exog_max_util_df = CSV.read(joinpath("inputs",params["exog-files"]["max_util"]), DataFrame)
-    else
-        exog_max_util_df = nothing
+    exog_investment_df = nothing
+    exog_pot_output_df = nothing
+    exog_max_util_df = nothing
+    if haskey(params, "exog-files")
+        exog_file_list = params["exog-files"]
+        if haskey(exog_file_list, "investment") && !isnothing(exog_file_list["investment"]) && isfile(joinpath("inputs",exog_file_list["investment"]))
+            exog_investment_df = CSV.read(joinpath("inputs",exog_file_list["investment"]), DataFrame)
+        end
+        if haskey(exog_file_list, "pot_output") && !isnothing(exog_file_list["pot_output"]) && isfile(joinpath("inputs",exog_file_list["pot_output"]))
+            exog_pot_output_df = CSV.read(joinpath("inputs",exog_file_list["pot_output"]), DataFrame)
+        end
+        if haskey(exog_file_list, "max_util") && !isnothing(exog_file_list["max_util"]) && isfile(joinpath("inputs",exog_file_list["max_util"]))
+            exog_max_util_df = CSV.read(joinpath("inputs",exog_file_list["max_util"]), DataFrame)
+        end
     end
     
     #--------------------------------------------------------------------------------------
