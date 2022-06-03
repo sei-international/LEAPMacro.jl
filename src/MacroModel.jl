@@ -271,8 +271,11 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	param_pb = prices.pb
 	param_Mref = 2 * io.M # Allow for some extra slack -- this just sets a scale
 	param_mfrac = io.m_frac
+	# Initialize maximum utilization in multiple steps
 	param_max_util = ones(ns)
-    #----------------------------------
+	max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[1,:])
+	param_max_util[max_util_ndxs] .= exog.exog_max_util[1,max_util_ndxs]
+#----------------------------------
     # Variables
     #----------------------------------
     # For objective function
@@ -349,7 +352,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		@info optim_output
 	end
     status = primal_status(mdl)
-    @info "Calibrating: $status"
+    @info "Calibrating for $base_year: $status"
 
 	# Sector variables
     IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
@@ -451,7 +454,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Loop over years
 	#
 	#############################################################################
-    @info "Running from $base_year to $final_year:"
+	base_year_plusone = base_year + 1
+    @info "Running from $base_year_plusone to $final_year:"
 
     previous_failed = false
     for t in 1:ntime
@@ -610,6 +614,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 							w_gr, ω_gr, value.(I_tot), i_bank]
 		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
 
+		if t == ntime
+			break
+		end
 		#--------------------------------
 		# Update Taylor rule
 		#--------------------------------
@@ -646,8 +653,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_mfrac = (value.(M) + IOlib.ϵ * param_mfrac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
 		# Set maximum utilization in multiple steps
 		param_max_util = ones(ns)
-		max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[t,:])
-		param_max_util[max_util_ndxs] .= exog.exog_max_util[t,max_util_ndxs]
+		max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[t + 1,:])
+		param_max_util[max_util_ndxs] .= exog.exog_max_util[t + 1,max_util_ndxs]
 
 		for i in 1:ns
 			set_normalized_coefficient(eq_io[i], u[i], -param_Pg * param_z[i])
@@ -682,6 +689,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 			@info optim_output
 		end
         status = primal_status(mdl)
+		# Increment year to report the correct year is being calculated
+		year += 1
         @info "Simulating for $year: $status"
         previous_failed = status != MOI.FEASIBLE_POINT
         if previous_failed
@@ -689,8 +698,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
             indices[t,2:finndx] = fill(NaN, (finndx - 2) + 1)
         end
 
-		# TODO: Make sure everything gets assigned to the proper year
-		year += 1
 
     end
 
