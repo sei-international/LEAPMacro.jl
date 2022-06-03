@@ -441,6 +441,28 @@ function get_var_params(param_file::String)
        end
     end
 
+    if !isnothing(exog_pot_output_df)
+        data_sec_codes = names(exog_pot_output_df)[2:end]
+        # Using findfirst: there should only be one entry per code
+        data_sec_ndxs = [findfirst(params["included_sector_codes"] .== sec_code) for sec_code in data_sec_codes]
+        # Confirm that the sectors are included
+        if !isnothing(findfirst(isnothing.(data_sec_ndxs)))
+            invalid_sec_codes = data_sec_codes[findall(x -> isnothing(x), data_sec_ndxs)]
+            if length(invalid_sec_codes) > 1
+                invalid_sec_codes_str = "Sector codes '" * join(invalid_sec_codes, "', '") * "'"
+            else
+                invalid_sec_codes_str = "Sector code '" * invalid_sec_codes[1] * "'"
+            end
+            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["pot_output"] * "' not valid"))
+        end
+        for row in eachrow(exog_pot_output_df)
+            data_year = floor(Int64, row[:year])
+            if data_year in base_year:final_year
+                retval.exog_pot_output[data_year - base_year + 1, data_sec_ndxs] .= Vector(row[2:end])
+            end
+       end
+    end
+
     if !isnothing(exog_max_util_df)
         data_sec_codes = names(exog_max_util_df)[2:end]
         # Using findfirst: there should only be one entry per code

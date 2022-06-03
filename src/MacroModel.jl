@@ -536,6 +536,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		γ_r = profit_sens * (profit_rate .- targ_profit_rate)
 		γ_i = -intrate_sens * (i_bank - tf_i_targ) * ones(ns)
         γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
+		# Override default behavior if production is exogenously specified
+		if t > 1
+			γ_spec = exog.exog_pot_output[t,:] ./ exog.exog_pot_output[t - 1,:] .- 1.0
+			pot_output_ndxs = findall(x -> !ismissing(x), γ_spec)
+			γ[pot_output_ndxs] .= γ_spec[pot_output_ndxs]
+		end
+
 		# Non-energy investment, by sector and total
         I_ne_disag = z .* (γ + exog.δ) .* capital_output_ratio
         I_ne = sum(I_ne_disag)
