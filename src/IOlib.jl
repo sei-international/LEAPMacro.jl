@@ -300,7 +300,7 @@ function get_var_params(param_file::String)
     exog_investment_df = nothing
     exog_pot_output_df = nothing
     exog_max_util_df = nothing
-    if haskey(params, "exog-files")
+    if haskey(params, "exog-files") && !isnothing(params["exog-files"])
         exog_file_list = params["exog-files"]
         if haskey(exog_file_list, "investment") && !isnothing(exog_file_list["investment"]) && isfile(joinpath("inputs",exog_file_list["investment"]))
             exog_investment_df = CSV.read(joinpath("inputs",exog_file_list["investment"]), DataFrame)
