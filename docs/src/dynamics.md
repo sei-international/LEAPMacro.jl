@@ -30,7 +30,7 @@ V_k = \left(1 + \underline{\tau}_{d,k}\right)\overline{p}_{d,k,-1}\left(F_k + X_
 ```
 The GDP inflation rate is calcualted as
 ```math
-\pi_GDP = \frac{\sum_{k = 1}^{n_p} V_k\pi_{d,k}}{\sum_{k = l}^{n_p} V_l},
+\pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{d,k}}{\sum_{k = l}^{n_p} V_l},
     \quad \pi_{d,k} = \frac{p_{d,k}-p_{d,k,-1}}{p_{d,k,-1}}.
 ```
 
