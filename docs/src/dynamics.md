@@ -101,7 +101,7 @@ With the above expressions, the growth rate of the wage share can be calculated.
 Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of output, ``\Pi_i``, is given by the value of output per unit of output less unit costs,
 ```math
 \Pi_i = \frac{1}{g_i}\sum_{k=1}^{n_p} \underline{S}_{i,k} q_{s,k}\overline{p}_{d,k} -
-        \left[\overline{P}_g\underline{\omega}_i +
+        \left[\overline{P}_g\omega_i +
               \sum_{k = 1}^{n_p}\left(1+\tau_{d,k}\right)\overline{p}_{d,k}\underline{D}_{k,i} \right].
 ```
 
