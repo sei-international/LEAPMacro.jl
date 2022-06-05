@@ -8,6 +8,8 @@ In between runs of the [linear goal program](@ref lgp), the [dynamic parameters]
 In the equations below, a subscript ``+1`` indicates the next-year's value, and a subscript ``-1`` the previous year's value. An underline indicates an [exogenous parameter](@ref exog-param-vars), while an overline is a [dynamic parameter](@ref dynamic-param-vars).
 
 ## Prices
+For an explanation of the different prices, see [Processing the supply-use table](@ref process-sut).
+
 World prices grow at an exogenously specified inflation rate ``\underline{\pi}_{w,k}``,
 ```math
 \overline{p}_{w,k,+1} = \left(1 + \underline{\pi}_{w,k}\right)\overline{p}_{w,k}.
