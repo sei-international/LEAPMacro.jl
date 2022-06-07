@@ -154,6 +154,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	infl_passthrough = params["wage-fcn"]["infl_passthrough"]
 	lab_constr_coeff = params["wage-fcn"]["lab_constr_coeff"]
 	LEAP_indices = params["LEAP_sector_indices"]
+	# Optionally update technical coefficients (the scaled Use matrix, io.D)
+	calc_use_matrix_tech_change = haskey(params, "tech-param-change") && !isnothing(params["tech-param-change"]) && haskey(params["tech-param-change"], "conv_rate")
+	if calc_use_matrix_tech_change
+		use_matrix_tech_change_conv = params["tech-param-change"]["conv_rate"]
+	else
+		use_matrix_tech_change_conv = 0.0 # Not used in this case, but assign a value
+	end
 
 	#----------------------------------
     # Calculate variables based on parameters
@@ -403,6 +410,11 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     prev_GDP_gr = neutral_growth
     prev_πg = params["global-params"]["infl_default"]
 
+	if calc_use_matrix_tech_change
+		sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ (value.(u) .* z)
+		init_intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+	end
+
 	lab_force_index = 1
 
     year = base_year
@@ -522,6 +534,15 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		w_gr = infl_passthrough * πGDP + λ_gr * (1.0 + lab_constr_coeff * (L_gr - exog.working_age_grs[t]))
 		ω_gr = w_gr - λ_gr - πg
 		ω = (1.0 + ω_gr) * ω
+
+		#--------------------------------
+		# Update use matrix
+		#--------------------------------
+		if calc_use_matrix_tech_change
+			sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ g
+			target_D = [init_intermed_cost_shares[i,j] * sector_price_level[j] /((1 + io.τd[i]) * pd_prev[i]) for i in 1:np, j in 1:ns]
+			io.D += use_matrix_tech_change_conv * (target_D - io.D)
+		end
 
 		#--------------------------------
 		# Profits

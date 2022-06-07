@@ -116,6 +116,14 @@ wage-fcn:
     lab_constr_coeff: 0.5
 
 #---------------------------------------------------------------------------
+# Parameter for rate of change in technical parameters
+#---------------------------------------------------------------------------
+# Uncomment conv_rate line below to endogenize changes in the scaled Use matrix
+tech-param-change:
+    # Rate of convergence to initial cost shares
+    # conv_rate: 0.1 # 1/year (this should be between 0 and 1, inclusive)
+
+#---------------------------------------------------------------------------
 # Demand model parameters
 #---------------------------------------------------------------------------
 # For exports, with respect to world GDP
