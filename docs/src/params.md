@@ -69,3 +69,48 @@ The corresponding [variables](@ref exog-param-vars) are:
 
 Here is the example from the Freedonia sample model:
 ![Freedonia time_series file](assets/images/time_series.png)
+
+## [Optional input files](@id params-optional-input-files)
+In the [configuration file general settings](@ref config-general-settings), it is possible to specify any or all of three optional input files for: investment demand; potential output; and maximum capacity utilization.
+
+### Investment demand
+The Macro model calculates investment for non-energy sectors based on expected demand and profitability: see the explanation of [potential output](@ref dynamics-potential-output) in the Technical Details. However, for public infrastructure investment -- which is driven by policy goals, rather than private profitability, and where the capital stock is not associated with a particular sector -- investment must be specified exogenously. (When externally specified investment *is* associated with a particular sector, it is better to specify potential output: see below.)
+
+The investment demand parameter file has the following structure:
+
+| `year` | `addl_investment` |
+|-------:|------------------:|
+|    y_1 |             inv_1 |
+|    y_2 |             inv_2 |
+|    ... |               ... |
+
+Note that not all years need to be included. For example, if there is investment expenditure in 2025, but not in 2026, then the year 2026 does not have to be included in the file. The values are in "real" monetary terms, and are used directly by Macro, so the units should be the same as those for the supply and use tables.
+
+### Potential output
+In the Macro model, potential output is determined by investment: see [potential output](@ref dynamics-potential-output) in the Technical Details. In some cases, it is best to override this behavior. For example, output from agriculture might be determined by an external crop model, or the output from the mining sector might be constrained by the availability of the ore. In other cases, the production level might be set as a policy target or through a sector-specific planning document. In these cases, potential output can be specified for specific sectors, and Macro will calculate investment.
+
+The potential output parameter file has the following structure:
+
+| `year` |       `sec_1` |       `sec_2` | ... |
+|-------:|--------------:|--------------:|----:|
+|    y_1 |   potout_s1y1 |   potout_s2y1 | ... |
+|    y_2 |   potout_s1y2 |   potout_s2y2 | ... |
+|    ... |           ... |           ... | ... |
+|  y_*N* | potout_s1y*N* | potout_s2y*N* | ... |
+
+The sequence of values is converted internally into an index. For this reason, **values must be specified for all years**. However, **values should be specified only for sectors with exogenous potential output**. Other sectors, where Macro simulates the change in potential output, should not appear in this file.
+
+### Maximum capacity utilization
+Capacity utilization in the Macro model is determined in each time step by solving a [linear goal program](@ref lgp). By default, maximum capacity utilization is equal to 1.0. However, in some cases, capacity utilization might be constrained. For example, during a disease outbreak, some service sector activities may be limited, and during a drought, manufacturing plants that rely on cooling or process water might have to curtail production. In these cases, a maximum level of capacity utilization less than one can be specified exogenously.
+
+The maximum capacity utilization file has the following structure:
+
+| `year` |     `sec_1` |     `sec_2` | ... |
+|-------:|------------:|------------:|----:|
+|    y_1 |   umax_s1y1 |   umax_s2y1 | ... |
+|    y_2 |   umax_s1y2 |             | ... |
+|    y_3 |   umax_s1y3 |   umax_s2y3 | ... |
+|    ... |         ... |         ... | ... |
+|  y_*N* | umax_s1y*N* | umax_s2y*N* | ... |
+
+In the file, all years must be listed. However, values do not have to specified for all years. As indicated in the table for sector 2 and year 2 (cell `y_2`,`sec_2`), if capacity utilization is unconstrained in some year, the maximum level can be omitted, and Macro will set it equal to 1.0.
