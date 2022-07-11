@@ -73,6 +73,46 @@ function calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, t
 end
 
 """
+    intermed_tech_change(α, k, θ = nothing, b = nothing)
+	
+	α(np,ns) = matrix of cost shares
+	k = single value or a vector (ns) of rate coefficients
+	θ = single value or vector (ns) of exponents
+	c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
+	b(np,ns) = matrix of weights (if b = nothing it is set to one)
+
+Calculate growth rate of intermediate demand coefficients (that is, io.D entries), or the intercepts (for initialization)
+"""
+function intermed_tech_change(α, k, θ = 2.0, c = nothing, b = nothing)
+	# Initialize values
+	(np, ns) = size(α)
+	if isa(k, Number)
+		k = k * ones(ns)
+	end
+	if isa(θ, Number)
+		θ = θ * ones(ns)
+	end
+	if isnothing(b)
+		b = ones(np, ns)
+	end
+	if isnothing(c)
+		c = zeros(np, ns)
+	end
+	
+	cost_shares_exponentiated = [α[p,s]^θ[s] for p in 1:np, s in 1:ns]
+	println(cost_shares_exponentiated)
+	denom = sum(cost_shares_exponentiated .* b, dims = 1).^(1.0 .- 1.0 ./ θ)'
+	println(denom)
+	num = [(cost_shares_exponentiated .* b ./ α)[p,s] * k[s] for p in 1:np, s in 1:ns]
+	println(num)
+	println(c)
+	println(num ./ denom)
+	
+	return c .- num ./ denom
+end
+
+
+"""
     ModelCalculations(file::String, I_en::Array, run::Int64)
 
 Implement the Macro model. This is the main function.
