@@ -100,15 +100,10 @@ function intermed_tech_change(α, k, θ = 2.0, c = nothing, b = nothing)
 	end
 	
 	cost_shares_exponentiated = [α[p,s]^θ[s] for p in 1:np, s in 1:ns]
-	println(cost_shares_exponentiated)
 	denom = sum(cost_shares_exponentiated .* b, dims = 1).^(1.0 .- 1.0 ./ θ)'
-	println(denom)
-	num = [(cost_shares_exponentiated .* b ./ α)[p,s] * k[s] for p in 1:np, s in 1:ns]
-	println(num)
-	println(c)
-	println(num ./ denom)
-	
-	return c .- num ./ denom
+	num = [(cost_shares_exponentiated .* b ./ (α .+ IOlib.ϵ))[p,s] * k[s] for p in 1:np, s in 1:ns]
+
+	return c .- num ./ (denom .+ IOlib.ϵ)
 end
 
 
@@ -195,11 +190,11 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	lab_constr_coeff = params["wage-fcn"]["lab_constr_coeff"]
 	LEAP_indices = params["LEAP_sector_indices"]
 	# Optionally update technical coefficients (the scaled Use matrix, io.D)
-	calc_use_matrix_tech_change = haskey(params, "tech-param-change") && !isnothing(params["tech-param-change"]) && haskey(params["tech-param-change"], "conv_rate")
+	calc_use_matrix_tech_change = haskey(params, "tech-param-change") && !isnothing(params["tech-param-change"]) && haskey(params["tech-param-change"], "scale_factor")
 	if calc_use_matrix_tech_change
-		use_matrix_tech_change_conv = params["tech-param-change"]["conv_rate"]
+		tech_change_scale_factor = params["tech-param-change"]["scale_factor"]
 	else
-		use_matrix_tech_change_conv = 0.0 # Not used in this case, but assign a value
+		tech_change_scale_factor = 0.0 # Not used in this case, but assign a value
 	end
 
 	#----------------------------------
@@ -452,7 +447,11 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 
 	if calc_use_matrix_tech_change
 		sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ (value.(u) .* z)
-		init_intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+		intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+		intermed_tech_change_intercept = -intermed_tech_change(intermed_cost_shares, tech_change_scale_factor)
+		if params["report-diagnostics"]
+			IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"init_cost_shares.csv"), intermed_cost_shares, params["included_product_codes"], params["included_sector_codes"])
+		end
 	end
 
 	lab_force_index = 1
@@ -580,8 +579,12 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		if calc_use_matrix_tech_change
 			sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ g
-			target_D = [init_intermed_cost_shares[i,j] * sector_price_level[j] /((1 + io.τd[i]) * pd_prev[i]) for i in 1:np, j in 1:ns]
-			io.D += use_matrix_tech_change_conv * (target_D - io.D)
+			intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+			D_hat = intermed_tech_change_intercept + intermed_tech_change(intermed_cost_shares, tech_change_scale_factor)
+			io.D = io.D .* exp.(D_hat) # This ensures that io.D will not become negative
+			if params["report-diagnostics"]
+				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"cost_shares_" * string(t) * ".csv"), intermed_cost_shares, params["included_product_codes"], params["included_sector_codes"])
+			end
 		end
 
 		#--------------------------------
