@@ -103,7 +103,7 @@ By default, intermediate demand coefficients are kept at their initial values: `
 ```math
 \hat{\overline{D}}_{ki} = C_{ki} - \frac{\underline{A}\alpha_{ki}}{\sqrt{\sum_{l=1}^{n_p} \alpha^2_{li}}},
 ```
-where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{A}`` is a rate constant, which is specified in the [configuration file](@ref config), and the ``\alpha_{ki}`` are cost shares, set to be compatible with the calculation of [prices for non-tradeables](@ref dynamics-prices).
+where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{A}`` is a rate constant, which is specified in the [configuration file](@ref config-intermed-dmd-change), and the ``\alpha_{ki}`` are cost shares, set to be compatible with the calculation of [prices for non-tradeables](@ref dynamics-prices).
 
 [^1]: The model is a simplified application of a more general model that is presented in [_Cost Share-induced Technological Change and Kaldor’s Stylized Facts_](https://www.sei.org/publications/cost-share-induced-technological-change-kaldors-stylized-facts/) by Eric Kemp-Benedict.
 
