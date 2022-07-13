@@ -14,7 +14,7 @@ World prices grow at an exogenously specified inflation rate ``\underline{\pi}_{
 ```math
 \overline{p}_{w,k,+1} = \left(1 + \underline{\pi}_{w,k}\right)\overline{p}_{w,k}.
 ```
-In principle, each product ``k`` could have a distinct inflation rate. However, as currently implemented, a uniform inflation rate is applied to all traded goods, so that ``\underline{\pi}_{w,k} = \underline{\pi}_w``.
+By default, a uniform inflation rate is applied to all traded goods, while the real price is constant, so that ``\underline{\pi}_{w,k} = \underline{\pi}_w``. However, optionally, a real price index for an individual product ``k`` can be specified: see [real price trends for selected tradeables](@ref params-optional-price-trend).
 
 The output price level is given by
 ```math

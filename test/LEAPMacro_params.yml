@@ -35,11 +35,14 @@ model:
 #---------------------------------------------------------------------------
 # Uncomment the lines below to use the files included in the Freedonia sample model
 # For pot_output and max_util, include only those sectors where values are constrained -- the others will be unconstrained
+# For real_price:
+#   * Include only those products where values are specified -- for others the real price will be held constant
+#   * Prices for non-tradeables will be ignored; they are calculated internally by Macro
 exog-files:
     # investment: exog_invest.csv # Time series of exogenous investment demand, additional to that simulated by the model
     # pot_output: exog_pot_output.csv # Potential output (any units -- it is applied as an index): sectors label columns; years label rows
     # max_util: exog_max_util.csv # Maximum capacity utilization: sectors label columns; years label rows (must lie between 0 and 1)
-    # real_price: exog_price.csv # Real prices (any units -- it is applied as an index): sectors label columns; years label rows
+    # real_price: exog_price.csv # Real prices for tradeables (any units -- it is applied as an index): products label columns; years label rows
 
 #---------------------------------------------------------------------------
 # Start and end years for the simulation
@@ -122,7 +125,7 @@ wage-fcn:
 # Uncomment scale_factor line below to endogenize changes in the scaled Use matrix
 tech-param-change:
     # Scale factor: Note that if this is too large then it can create instabilities
-    scale_factor: 2.0 # 1/year
+    scale_factor: 0.1 # 1/year
 
 #---------------------------------------------------------------------------
 # Demand model parameters

@@ -48,8 +48,9 @@ mutable struct ExogParams
 	xr::Array{Float64,1} # Nominal exchange rate x year
     δ::Array{Float64,1} # ns
     I_addl::Array{Any,1} # Additional investment x year
-    exog_pot_output::Array{Any,2} # Exogenously specified potential output (converged to index)
+    exog_pot_output::Array{Any,2} # Exogenously specified potential output (converted to index)
     exog_max_util::Array{Any,2} # Exogenous max capacity utilization (forced to lie between 0 and 1)
+    exog_price::Array{Any,2} # Exogenously specified real prices (converted to index)
     export_elast_demand::Array{Any,1} # np x year
     wage_elast_demand::Array{Any,1} # np x year
 end
@@ -280,6 +281,7 @@ function get_var_params(param_file::String)
                     Array{Any}(undef, 0), # I_addl
                     Array{Any}(undef, 0, 0), # exog_pot_output
                     Array{Any}(undef, 0, 0), # exog_max_util
+                    Array{Any}(undef, 0, 0), # exog_price
                     [], # export_elast_demand
                     []) # wage_elast_demand
 
@@ -300,6 +302,7 @@ function get_var_params(param_file::String)
     exog_investment_df = nothing
     exog_pot_output_df = nothing
     exog_max_util_df = nothing
+    exog_real_price_df = nothing
     if haskey(params, "exog-files") && !isnothing(params["exog-files"])
         exog_file_list = params["exog-files"]
         if haskey(exog_file_list, "investment") && !isnothing(exog_file_list["investment"]) && isfile(joinpath("inputs",exog_file_list["investment"]))
@@ -310,6 +313,9 @@ function get_var_params(param_file::String)
         end
         if haskey(exog_file_list, "max_util") && !isnothing(exog_file_list["max_util"]) && isfile(joinpath("inputs",exog_file_list["max_util"]))
             exog_max_util_df = CSV.read(joinpath("inputs",exog_file_list["max_util"]), DataFrame)
+        end
+        if haskey(exog_file_list, "real_price") && !isnothing(exog_file_list["real_price"]) && isfile(joinpath("inputs",exog_file_list["real_price"]))
+            exog_real_price_df = CSV.read(joinpath("inputs",exog_file_list["real_price"]), DataFrame)
         end
     end
     
@@ -431,6 +437,7 @@ function get_var_params(param_file::String)
     retval.I_addl = zeros(nyears)
     retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
     retval.exog_max_util = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
+    retval.exog_price = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
 
     if !isnothing(exog_investment_df)
         for row in eachrow(exog_investment_df)
@@ -481,6 +488,28 @@ function get_var_params(param_file::String)
             data_year = floor(Int64, row[:year])
             if data_year in base_year:final_year
                 retval.exog_max_util[data_year - base_year + 1, data_sec_ndxs] .= Vector(row[2:end])
+            end
+       end
+    end
+
+    if !isnothing(exog_real_price_df)
+        data_prod_codes = names(exog_real_price_df)[2:end]
+        # Using findfirst: there should only be one entry per code
+        data_prod_ndxs = [findfirst(params["included_product_codes"] .== prod_code) for prod_code in data_prod_codes]
+        # Confirm that the products are included
+        if !isnothing(findfirst(isnothing.(data_prod_ndxs)))
+            invalid_prod_codes = data_prod_codes[findall(x -> isnothing(x), data_prod_ndxs)]
+            if length(invalid_prod_codes) > 1
+                invalid_prod_codes_str = "Product codes '" * join(invalid_prod_codes, "', '") * "'"
+            else
+                invalid_prod_codes_str = "Product code '" * invalid_prod_codes[1] * "'"
+            end
+            throw(DomainError(invalid_prod_codes, invalid_prod_codes_str * " in input file '" * params["exog-files"]["real_price"] * "' not valid"))
+        end
+        for row in eachrow(exog_real_price_df)
+            data_year = floor(Int64, row[:year])
+            if data_year in base_year:final_year
+                retval.exog_price[data_year - base_year + 1, data_prod_ndxs] .= Vector(row[2:end])
             end
        end
     end

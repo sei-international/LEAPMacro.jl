@@ -116,3 +116,11 @@ Variables and parameters are labeled with the following dimensions:
 | ``\underline{\gamma}^\text{world}``  | Growth rate of world GDP (also termed gross world product, GWP)                                                                     |
 | ``\underline{\eta}^\text{exp}_k``    | Elasticity of normal export demand for product ``k`` with respect to a change in GWP                                                |
 | ``\underline{\eta}^\text{wage}_k``   | Elasticity of normal final demand for product ``k`` with respect to a change in the wage bill                                       |
+
+The following are [optional exogenous parameters](@id optional-exog-param-vars):
+
+| Symbol                          | Definition                                                                                 |
+|:--------------------------------|:-------------------------------------------------------------------------------------------|
+| ``\underline{I}_\text{exog}``   | Exogenous investment, not associated with a sector (default is 0.0)                        |
+| ``\underline{z}_i^\text{exog}`` | Exogenously specified potential output (default is that Macro calculates potential output) |
+| ``\underline{u}_i^\text{max}``  | In the [linear goal program](@ref lgp), the maximum capacity utilization (default is 1.0)  |

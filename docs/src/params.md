@@ -71,7 +71,7 @@ Here is the example from the Freedonia sample model:
 ![Freedonia time_series file](assets/images/time_series.png)
 
 ## [Optional input files](@id params-optional-input-files)
-In the [configuration file general settings](@ref config-general-settings), it is possible to specify any or all of three optional input files for: investment demand; potential output; and maximum capacity utilization.
+In the [configuration file general settings](@ref config-general-settings), it is possible to specify any or all of three optional input files for: investment demand; potential output; maximum capacity utilization; and real prices for tradeables.
 
 ### Investment demand
 The Macro model calculates investment for non-energy sectors based on expected demand and profitability: see the explanation of [potential output](@ref dynamics-potential-output) in the Technical Details. However, for public infrastructure investment -- which is driven by policy goals, rather than private profitability, and where the capital stock is not associated with a particular sector -- investment must be specified exogenously. (When externally specified investment *is* associated with a particular sector, it is better to specify potential output: see below.)
@@ -114,3 +114,20 @@ The maximum capacity utilization file has the following structure:
 |  y_*N* | umax_s1y*N* | umax_s2y*N* | ... |
 
 In the file, all years must be listed. However, values do not have to specified for all years. As indicated in the table for sector 2 and year 2 (cell `y_2`,`sec_2`), if capacity utilization is unconstrained in some year, the maximum level can be omitted, and Macro will set it equal to 1.0.
+
+### [Real price trends for selected tradeables](@id params-optional-price-trend)
+The Macro model assumes that countries are price takers in world markets, and prices for tradeables are exogenous. The domestic prices of tradeables could literally be the world price, but the fundamental assumption is that domestic producers are price takers for tradeables, whereas for non-tradeables they set prices as a markup on costs.
+
+By default, prices for all tradeables grow at a uniform, user-specified world inflation rate. However, optionally, real price indices for all or some tradeables can be specified. The real price trend is then adjusted for inflation at the world inflation rate.
+
+The real price file has the following structure:
+
+| `year` |  `prod_1` |  `prod_2` | ... |
+|-------:|----------:|----------:|----:|
+|    y_1 |   pw_p1y1 |   pw_p2y1 | ... |
+|    y_2 |   pw_p1y2 |   pw_p2y2 | ... |
+|    y_3 |   pw_p1y3 |   pw_p2y3 | ... |
+|    ... |       ... |       ... | ... |
+|  y_*N* | pw_p1y*N* | pw_p2y*N* | ... |
+
+The sequence of values is converted internally into an index. For this reason, **values must be specified for all years**. However, **values should be specified only for products for which a real price index is specified**. For other products, the real price is assumed to be constant, so the price rises at the world inflation rate. Price indices for non-tradeables are ignored; Macro calculates those prices endogenously based on a markup. 

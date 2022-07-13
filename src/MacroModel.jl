@@ -317,7 +317,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	param_max_util = ones(ns)
 	max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[1,:])
 	param_max_util[max_util_ndxs] .= exog.exog_max_util[1,max_util_ndxs]
-#----------------------------------
+	#----------------------------------
     # Variables
     #----------------------------------
     # For objective function
@@ -449,9 +449,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ (value.(u) .* z)
 		intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 		intermed_tech_change_intercept = -intermed_tech_change(intermed_cost_shares, tech_change_scale_factor)
-		if params["report-diagnostics"]
-			IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"init_cost_shares.csv"), intermed_cost_shares, params["included_product_codes"], params["included_sector_codes"])
-		end
 	end
 
 	lab_force_index = 1
@@ -583,7 +580,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 			D_hat = intermed_tech_change_intercept + intermed_tech_change(intermed_cost_shares, tech_change_scale_factor)
 			io.D = io.D .* exp.(D_hat) # This ensures that io.D will not become negative
 			if params["report-diagnostics"]
-				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"cost_shares_" * string(t) * ".csv"), intermed_cost_shares, params["included_product_codes"], params["included_sector_codes"])
+				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(year) * ".csv"), io.D, params["included_product_codes"], params["included_sector_codes"])
 			end
 		end
 
@@ -697,7 +694,14 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Update prices
 		#--------------------------------
 		prices.Pg = (1 + πg) * prices.Pg
+		# Apply global inflation rate to world prices
 		prices.pw = prices.pw * (1 + exog.πw[t])
+		# Adjust for any exogenous price indices
+		if t > 1
+			pw_spec = exog.exog_price[t,:] ./ exog.exog_price[t - 1,:]
+			pw_ndxs = findall(x -> !ismissing(x), pw_spec)
+			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
+		end
 		prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, exog)
 		prices.pb = prices.pd
 
