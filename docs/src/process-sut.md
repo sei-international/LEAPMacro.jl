@@ -40,9 +40,9 @@ The domestic supply of product ``k`` is equal to
 ```math
 q_{s,k} = \sum_{i=1}^{n_s} V_{ik}.
 ```
-Demand coefficients are then calculated as
+Initial values for demand coefficients are then calculated as
 ```math
-\underline{D}_{ki} = \frac{1}{g_i}U_{ki},
+\underline{D}^\text{init}_{ki} = \frac{1}{g_i}U_{ki},
 ```
 and supply shares are calculated as
 ```math

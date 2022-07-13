@@ -47,6 +47,10 @@ mutable struct ExogParams
 	βKV::Array{Float64,1} # Kaldor-Verdoorn intercept x year
 	xr::Array{Float64,1} # Nominal exchange rate x year
     δ::Array{Float64,1} # ns
+    I_addl::Array{Any,1} # Additional investment x year
+    exog_pot_output::Array{Any,2} # Exogenously specified potential output (converted to index)
+    exog_max_util::Array{Any,2} # Exogenous max capacity utilization (forced to lie between 0 and 1)
+    exog_price::Array{Any,2} # Exogenously specified real prices (converted to index)
     export_elast_demand::Array{Any,1} # np x year
     wage_elast_demand::Array{Any,1} # np x year
 end
@@ -274,12 +278,17 @@ function get_var_params(param_file::String)
 					Array{Float64}(undef, 0), # βKV
 					Array{Float64}(undef, 0), # xr
                     Array{Float64}(undef, 0), # δ
+                    Array{Any}(undef, 0), # I_addl
+                    Array{Any}(undef, 0, 0), # exog_pot_output
+                    Array{Any}(undef, 0, 0), # exog_max_util
+                    Array{Any}(undef, 0, 0), # exog_price
                     [], # export_elast_demand
                     []) # wage_elast_demand
 
     params = parse_input_file(param_file)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
+    nyears = final_year - base_year + 1
     sec_ndxs = params["sector-indexes"]
     prod_ndxs = params["product-indexes"]
 
@@ -289,6 +298,27 @@ function get_var_params(param_file::String)
     time_series = CSV.read(joinpath("inputs",params["files"]["time_series"]), DataFrame)
     prod_codes = product_info[prod_ndxs,:code]
 
+    # Optional files
+    exog_investment_df = nothing
+    exog_pot_output_df = nothing
+    exog_max_util_df = nothing
+    exog_real_price_df = nothing
+    if haskey(params, "exog-files") && !isnothing(params["exog-files"])
+        exog_file_list = params["exog-files"]
+        if haskey(exog_file_list, "investment") && !isnothing(exog_file_list["investment"]) && isfile(joinpath("inputs",exog_file_list["investment"]))
+            exog_investment_df = CSV.read(joinpath("inputs",exog_file_list["investment"]), DataFrame)
+        end
+        if haskey(exog_file_list, "pot_output") && !isnothing(exog_file_list["pot_output"]) && isfile(joinpath("inputs",exog_file_list["pot_output"]))
+            exog_pot_output_df = CSV.read(joinpath("inputs",exog_file_list["pot_output"]), DataFrame)
+        end
+        if haskey(exog_file_list, "max_util") && !isnothing(exog_file_list["max_util"]) && isfile(joinpath("inputs",exog_file_list["max_util"]))
+            exog_max_util_df = CSV.read(joinpath("inputs",exog_file_list["max_util"]), DataFrame)
+        end
+        if haskey(exog_file_list, "real_price") && !isnothing(exog_file_list["real_price"]) && isfile(joinpath("inputs",exog_file_list["real_price"]))
+            exog_real_price_df = CSV.read(joinpath("inputs",exog_file_list["real_price"]), DataFrame)
+        end
+    end
+    
     #--------------------------------------------------------------------------------------
     # Sector-specific
     #--------------------------------------------------------------------------------------
@@ -321,82 +351,73 @@ function get_var_params(param_file::String)
     #--------------------------------------------------------------------------------------
     # Time series
     #--------------------------------------------------------------------------------------
+    start_year = floor(Int64, time_series[1,:year])
+    end_year = start_year + length(time_series[!,:year]) - 1
+
     # World inflation rate (apply to world prices only, others induced)
     world_infl_temp = time_series[!,:world_infl_rate]
     world_infl_default = params["global-params"]["infl_default"]
-    world_infl_start = floor(Int64, time_series[1,:year])
-    world_infl_end = world_infl_start + length(world_infl_temp) - 1
 
     # World GDP growth rate (including historical, for calibration)
     world_grs_temp = time_series[!,:world_gr]
     world_grs_default = params["global-params"]["gr_default"]
-    world_grs_start = floor(Int64, time_series[1,:year])
-    world_grs_end = world_grs_start + length(world_grs_temp) - 1
 
 	# Working age growth rate (No default -- must provide all values for specified time period)
     working_age_grs_temp = time_series[!,:working_age_gr]
-    working_age_grs_start = floor(Int64, time_series[1,:year])
-    working_age_grs_end = working_age_grs_start + length(working_age_grs_temp) - 1
 
 	# Exchange rate (No default -- must provide all values for specified time period)
     xr_temp = time_series[!,:exchange_rate]
-    xr_start = floor(Int64, time_series[1,:year])
-    xr_end = xr_start + length(xr_temp) - 1
 
     # Kaldor-Verdoorn parameters
     αKV_temp = time_series[!,:KV_coeff]
     αKV_default = params["labor-prod-fcn"]["KV_coeff_default"]
-    αKV_start = floor(Int64, time_series[1,:year])
-    αKV_end = αKV_start + length(αKV_temp) - 1
 
 	βKV_temp = time_series[!,:KV_intercept]
     βKV_default = params["labor-prod-fcn"]["KV_intercept_default"]
-    βKV_start = floor(Int64, time_series[1,:year])
-    βKV_end = βKV_start + length(βKV_temp) - 1
+
     #--------------------------------------------------------------------------------------
     # Fill in by looping over years
     #--------------------------------------------------------------------------------------
     for year in base_year:final_year
-        # creates world inflation rate array for use in the model, using model years
-        if year in world_infl_start:world_infl_end
-            push!(retval.πw, world_infl_temp[year - world_infl_start + 1])
+        if year in start_year:end_year
+            year_ndx = year - start_year + 1
+            # These have no defaults: check first
+            if !ismissing(working_age_grs_temp[year_ndx])
+                push!(retval.working_age_grs, working_age_grs_temp[year_ndx])
+            else
+                error_string = "Value for working age growth rate missing in year " * string(year) * ", with no default"
+                throw(MissingException(error_string))
+            end
+            if !ismissing(xr_temp[year_ndx])
+                push!(retval.xr, xr_temp[year_ndx])
+            else
+                error_string = "Value for exchange rate missing in year " * string(year) * ", with no default"
+                throw(MissingException(error_string))
+            end
+            # These have defaults
+            if !ismissing(world_infl_temp[year_ndx])
+                push!(retval.πw, world_infl_temp[year_ndx])
+            else
+                push!(retval.πw, world_infl_default)
+            end
+            if !ismissing(world_grs_temp[year_ndx])
+                push!(retval.world_grs, world_grs_temp[year_ndx])
+            else
+                push!(retval.world_grs, world_grs_default)
+            end
+            if !ismissing(αKV_temp[year_ndx])
+                push!(retval.αKV, αKV_temp[year_ndx])
+            else
+                push!(retval.αKV, αKV_default)
+            end
+            if !ismissing(βKV_temp[year_ndx])
+                push!(retval.βKV, βKV_temp[year_ndx])
+            else
+                push!(retval.βKV, βKV_default)
+            end
         else
-            push!(retval.πw, world_infl_default)
-        end
-
-        # creates world growth rate array for use in the model, using model years
-        if year in world_grs_start:world_grs_end
-            push!(retval.world_grs, world_grs_temp[year - world_grs_start + 1])
-        else
-            push!(retval.world_grs, world_grs_default)
-        end
-
-		# creates working age growth rate array for use in the model, using model years
-        if year in working_age_grs_start:working_age_grs_end
-            push!(retval.working_age_grs, working_age_grs_temp[year - working_age_grs_start + 1])
-        else
-			error_string = "Year is not in range " * string(working_age_grs_start) * ":" * string(working_age_grs_end) * " for working age growth rates"
+			error_string = "Year " * string(year) * " is not in time series range " * string(start_year) * ":" * string(end_year)
             throw(DomainError(year, error_string))
-        end
-
-		# creates exchange rate array for use in the model, using model years
-        if year in xr_start:xr_end
-            push!(retval.xr, xr_temp[year - xr_start + 1])
-        else
-			error_string = "Year is not in range " * string(xr_start) * ":" * string(xr_end) * " for exchange rates"
-            throw(DomainError(year, error_string))
-        end
-
-		# fill in Kaldor-Verdoorn coefficient and intercept
-        if year in αKV_start:αKV_end
-            push!(retval.αKV, αKV_temp[year - αKV_start + 1])
-        else
-            push!(retval.αKV, αKV_default)
-        end
-		if year in βKV_start:βKV_end
-            push!(retval.βKV, βKV_temp[year - βKV_start + 1])
-        else
-            push!(retval.βKV, βKV_default)
         end
 
         deltat = max(0, year - base_year + 1) # Year past the end of calibration period
@@ -407,6 +428,90 @@ function get_var_params(param_file::String)
 
         wage_elast_demand_temp = wage_elast_demand0 - (1 - exp(-wage_elast_decay * deltat)) * (wage_elast_demand0 - asympt_wage_elast)
         push!(retval.wage_elast_demand, wage_elast_demand_temp)
+    end
+
+    #--------------------------------------------------------------------------------------
+    # Optional files
+    #--------------------------------------------------------------------------------------
+
+    retval.I_addl = zeros(nyears)
+    retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
+    retval.exog_max_util = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
+    retval.exog_price = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
+
+    if !isnothing(exog_investment_df)
+        for row in eachrow(exog_investment_df)
+            data_year = floor(Int64, row[:year])
+            if data_year in base_year:final_year
+                retval.I_addl[data_year - base_year + 1] = row[:addl_investment]
+            end
+       end
+    end
+
+    if !isnothing(exog_pot_output_df)
+        data_sec_codes = names(exog_pot_output_df)[2:end]
+        # Using findfirst: there should only be one entry per code
+        data_sec_ndxs = [findfirst(params["included_sector_codes"] .== sec_code) for sec_code in data_sec_codes]
+        # Confirm that the sectors are included
+        if !isnothing(findfirst(isnothing.(data_sec_ndxs)))
+            invalid_sec_codes = data_sec_codes[findall(x -> isnothing(x), data_sec_ndxs)]
+            if length(invalid_sec_codes) > 1
+                invalid_sec_codes_str = "Sector codes '" * join(invalid_sec_codes, "', '") * "'"
+            else
+                invalid_sec_codes_str = "Sector code '" * invalid_sec_codes[1] * "'"
+            end
+            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["pot_output"] * "' not valid"))
+        end
+        for row in eachrow(exog_pot_output_df)
+            data_year = floor(Int64, row[:year])
+            if data_year in base_year:final_year
+                retval.exog_pot_output[data_year - base_year + 1, data_sec_ndxs] .= Vector(row[2:end])
+            end
+       end
+    end
+
+    if !isnothing(exog_max_util_df)
+        data_sec_codes = names(exog_max_util_df)[2:end]
+        # Using findfirst: there should only be one entry per code
+        data_sec_ndxs = [findfirst(params["included_sector_codes"] .== sec_code) for sec_code in data_sec_codes]
+        # Confirm that the sectors are included
+        if !isnothing(findfirst(isnothing.(data_sec_ndxs)))
+            invalid_sec_codes = data_sec_codes[findall(x -> isnothing(x), data_sec_ndxs)]
+            if length(invalid_sec_codes) > 1
+                invalid_sec_codes_str = "Sector codes '" * join(invalid_sec_codes, "', '") * "'"
+            else
+                invalid_sec_codes_str = "Sector code '" * invalid_sec_codes[1] * "'"
+            end
+            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["max_util"] * "' not valid"))
+        end
+        for row in eachrow(exog_max_util_df)
+            data_year = floor(Int64, row[:year])
+            if data_year in base_year:final_year
+                retval.exog_max_util[data_year - base_year + 1, data_sec_ndxs] .= Vector(row[2:end])
+            end
+       end
+    end
+
+    if !isnothing(exog_real_price_df)
+        data_prod_codes = names(exog_real_price_df)[2:end]
+        # Using findfirst: there should only be one entry per code
+        data_prod_ndxs = [findfirst(params["included_product_codes"] .== prod_code) for prod_code in data_prod_codes]
+        # Confirm that the products are included
+        if !isnothing(findfirst(isnothing.(data_prod_ndxs)))
+            invalid_prod_codes = data_prod_codes[findall(x -> isnothing(x), data_prod_ndxs)]
+            if length(invalid_prod_codes) > 1
+                invalid_prod_codes_str = "Product codes '" * join(invalid_prod_codes, "', '") * "'"
+            else
+                invalid_prod_codes_str = "Product code '" * invalid_prod_codes[1] * "'"
+            end
+            throw(DomainError(invalid_prod_codes, invalid_prod_codes_str * " in input file '" * params["exog-files"]["real_price"] * "' not valid"))
+        end
+        for row in eachrow(exog_real_price_df)
+            data_year = floor(Int64, row[:year])
+            if data_year in base_year:final_year
+                retval.exog_price[data_year - base_year + 1, data_prod_ndxs] .= Vector(row[2:end])
+            end
+       end
     end
 
     return retval

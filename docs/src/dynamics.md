@@ -7,12 +7,14 @@ In between runs of the [linear goal program](@ref lgp), the [dynamic parameters]
 
 In the equations below, a subscript ``+1`` indicates the next-year's value, and a subscript ``-1`` the previous year's value. An underline indicates an [exogenous parameter](@ref exog-param-vars), while an overline is a [dynamic parameter](@ref dynamic-param-vars).
 
-## Prices
+## [Prices](@id dynamics-prices)
+For an explanation of the different prices, see [Processing the supply-use table](@ref process-sut).
+
 World prices grow at an exogenously specified inflation rate ``\underline{\pi}_{w,k}``,
 ```math
 \overline{p}_{w,k,+1} = \left(1 + \underline{\pi}_{w,k}\right)\overline{p}_{w,k}.
 ```
-In principle, each product ``k`` could have a distinct inflation rate. However, as currently implemented, a uniform inflation rate is applied to all traded goods, so that ``\underline{\pi}_{w,k} = \underline{\pi}_w``.
+By default, a uniform inflation rate is applied to all traded goods, while the real price is constant, so that ``\underline{\pi}_{w,k} = \underline{\pi}_w``. However, optionally, a real price index for an individual product ``k`` can be specified: see [real price trends for selected tradeables](@ref params-optional-price-trend).
 
 The output price level is given by
 ```math
@@ -28,17 +30,18 @@ The GDP deflator ``\pi_\text{GDP}`` is an index that grows at the average of the
 ```math
 V_k = \left(1 + \underline{\tau}_{d,k}\right)\overline{p}_{d,k,-1}\left(F_k + X_k + I_k - M_k\right).
 ```
-The GDP inflation rate is calcualted as
+The GDP inflation rate is calculated as
 ```math
-\pi_GDP = \frac{\sum_{k = 1}^{n_p} V_k\pi_{d,k}}{\sum_{k = l}^{n_p} V_l},
+\pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{d,k}}{\sum_{k = l}^{n_p} V_l},
     \quad \pi_{d,k} = \frac{p_{d,k}-p_{d,k,-1}}{p_{d,k,-1}}.
 ```
 
-Domestic prices for tradeable goods and services (tradeables) are equal to the (exogenous) world price. Prices for non-tradeables are set as a mark-up on costs,
+Domestic prices for tradeable goods and services (tradeables) are equal to the (exogenous) world price,
 ```math
 \overline{p}_{d,k} = \underline{e}\overline{p}_{w,k},\quad k\in \text{tradeables},
 ```
 
+Prices for non-tradeables are set as a mark-up on costs,
 ```math
 \left(1 + \underline{\tau}_{d,k}\right) \overline{p}_{d,k} = \sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}
 \left[
@@ -95,11 +98,20 @@ With the above expressions, the growth rate of the wage share can be calculated.
 \hat{\omega}_i = \hat{w} - \hat{\lambda} - \pi_g.
 ```
 
+## [Intermediate demand coefficients](@id dynamics-intermed-dmd-coeff)
+By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^1]: see [real price trends for selected tradeables](@ref params-optional-price-trend). The growth rates of the coefficients are calculated as
+```math
+\hat{\overline{D}}_{ki} = C_{ki} - \frac{\underline{A}\alpha_{ki}}{\sqrt{\sum_{l=1}^{n_p} \alpha^2_{li}}},
+```
+where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{A}`` is a rate constant, which is specified in the [configuration file](@ref config), and the ``\alpha_{ki}`` are cost shares, set to be compatible with the calculation of [prices for non-tradeables](@ref dynamics-prices).
+
+[^1]: The model is a simplified application of a more general model that is presented in [_Cost Share-induced Technological Change and Kaldor’s Stylized Facts_](https://www.sei.org/publications/cost-share-induced-technological-change-kaldors-stylized-facts/) by Eric Kemp-Benedict.
+
 ## Profit rate
 Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of output, ``\Pi_i``, is given by the value of output per unit of output less unit costs,
 ```math
 \Pi_i = \frac{1}{g_i}\sum_{k=1}^{n_p} \underline{S}_{i,k} q_{s,k}\overline{p}_{d,k} -
-        \left[\overline{P}_g\underline{\omega}_i +
+        \left[\overline{P}_g\omega_i +
               \sum_{k = 1}^{n_p}\left(1+\tau_{d,k}\right)\overline{p}_{d,k}\underline{D}_{k,i} \right].
 ```
 
@@ -117,8 +129,8 @@ Capital-output ratios are initialized using a procedure described below in [Dema
 Net potential output in sector ``i`` (that is, accounting for depreciation) grows at a rate ``\gamma_i``. The value is given by an investment function that responss to utilization, profitability, and borrowing costs as proxied by the central bank lending rate. The model assumes no active disinvestment, so the net growth rate is not allowed to fall below (the negative of) the depreciation rate,
 ```math
 \gamma_i = \max\left[\gamma_{i0} + \underline{\alpha}_\text{util}\left(u_i - 1\right) +
-           \underline{\alpha}_\text{profit}\left(r_i - \underline{r}^*\right) +
-           -\underline{\alpha}_\text{bank}\left(i_b - \underline{i}_{b0}\right),
+           \underline{\alpha}_\text{profit}\left(r_i - \underline{r}^*\right) -
+           \underline{\alpha}_\text{bank}\left(i_b - \underline{i}_{b0}\right),
            -\underline{\delta}_i\right].
 ```
 The first term ``\gamma_{i0}`` is "autonomous investment". It represents long-run expectations. The other terms make up "induced investment" due to short-term changes in utilization, profits, and borrowing costs. The target value for utilization is full utilization, ``u_i = 1``, while for the bank rate it is the neutral bank rate that enters the Taylor function, ``\underline{i}_{b0}`` (see below). The target for the profit rate, ``\underline{r}^*``, is calculated by Macro during an internal calibration step to be consistent with starting values for investment and profits, using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).

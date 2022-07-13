@@ -73,6 +73,41 @@ function calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, t
 end
 
 """
+    intermed_tech_change(α, k, θ = nothing, b = nothing)
+	
+	α(np,ns) = matrix of cost shares
+	k = single value or a vector (ns) of rate coefficients
+	θ = single value or vector (ns) of exponents
+	c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
+	b(np,ns) = matrix of weights (if b = nothing it is set to one)
+
+Calculate growth rate of intermediate demand coefficients (that is, io.D entries), or the intercepts (for initialization)
+"""
+function intermed_tech_change(α, k, θ = 2.0, c = nothing, b = nothing)
+	# Initialize values
+	(np, ns) = size(α)
+	if isa(k, Number)
+		k = k * ones(ns)
+	end
+	if isa(θ, Number)
+		θ = θ * ones(ns)
+	end
+	if isnothing(b)
+		b = ones(np, ns)
+	end
+	if isnothing(c)
+		c = zeros(np, ns)
+	end
+	
+	cost_shares_exponentiated = [α[p,s]^θ[s] for p in 1:np, s in 1:ns]
+	denom = sum(cost_shares_exponentiated .* b, dims = 1).^(1.0 .- 1.0 ./ θ)'
+	num = [(cost_shares_exponentiated .* b ./ (α .+ IOlib.ϵ))[p,s] * k[s] for p in 1:np, s in 1:ns]
+
+	return c .- num ./ (denom .+ IOlib.ϵ)
+end
+
+
+"""
     ModelCalculations(file::String, I_en::Array, run::Int64)
 
 Implement the Macro model. This is the main function.
@@ -154,6 +189,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	infl_passthrough = params["wage-fcn"]["infl_passthrough"]
 	lab_constr_coeff = params["wage-fcn"]["lab_constr_coeff"]
 	LEAP_indices = params["LEAP_sector_indices"]
+	# Optionally update technical coefficients (the scaled Use matrix, io.D)
+	calc_use_matrix_tech_change = haskey(params, "tech-param-change") && !isnothing(params["tech-param-change"]) && haskey(params["tech-param-change"], "rate_constant")
+	if calc_use_matrix_tech_change
+		tech_change_rate_constant = params["tech-param-change"]["rate_constant"]
+	else
+		tech_change_rate_constant = 0.0 # Not used in this case, but assign a value
+	end
 
 	#----------------------------------
     # Calculate variables based on parameters
@@ -271,7 +313,11 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	param_pb = prices.pb
 	param_Mref = 2 * io.M # Allow for some extra slack -- this just sets a scale
 	param_mfrac = io.m_frac
-    #----------------------------------
+	# Initialize maximum utilization in multiple steps
+	param_max_util = ones(ns)
+	max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[1,:])
+	param_max_util[max_util_ndxs] .= exog.exog_max_util[1,max_util_ndxs]
+	#----------------------------------
     # Variables
     #----------------------------------
     # For objective function
@@ -310,7 +356,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Constraints
     #----------------------------------
     # Sector constraints
-	@constraint(mdl, eq_util[i = 1:ns], u[i] + ugap[i] == 1.0)
+	@constraint(mdl, eq_util[i = 1:ns], u[i] + ugap[i] == param_max_util[i])
 	# Fundamental input-output equation
 	@constraint(mdl, eq_io[i = 1:ns], sum(io.S[i,j] * param_pb[j] * qs[j] for j in 1:np) - param_Pg * param_z[i] * u[i] == 0)
     # Product constraints
@@ -348,7 +394,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		@info optim_output
 	end
     status = primal_status(mdl)
-    @info "Calibrating: $status"
+    @info "Calibrating for $base_year: $status"
 
 	# Sector variables
     IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
@@ -398,6 +444,12 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	prev_GDP_deflator = 1
     prev_GDP_gr = neutral_growth
     prev_πg = params["global-params"]["infl_default"]
+
+	if calc_use_matrix_tech_change
+		sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ (value.(u) .* z)
+		intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+		intermed_tech_change_intercept = -intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
+	end
 
 	lab_force_index = 1
 
@@ -450,7 +502,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Loop over years
 	#
 	#############################################################################
-    @info "Running from $base_year to $final_year:"
+	base_year_plusone = base_year + 1
+    @info "Running from $base_year_plusone to $final_year:"
 
     previous_failed = false
     for t in 1:ntime
@@ -519,6 +572,19 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		ω = (1.0 + ω_gr) * ω
 
 		#--------------------------------
+		# Update use matrix
+		#--------------------------------
+		if calc_use_matrix_tech_change
+			sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ g
+			intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+			D_hat = intermed_tech_change_intercept + intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
+			io.D = io.D .* exp.(D_hat) # This ensures that io.D will not become negative
+			if params["report-diagnostics"]
+				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(year) * ".csv"), io.D, params["included_product_codes"], params["included_sector_codes"])
+			end
+		end
+
+		#--------------------------------
 		# Profits
 		#--------------------------------
 		# First, update the Vnorm matrix
@@ -535,11 +601,18 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		γ_r = profit_sens * (profit_rate .- targ_profit_rate)
 		γ_i = -intrate_sens * (i_bank - tf_i_targ) * ones(ns)
         γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
+		# Override default behavior if production is exogenously specified
+		if t > 1
+			γ_spec = exog.exog_pot_output[t,:] ./ exog.exog_pot_output[t - 1,:] .- 1.0
+			pot_output_ndxs = findall(x -> !ismissing(x), γ_spec)
+			γ[pot_output_ndxs] .= γ_spec[pot_output_ndxs]
+		end
+
 		# Non-energy investment, by sector and total
         I_ne_disag = z .* (γ + exog.δ) .* capital_output_ratio
         I_ne = sum(I_ne_disag)
-		# Combine with energy investment
-        I_total = I_ne + I_en[t]
+		# Combine with energy investment and any additional exogenous investment
+        I_total = I_ne + I_en[t] + exog.I_addl[t]
 		# Update autonomous investment term
         γ_0 = γ_0 + growth_adj * (γ - γ_0)
 
@@ -602,6 +675,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 							w_gr, ω_gr, value.(I_tot), i_bank]
 		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
 
+		if t == ntime
+			break
+		end
 		#--------------------------------
 		# Update Taylor rule
 		#--------------------------------
@@ -618,7 +694,14 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Update prices
 		#--------------------------------
 		prices.Pg = (1 + πg) * prices.Pg
+		# Apply global inflation rate to world prices
 		prices.pw = prices.pw * (1 + exog.πw[t])
+		# Adjust for any exogenous price indices
+		if t > 1
+			pw_spec = exog.exog_price[t,:] ./ exog.exog_price[t - 1,:]
+			pw_ndxs = findall(x -> !ismissing(x), pw_spec)
+			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
+		end
 		prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, exog)
 		prices.pb = prices.pd
 
@@ -636,9 +719,14 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_pb = prices.pb
 		param_z = z
 		param_mfrac = (value.(M) + IOlib.ϵ * param_mfrac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
+		# Set maximum utilization in multiple steps
+		param_max_util = ones(ns)
+		max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[t + 1,:])
+		param_max_util[max_util_ndxs] .= exog.exog_max_util[t + 1,max_util_ndxs]
 
 		for i in 1:ns
 			set_normalized_coefficient(eq_io[i], u[i], -param_Pg * param_z[i])
+			set_normalized_rhs(eq_util[i], param_max_util[i])
 			for j in 1:np
 				set_normalized_coefficient(eq_io[i], qs[j], io.S[i,j] * param_pb[j])
 			end
@@ -669,6 +757,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 			@info optim_output
 		end
         status = primal_status(mdl)
+		# Increment year to report the correct year is being calculated
+		year += 1
         @info "Simulating for $year: $status"
         previous_failed = status != MOI.FEASIBLE_POINT
         if previous_failed
@@ -676,7 +766,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
             indices[t,2:finndx] = fill(NaN, (finndx - 2) + 1)
         end
 
-		year += 1
 
     end
 

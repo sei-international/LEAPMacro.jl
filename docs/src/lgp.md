@@ -52,7 +52,7 @@ q_{s,k}\underline{d}_k = 0.
 ## Supply of intermediate goods
 `eq_intdmd`: Intermediate goods are required for production and are given by technical coefficients (the input-output relationships). Intermediate demand is determined by
 ```math
-q_{d,k} - \sum_{i = 1}^{n_s} \underline{D}_{ki}\overline{z}_i u_i = 0.
+q_{d,k} - \sum_{i = 1}^{n_s} \overline{D}_{ki}\overline{z}_i u_i = 0.
 ```
 
 ## Capacity utilization
