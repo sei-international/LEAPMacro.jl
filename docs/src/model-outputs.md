@@ -70,6 +70,9 @@ Other files report figures that should be close to, although not necessarily ide
   * `tot_intermediate_supply_non-energy_sectors.csv`: Note that these values will be lower than in the supply-use table due to the excluded energy sectors
   * `wages.csv`
 
+If intermediate demand coefficients are [calculated endogenously](@ref config-intermed-dmd-change), then a further set of files will be reported containing tables of intermediate demand coefficients for each year of the simulation:
+  * `demand_coefficients_[year].csv`
+
 ## The `calibration` folder
 The files in this folder are generated after further adjustments and a calibration run of the [linear goal program](@ref lgp). Some of these files can also be used as a "sanity check", including:
   * `basic_prices_0.csv`: These should be close to 1

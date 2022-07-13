@@ -207,6 +207,18 @@ wage-fcn:
     lab_constr_coeff: 0.5
 ```
 
+### [Endogenous change in intermediate demand coefficients](@id config-intermed-dmd-change)
+The next block is optional. If it is present, it sets a rate constant for endogenously determining [intermediate demand coefficients](@ref dynamics-intermed-dmd-coeff). If the parameter is set to high, then it can generate unreasonably large rates of change in technical coefficients and can even create model instabilities. It is good practice to check [the `diagnostics` folder](@ref model-outputs-diagnostics) for annual files labeled `demand_coefficients_[year].csv` to see whether the values are reasonable.
+```yaml
+#---------------------------------------------------------------------------
+# Parameter for rate of change in technical parameters
+#---------------------------------------------------------------------------
+# Uncomment rate_constant line below to endogenize changes in the scaled Use matrix
+tech-param-change:
+    # Rate constant: Note that if this is too large then it can create instabilities
+    # rate_constant: 0.1 # 1/year
+```
+
 ### [Long-run demand elasticities](@id config-longrun-demand-elast)
 Initial values for demand elasticities for products with respect to global GDP (for exports) and the wage bill (for domestic final demand excluding investment) are specified in the [external parameter files](@ref params). The way that the elasticities enter into the model is described in the page on [model dynamics](@ref dynamics-demand-fcns).
 

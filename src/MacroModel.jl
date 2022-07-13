@@ -190,11 +190,11 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	lab_constr_coeff = params["wage-fcn"]["lab_constr_coeff"]
 	LEAP_indices = params["LEAP_sector_indices"]
 	# Optionally update technical coefficients (the scaled Use matrix, io.D)
-	calc_use_matrix_tech_change = haskey(params, "tech-param-change") && !isnothing(params["tech-param-change"]) && haskey(params["tech-param-change"], "scale_factor")
+	calc_use_matrix_tech_change = haskey(params, "tech-param-change") && !isnothing(params["tech-param-change"]) && haskey(params["tech-param-change"], "rate_constant")
 	if calc_use_matrix_tech_change
-		tech_change_scale_factor = params["tech-param-change"]["scale_factor"]
+		tech_change_rate_constant = params["tech-param-change"]["rate_constant"]
 	else
-		tech_change_scale_factor = 0.0 # Not used in this case, but assign a value
+		tech_change_rate_constant = 0.0 # Not used in this case, but assign a value
 	end
 
 	#----------------------------------
@@ -448,7 +448,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	if calc_use_matrix_tech_change
 		sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ (value.(u) .* z)
 		intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
-		intermed_tech_change_intercept = -intermed_tech_change(intermed_cost_shares, tech_change_scale_factor)
+		intermed_tech_change_intercept = -intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
 	end
 
 	lab_force_index = 1
@@ -577,7 +577,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		if calc_use_matrix_tech_change
 			sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ g
 			intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
-			D_hat = intermed_tech_change_intercept + intermed_tech_change(intermed_cost_shares, tech_change_scale_factor)
+			D_hat = intermed_tech_change_intercept + intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
 			io.D = io.D .* exp.(D_hat) # This ensures that io.D will not become negative
 			if params["report-diagnostics"]
 				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(year) * ".csv"), io.D, params["included_product_codes"], params["included_sector_codes"])

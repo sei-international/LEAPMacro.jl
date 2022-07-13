@@ -33,7 +33,7 @@ Five prices appear in the Macro model:
   4. Wages
   5. The central bank rate
 
-World prices for goods and services are treated very simply: all prices rise at the same inflation rate. While this is an acknowledged [limitation of the model](@ref terms-of-trade), it reduces the number of parameters the model developer must set and simplifies the application of the LEAP-Macro plugin in a LEAP model.
+In the Macro model, producers are assumed to be price-takers for tradeable goods and services, so prices of tradeables are set exogenously. The exogenous prices for tradeables are termed the "world prices", but the important distinction is that they are exogenous, whereas prices of non-tradeables are set endogenously through a markup. By default, world prices for all goods and services rise at the same inflation rate, with a constant real price. Optionally, [real price trends for selected tradeables](@ref params-optional-price-trend) can be specified on a product-by-product basis.
 
 The exchange rate is specified outside the model in the `time_series.csv` [parameter file](@ref params).
 

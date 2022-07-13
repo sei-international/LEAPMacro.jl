@@ -7,7 +7,7 @@ In between runs of the [linear goal program](@ref lgp), the [dynamic parameters]
 
 In the equations below, a subscript ``+1`` indicates the next-year's value, and a subscript ``-1`` the previous year's value. An underline indicates an [exogenous parameter](@ref exog-param-vars), while an overline is a [dynamic parameter](@ref dynamic-param-vars).
 
-## Prices
+## [Prices](@id dynamics-prices)
 For an explanation of the different prices, see [Processing the supply-use table](@ref process-sut).
 
 World prices grow at an exogenously specified inflation rate ``\underline{\pi}_{w,k}``,
@@ -30,17 +30,18 @@ The GDP deflator ``\pi_\text{GDP}`` is an index that grows at the average of the
 ```math
 V_k = \left(1 + \underline{\tau}_{d,k}\right)\overline{p}_{d,k,-1}\left(F_k + X_k + I_k - M_k\right).
 ```
-The GDP inflation rate is calcualted as
+The GDP inflation rate is calculated as
 ```math
 \pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{d,k}}{\sum_{k = l}^{n_p} V_l},
     \quad \pi_{d,k} = \frac{p_{d,k}-p_{d,k,-1}}{p_{d,k,-1}}.
 ```
 
-Domestic prices for tradeable goods and services (tradeables) are equal to the (exogenous) world price. Prices for non-tradeables are set as a mark-up on costs,
+Domestic prices for tradeable goods and services (tradeables) are equal to the (exogenous) world price,
 ```math
 \overline{p}_{d,k} = \underline{e}\overline{p}_{w,k},\quad k\in \text{tradeables},
 ```
 
+Prices for non-tradeables are set as a mark-up on costs,
 ```math
 \left(1 + \underline{\tau}_{d,k}\right) \overline{p}_{d,k} = \sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}
 \left[
@@ -96,6 +97,15 @@ With the above expressions, the growth rate of the wage share can be calculated.
 ```math
 \hat{\omega}_i = \hat{w} - \hat{\lambda} - \pi_g.
 ```
+
+## [Intermediate demand coefficients](@id dynamics-intermed-dmd-coeff)
+By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^1]: see [real price trends for selected tradeables](@ref params-optional-price-trend). The growth rates of the coefficients are calculated as
+```math
+\hat{\overline{D}}_{ki} = C_{ki} - \frac{\underline{A}\alpha_{ki}}{\sqrt{\sum_{l=1}^{n_p} \alpha^2_{li}}},
+```
+where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{A}`` is a rate constant, which is specified in the [configuration file](@ref config), and the ``\alpha_{ki}`` are cost shares, set to be compatible with the calculation of [prices for non-tradeables](@ref dynamics-prices).
+
+[^1]: The model is a simplified application of a more general model that is presented in [_Cost Share-induced Technological Change and Kaldor’s Stylized Facts_](https://www.sei.org/publications/cost-share-induced-technological-change-kaldors-stylized-facts/) by Eric Kemp-Benedict.
 
 ## Profit rate
 Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of output, ``\Pi_i``, is given by the value of output per unit of output less unit costs,

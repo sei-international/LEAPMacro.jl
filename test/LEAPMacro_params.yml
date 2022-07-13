@@ -122,10 +122,10 @@ wage-fcn:
 #---------------------------------------------------------------------------
 # Parameter for rate of change in technical parameters
 #---------------------------------------------------------------------------
-# Uncomment scale_factor line below to endogenize changes in the scaled Use matrix
+# Uncomment rate_constant line below to endogenize changes in the scaled Use matrix
 tech-param-change:
-    # Scale factor: Note that if this is too large then it can create instabilities
-    scale_factor: 0.1 # 1/year
+    # Rate constant: Note that if this is too large then it can create instabilities
+    # rate_constant: 0.1 # 1/year
 
 #---------------------------------------------------------------------------
 # Demand model parameters
