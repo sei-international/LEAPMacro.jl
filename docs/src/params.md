@@ -73,7 +73,7 @@ Here is the example from the Freedonia sample model:
 ## [Optional input files](@id params-optional-input-files)
 In the [configuration file general settings](@ref config-general-settings), it is possible to specify any or all of three optional input files for: investment demand; potential output; maximum capacity utilization; and real prices for tradeables.
 
-### Investment demand
+### [Investment demand](@id params-optional-exog-investment)
 The Macro model calculates investment for non-energy sectors based on expected demand and profitability: see the explanation of [potential output](@ref dynamics-potential-output) in the Technical Details. However, for public infrastructure investment -- which is driven by policy goals, rather than private profitability, and where the capital stock is not associated with a particular sector -- investment must be specified exogenously. (When externally specified investment *is* associated with a particular sector, it is better to specify potential output: see below.)
 
 The investment demand parameter file has the following structure:
@@ -100,7 +100,7 @@ The potential output parameter file has the following structure:
 
 The sequence of values is converted internally into an index. For this reason, **values must be specified for all years**. However, **values should be specified only for sectors with exogenous potential output**. Other sectors, where Macro simulates the change in potential output, should not appear in this file.
 
-### Maximum capacity utilization
+### [Maximum capacity utilization](@id params-optional-max-utilization)
 Capacity utilization in the Macro model is determined in each time step by solving a [linear goal program](@ref lgp). By default, maximum capacity utilization is equal to 1.0. However, in some cases, capacity utilization might be constrained. For example, during a disease outbreak, some service sector activities may be limited, and during a drought, manufacturing plants that rely on cooling or process water might have to curtail production. In these cases, a maximum level of capacity utilization less than one can be specified exogenously.
 
 The maximum capacity utilization file has the following structure:
