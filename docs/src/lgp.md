@@ -60,9 +60,9 @@ q_{d,k} - \sum_{i = 1}^{n_s} \overline{D}_{ki}\overline{z}_i u_i = 0.
 ```math
 \sum_{k=1}^{n_p} \underline{S}_{ik} \overline{p}_{b,k}q_{s,k} - \overline{P}_g\overline{z}_i u_i = 0.
 ```
-`eq_util`: Deviations in utilization for sector ``i`` below the target value of ``u_i = 1`` are penalized in the goal program. The deviation variable is calculated by imposing the condition
+`eq_util`: Deviations in utilization for sector ``i`` below the target value of ``u_i = \underline{u}_i^\text{max}`` are penalized in the goal program. (Note that ``\underline{u}_i^\text{max} = 1`` unless it is set exogenously. See [optional exogenous parameters](@ref optional-exog-param-vars) and the format for the [maximum capacity utilization file](@ref params-optional-max-utilization).) The deviation variable is calculated by imposing the condition
 ```math
-u_i + \Delta u_i = 1,\quad 0 \leq u_i,\Delta u_i \leq 1.
+u_i + \Delta u_i = \underline{u}_i^\text{max},\quad 0 \leq u_i,\Delta u_i \leq 1.
 ```
 
 ## Investment goods allocation

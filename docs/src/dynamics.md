@@ -126,7 +126,7 @@ r_i = \frac{\Pi_i}{p_K\underline{v}_i}.
 Capital-output ratios are initialized using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).
 
 ## [Potential output](@id dynamics-potential-output)
-Net potential output in sector ``i`` (that is, accounting for depreciation) grows at a rate ``\gamma_i``. The value is given by an investment function that responss to utilization, profitability, and borrowing costs as proxied by the central bank lending rate. The model assumes no active disinvestment, so the net growth rate is not allowed to fall below (the negative of) the depreciation rate,
+Net potential output in sector ``i`` (that is, accounting for depreciation) grows at a rate ``\gamma_i``. Unless it is overridden by an [optional exogenous potential output](@ref optional-exog-param-vars), the value is determined endogenously by an investment function that responds to utilization, profitability, and borrowing costs (proxied by the central bank lending rate). The model assumes no active disinvestment, so the net growth rate is not allowed to fall below (the negative of) the depreciation rate,
 ```math
 \gamma_i = \max\left[\gamma_{i0} + \underline{\alpha}_\text{util}\left(u_i - 1\right) +
            \underline{\alpha}_\text{profit}\left(r_i - \underline{r}^*\right) -
@@ -135,11 +135,16 @@ Net potential output in sector ``i`` (that is, accounting for depreciation) grow
 ```
 The first term ``\gamma_{i0}`` is "autonomous investment". It represents long-run expectations. The other terms make up "induced investment" due to short-term changes in utilization, profits, and borrowing costs. The target value for utilization is full utilization, ``u_i = 1``, while for the bank rate it is the neutral bank rate that enters the Taylor function, ``\underline{i}_{b0}`` (see below). The target for the profit rate, ``\underline{r}^*``, is calculated by Macro during an internal calibration step to be consistent with starting values for investment and profits, using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).
 
+If potential output is specified exogenously through the variable ``\underline{z}_i^\text{exog}``, then 
+```math
+\gamma_i = \underline{z}_{i,+1}^\text{exog}/\underline{z}_i^\text{exog} - 1.
+```
+
 Potential output grows at the calculated rate,
 ```math
 \overline{z}_{i,+1} = \left(1 + \gamma_i\right)\overline{z}_i.
 ```
-Autonomous investment follows adaptive expectations, with an initial value ``\gamma_{i0} = \underline{\gamma})0``,
+Autonomous investment follows adaptive expectations, with an initial value ``\gamma_{i0} = \underline{\gamma}_0``,
 ```math
 \gamma_{i0,+1} = \gamma_{i0} + \underline{\xi}\left(\gamma_i - \gamma_{i0}\right).
 ```
@@ -158,9 +163,9 @@ The initial value for the target GDP growth rate is the initial value for the au
 ```
 
 ## [Demand for investment goods](@id dynamics-inv-dmd)
-Total next-period demand for investment goods ``\overline{I}_{+1}`` is given by an identity: the sum across sectors of current potential output multiplied by the rate of increase in potential output plus the depreciation rate, multiplied by the capital-output ratio,
+Total next-period demand for investment goods ``\overline{I}_{+1}`` is given by two terms: 1) the sum across sectors of current potential output multiplied by the rate of increase in potential output plus the depreciation rate, multiplied by the capital-output ratio; 2) exogenous investment ``\underline{I}_\text{exog}`` (see [optional exogenous parameters](@ref optional-exog-param-vars) and the format for the [exogenous investment demand file](@ref params-optional-exog-investment)). That is,
 ```math
-\overline{I}_{+1} = \sum_{i=1}^{n_s} \overline{z}_i \underline{v}_i \left(\gamma_i + \underline{\delta}_i\right).
+\overline{I}_{+1} = \sum_{i=1}^{n_s} \overline{z}_i \underline{v}_i \left(\gamma_i + \underline{\delta}_i\right) + \underline{I}_{\text{exog},+1}.
 ```
 The total is then allocated across investment goods supply shares ``\underline{\theta}_k``.
 

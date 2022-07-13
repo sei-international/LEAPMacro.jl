@@ -118,7 +118,8 @@ Variables and parameters are labeled with the following dimensions:
 | ``\underline{\eta}^\text{exp}_k``    | Elasticity of normal export demand for product ``k`` with respect to a change in GWP                                                |
 | ``\underline{\eta}^\text{wage}_k``   | Elasticity of normal final demand for product ``k`` with respect to a change in the wage bill                                       |
 
-The following are [optional exogenous parameters](@id optional-exog-param-vars):
+## [Optional exogenous parameters](@id optional-exog-param-vars)
+The following are optional exogenous parameters:
 
 | Symbol                          | Definition                                                                                                                                                                          |
 |:--------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
