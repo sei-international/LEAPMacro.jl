@@ -48,6 +48,9 @@ Here is the example from the Freedonia sample model:
 ## Time series
 The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-wages-labor-prod).
 
+!!! info "Exchange rates and supply-use tables"
+    Supply-use tables have entries that are all in the same currency, usually but not always the national (domestic) currency. Exchange rates express the domestic currency in terms of a foreign currency, such as the US dollar, the Euro, the Yen, or a mixture of currencies (a currency "basket"). In Macro, exchange rates are converted into an index to ensure consistent currency units.
+
 Scenarios for the world economic growth rate can be drawn from other studies, such as the [Shared Socioeconomic Pathways (SSP) database](https://tntcat.iiasa.ac.at/SspDb/dsd?Action=htmlpage&page=about). The working age growth rate can be calculated from national projections or the [UN Population Prospects database](https://population.un.org/wpp/Download/Standard/Population/).
 
 Other parameters have less well-established sources of estimates. The labor productivity parameters (the Kaldor-Verdoorn parameters `KV_coeff` and `KV_intercept`) might well be assumed constant, possibly estimated from historical data or drawn from studies such as [Estimating Kaldor-Verdoorn’s law across countries in different stages of development](https://www.anpec.org.br/encontro/2014/submissao/files_I/i9-0ed7d252394aed6039f6af0e4ed51fc6.pdf) by Guilherme Magacho. Assumptions regarding the world inflation rate and the exchange rate can be based on historical patterns, other modeling studies, or consultation with experts.

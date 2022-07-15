@@ -760,7 +760,7 @@ function prices_init(np::Int64, io::IOdata)
     return PriceData(ones(np), #pb
                      ones(np), #pd
                      ones(np), #pp
-                     ones(np) + io.τd, #pw in domestic currency (converted using xr in Macro.jl)
+                     ones(np) + io.τd, #pw in domestic currency (converted using xr in ModelCalculations)
                      1,1)
 end
 
