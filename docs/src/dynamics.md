@@ -101,9 +101,9 @@ With the above expressions, the growth rate of the wage share can be calculated.
 ## [Intermediate demand coefficients](@id dynamics-intermed-dmd-coeff)
 By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^1]: see [real price trends for selected tradeables](@ref params-optional-price-trend). The growth rates of the coefficients are calculated as
 ```math
-\hat{\overline{D}}_{ki} = C_{ki} - \frac{\underline{A}\alpha_{ki}}{\sqrt{\sum_{l=1}^{n_p} \alpha^2_{li}}},
+\hat{\overline{D}}_{ki} = C_{ki} - \frac{\underline{a}\alpha_{ki}}{\sqrt{\sum_{l=1}^{n_p} \alpha^2_{li}}},
 ```
-where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{A}`` is a rate constant, which is specified in the [configuration file](@ref config-intermed-dmd-change), and the ``\alpha_{ki}`` are cost shares, set to be compatible with the calculation of [prices for non-tradeables](@ref dynamics-prices).
+where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{a}`` is a rate constant, which is specified in the [configuration file](@ref config-intermed-dmd-change), and the ``\alpha_{ki}`` are cost shares, set to be compatible with the calculation of [prices for non-tradeables](@ref dynamics-prices).
 
 [^1]: The model is a simplified application of a more general model that is presented in [_Cost Share-induced Technological Change and Kaldor’s Stylized Facts_](https://www.sei.org/publications/cost-share-induced-technological-change-kaldors-stylized-facts/) by Eric Kemp-Benedict.
 
