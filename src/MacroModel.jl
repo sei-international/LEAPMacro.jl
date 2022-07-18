@@ -262,8 +262,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     # Capital productivity of new investment
     #----------------------------------
 	# Intermediate variables
-	profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* ω +  transpose(io.D) * ((ones(np) + io.τd) .* prices.pd))
-	price_of_capital = dot(θ,(ones(np) + io.τd) .* prices.pd)
+	profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* ω +  transpose(io.D) * ((ones(np) + io.τd) .* prices.pb))
+	price_of_capital = dot(θ,(ones(np) + io.τd) .* prices.pb)
 	I_nextper = (1 + neutral_growth) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
 	profit_share_rel_capprice = (1/price_of_capital) * profit_per_output
 	init_profit = sum((γ_0 + exog.δ) .* io.g .* profit_share_rel_capprice)
@@ -589,8 +589,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# First, update the Vnorm matrix
 		io.Vnorm = Diagonal(1 ./ g) * io.S * Diagonal(value.(qs))
-		profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* ω +  transpose(io.D) * ((ones(np) + io.τd) .* prices.pd))
-		pK = dot(θ,(ones(np) + io.τd) .* prices.pd)
+		profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* ω +  transpose(io.D) * ((ones(np) + io.τd) .* prices.pb))
+		pK = dot(θ,(ones(np) + io.τd) .* prices.pb)
 		profit_rate = profit_per_output ./ (pK * capital_output_ratio)
 
 		#--------------------------------
