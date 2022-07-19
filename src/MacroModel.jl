@@ -447,7 +447,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	#--------------------------------
 	# Initialize variables for calculating inflation, growth rates, etc.
 	#--------------------------------
-    pd_prev = prices.pd/(1 + params["global-params"]["infl_default"])
+	pw_prev = prices.pw/(1 + params["global-params"]["infl_default"])
+	pd_prev = prices.pd/(1 + params["global-params"]["infl_default"])
     pb_prev = param_pb/(1 + params["global-params"]["infl_default"])
     prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/(1 + neutral_growth)
 
@@ -542,6 +543,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         else
 			πd = (param_pd - pd_prev) ./ (pd_prev .+ IOlib.ϵ) # If not produced, pd_prev = 0
 	        πb = (param_pb - pb_prev) ./ pb_prev
+	        πw_byprod = (prices.pw - pw_prev) ./ pw_prev # exog.πw is a single value, applied to all products; this is by product
             πg = sum(g_share .* πb)
             prev_πg = πg
 			val_findmd = pd_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
@@ -630,7 +632,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Export demand
 		#--------------------------------
-        Xmax = Xmax .* (1 + exog.world_grs[t]).^exog.export_elast_demand[t]
+        Xmax = Xmax .* (1 + exog.world_grs[t]).^exog.export_elast_demand[t] .* ((1 .+ πw_byprod)./(1 .+ πd)).^exog.export_price_elast
 
 		#--------------------------------
 		# Final domestic consumption demand
@@ -714,6 +716,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 			pw_ndxs = findall(x -> !ismissing(x), pw_spec)
 			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
 		end
+
 		# prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, exog)
 		# prices.pb = prices.pd
 
@@ -734,7 +737,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_pd = prices.pd
 		param_pb = prices.pb
 		param_z = z
-		param_mfrac = io.m_frac
+		param_mfrac = io.m_frac .* ((1 .+ πd)./(1 .+ πw_byprod)).^exog.import_price_elast
 		# Set maximum utilization in multiple steps
 		param_max_util = ones(ns)
 		max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[t + 1,:])
