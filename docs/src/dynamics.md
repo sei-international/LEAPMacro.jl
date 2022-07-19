@@ -12,61 +12,64 @@ For an explanation of the different prices, see [Processing the supply-use table
 
 World prices grow at an exogenously specified inflation rate ``\underline{\pi}_{w,k}``,
 ```math
-\overline{p}_{w,k,+1} = \left(1 + \underline{\pi}_{w,k}\right)\overline{p}_{w,k}.
+    \overline{p}_{w,k,+1} = \left(1 + \underline{\pi}_{w,k}\right)\overline{p}_{w,k}.
 ```
 By default, a uniform inflation rate is applied to all traded goods, while the real price is constant, so that ``\underline{\pi}_{w,k} = \underline{\pi}_w``. However, optionally, a real price index for an individual product ``k`` can be specified: see [real price trends for selected tradeables](@ref params-optional-price-trend).
 
 The output price level is given by
 ```math
-\overline{P}_{g,+1} = \left(1 + \pi_g\right)\overline{P}_g,
+    \overline{P}_{g,+1} = \left(1 + \pi_g\right)\overline{P}_g,
 ```
 where the inflation rate ``\pi_g`` is given by the averge of the rate of increase in basic prices, weighted by domestic supply,
 ```math
-\pi_g = \frac{\sum_{k = 1}^{n_p} q_{s,k}\pi_{b,k}}{\sum_{k = l}^{n_p} q_{s,l}},
-    \quad \pi_{b,k} = \frac{p_{b,k}-p_{b,k,-1}}{p_{b,k,-1}}.
+    \pi_g = \frac{\sum_{k = 1}^{n_p} q_{s,k}\pi_{b,k}}{\sum_{k = l}^{n_p} q_{s,l}}, \quad \pi_{b,k} = \frac{p_{b,k}-p_{b,k,-1}}{p_{b,k,-1}}.
 ```
 
 The GDP deflator ``\pi_\text{GDP}`` is an index that grows at the average of the rate of increase of producers' prices weighted by the value of final demand. The value of final demand for good ``k`` is
 ```math
-V_k = \left(1 + \underline{\tau}_{d,k}\right)\overline{p}_{d,k,-1}\left(F_k + X_k + I_k - M_k\right).
+    V_k = \overline{p}_{d,k,-1}\left(F_k + X_k + I_k - M_k\right).
 ```
 The GDP inflation rate is calculated as
 ```math
-\pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{d,k}}{\sum_{k = l}^{n_p} V_l},
-    \quad \pi_{d,k} = \frac{p_{d,k}-p_{d,k,-1}}{p_{d,k,-1}}.
+    \pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{d,k}}{\sum_{k = l}^{n_p} V_l}, \quad \pi_{d,k} = \frac{p_{d,k}-p_{d,k,-1}}{p_{d,k,-1}}.
 ```
 
-Domestic prices for tradeable goods and services (tradeables) are equal to the (exogenous) world price,
+Basic prices are a weighted average of domestic and foreign prices, with the weight given by the import fraction ``f_k``, where
 ```math
-\overline{p}_{d,k} = \underline{e}\overline{p}_{w,k},\quad k\in \text{tradeables},
+    f_k = \frac{M_k}{q_{d,k} + F_k + I_k}.
 ```
-
-Prices for non-tradeables are set as a mark-up on costs,
+Basic prices are therefore
 ```math
-\left(1 + \underline{\tau}_{d,k}\right) \overline{p}_{d,k} = \sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}
-\left[
-  \overline{P}_g\omega_i + \sum_{l = 1}^{n_p}\left(1 + \underline{\tau}_{d,l}\right) \overline{p}_{d,l} \underline{D}_{li}
-\right],
-\quad k\not\in \text{tradeables}.
+    \overline{p}_{b,k} = f_k \underline{e}\overline{p}_{w,k} + \left(1 - f_k\right)\overline{p}_{d,k}.
 ```
-Together, these equations form a linear system in producer prices (a "Sraffian" system), which is solved using linear algebra.
-
-Basic prices are the average prices of domestic goods and imports. They are tracked separately from the producer price in the model, but under the assumptions listed above, they are guaranteed to be equal,
+If ``f_k = 1``, meaning the country does not produce product ``k`` and all supply is from imports, then ``\overline{p}_{b,k} = \overline{p}_{w,k}``. Otherwise, domestic prices are set as a mark-up on costs, where costs are in terms of basic prices
 ```math
-\overline{p}_{b,k} = \overline{p}_{d,k}.
+ \overline{p}_{d,k} = \sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}
+    \left[
+        \overline{P}_g\left(\omega_i + \varepsilon_i\right) + \sum_{l = 1}^{n_p} \overline{p}_{b,l} \overline{D}_{li}
+    \right].
 ```
+Together these equations lead to a linear system in domestic prices,
+```math
+\overline{p}_{d,k} = \overline{P}_g\sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}\left(\omega_i + \varepsilon_i\right) + \underline{e}\sum_{l = 1}^{n_p} A_{kl} f_l \overline{p}_{w,l} + \sum_{l = 1}^{n_p} A_{kl} \left(1 - f_l\right)\overline{p}_{d,l},
+```
+where
+```math
+    A_{kl} = \sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}\overline{D}_{li}.
+```
+This system is solved using linear algebra.
 
 ## Imports
-The reference import demand is set equal to twice the calculated volume of imports from the [linear goal program](@ref lgp),
+The normal level of imports of good ``k`` as a fraction of domestic demand (intermediate, final, and investment) is updated based on the values calculated in the last run of the [linear goal program](@ref lgp), and then adjusted based on relative changes in world and domestic prices,
+```math
+\overline{f}_k = f_k \left(\frac{1 + \pi_{d,k}}{1 + \underline{\pi}_{w,k}}\right)^{\underline{\phi}^\text{imp}_k}.
+```
+
+The reference import demand, which appears as a scale factor in the [linear goal program](@ref lgp), is set equal to twice the calculated volume of imports,
 ```math
 \overline{M}^\text{ref}_k = 2 M_k.
 ```
-This formulation is not problematic because the reference level only sets a scale.
-
-The normal level of imports of good ``k`` as a fraction of domestic demand (intermediate, final, and investment) is updated based on the calculated values,
-```math
-\overline{f}_k = \frac{M_k}{q_{d,k} + F_k + I_k}.
-```
+The multiple of two is somewhat arbitrary, because this simply sets a scale.
 
 ## [Wages and labor productivity](@id dynamics-wages-labor-prod)
 The wage share ``\omega_i`` in sector ``i`` is defined as
@@ -101,9 +104,9 @@ With the above expressions, the growth rate of the wage share can be calculated.
 ## [Intermediate demand coefficients](@id dynamics-intermed-dmd-coeff)
 By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^1]: see [real price trends for selected tradeables](@ref params-optional-price-trend). The growth rates of the coefficients are calculated as
 ```math
-\hat{\overline{D}}_{ki} = C_{ki} - \frac{\underline{A}\alpha_{ki}}{\sqrt{\sum_{l=1}^{n_p} \alpha^2_{li}}},
+\hat{\overline{D}}_{ki} = C_{ki} - \frac{\underline{a}\alpha_{ki}}{\sqrt{\sum_{l=1}^{n_p} \alpha^2_{li}}},
 ```
-where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{A}`` is a rate constant, which is specified in the [configuration file](@ref config-intermed-dmd-change), and the ``\alpha_{ki}`` are cost shares, set to be compatible with the calculation of [prices for non-tradeables](@ref dynamics-prices).
+where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{a}`` is a rate constant, which is specified in the [configuration file](@ref config-intermed-dmd-change), and the ``\alpha_{ki}`` are cost shares, set to be compatible with the calculation of [prices for non-tradeables](@ref dynamics-prices).
 
 [^1]: The model is a simplified application of a more general model that is presented in [_Cost Share-induced Technological Change and Kaldor’s Stylized Facts_](https://www.sei.org/publications/cost-share-induced-technological-change-kaldors-stylized-facts/) by Eric Kemp-Benedict.
 
@@ -111,13 +114,13 @@ where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`
 Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of output, ``\Pi_i``, is given by the value of output per unit of output less unit costs,
 ```math
 \Pi_i = \frac{1}{g_i}\sum_{k=1}^{n_p} \underline{S}_{i,k} q_{s,k}\overline{p}_{d,k} -
-        \left[\overline{P}_g\omega_i +
-              \sum_{k = 1}^{n_p}\left(1+\tau_{d,k}\right)\overline{p}_{d,k}\underline{D}_{k,i} \right].
+        \left[\overline{P}_g\left(\omega_i + \varepsilon_i\right) +
+              \sum_{k = 1}^{n_p}\overline{p}_{d,k}\underline{D}_{k,i} \right].
 ```
 
 The Macro model does not track the capital stock. The calculation for the profit rate starts with the current unit price of capital goods ``p_K``, calculated as
 ```math
-p_K = \sum_{k=1}^{n_p}\underline{\theta}_k \left(1+\tau_{d,k}\right) \overline{p}_{d,k}.
+p_K = \sum_{k=1}^{n_p}\underline{\theta}_k \overline{p}_{d,k}.
 ```
 The profit rate is then given by profits divicded by the product of the price of capital and the capital-output ratio ``\underline{v}_i``,
 ```math
@@ -184,9 +187,9 @@ Substituting this expression into the equation for investment demand and solving
 The calibrated value for ``\underline{r}^*`` is found by setting ``\overline{z}_i = g_i`` and ``\gamma_i = \underline{\gamma}_0``. That value is then used to calculate capital-output ratios.
 
 ## [Export demand and final demand](@id dynamics-demand-fcns)
-The normal level of export demand grows with global GDP (or gross world product, GWP) to a goods-specific elasticity,
+The normal level of export demand grows with global GDP (or gross world product, GWP) to a goods-specific elasticity, modified by the relative change in domestic and world prices,
 ```math
-\overline{X}^\text{norm}_{k,+1} = \left(1 + \underline{\gamma}^\text{world}\right)^{\underline{\eta}^\text{exp}_k}\overline{X}^\text{norm}_k.
+\overline{X}^\text{norm}_{k,+1} = \left(1 + \underline{\gamma}^\text{world}\right)^{\underline{\eta}^\text{exp}_k} \left(\frac{1 + \underline{\pi}_{w,k}}{1 + \pi_{d,k}}\right)^{\underline{\phi}^\text{exp}_k} \overline{X}^\text{norm}_k.
 ```
 Normal final demand grows with the real wage bill to a goods-specific elasticity. The next-period nominal wage bill in sector ``i`` is calculated using variables and parameters introduced above,
 ```math

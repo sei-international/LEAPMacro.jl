@@ -12,8 +12,8 @@ In addition to model variables, there are [exogenous parameters](@ref exog-param
 
 Variables and parameters are labeled with the following dimensions:
 
-| Symbol       | Definition                                          | 
-|:-------------| :---------------------------------------------------|
+| Symbol       | Definition                                          |
+|:-------------|:----------------------------------------------------|
 | ``n_s``      | Number of sectors                                   |
 | ``n_p``      | Number of products                                  |
 | ``i``, ``j`` | Sector indices, taking values from ``1\ldots n_s``  |
@@ -87,11 +87,11 @@ Variables and parameters are labeled with the following dimensions:
 | ``\underline{\varphi}_F``            | For final demand sector weights, weight of value share vs. constant share                                                           |
 | ``\underline{\varphi}_X``            | For export sector weights, weight of value share vs. constant share                                                                 |
 | ``\underline{S}_{ik}``               | Sector ``i``'s share of domestic production of product ``k``                                                                        |
-| ``\underline{D}^\text{init}_{ki}``   | Initial value for intermediate demand for product ``k`` per unit of output from sector ``i``                                         |
+| ``\underline{D}^\text{init}_{ki}``   | Initial value for intermediate demand for product ``k`` per unit of output from sector ``i``                                        |
 | ``\underline{d}_k``                  | Equal to ``\underline{d}_k = 1`` if the country does _not_ produce product ``k`` and  ``\underline{d}_k = 0`` if it does produce it |
+| ``\underline{\varepsilon}_i``        | Initial energy cost share for sector ``i`` if energy excluded, otherwise zero                                                       |
 | ``\underline{e}``                    | Exchange rate                                                                                                                       |
 | ``\underline{\pi}_{w,k}``            | Inflation rate for the world price of product ``k`` (currently the same across all products)                                        |
-| ``\underline{\tau}_{d,k}``           | Tax rate on domestic supply of product ``k``                                                                                        |
 | ``\underline{\mu}_i``                | Profit margin in sector ``i`` over total costs                                                                                      |
 | ``\underline{\alpha}_\text{KV}``     | Kaldor-Verdoorn law coefficient                                                                                                     |
 | ``\underline{\beta}_\text{KV}``      | Kaldor-Verdoorn law intercept                                                                                                       |
@@ -117,13 +117,15 @@ Variables and parameters are labeled with the following dimensions:
 | ``\underline{\gamma}^\text{world}``  | Growth rate of world GDP (also termed gross world product, GWP)                                                                     |
 | ``\underline{\eta}^\text{exp}_k``    | Elasticity of normal export demand for product ``k`` with respect to a change in GWP                                                |
 | ``\underline{\eta}^\text{wage}_k``   | Elasticity of normal final demand for product ``k`` with respect to a change in the wage bill                                       |
+| ``\underline{\phi}^\text{exp}_k``    | Elasticity of export demand with respect to relative price changes                                                                  |
+| ``\underline{\phi}^\text{imp}_k``    | Elasticity of import demand with respect to relative price changes                                                                  |
 
 ## [Optional exogenous parameters](@id optional-exog-param-vars)
 The following are optional exogenous parameters:
 
-| Symbol                          | Definition                                                                                                                                                                          |
-|:--------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ``\underline{I}_\text{exog}``   | Exogenous investment, not associated with a sector (default is 0.0)                                                                                                                 |
-| ``\underline{z}_i^\text{exog}`` | Exogenously specified potential output (default is that Macro calculates potential output)                                                                                          |
-| ``\underline{u}_i^\text{max}``  | In the [linear goal program](@ref lgp), the maximum capacity utilization (default is 1.0)                                                                                           |
-| ``\underline{A}``               | Rate constant for endogenous intermediate demand coefficients (default is ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``) |
+| Symbol                          | Definition                                                                                                                        |
+|:--------------------------------|:----------------------------------------------------------------------------------------------------------------------------------|
+| ``\underline{I}_\text{exog}``   | Exogenous investment, not associated with a sector (default is 0.0)                                                               |
+| ``\underline{z}_i^\text{exog}`` | Exogenously specified potential output (default is that Macro calculates potential output)                                        |
+| ``\underline{u}_i^\text{max}``  | In the [linear goal program](@ref lgp), the maximum capacity utilization (default is 1.0)                                         |
+| ``\underline{a}``               | Rate constant for endogenous intermediate demand coefficients (default is ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``) |
