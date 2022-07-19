@@ -454,7 +454,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 
 	prev_GDP_deflator = 1
     prev_GDP_gr = neutral_growth
-    prev_πg = params["global-params"]["infl_default"]
+    πg = params["global-params"]["infl_default"]
+    πb = ones(length(prices.pb)) * params["global-params"]["infl_default"]
+    πd = ones(length(prices.pd)) * params["global-params"]["infl_default"]
+    πw_byprod = ones(length(prices.pw)) * params["global-params"]["infl_default"]
 
 	if calc_use_matrix_tech_change
 		sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
@@ -533,9 +536,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         va_at_prev_prices_2 = sum(pb_prev[j] * io.D[j,:] for j in 1:np) .* g
         value_added_at_prev_prices = va_at_prev_prices_1 - va_at_prev_prices_2
         if previous_failed
-            πg = prev_πg
-            pd_prev = pd_prev * (1 + πg)
-            pb_prev = pb_prev * (1 + πg)
+            pd_prev = pd_prev .* (1 .+ πd)
+            pb_prev = pb_prev .* (1 .+ πb)
+            pw_prev = pb_prev .* (1 .+ πw_byprod)
             va1 = (1 + πg) * prices.Pg * g
             va2 = sum(value.(param_pb)[j] * io.D[j,:] for j in 1:np) .* g
             value_added = va1 - va2
@@ -545,7 +548,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	        πb = (param_pb - pb_prev) ./ pb_prev
 	        πw_byprod = (prices.pw - pw_prev) ./ pw_prev # exog.πw is a single value, applied to all products; this is by product
             πg = sum(g_share .* πb)
-            prev_πg = πg
 			val_findmd = pd_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
 	        val_findmd_share = val_findmd/sum(val_findmd)
             πGDP = sum(val_findmd_share .* πd)
