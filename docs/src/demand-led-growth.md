@@ -33,11 +33,11 @@ Five prices appear in the Macro model:
   4. Wages
   5. The central bank rate
 
-In the Macro model, producers are assumed to be price-takers for tradeable goods and services, so prices of tradeables are set exogenously. The exogenous prices for tradeables are termed the "world prices", but the important distinction is that they are exogenous, whereas prices of non-tradeables are set endogenously through a markup. By default, world prices for all goods and services rise at the same inflation rate, with a constant real price. Optionally, [real price trends for selected tradeables](@ref params-optional-price-trend) can be specified on a product-by-product basis.
+In the Macro model, prices of trading partners (the "world prices") are set exogenously. By default, world prices for all goods and services rise at the same inflation rate, with a constant real price. Optionally, [real price trends for selected tradeables](@ref params-optional-price-trend) can be specified on a product-by-product basis.
 
 The exchange rate is specified outside the model in the `time_series.csv` [parameter file](@ref params).
 
-Domestic prices for goods and services are determined as a mark-up on cost of labor and intermediate inputs. Because intermediate input costs enter the calculation, and some of those inputs will typically be imported, domestic prices tend to track world prices in the model.
+Basic prices -- what domestic consumers pay -- is a trade-weighted average of world and domestic prices. Domestic prices for goods and services are determined as a mark-up on cost of labor and intermediate inputs. Because intermediate input costs enter the calculation, and some of those inputs will typically be imported, domestic prices tend to track world prices in the model.
 
 Wages rise more or less in proportion to inflation (with a proportionality factor set in the [configuration file](@ref config)) and in response to the difference between the growth rate of the demand for labor and the growth rate of the working-age population, which is set in the `time_series.csv` [parameter file](@ref params).
 

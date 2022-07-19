@@ -37,40 +37,47 @@ function to_quoted_string_vec(svec)
 end
 
 """
-    calc_sraffa_inverse(np::Int64, ns::Int64, tradeables::Array{Bool,1}, io::IOdata)
+    calc_sraffa_matrix(np::Int64, ns::Int64, io::IOdata)
+	# np: number of products
+	# ns: number of sectors
+	# io: IOdata data structure
 
-Calculate the Sraffa inverse matrix, which is used to calculate domestic prices
+Calculate the Sraffa matrix, which is used to calculate domestic prices
 """
-function calc_sraffa_inverse(np::Int64, ns::Int64, tradeables::Array{Bool,1}, io::IOdata)
+function calc_sraffa_matrix(np::Int64, ns::Int64, io::IOdata)
 	sraffa_matrix = Array{Float64}(undef, np, np)
-	sraffa_matrix .= 0.0
 	# Domestic prices
-	for i in findall(.!tradeables)
+	for i in 1:np
 		for j in 1:np
-			sraffa_matrix[i,j] = ((1 + io.τd[j])/(1 + io.τd[i])) * sum(io.μ[r] * io.S[r,i] * io.D[j,r] for r in 1:ns)
+			sraffa_matrix[i,j] = sum(io.μ[r] * io.S[r,i] * io.D[j,r] for r in 1:ns)
 		end
 	end
-    inv(LinearAlgebra.I - sraffa_matrix)
+    return sraffa_matrix
 end
 
 """
-    calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, exog::ExogParams)
+    calc_dom_prices(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, prices::PriceData, io::IOdata, exog::ExogParams)
+	# t: time index (for exchange rate)
+	# np: number of products
+	# ns: number of sectors
+	# ω: wage share by sector
+	# io: IOdata data structure
 
-Calculate the Sraffa right-hand side expression, which is multiplied by the Sraffa inverse matrix to give domestic prices
+Evaluate the Sraffa system to get domestic prices
 """
-function calc_sraffa_RHS(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, tradeables::Array{Bool,1}, prices::PriceData, io::IOdata, exog::ExogParams)
-	sraffa_wage_vector = Array{Float64}(undef, np)
-	sraffa_wage_vector .= 0.0 # Initialize to zero
-	for i in findall(.!tradeables)
-		sraffa_wage_vector[i] = (1/(1 + io.τd[i])) * sum(io.μ[r] * io.S[r,i] * ω[r] for r in 1:ns)
+function calc_dom_prices(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, prices::PriceData, io::IOdata, exog::ExogParams)
+	sraffa_matrix = calc_sraffa_matrix(np, ns, io)
+	wage_vector = Array{Float64}(undef, np)
+	world_price_vector = Array{Float64}(undef, np)
+	for i in 1:np
+		wage_vector[i] = prices.Pg * sum(io.μ[r] * io.S[r,i] * (ω[r] + io.energy_share[r]) for r in 1:ns)
+		world_price_vector[i] = exog.xr[t] * sum(sraffa_matrix[i,j] * io.m_frac[j] * prices.pw[j] for j in 1:np)
 	end
-	# Initialize prices.pd
-	sraffa_RHS = prices.Pg * sraffa_wage_vector
-	for i in findall(tradeables)
-		sraffa_RHS[i] = exog.xr[t] * prices.pw[i]
-	end
-	return sraffa_RHS
+	sraffa_RHS = wage_vector + world_price_vector
+	# Solve the Sraffa system and return the result
+	inv(LinearAlgebra.I - [sraffa_matrix[i,j] * (1 - io.m_frac[j]) for i in 1:np, j in 1:np]) * sraffa_RHS
 end
+
 
 """
     intermed_tech_change(α, k, θ = nothing, b = nothing)
@@ -205,6 +212,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	# Initial autonomous growth rate
 	γ_0 = neutral_growth * ones(ns)
 	# Set up a "tradeables" filter
+	# TODO: Get rid of tradeables
     tradeables = [true for i in 1:np] # Initialize to true
     tradeables[params["non-tradeable-range"]] .= false
 
@@ -254,16 +262,18 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	#----------------------------------
     # Domestic prices using a Sraffian price system
     #----------------------------------
-	sraffa_inverse = calc_sraffa_inverse(np, ns, tradeables, io)
-    prices.pd = sraffa_inverse * calc_sraffa_RHS(1, np, ns, ω, tradeables, prices, io, exog)
-	prices.pb = prices.pd
+	# sraffa_inverse = calc_sraffa_inverse(np, ns, tradeables, io)
+    # prices.pd = sraffa_inverse * calc_sraffa_RHS(1, np, ns, ω, tradeables, prices, io, exog)
+	# prices.pb = prices.pd
+	prices.pd = calc_dom_prices(1, np, ns, ω, prices, io, exog)
+	prices.pb = exog.xr[1] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
 
 	#----------------------------------
     # Capital productivity of new investment
     #----------------------------------
 	# Intermediate variables
-	profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* ω +  transpose(io.D) * ((ones(np) + io.τd) .* prices.pb))
-	price_of_capital = dot(θ,(ones(np) + io.τd) .* prices.pb)
+	profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
+	price_of_capital = dot(θ,prices.pb)
 	I_nextper = (1 + neutral_growth) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
 	profit_share_rel_capprice = (1/price_of_capital) * profit_per_output
 	init_profit = sum((γ_0 + exog.δ) .* io.g .* profit_share_rel_capprice)
@@ -446,8 +456,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     prev_πg = params["global-params"]["infl_default"]
 
 	if calc_use_matrix_tech_change
-		sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ (value.(u) .* z)
-		intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+		sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
+		intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 		intermed_tech_change_intercept = -intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
 	end
 
@@ -490,6 +500,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	output_var(params, product_names, "imports", run, "", "w")
 	output_var(params, product_names, "exports", run, "", "w")
 	output_var(params, product_names, "basic_prices", run, "", "w")
+	output_var(params, product_names, "domestic_prices", run, "", "w")
 	# Create a file to hold scalar variables
 	scalar_var_list = ["GDP gr", "curr acct surplus to GDP ratio", "curr acct surplus", "real GDP",
 					   "GDP deflator", "labor productivity gr", "labor force gr", "wage rate gr",
@@ -511,29 +522,29 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Output
 		#--------------------------------
         g = value.(u) .* z
-		g_share = pb_prev .* value.(qs)/sum(pb_prev .* value.(qs))
+		g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
 
 		#--------------------------------
 		# Price indices and deflators
 		#--------------------------------
         # This is used here if the previous calculation failed, but is also reported below
         va_at_prev_prices_1 = prices.Pg * g
-        va_at_prev_prices_2 = sum(pd_prev[j] * io.D[j,:] for j in 1:np) .* g
+        va_at_prev_prices_2 = sum(pb_prev[j] * io.D[j,:] for j in 1:np) .* g
         value_added_at_prev_prices = va_at_prev_prices_1 - va_at_prev_prices_2
         if previous_failed
             πg = prev_πg
             pd_prev = pd_prev * (1 + πg)
             pb_prev = pb_prev * (1 + πg)
             va1 = (1 + πg) * prices.Pg * g
-            va2 = sum(value.(param_pd)[j] * io.D[j,:] for j in 1:np) .* g
+            va2 = sum(value.(param_pb)[j] * io.D[j,:] for j in 1:np) .* g
             value_added = va1 - va2
             πGDP = sum(value_added)/sum(value_added_at_prev_prices) - 1
         else
-			πd = (param_pd - pd_prev) ./ pd_prev
+			πd = (param_pd - pd_prev) ./ (pd_prev .+ IOlib.ϵ) # If not produced, pd_prev = 0
 	        πb = (param_pb - pb_prev) ./ pb_prev
             πg = sum(g_share .* πb)
             prev_πg = πg
-			val_findmd = (ones(np) + io.τd) .* pd_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
+			val_findmd = pd_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
 	        val_findmd_share = val_findmd/sum(val_findmd)
             πGDP = sum(val_findmd_share .* πd)
             pd_prev = param_pd
@@ -575,8 +586,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Update use matrix
 		#--------------------------------
 		if calc_use_matrix_tech_change
-			sector_price_level = (io.S * (pb_prev .* value.(qs))) ./ g
-			intermed_cost_shares = [(1 + io.τd[i]) * pd_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+			sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ g
+			intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 			D_hat = intermed_tech_change_intercept + intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
 			io.D = io.D .* exp.(D_hat) # This ensures that io.D will not become negative
 			if params["report-diagnostics"]
@@ -589,8 +600,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# First, update the Vnorm matrix
 		io.Vnorm = Diagonal(1 ./ g) * io.S * Diagonal(value.(qs))
-		profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* ω +  transpose(io.D) * ((ones(np) + io.τd) .* prices.pb))
-		pK = dot(θ,(ones(np) + io.τd) .* prices.pb)
+		profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
+		pK = dot(θ, prices.pb)
 		profit_rate = profit_per_output ./ (pK * capital_output_ratio)
 
 		#--------------------------------
@@ -670,6 +681,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		output_var(params, value.(M), "imports", run, year, "a")
 		output_var(params, value.(X), "exports", run, year, "a")
 		output_var(params, param_pb, "basic_prices", run, year, "a")
+		output_var(params, param_pd, "domestic_prices", run, year, "a")
 		# Scalar variables
 		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, value.(I_tot), i_bank]
@@ -702,9 +714,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 			pw_ndxs = findall(x -> !ismissing(x), pw_spec)
 			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
 		end
-		prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, exog)
-		prices.pb = prices.pd
+		# prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, exog)
+		# prices.pb = prices.pd
 
+		io.m_frac = (value.(M) + IOlib.ϵ * io.m_frac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
+		prices.pd = calc_dom_prices(t, np, ns, ω, prices, io, exog)
+		prices.pb = exog.xr[t] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
+		
 		#--------------------------------
 		# Update the linear goal program
 		#--------------------------------
@@ -718,7 +734,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_pd = prices.pd
 		param_pb = prices.pb
 		param_z = z
-		param_mfrac = (value.(M) + IOlib.ϵ * param_mfrac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
+		param_mfrac = io.m_frac
 		# Set maximum utilization in multiple steps
 		param_max_util = ones(ns)
 		max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[t + 1,:])

@@ -24,15 +24,14 @@ mutable struct IOdata
     marg_pos_ratio::Array{Float64,1} # np
     marg_neg_share::Array{Float64,1} # np
     m_frac::Array{Float64,1} # np
+    energy_share::Array{Float64,1} # ns
     μ::Array{Float64,1} # ns
-    τd::Array{Float64,1} # np
 end
 
 "Price indices"
 mutable struct PriceData
     pb::Array{Float64,1}
     pd::Array{Float64,1}
-    pp::Array{Float64,1}
     pw::Array{Float64,1}
     Pg::Float64
     Pc::Float64
@@ -53,6 +52,8 @@ mutable struct ExogParams
     exog_price::Array{Any,2} # Exogenously specified real prices (converted to index)
     export_elast_demand::Array{Any,1} # np x year
     wage_elast_demand::Array{Any,1} # np x year
+    export_price_elast::Array{Any,1} # np
+    import_price_elast::Array{Any,1} # np
 end
 
 """
@@ -192,6 +193,8 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
 
     global_params = YAML.load_file(YAML_file)
 
+    global_params["include-energy-sectors"] = include_energy_sectors
+
     if include_energy_sectors
         output_folder_name = string(global_params["output_folder"], "_full")
     else
@@ -235,6 +238,7 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
 
     global_params["energy-sector-indexes"] = []
     global_params["energy-product-indexes"] = []
+
     if !include_energy_sectors
         user_defined_energy_sector_ndxs = findall(in(global_params["excluded_sectors"]["energy"]).(sector_codes))
         user_defined_energy_product_ndxs = findall(in(global_params["excluded_products"]["energy"]).(sector_codes))
@@ -283,7 +287,9 @@ function get_var_params(param_file::String)
                     Array{Any}(undef, 0, 0), # exog_max_util
                     Array{Any}(undef, 0, 0), # exog_price
                     [], # export_elast_demand
-                    []) # wage_elast_demand
+                    [], # wage_elast_demand
+                    Array{Float64}(undef, 0), # export_price_elast
+                    Array{Float64}(undef, 0)) # import_price_elast          
 
     params = parse_input_file(param_file)
     base_year = params["years"]["start"]
@@ -329,7 +335,18 @@ function get_var_params(param_file::String)
     # Product-specific
     #--------------------------------------------------------------------------------------
     #--- Demand model parameters
-    # Note, these are used later to make time-varying parameters
+    if hasproperty(product_info, :import_price_elast)
+        retval.import_price_elast = product_info[prod_ndxs,:import_price_elast]
+    else
+        retval.import_price_elast = zeros(length(prod_codes))
+    end
+    if hasproperty(product_info, :export_price_elast)
+        retval.export_price_elast = product_info[prod_ndxs,:export_price_elast]
+    else
+        retval.export_price_elast = zeros(length(prod_codes))
+    end
+
+    # Note, export and household demand parameters are used later to make time-varying parameters
     # Export demand
     export_elast_decay = params["export_elast_demand"]["decay"]
     # Get initial value
@@ -600,8 +617,8 @@ function supplyusedata(param_file::String)
                     Array{Float64}(undef, 0), # marg_pos_ratio
                     Array{Float64}(undef, 0), # marg_neg_share
                     Array{Float64}(undef, 0), # m_frac
-                    Array{Float64}(undef, 0), # μ
-                    Array{Float64}(undef, 0)) # τd
+                    Array{Float64}(undef, 0), # energy_share
+                    Array{Float64}(undef, 0)) # μ
     # Reads in key parameters from the YAML config file
     params = parse_input_file(param_file)
 
@@ -613,6 +630,8 @@ function supplyusedata(param_file::String)
 
 	terr_adj_sector_ndx = params["terr-adj-sector-indexes"]
 	terr_adj_product_ndx = params["terr-adj-product-indexes"]
+
+    energy_product_ndxs = params["energy-product-indexes"]
 
     SUT_df = CSV.read(joinpath("inputs",params["files"]["SUT"]), header=false, DataFrame)
 
@@ -634,6 +653,9 @@ function supplyusedata(param_file::String)
 	#--------------------------------
 	use_table = excel_range_to_mat(SUT_df, params["SUT_ranges"]["use_table"])[product_ndxs,sector_ndxs]
 	retval.D = use_table * Diagonal(1.0 ./ retval.g)
+    # For pricing algorithm, keep track of energy cost share if energy sectors are excluded (e.g., when running together with LEAP)
+    energy_use = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["use_table"])[energy_product_ndxs,sector_ndxs], dims=1))
+    retval.energy_share = energy_use ./ retval.g
 
 	#--------------------------------
 	# Margins
@@ -652,7 +674,6 @@ function supplyusedata(param_file::String)
 	# Taxes
 	#--------------------------------
 	taxes = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["taxes"])[product_ndxs,:], dims=2))
-	retval.τd = taxes ./ tot_supply
 
 	#--------------------------------
 	# Imports
@@ -713,7 +734,7 @@ function supplyusedata(param_file::String)
 	# Profit margin
 	#--------------------------------
 	tot_int_dmd = vec(sum(excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_intermediate_demand"])[:,sector_ndxs], dims=1))
-	profit = max.(retval.g - tot_int_dmd - retval.W,zeros(ns))
+	profit = max.(retval.g - tot_int_dmd - retval.W, zeros(ns))
 	retval.μ = retval.g ./ (retval.g - profit .+ ϵ)
 
     if params["report-diagnostics"]
@@ -728,12 +749,14 @@ function supplyusedata(param_file::String)
         write_vector_to_csv(joinpath(params["diagnostics_path"],"exports.csv"),  retval.X, "exports", params["included_product_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"final_demand.csv"),  retval.F, "final demand", params["included_product_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"investment.csv"),  retval.I, "investment", params["included_product_codes"])
-        write_vector_to_csv(joinpath(params["diagnostics_path"],"tax_rate.csv"), retval.τd, "taxes on products", params["included_product_codes"])
         # Values by sector
         write_vector_to_csv(joinpath(params["diagnostics_path"],"sector_output.csv"), retval.g, "output", params["included_sector_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"tot_intermediate_demand_all_products.csv"),  tot_int_dmd, "intermediate demand", params["included_sector_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"wages.csv"),  retval.W, "wages", params["included_sector_codes"])
         write_vector_to_csv(joinpath(params["diagnostics_path"],"profit_margins.csv"), retval.μ, "profit margins", params["included_sector_codes"])
+        if sum(retval.energy_share) != 0
+            write_vector_to_csv(joinpath(params["diagnostics_path"],"energy_share.csv"), retval.energy_share, "energy share", params["included_sector_codes"])
+        end
         # Matrices
         write_matrix_to_csv(joinpath(params["diagnostics_path"],"supply_fractions.csv"), retval.S, params["included_sector_codes"], params["included_product_codes"])
         write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients.csv"), retval.D, params["included_product_codes"], params["included_sector_codes"])
@@ -759,8 +782,7 @@ Initialize price structure.
 function prices_init(np::Int64, io::IOdata)
     return PriceData(ones(np), #pb
                      ones(np), #pd
-                     ones(np), #pp
-                     ones(np) + io.τd, #pw in domestic currency (converted using xr in ModelCalculations)
+                     ones(np), #pw in domestic currency (converted using xr in ModelCalculations)
                      1,1)
 end
 
