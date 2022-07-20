@@ -68,7 +68,7 @@ Note that when ``\pi_{d,k}`` and ``\underline{\pi}_{w,k}`` are much smaller than
 ```math
 \overline{f}_k \approxeq f_k + f_k\left(1 - f_k\right)\underline{\phi}^\text{imp}_k \left(\pi_{d,k} - \underline{\pi}_{w,k}\right).
 ```
-In this formulation, the parameter ``\underline{\phi}^\text{imp}_k`` is seen to be an Armington elasticity of substitution between domestic products and imports.
+In this formulation, the parameter ``\underline{\phi}^\text{imp}_k`` is seen to be an elasticity of substitution between domestic products and imports. The factor ``f_k\left(1 - f_k\right)`` arises because the elasticity is applied to the import share rather than to imports and domestic products separately.
 
 The reference import demand, which appears as a scale factor in the [linear goal program](@ref lgp), is set equal to twice the calculated volume of imports,
 ```math

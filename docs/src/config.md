@@ -329,7 +329,7 @@ SUT_ranges:
     wages: J37:W38
 ```
 
-## [Linking Macro to LEAP](@id config-link-LEAP)
+## [Mapping Macro variabls to LEAP variables](@id config-link-LEAP)
 The next, and final, block specifies how LEAP and Macro are linked.
 
 The first section says which LEAP scenario to use for inputs to the Macro model, the LEAP scenario to which Macro returns its results, and currency unit for investment costs, and a scaling factor. For example, if entries in the Macro model input files are in millions of US dollars, and investment costs are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).

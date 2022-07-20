@@ -38,20 +38,20 @@ Variables and parameters are labeled with the following dimensions:
 | ``m^\pm_k``        | Positive ``(+)`` and negative ``(-)`` margins for product ``k``                                                                |
 
 ## [Dynamic parameters](@id dynamic-param-vars)
-| Symbol                         | Definition                                                                                                   |
-|:-------------------------------|:-------------------------------------------------------------------------------------------------------------|
-| ``\overline{z}_i``             | Potential output for sector ``i``                                                                            |
-| ``\overline{W}_i``             | Nominal wage bill in sector ``i``                                                                            |
-| ``\overline{p}_{b,k}``         | Basic price for product ``k`` as an index relative to the initial year                                       |
-| ``\overline{P}_g``             | Price level of output as an index relative to the initial year                                               |
-| ``\overline{I}``               | Demand for investment goods                                                                                  |
-| ``\overline{X}^\text{norm}_k`` | Normal level of export demand for product ``k``                                                              |
-| ``\overline{F}^\text{norm}_k`` | Normal level of final demand for product ``k``                                                               |
-| ``\overline{M}^\text{ref}_k``  | Reference level of imports for product ``k``                                                                 |
-| ``\overline{f}_k``             | Normal level of imports of good ``k`` as a fraction of domestic demand (intermediate, final, and investment) |
-| ``\overline{p}_{d,k}``         | Producer price for product ``k`` as an index relative to the initial year                                    |
-| ``\overline{p}_{w,k}``         | World price index for product ``k``                                                                          |
-| ``\overline{D}_{ki}``          | Intermediate demand for product ``k`` per unit of output from sector ``i``                                   |
+| Symbol                         | Definition                                                                 |
+|:-------------------------------|:---------------------------------------------------------------------------|
+| ``\overline{z}_i``             | Potential output for sector ``i``                                          |
+| ``\overline{W}_i``             | Nominal wage bill in sector ``i``                                          |
+| ``\overline{p}_{b,k}``         | Basic price for product ``k`` as an index relative to the initial year     |
+| ``\overline{P}_g``             | Price level of output as an index relative to the initial year             |
+| ``\overline{I}``               | Demand for investment goods                                                |
+| ``\overline{X}^\text{norm}_k`` | Normal level of export demand for product ``k``                            |
+| ``\overline{F}^\text{norm}_k`` | Normal level of final demand for product ``k``                             |
+| ``\overline{M}^\text{ref}_k``  | Reference level of imports for product ``k``                               |
+| ``\overline{f}_k``             | Normal level of imports of good ``k`` as a fraction of domestic demand     |
+| ``\overline{p}_{d,k}``         | Producer price for product ``k`` as an index relative to the initial year  |
+| ``\overline{p}_{w,k}``         | World price index for product ``k``                                        |
+| ``\overline{D}_{ki}``          | Intermediate demand for product ``k`` per unit of output from sector ``i`` |
 
 ## [Intermediate variables](@id intermed-vars)
 | Symbol                 | Definition                                                                                    |

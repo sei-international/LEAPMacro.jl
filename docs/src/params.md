@@ -8,7 +8,7 @@ External parameters that are specified for all products, all sectors, or over ti
 !!! info "Comma-separated variable (CSV) files"
     CSV-formatted files are plain text files that can be viewed in a text editor. They can also be opened and modified in Excel, Google Sheets, or other spreadsheet program, which is a convenient way to edit them. 
 
-## Product parameters
+## [Product parameters](@id params-products)
 The product parameters file has the structure shown below, where ``n_p`` is the number of products. The first two columns are the product codes and product names. These should be in the same order as the products in the [supply-use tables](@ref sut).
 
 The next two columns are numbers giving the initial elasticities for export demand (with respect to global GDP) and final demand (with respect to total wages). For details, see the page on [model dynamics](@ref dynamics-demand-fcns) and on the [configuration file](@ref config-longrun-demand-elast).
@@ -29,7 +29,7 @@ The corresponding [variables](@ref exog-param-vars) are:
 Here is the example from the Freedonia sample model:
 ![Freedonia product_parameters file](assets/images/product_parameters.png)
 
-## Sector parameters
+## [Sector parameters](@id params-sectors)
 The structure of the sector parameters file is shown below, where ``n_s`` is the number of sectors. It contains only a single parameter for each sector, the depreciation rate. Where available, this can be calculated from national statistics. Otherwise, the `delta` parameter reported for the whole economy in the [Penn World Table](https://www.rug.nl/ggdc/productivity/pwt/) can be applied to each sector.
 
 | `code`      | `name`       | `depr_rate` |
@@ -45,7 +45,7 @@ The corresponding [variable](@ref exog-param-vars) is:
 Here is the example from the Freedonia sample model:
 ![Freedonia sector_parameters file](assets/images/sector_parameters.png)
 
-## Time series
+## [Time series](@id params-time-series)
 The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-wages-labor-prod).
 
 !!! info "Exchange rates and supply-use tables"

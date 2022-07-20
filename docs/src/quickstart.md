@@ -9,7 +9,7 @@ This documentation explains how to quickly run Macro without linking it to LEAP.
 The quickest way to get started with Macro is by running the "Freedonia" sample model:
 1. Download the [demonstration files](assets/Macro.zip) as a zip file and save it to the folder of your choice
 1. Unzip the `Macro.zip` file
-1. Go the folder where you unzipped it (it will have a file in it named `LEAPMacro_params.yml`)
+1. Go the folder where you unzipped it (it will have a file in it named `LEAPMacro_params.yml`, together with several other files)
 1. Start Julia in that folder and run the demo model:
 ```julia
 julia> import LEAPMacro
