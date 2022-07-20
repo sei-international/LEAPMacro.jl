@@ -457,6 +457,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     πg = params["global-params"]["infl_default"]
     πb = ones(length(prices.pb)) * params["global-params"]["infl_default"]
     πd = ones(length(prices.pd)) * params["global-params"]["infl_default"]
+	# TODO: Replace exog.πw with exog.πw_base, replace πw_byprod with πw
     πw_byprod = ones(length(prices.pw)) * params["global-params"]["infl_default"]
 
 	if calc_use_matrix_tech_change
@@ -604,7 +605,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# First, update the Vnorm matrix
 		io.Vnorm = Diagonal(1 ./ g) * io.S * Diagonal(value.(qs))
-		profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
+		# Calculate export-weighted price
+		export_share = value.(X) ./ (value.(qs) .+ IOlib.ϵ)
+		px = exog.xr[t] * export_share .* prices.pw + (1 .- export_share) .* prices.pd
+		profit_per_output = io.Vnorm * px - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
 		pK = dot(θ, prices.pb)
 		profit_rate = profit_per_output ./ (pK * capital_output_ratio)
 
@@ -739,7 +743,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_pd = prices.pd
 		param_pb = prices.pb
 		param_z = z
-		param_mfrac = io.m_frac .* ((1 .+ πd)./(1 .+ πw_byprod)).^exog.import_price_elast
+		# Caluculate updated m_frac for use in goal program
+		adj_import_price_elast = max.(0, 1 .- io.m_frac) .* exog.import_price_elast
+		param_mfrac = io.m_frac .* ((1 .+ πd)./(1 .+ πw_byprod)).^adj_import_price_elast
 		# Set maximum utilization in multiple steps
 		param_max_util = ones(ns)
 		max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[t + 1,:])
