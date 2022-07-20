@@ -62,8 +62,13 @@ This system is solved using linear algebra.
 ## Imports
 The normal level of imports of good ``k`` as a fraction of domestic demand (intermediate, final, and investment) is updated based on the values calculated in the last run of the [linear goal program](@ref lgp), and then adjusted based on relative changes in world and domestic prices,
 ```math
-\overline{f}_k = f_k \left(\frac{1 + \pi_{d,k}}{1 + \underline{\pi}_{w,k}}\right)^{\underline{\phi}^\text{imp}_k}.
+\overline{f}_k = f_k \left(\frac{1 + \pi_{d,k}}{1 + \underline{\pi}_{w,k}}\right)^{(1 - f_k)\underline{\phi}^\text{imp}_k}.
 ```
+Note that when ``\pi_{d,k}`` and ``\underline{\pi}_{w,k}`` are much smaller than one, this is approximately equal to
+```math
+\overline{f}_k \approxeq f_k + f_k\left(1 - f_k\right)\underline{\phi}^\text{imp}_k \left(\pi_{d,k} - \underline{\pi}_{w,k}\right).
+```
+In this formulation, the parameter ``\underline{\phi}^\text{imp}_k`` is seen to be an Armington elasticity of substitution between domestic products and imports.
 
 The reference import demand, which appears as a scale factor in the [linear goal program](@ref lgp), is set equal to twice the calculated volume of imports,
 ```math
@@ -113,16 +118,20 @@ where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`
 ## Profit rate
 Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of output, ``\Pi_i``, is given by the value of output per unit of output less unit costs,
 ```math
-\Pi_i = \frac{1}{g_i}\sum_{k=1}^{n_p} \underline{S}_{i,k} q_{s,k}\overline{p}_{d,k} -
+\Pi_i = \frac{1}{g_i}\sum_{k=1}^{n_p} \underline{S}_{i,k} q_{s,k}p_{x,k} -
         \left[\overline{P}_g\left(\omega_i + \varepsilon_i\right) +
-              \sum_{k = 1}^{n_p}\overline{p}_{d,k}\underline{D}_{k,i} \right].
+              \sum_{k = 1}^{n_p}\overline{p}_{b,k}\underline{D}_{k,i} \right].
+```
+Basic prices are used on the cost side of this equation, while an export-weighted price ``p_{x,k}`` is used on the revenue side, where
+```math
+p_{x,k} = \frac{X_k}{q_{s,k}} \underline{e}\overline{p}_{w,k} + \left(1 - \frac{X_k}{q_{s,k}}\right)\overline{p}_{d,k}.
 ```
 
-The Macro model does not track the capital stock. The calculation for the profit rate starts with the current unit price of capital goods ``p_K``, calculated as
+The Macro model does not track the capital stock. Instead, it tracks potential output, which is related to the capital stock through a sector-specific capital-output ratio. The calculation for the profit rate starts with the current unit price of capital goods ``p_K``, calculated as
 ```math
 p_K = \sum_{k=1}^{n_p}\underline{\theta}_k \overline{p}_{d,k}.
 ```
-The profit rate is then given by profits divicded by the product of the price of capital and the capital-output ratio ``\underline{v}_i``,
+The profit rate is then given by profits divided by the product of the price of capital and the capital-output ratio ``\underline{v}_i``,
 ```math
 r_i = \frac{\Pi_i}{p_K\underline{v}_i}.
 ```
