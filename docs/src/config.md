@@ -101,7 +101,7 @@ years:
 The next several blocks contain some of the [exogenous parameters](@ref exog-param-vars) for the Macro model that are not specified in the files identified in earlier blocks.
 
 ### [Initial value adjustments](@id config-init-val-adj)
-The first block of model parameters contains adjustments that are applied to the initial values. They can be used to make a correction if, for example, the economy was recovering from a recession in the first year. These values should normally be set to zero when starting a calibration.
+The first block of model parameters specifies adjustments to initial values. They can be used to make a correction if, for example, the economy was recovering from a recession in the first year of the simulation. These parameters should normally be set to zero when starting a calibration.
 ```yaml
 #---------------------------------------------------------------------------
 # Adjustment parameters for initializing variables
@@ -119,10 +119,10 @@ calib:
 ```
 
 ### Default values for the global economy
-The second block of model parameters provides default values for the global inflation rate and growth rate of global GDP (or gross world product, GWP). These are applied only if they are not specified for some year in the [external parameter files](@ref params).
+The second block of model parameters provides default values for the global inflation rate and growth rate of global GDP (or gross world product, GWP). These are applied if they are not specified for some year in the [external time-series file](@ref params-time-series). Also, the default global inflation rate is applied to price indices when initializing the model.
 
-The correspondence between the parameters and the model variables is:
-  * `infl_default` : ``\underline{\pi}_{w,k}`` (assumed to be the same for all products ``k``)
+The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
+  * `infl_default` : ``\underline{\pi}_{w,k}`` (applied uniformly to all products ``k``, modified by the optional `real_price` file in the `exog-files` block)
   * `gr_default` : ``\underline{\gamma}^\text{world}``
 ```yaml
 #---------------------------------------------------------------------------
@@ -138,7 +138,7 @@ global-params:
 ### [Taylor rule coefficients](@id config-taylor-rule)
 The next block contains the parameters for implementing a "Taylor rule", which adjusts the central bank interest rate in response to inflation and economic growth. See the page on [model dynamics](@ref dynamics-taylor-rule) for details.
 
-The correspondence between the parameters and the model variables is:
+The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
   * `neutral_growth_band` : ``[\hat{\underline{Y}}^*_\text{min},\hat{\underline{Y}}^*_\text{max}]``
   * `target_intrate` : ``\underline{i}_{b0}``
   * `target_infl` : ``\underline{\pi}^*``
@@ -162,10 +162,10 @@ taylor-fcn:
 ```
 
 ### Investment function coefficients
-The next block contains the parameters for the investment function. As explained in the page on [model dynamics](@ref dynamics-inv-dmd), the investment function calculates the demand for investment goods as a function of capacity utilization, profitability, and borrowing costs.
+The next block contains the parameters for the investment function. As explained in the page on [model dynamics](@ref dynamics-potential-output), the investment function calculates the demand for investment goods as a function of capacity utilization, profitability, and borrowing costs.
 
-The correspondence between the parameters and the model variables is:
-  * `init_neutral_growth`: Initial value of ``\gamma_{i0}`` for every sector ``i``
+The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
+  * `init_neutral_growth`: Initial value of ``\gamma_{i0}`` (with the same initial value for every sector ``i``)
   * `util_sens` : ``\underline{\alpha}_\text{util}``
   * `profit_sens` : ``\underline{\alpha}_\text{profit}``
   * `intrate_sens` : ``\underline{\alpha}_\text{bank}``
@@ -187,10 +187,12 @@ investment-fcn:
     growth_adj: 0.10
 ```
 
-### Employment and labor productivity
-The next block contains default parameters for the labor productivity function and for the function that determines the growth rate of the wage. See the page on [model dynamics](@ref dynamics-wages-labor-prod) for details. The default productivity parameters are used if they are not specified for some year in the [external parameter files](@ref params).
+### Employment, labor productivity, and wages
+The next block contains default parameters for the labor productivity function (following the Kaldor-Verdoorn law) and for the function that determines the growth rate of the wage. See the page on [model dynamics](@ref dynamics-wages-labor-prod) for details.
 
-The correspondence between the parameters and the model variables is:
+For labor productivity, the default parameters are used if they are not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series).
+
+The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
   * For labor productivity:
     - `KV_coeff_default` : ``\underline{\alpha}_\text{KV}``
     - `KV_intercept_default` : ``\underline{\beta}_\text{KV}``
@@ -199,7 +201,7 @@ The correspondence between the parameters and the model variables is:
     - `lab_constr_coeff` : ``\underline{k}``
 ```yaml
 #---------------------------------------------------------------------------
-# Parameters for the labor productivity and labor force model
+# Parameters for labor productivity, labor force, and wages
 #---------------------------------------------------------------------------
 labor-prod-fcn:
     # Default Kaldor-Verdoorn coefficient
@@ -207,14 +209,16 @@ labor-prod-fcn:
     # Default Kaldor-Verdoorn intercept
     KV_intercept_default: 0.00
 wage-fcn:
-    # Inflation pass-through
+    # Inflation pass-through (wage indexing coefficient)
     infl_passthrough: 1.00
-    # Labor supply constraint coefficent
+    # Labor supply constraint coefficient
     lab_constr_coeff: 0.5
 ```
 
 ### [Endogenous change in intermediate demand coefficients](@id config-intermed-dmd-change)
-The next block is optional. If it is present, it sets a rate constant for endogenously determining [intermediate demand coefficients](@ref dynamics-intermed-dmd-coeff). If the parameter is set to high, then it can generate unreasonably large rates of change in technical coefficients and can even create model instabilities. It is good practice to check [the `diagnostics` folder](@ref model-outputs-diagnostics) for annual files labeled `demand_coefficients_[year].csv` to see whether the values are reasonable.
+The next block is optional. If it is present, it sets a rate constant for endogenously determining [intermediate demand coefficients](@ref dynamics-intermed-dmd-coeff).
+
+Note that if the `rate_constant` parameter is set too high, then it can generate unreasonably large rates of change in technical coefficients and can even create model instabilities. It is good practice to check [the `diagnostics` folder](@ref model-outputs-diagnostics) for annual files labeled `demand_coefficients_[year].csv` to see whether the values are reasonable.
 ```yaml
 #---------------------------------------------------------------------------
 # Parameter for rate of change in technical parameters
@@ -226,13 +230,13 @@ tech-param-change:
 ```
 
 ### [Long-run demand elasticities](@id config-longrun-demand-elast)
-Initial values for demand elasticities for products with respect to global GDP (for exports) and the wage bill (for domestic final demand excluding investment) are specified in the [external parameter files](@ref params). The way that the elasticities enter into the model is described in the page on [model dynamics](@ref dynamics-demand-fcns).
+Initial values for demand elasticities for products with respect to domestic vs. world prices, global GDP (for exports), and the wage bill (for domestic final demand excluding investment) are specified in the [external product parameters file](@ref params-products). The way that the elasticities enter into the model is described in the page on [model dynamics](@ref dynamics-demand-fcns).
 
 For products that are not labeled as "Engel products"[^1] (given by the parameter `engel-prods`):
-  * If the initial elasticity is less than one, then it remains at its starting level;
-  * If the initial elasticity is greater than one, it asymptotically approaches a value of one over time;
+  * If the initial wage elasticity is less than one, then it remains at its starting level;
+  * If the initial wage elasticity is greater than one, it asymptotically approaches a value of one over time;
 For products labeled as Engel products:
-  * The elasticity approaches the `engel_asympt_elast` over time.
+  * The wage elasticity approaches the `engel_asympt_elast` over time.
 The rate of convergence on the long-run values is given by the `decay` parameter, with the possibility of a different rate of convergence for exports and final demand.
 ```yaml
 #---------------------------------------------------------------------------
@@ -253,7 +257,7 @@ wage_elast_demand:
 ### [Linear goal program weights](@id config-lgp-weights)
 The Macro model solves a linear goal program for each year of the simulation. As described in the documentation for the [linear goal program](@ref lgp), the objective function contains weights, which are specified in the next block.
 
-The correspondence between the parameters and the model variables is:
+The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
   * For category weights:
     - `utilization` : ``\underline{w}_u``
     - `final_demand_cov` : ``\underline{w}_F``

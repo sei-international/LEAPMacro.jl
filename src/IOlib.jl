@@ -386,11 +386,19 @@ function get_var_params(param_file::String)
     xr_temp = time_series[!,:exchange_rate]
 
     # Kaldor-Verdoorn parameters
-    αKV_temp = time_series[!,:KV_coeff]
     αKV_default = params["labor-prod-fcn"]["KV_coeff_default"]
+    if hasproperty(time_series, :KV_coeff)
+        αKV_temp = time_series[!,:KV_coeff]
+    else
+        αKV_temp = fill(αKV_default, length(time_series[!,:year]))
+    end
 
-	βKV_temp = time_series[!,:KV_intercept]
     βKV_default = params["labor-prod-fcn"]["KV_intercept_default"]
+    if hasproperty(time_series, :KV_intercept)
+        βKV_temp = time_series[!,:KV_intercept]
+    else
+        βKV_temp = fill(βKV_default, length(time_series[!,:year]))
+    end
 
     #--------------------------------------------------------------------------------------
     # Fill in by looping over years

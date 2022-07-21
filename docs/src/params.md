@@ -15,6 +15,8 @@ The next two columns are numbers giving the initial elasticities for export dema
 
 Elasticities can be estimated from historical data, although that requires knowledge of statistical methods. Otherwise, they can be drawn from reported estimates or from already existing economic models.
 
+ADD NEW COLUMNS TO THIS TABLE
+
 | `code`      | `name`       | `export_elast_demand0` | `wage_elast_demand0` |
 |:------------|:-------------|-----------------------:|---------------------:|
 | CODE1       | Name 1       |                   xe_1 |                 we_1 |
@@ -54,6 +56,8 @@ The structure of the time series file is shown below. It contains several parame
 Scenarios for the world economic growth rate can be drawn from other studies, such as the [Shared Socioeconomic Pathways (SSP) database](https://tntcat.iiasa.ac.at/SspDb/dsd?Action=htmlpage&page=about). The working age growth rate can be calculated from national projections or the [UN Population Prospects database](https://population.un.org/wpp/Download/Standard/Population/).
 
 Other parameters have less well-established sources of estimates. The labor productivity parameters (the Kaldor-Verdoorn parameters `KV_coeff` and `KV_intercept`) might well be assumed constant, possibly estimated from historical data or drawn from studies such as [Estimating Kaldor-Verdoorn’s law across countries in different stages of development](https://www.anpec.org.br/encontro/2014/submissao/files_I/i9-0ed7d252394aed6039f6af0e4ed51fc6.pdf) by Guilherme Magacho. Assumptions regarding the world inflation rate and the exchange rate can be based on historical patterns, other modeling studies, or consultation with experts.
+
+NOTE: THE KV COLUMNS CAN BE OMITTED
 
 | `year` | `world_gr` | `world_infl_rate` | `working_age_gr` | `exchange_rate` | `KV_coeff` | `KV_intercept` |
 |-------:|-----------:|------------------:|-----------------:|----------------:|-----------:|---------------:|

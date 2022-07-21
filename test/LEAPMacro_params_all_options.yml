@@ -106,7 +106,7 @@ investment-fcn:
     growth_adj: 0.10
 
 #---------------------------------------------------------------------------
-# Parameters for the labor productivity and labor force model
+# Parameters for labor productivity, labor force, and wages
 #---------------------------------------------------------------------------
 labor-prod-fcn:
     # Default Kaldor-Verdoorn coefficient
@@ -114,9 +114,9 @@ labor-prod-fcn:
     # Default Kaldor-Verdoorn intercept
     KV_intercept_default: 0.00
 wage-fcn:
-    # Inflation pass-through
+    # Inflation pass-through (wage indexing coefficient)
     infl_passthrough: 1.00
-    # Labor supply constraint coefficent
+    # Labor supply constraint coefficient
     lab_constr_coeff: 0.5
 
 #---------------------------------------------------------------------------
