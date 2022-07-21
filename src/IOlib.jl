@@ -317,8 +317,8 @@ function get_var_params(param_file::String)
         if haskey(exog_file_list, "pot_output") && !isnothing(exog_file_list["pot_output"]) && isfile(joinpath("inputs",exog_file_list["pot_output"]))
             exog_pot_output_df = CSV.read(joinpath("inputs",exog_file_list["pot_output"]), DataFrame)
         end
-        if haskey(exog_file_list, "max_util") && !isnothing(exog_file_list["max_util"]) && isfile(joinpath("inputs",exog_file_list["max_util"]))
-            exog_max_util_df = CSV.read(joinpath("inputs",exog_file_list["max_util"]), DataFrame)
+        if haskey(exog_file_list, "max_utilization") && !isnothing(exog_file_list["max_utilization"]) && isfile(joinpath("inputs",exog_file_list["max_utilization"]))
+            exog_max_util_df = CSV.read(joinpath("inputs",exog_file_list["max_utilization"]), DataFrame)
         end
         if haskey(exog_file_list, "real_price") && !isnothing(exog_file_list["real_price"]) && isfile(joinpath("inputs",exog_file_list["real_price"]))
             exog_real_price_df = CSV.read(joinpath("inputs",exog_file_list["real_price"]), DataFrame)
@@ -499,7 +499,7 @@ function get_var_params(param_file::String)
             else
                 invalid_sec_codes_str = "Sector code '" * invalid_sec_codes[1] * "'"
             end
-            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["max_util"] * "' not valid"))
+            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["max_utilization"] * "' not valid"))
         end
         for row in eachrow(exog_max_util_df)
             data_year = floor(Int64, row[:year])

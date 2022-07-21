@@ -6,6 +6,8 @@ CurrentModule = LEAPMacro
 
 The configuration file is written in YAML syntax and has a `.yml` extension. By default, Macro assumes the configuration file will be called `LEAPMacro_params.yml`, but other names are possible, and in fact encouraged, because each configuration file corresponds to a different scenario.
 
+The configuration file used as an example on this page is the `LEAPMacro_params.yml` file that is distributed with the demonstration files (see the [Quick start](@ref quick-start) page).
+
 ```@contents
 Pages = ["config.md"]
 Depth = 3
@@ -21,7 +23,7 @@ The configuration file is made up of several blocks. The first block names a sub
 output_folder: Baseline
 ```
 
-The next block specifies the input files. In many cases, these will be the same across a set of scenarios. However, it is possible that they might differ. For example, the supply-use table, given by the `SUT` parameter, could be drawn from different years for calibration purposes, and different `time_series` might distinguish different scenarios.
+The next block specifies the required input files. Other, optional input files are described below. In many cases, the input files will be the same across a set of scenarios. However, it is possible that they might differ. For example, the supply-use table, given by the `SUT` parameter, could be drawn from different years for calibration purposes, and different `time_series` might distinguish different scenarios.
 ```yaml
 #---------------------------------------------------------------------------
 # Supply-use table and supplementary tables as CSV files
@@ -34,7 +36,11 @@ files:
     time_series: time_series.csv
 ```
 
-The following block says how to manage the output folders. Reporting diagnostics is optional. It is highly recommended while developing a model, but `report-diagnostics` can be set to `false` for a model in active use. Ordinarily it is useful to clear the folders with each run, since files will be overwritten. Sometimes during model development it is useful set `clear-folders` to `false` temporarily. To compare results from different runs, make a copy of the output files so that they are not overwritten in the subsequent run.
+The following block says how to manage the output folders.
+
+Ordinarily it is useful to clear the folders with each run, since files will in any case be overwritten. But sometimes during model development it is useful to set `clear-folders` to `false` temporarily -- for example, if only a few files need to be compared between one run to the next. To compare results from different runs, make a copy of output files of interest and set `clear-folders` to `false`, or copy the entire output file folder.
+
+Reporting diagnostics is optional. It is highly recommended while developing a model, but `report-diagnostics` can be set to `false` for a model in active use.
 ```yaml
 # Say whether to clear the contents of the results, calibration, and diagnostic folders before the run
 clear-folders:
@@ -45,7 +51,7 @@ clear-folders:
 report-diagnostics: true
 ```
 
-The next block has settings for running LEAP. To develop the Macro model independently of LEAP, set `run_leap` to `false`. To reduce the time spent while running LEAP and Macro together, set `hide_leap` to `true`. The `max_runs` parameter can be left at the default value; it is quite unusual to go that far before convergence. The `max_tolerance` is the percent difference in Macro model outputs between runs. The tolerance can be tightened (a smaller value) or loosened (a larger value) depending on the needs of the analysis.
+The next block has settings for running LEAP. To develop the Macro model independently of LEAP, set `run_leap` to `false`. To reduce the time spent while running LEAP and Macro together, set `hide_leap` to `true`. The `max_runs` parameter can normally be left at the default value; it is quite unusual to go that far before convergence. The `max_tolerance` is the percent difference in Macro model outputs between runs. The tolerance can be tightened (a smaller value) or loosened (a larger value) depending on the needs of the analysis.
 ```yaml
 model:
     # Set run_leap to "false" to do a single run of the Macro model without calling LEAP
@@ -61,7 +67,7 @@ model:
 The next block is optional, and can be entirely omitted. This block allows for additional exogenous time series that might be of interest in some studies. Any of them can be added or excluded individually. The allowed input files include:
   * `investment`: A time series of exogenous investment demand beyond that simulated by the model (e.g., public investment)
   * `pot_output`: Potential output, which will override the value simulated by the model, where the entered values are converted to an index (e.g., agricultural production might be determined by an independent crop production model)
-  * `max_util`: Maximum capacity utilization (e.g., if an exogenous constraint prevents operation at full capacity)
+  * `max_utilization`: Maximum capacity utilization (e.g., if an exogenous constraint prevents operation at full capacity)
   * `real_price`: Real prices for tradeables; the entered values are converted to an index by Macro and multiplied by an index of inflation at the user-specified world inflation rate
 These are explained in more detail under [external parameter files](@ref params-optional-input-files). Examples of each type of file are included in the sample Freedonia model. Any file can be commented out. Alternatively, the filename can be set to "~", meaning that it is omitted.
 ```yaml
@@ -69,18 +75,18 @@ These are explained in more detail under [external parameter files](@ref params-
 # Optional input files for exogenous time series (CSV files)
 #---------------------------------------------------------------------------
 # Uncomment the lines below to use the files included in the Freedonia sample model
-# For pot_output and max_util, include only those sectors where values are constrained -- the others will be unconstrained
+# For pot_output and max_utilization, include only those sectors where values are constrained -- the others will be unconstrained
 # For real_price:
 #   * Include only those products where values are specified -- for others the real price will be held constant
 #   * Prices for non-tradeables will be ignored; they are calculated internally by Macro
 exog-files:
     # investment: exog_invest.csv # Time series of exogenous investment demand, additional to that simulated by the model
     # pot_output: exog_pot_output.csv # Potential output (any units -- it is applied as an index): sectors label columns; years label rows
-    # max_util: exog_max_util.csv # Maximum capacity utilization: sectors label columns; years label rows (must lie between 0 and 1)
+    # max_utilization: exog_max_util.csv # Maximum capacity utilization: sectors label columns; years label rows (must lie between 0 and 1)
     # real_price: exog_price.csv # Real prices for tradeables (any units -- it is applied as an index): products label columns; years label rows
 ```
 
-The next block sets the start and end years for the simulation. These should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data. Also, the end year can be set closer to the start year, but Macro normally runs quickly once it is loaded, so that is rarely necessary for performance.
+The next block sets the start and end years for the simulation. When running with LEAP, these should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data. Also, the end year can be set closer to the start year, but Macro normally runs quickly once it is loaded, so that is rarely necessary for performance.
 ```yaml
 #---------------------------------------------------------------------------
 # Start and end years for the simulation
@@ -92,10 +98,10 @@ years:
 ```
 
 ## [Model parameters](@id config-model-params)
-The next several blocks contain some of the [exogenous parameters](@ref exog-param-vars) for the Macro model.
+The next several blocks contain some of the [exogenous parameters](@ref exog-param-vars) for the Macro model that are not specified in the files identified in earlier blocks.
 
 ### [Initial value adjustments](@id config-init-val-adj)
-The first block of model parameters contains adjustments that are applied to the initial values. This can help adjust if, for example, the economy was recovering from a recession in the first year. These values should normally be adjusted last when calibrating a model.
+The first block of model parameters contains adjustments that are applied to the initial values. They can be used to make a correction if, for example, the economy was recovering from a recession in the first year. These values should normally be set to zero when starting a calibration.
 ```yaml
 #---------------------------------------------------------------------------
 # Adjustment parameters for initializing variables
@@ -109,7 +115,7 @@ calib:
     # Adjustment factor for maximum household demand in the initial year
     max_hh_dmd_adj_factor: 0.00
     # Potential output relative to actual output in the base year
-    pot_output_adj_factor: 0.10
+    pot_output_adj_factor: 0.05
 ```
 
 ### Default values for the global economy
