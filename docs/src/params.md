@@ -5,41 +5,51 @@ CurrentModule = LEAPMacro
 # [External parameter files](@id params)
 External parameters that are specified for all products, all sectors, or over time, are supplied in three comma-separated variable (CSV) files in the `inputs` folder. The files provided with the Freedonia sample model have the names `product_parameters.csv`, `sector_parameters.csv`, and `time_series.csv`. However, the names are set in the configuration file's [general settings](@ref config-general-settings). That means that different external parameter files can be used for different scenarios.
 
+The other files in the Freedonia sample model `input` folder include the [supply-use table](@ref sut) and some optional input files, which are described below.
+
 !!! info "Comma-separated variable (CSV) files"
     CSV-formatted files are plain text files that can be viewed in a text editor. They can also be opened and modified in Excel, Google Sheets, or other spreadsheet program, which is a convenient way to edit them. 
 
 ## [Product parameters](@id params-products)
-The product parameters file has the structure shown below, where ``n_p`` is the number of products. The first two columns are the product codes and product names. These should be in the same order as the products in the [supply-use tables](@ref sut).
+The product parameters file has the structure shown below. There are as many rows in the table as there are products.
 
-The next two columns are numbers giving the initial elasticities for export demand (with respect to global GDP) and final demand (with respect to total wages). For details, see the page on [model dynamics](@ref dynamics-demand-fcns) and on the [configuration file](@ref config-longrun-demand-elast).
+The first two columns are the product codes and product names. These should be in the same order as the products in the [supply-use tables](@ref sut).
 
-Elasticities can be estimated from historical data, although that requires knowledge of statistical methods. Otherwise, they can be drawn from reported estimates or from already existing economic models.
+The next two columns provide the initial income elasticities of demand[^1] for exports (with respect to global GDP) and domestic final consumption (with respect to total wages). These elasticities change over time, as determined by additional parameters in the [configuration file](@ref config-longrun-demand-elast).
 
-ADD NEW COLUMNS TO THIS TABLE
+The final two columns are bracketed because they are optional. They specify how imports and exports respond to relative changes between domestic and world prices. If the columns are not present, these elasticities are set to zero by default, meaning no price sensitivity.
 
-| `code`      | `name`       | `export_elast_demand0` | `wage_elast_demand0` |
-|:------------|:-------------|-----------------------:|---------------------:|
-| CODE1       | Name 1       |                   xe_1 |                 we_1 |
-| CODE2       | Name 2       |                   xe_2 |                 we_2 |
-| ...         | ...          |                    ... |                  ... |
-| CODE``n_p`` | Name ``n_p`` |            xe_ ``n_p`` |          we_ ``n_p`` |
+For more information on how Macro uses the elasticities, see the detailed explanation of [export demand and final demand](@ref dynamics-demand-fcns) and [imports](@ref dynamics-imports).
+
+Elasticities can be estimated from historical data, although that requires knowledge of statistical methods. Otherwise, they can be drawn from published studies or from already existing economic models.
+
+| `code` | `name` | `export_elast_demand0` | `wage_elast_demand0` | `[import_price_elast]` | `[export_price_elast]` |
+|:-------|:-------|-----------------------:|---------------------:|-----------------------:|-----------------------:|
+| CODE1  | Name1  |                   xe_1 |                 we_1 |              \[mpe_1\] |              \[xpe_1\] |
+| CODE2  | Name2  |                   xe_2 |                 we_2 |              \[mpe_2\] |              \[xpe_2\] |
+| ...    | ...    |                    ... |                  ... |                    ... |                    ... |
 
 The corresponding [variables](@ref exog-param-vars) are:
   * `export_elast_demand0` : the initial value for ``\underline{\eta}^\text{exp}_k`` for product ``k``
   * `wage_elast_demand0` : the initial value for ``\underline{\eta}^\text{wage}_k`` for product ``k``
+  * `import_price_elast` : ``\underline{\phi}^\text{imp}_k`` for product ``k``
+  * `export_price_elast` : ``\underline{\phi}^\text{export}_k`` for product ``k``
 
 Here is the example from the Freedonia sample model:
 ![Freedonia product_parameters file](assets/images/product_parameters.png)
 
+[^1]: The [income elasticity of demand](https://www.investopedia.com/terms/i/incomeelasticityofdemand.asp) and [price elasticity of demand](https://www.investopedia.com/terms/p/priceelasticity.asp) are measures of the responsiveness of demand for a good or service with respect to changes in income or price.
+
 ## [Sector parameters](@id params-sectors)
-The structure of the sector parameters file is shown below, where ``n_s`` is the number of sectors. It contains only a single parameter for each sector, the depreciation rate. Where available, this can be calculated from national statistics. Otherwise, the `delta` parameter reported for the whole economy in the [Penn World Table](https://www.rug.nl/ggdc/productivity/pwt/) can be applied to each sector.
+The structure of the sector parameters file is shown below. There are as many rows in the table as there are sectors.
+
+In addition to the sector codes and names, this file contains only a single parameter for each sector, the depreciation rate. Where available, this can be calculated from national statistics. Otherwise, the `delta` parameter reported for the whole economy in the [Penn World Table](https://www.rug.nl/ggdc/productivity/pwt/) can be applied to each sector.
 
 | `code`      | `name`       | `depr_rate` |
 |:------------|:-------------|------------:|
 | CODE1       | Name 1       |        dr_1 |
 | CODE2       | Name 2       |        dr_2 |
 | ...         | ...          |         ... |
-| CODE``n_s`` | Name ``n_s`` | dr_ ``n_s`` |
 
 The corresponding [variable](@ref exog-param-vars) is:
   * `depr_rate` : ``\underline{\delta}_i`` for sector ``i``

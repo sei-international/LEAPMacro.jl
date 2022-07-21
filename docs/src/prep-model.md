@@ -5,6 +5,8 @@ CurrentModule = LEAPMacro
 # [Preparing a model](@id prep-model)
 Preparing a macroeconomic model is always complicated. The Macro model was built to reduce the complexities to some extent, but they cannot be entirely eliminated.
 
+ADD THE BATCH FILE FOR MAKING A PRECOMPILED VERSION
+
 With that in mind, here are some proposed steps. It is best to start with an existing [configuration file](@ref config), for example the one from the [Freedonia sample model](@ref quick-start):
   1. Prepare the [supply-use table](@ref sut);
   1. Estimate or assume [external parameters](@ref params);

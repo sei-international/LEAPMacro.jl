@@ -1,15 +1,15 @@
 code,name,export_elast_demand0,wage_elast_demand0,import_price_elast,export_price_elast
-agric,Agriculture and Forestry,1,1,0.5,1
-mining,Mining,2,1,0.5,1
-coal,Coal Mining,1.2,1,0.5,1
-petr,Petroleum and Natural Gas,1.2,1.2,0.5,1
-ironstl,Iron and Steel,1.5,1.2,0.5,1
-pulppr,Pulp and Paper,1.2,1,0.5,1
-foodpr,Food Processing,1.5,1.2,0.5,1
-hvymach,Heavy machinery,1.5,1,0.5,1
-othind,Other Industry,3,1.2,0.5,1
-util,"Electricity, Water, and Sewage",1,1.2,0.5,1
-constr,Construction,1,1,0.5,1
-transp,Transportation Services,1,1.2,0.5,1
-comm,Wholesale and Retail Trade,1.2,1.2,0.5,1
-othsrv,Other Services,1.2,1.2,0.5,1
+agric,Agriculture and Forestry,1,1,0.77,1
+mining,Mining,2,1,0.38,1
+coal,Coal Mining,1.2,1,0.38,1
+petr,Petroleum and Natural Gas,1.2,1.2,0.38,1
+ironstl,Iron and Steel,1.5,1.2,1.4,1
+pulppr,Pulp and Paper,1.2,1,1.4,1
+foodpr,Food Processing,1.5,1.2,1.4,1
+hvymach,Heavy machinery,1.5,1,1.4,1
+othind,Other Industry,3,1.2,1.4,1
+util,"Electricity, Water, and Sewage",1,1.2,1.84,1
+constr,Construction,1,1,0.67,1
+transp,Transportation Services,1,1.2,2.1,1
+comm,Wholesale and Retail Trade,1.2,1.2,0.84,1
+othsrv,Other Services,1.2,1.2,1.47,1

@@ -59,7 +59,7 @@ where
 ```
 This system is solved using linear algebra.
 
-## Imports
+## [Imports](@id dynamics-imports)
 The normal level of imports of good ``k`` as a fraction of domestic demand (intermediate, final, and investment) is updated based on the values calculated in the last run of the [linear goal program](@ref lgp), and then adjusted based on relative changes in world and domestic prices,
 ```math
 \overline{f}_k = f_k \left(\frac{1 + \pi_{d,k}}{1 + \underline{\pi}_{w,k}}\right)^{(1 - f_k)\underline{\phi}^\text{imp}_k}.
@@ -68,13 +68,15 @@ Note that when ``\pi_{d,k}`` and ``\underline{\pi}_{w,k}`` are much smaller than
 ```math
 \overline{f}_k \approxeq f_k + f_k\left(1 - f_k\right)\underline{\phi}^\text{imp}_k \left(\pi_{d,k} - \underline{\pi}_{w,k}\right).
 ```
-In this formulation, the parameter ``\underline{\phi}^\text{imp}_k`` is seen to be an elasticity of substitution between domestic products and imports. The factor ``f_k\left(1 - f_k\right)`` arises because the elasticity is applied to the import share rather than to imports and domestic products separately.
+In this formulation, the parameter ``\underline{\phi}^\text{imp}_k`` is seen to be an Armington elasticity[^1] of substitution between domestic products and imports. The factor ``f_k\left(1 - f_k\right)`` arises because the elasticity is applied to the import share rather than to imports and domestic products separately.
 
 The reference import demand, which appears as a scale factor in the [linear goal program](@ref lgp), is set equal to twice the calculated volume of imports,
 ```math
 \overline{M}^\text{ref}_k = 2 M_k.
 ```
 The multiple of two is somewhat arbitrary, because this simply sets a scale.
+
+[^1]: Armington elasticities play an important role in trade models, but estimates very widely, and are mainly available for high-income countries. As a general rule, long-run elasticities (e.g., annual) are larger than short-run elasticities (e.g., monthly), and estimates tend to increase with the level of disaggregation of the data.
 
 ## [Wages and labor productivity](@id dynamics-wages-labor-prod)
 The wage share ``\omega_i`` in sector ``i`` is defined as
@@ -108,13 +110,13 @@ With the above expressions, the growth rate of the wage share can be calculated.
 [^2]: The [Kaldor-Verdoorn law](https://www.encyclopedia.com/social-sciences/applied-and-social-sciences-magazines/verdoorns-law) states that the growth rate of labor productivity is an increasing function of the growth rate of output. In its original form it applies only to manufacturing, and the influences are weaker in services and agriculture. In the Macro model, an economy-wide labor productivity rate is specified as an increasing function of the GDP growth rate.
 
 ## [Intermediate demand coefficients](@id dynamics-intermed-dmd-coeff)
-By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^1]. The growth rates of the coefficients are calculated as
+By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^3]. The growth rates of the coefficients are calculated as
 ```math
 \hat{\overline{D}}_{ki} = C_{ki} - \frac{\underline{a}\alpha_{ki}}{\sqrt{\sum_{l=1}^{n_p} \alpha^2_{li}}},
 ```
 where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{a}`` is a rate constant, which is specified in the [configuration file](@ref config-intermed-dmd-change), and the ``\alpha_{ki}`` are cost shares, which are calculated consistent with the calculation of [prices](@ref dynamics-prices).
 
-[^1]: The model is a simplified application of a more general model that is presented in [_Cost Share-induced Technological Change and Kaldor’s Stylized Facts_](https://www.sei.org/publications/cost-share-induced-technological-change-kaldors-stylized-facts/) by Eric Kemp-Benedict.
+[^3]: The model is a simplified application of a more general model that is presented in [_Cost Share-induced Technological Change and Kaldor’s Stylized Facts_](https://www.sei.org/publications/cost-share-induced-technological-change-kaldors-stylized-facts/) by Eric Kemp-Benedict.
 
 ## Profit rate
 Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of output, ``\Pi_i``, is given by the value of output per unit of output less unit costs,
