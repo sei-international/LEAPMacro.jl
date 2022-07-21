@@ -58,7 +58,7 @@ Here is the example from the Freedonia sample model:
 ![Freedonia sector_parameters file](assets/images/sector_parameters.png)
 
 ## [Time series](@id params-time-series)
-The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-wages-labor-prod).
+The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-wages-labor-prod). The final two columns are optional, so they are bracketed. If they are missing, then the default values from the [configuration file](@ref config-empl-labprod-wage) are used for all years.
 
 !!! info "Exchange rates and supply-use tables"
     Supply-use tables have entries that are all in the same currency, usually but not always the national (domestic) currency. Exchange rates express the domestic currency in terms of a foreign currency, such as the US dollar, the Euro, the Yen, or a mixture of currencies (a currency "basket"). In Macro, exchange rates are converted into an index to ensure consistent currency units.
@@ -67,18 +67,16 @@ Scenarios for the world economic growth rate can be drawn from other studies, su
 
 Other parameters have less well-established sources of estimates. The labor productivity parameters (the Kaldor-Verdoorn parameters `KV_coeff` and `KV_intercept`) might well be assumed constant, possibly estimated from historical data or drawn from studies such as [Estimating Kaldor-Verdoorn’s law across countries in different stages of development](https://www.anpec.org.br/encontro/2014/submissao/files_I/i9-0ed7d252394aed6039f6af0e4ed51fc6.pdf) by Guilherme Magacho. Assumptions regarding the world inflation rate and the exchange rate can be based on historical patterns, other modeling studies, or consultation with experts.
 
-NOTE: THE KV COLUMNS CAN BE OMITTED
-
-| `year` | `world_gr` | `world_infl_rate` | `working_age_gr` | `exchange_rate` | `KV_coeff` | `KV_intercept` |
-|-------:|-----------:|------------------:|-----------------:|----------------:|-----------:|---------------:|
-|    y_1 |      wgr_1 |             wir_1 |           wagr_1 |            xr_1 |      kvc_1 |          kvi_1 |
-|    y_2 |      wgr_2 |             wir_2 |           wagr_2 |            xr_2 |      kvc_2 |          kvi_2 |
-|    ... |        ... |               ... |              ... |             ... |        ... |            ... |
-|  y_*N* |    wgr_*N* |           wir_*N* |         wagr_*N* |          xr_*N* |    kvc_*N* |        kvi_*N* |
+| `year` | `world_gr` | `world_infl_rate` | `working_age_gr` | `exchange_rate` | `[KV_coeff]` | `[KV_intercept]` |
+|-------:|-----------:|------------------:|-----------------:|----------------:|-------------:|-----------------:|
+|    y_1 |      wgr_1 |             wir_1 |           wagr_1 |            xr_1 |    \[kvc_1\] |        \[kvi_1\] |
+|    y_2 |      wgr_2 |             wir_2 |           wagr_2 |            xr_2 |    \[kvc_2\] |        \[kvi_2\] |
+|    ... |        ... |               ... |              ... |             ... |          ... |              ... |
+|  y_*N* |    wgr_*N* |           wir_*N* |         wagr_*N* |          xr_*N* |  \[kvc_*N*\] |      \[kvi_*N*\] |
 
 The corresponding [variables](@ref exog-param-vars) are:
   * `world_gr` : ``\underline{\gamma}^\text{world}``
-  * `world_infl_rate` : ``\underline{\pi}_{w,k}`` for sector ``k`` (but assumed to be the same for all products)
+  * `world_infl_rate` : ``\underline{\pi}_{w,k}`` (applied uniformly to all products ``k``, but modified by an optional file specifying [world real price trends for selected tradeables](@ref params-optional-price-trend))
   * `working_age_gr` : ``\underline{\hat{N}}``
   * `exchange_rate` : ``\underline{e}``
   * `KV_coeff` : ``\underline{\alpha}_\text{KV}``
@@ -88,7 +86,7 @@ Here is the example from the Freedonia sample model:
 ![Freedonia time_series file](assets/images/time_series.png)
 
 ## [Optional input files](@id params-optional-input-files)
-In the [configuration file general settings](@ref config-general-settings), it is possible to specify any or all of three optional input files for: investment demand; potential output; maximum capacity utilization; and real prices for tradeables.
+In the [configuration file general settings](@ref config-general-settings), it is possible to specify any or all of four optional input files for: investment demand; potential output; maximum capacity utilization; and real prices for tradeables. For the corresponding variables, see the table of [optional exogenous parameters](@ref optional-exog-param-vars).
 
 ### [Investment demand](@id params-optional-exog-investment)
 The Macro model calculates investment for non-energy sectors based on expected demand and profitability: see the explanation of [potential output](@ref dynamics-potential-output) in the Technical Details. However, for public infrastructure investment -- which is driven by policy goals, rather than private profitability, and where the capital stock is not associated with a particular sector -- investment must be specified exogenously. (When externally specified investment *is* associated with a particular sector, it is better to specify potential output: see below.)
@@ -132,10 +130,8 @@ The maximum capacity utilization file has the following structure:
 
 In the file, all years must be listed. However, values do not have to specified for all years. As indicated in the table for sector 2 and year 2 (cell `y_2`,`sec_2`), if capacity utilization is unconstrained in some year, the maximum level can be omitted, and Macro will set it equal to 1.0.
 
-### [Real price trends for selected tradeables](@id params-optional-price-trend)
-The Macro model assumes that countries are price takers in world markets, and prices for tradeables are exogenous. The domestic prices of tradeables could literally be the world price, but the fundamental assumption is that domestic producers are price takers for tradeables, whereas for non-tradeables they set prices as a markup on costs.
-
-By default, prices for all tradeables grow at a uniform, user-specified world inflation rate. However, optionally, real price indices for all or some tradeables can be specified. The real price trend is then adjusted for inflation at the world inflation rate.
+### [World real price trends for selected tradeables](@id params-optional-price-trend)
+In the Macro model, "world" prices for goods and services are specified exogenously, while domestic prices are calculated as a markup on costs. By default, world prices for all tradeables grow at a uniform, user-specified world inflation rate. However, optionally, real world price indices for all or some tradeables can be specified. The real price trend is then adjusted for inflation at the world inflation rate.
 
 The real price file has the following structure:
 
@@ -147,4 +143,4 @@ The real price file has the following structure:
 |    ... |       ... |       ... | ... |
 |  y_*N* | pw_p1y*N* | pw_p2y*N* | ... |
 
-The sequence of values is converted internally into an index. For this reason, **values must be specified for all years**. However, **values should be specified only for products for which a real price index is specified**. For other products, the real price is assumed to be constant, so the price rises at the world inflation rate. Price indices for non-tradeables are ignored; Macro calculates those prices endogenously based on a markup. 
+The sequence of values is converted internally into an index. For this reason, **values must be specified for all years**. However, **values should be specified only for products for which a real price index is specified**. For other products, the real world price is assumed to be constant, so the nominal price rises at the world inflation rate. Price indices for non-tradeables are ignored, because the world price is irrelevant; together with other domestic prices, Macro calculates prices of non-tradeables endogenously based on a markup. 

@@ -187,7 +187,7 @@ investment-fcn:
     growth_adj: 0.10
 ```
 
-### Employment, labor productivity, and wages
+### [Employment, labor productivity, and wages](@id config-empl-labprod-wage)
 The next block contains default parameters for the labor productivity function (following the Kaldor-Verdoorn law[^1]) and for the function that determines the growth rate of the wage. See the page on [model dynamics](@ref dynamics-wages-labor-prod) for details.
 
 For labor productivity, the default parameters are used if they are not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series).
