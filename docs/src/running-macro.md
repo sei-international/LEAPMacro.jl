@@ -8,7 +8,7 @@ Once the configuration and external parameter files have been prepared, the Macr
 ## Running Macro stand-alone
 When running Macro multiple times -- for example, when calibrating -- it is best to work in Julia's command-line read-eval-print loop (the REPL). That way, LEAPMacro is only included once, which speeds up subsequent runs.
 
-The only command needed is `LEAPMacro.run()`, which has the following definition:
+The only command needed is `LEAPMacro.run()`, which is defined as follows, with the default values indicated:
 ```julia
 function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stack::Bool = false, include_energy_sectors::Bool = false)
 ```

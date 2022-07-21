@@ -89,7 +89,7 @@ Others of the files in the `calibration` folder have names similar to the `diagn
   * `sector_output_0.csv`
   * `tot_intermediate_supply_non-energy_sectors_0.csv`
 
-## The `results` folder
+## [The `results` folder](@id model-outputs-results)
 The `results` folder contains the simulation results from the model. Once the model is fully developed, calibrated, and running in practice, this is the most interesting folder to look at.
 
 When running with LEAP, the Macro model may be run several times to converge on a consistent set of results. The results folder contains outputs from each of the runs:

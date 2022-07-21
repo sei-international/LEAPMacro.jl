@@ -26,7 +26,7 @@ Total sales by businesses, net of intermediate payments, is "value added". In th
 ## Format of the supply-use table
 The supply-use table is the most flexible of the Macro model input files. That is because supply-use tables vary widely in their level of detail and layout. However, Macro does have some restrictions, so some processing is normally required:
   * All of the tables must be in a single comma-separated variable (CSV) file;
-  * The tables and columns must be oriented in a specific direction;
+  * The tables and columns must be oriented in a specific direction, with produts labeling rows and sectors labeling columns;
   * To be summed together, groups of columns must be next to each other.
 
 !!! info "Aggregate products that are close substitutes"

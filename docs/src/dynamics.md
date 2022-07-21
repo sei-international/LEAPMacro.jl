@@ -87,7 +87,7 @@ The wage bill ``\overline{W}_i`` is by definition equal to the wage rate ``w_i``
 ```
 The model does not explicitly calculate sector-specific labor productivity, employment, or wage. Instead, it calculates growth rates for each of these parameters and assumes the growth rates hold across all sectors.
 
-Labor productivity is assumed to rise with growth, following the Kaldor-Verdoorn law. While the Kaldor-Verdoorn coefficients vary between sectors, with a higher responsiveness in industry than services, for example, data are limited. For that reason, the Macro model calculates the growth rate of economy-wide average labor productivity,
+Labor productivity is assumed to rise with growth, following the Kaldor-Verdoorn law[^2]. While the Kaldor-Verdoorn coefficients vary between sectors, with a higher responsiveness in industry than services, for example, data are limited. For that reason, the Macro model calculates the growth rate of economy-wide average labor productivity,
 ```math
 \hat{\lambda} = \underline{\alpha}_\text{KV} \hat{Y} + \underline{\beta}_\text{KV}.
 ```
@@ -105,6 +105,7 @@ With the above expressions, the growth rate of the wage share can be calculated.
 ```math
 \hat{\omega}_i = \hat{w} - \hat{\lambda} - \pi_g.
 ```
+[^2]: The [Kaldor-Verdoorn law](https://www.encyclopedia.com/social-sciences/applied-and-social-sciences-magazines/verdoorns-law) states that the growth rate of labor productivity is an increasing function of the growth rate of output. In its original form it applies only to manufacturing, and the influences are weaker in services and agriculture. In the Macro model, an economy-wide labor productivity rate is specified as an increasing function of the GDP growth rate.
 
 ## [Intermediate demand coefficients](@id dynamics-intermed-dmd-coeff)
 By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^1]. The growth rates of the coefficients are calculated as
