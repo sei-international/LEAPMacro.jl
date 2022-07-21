@@ -33,7 +33,7 @@ julia> LEAPMacro.run()
 Macro model run (0)...completed
 0
 ```
-
+### Running from the command line
 In some circumstances it can be helpful to specify options as command-line parameters and run Macro from the Windows command line. The ArgParse Julia package makes that relatively easy. Here is a sample script:
 ```julia
 using LEAPMacro
@@ -61,6 +61,8 @@ end
 parsed_args = parse_commandline()
 LEAPMacro.run(parsed_args["config_file"], dump_err_stack = parsed_args["verbose_errors"], include_energy_sectors = parsed_args["include_energy_sectors"])
 ```
+!!! tip "Speeding up LEAPMacro with a pre-compiled system image"
+    If Macro will be run multiple times from the command line, execution can be speeded up by pre-compiling the LEAPMacro plugin. In the [sample files](assets/Macro.zip), there is a Windows batch file, `make_LEAPMacro_sysimage.bat`. Running this batch file (from the command line or by double-clicking) will generate a "system image" called `LEAPMacro-sysimage.so`. After running the batch file, put the system image in the folder where you want to run Macro and call Julia with an additional `sysimage` argument -- `julia --sysimage=LEAPMacro-sysimage.so ...` -- where `...` is the name of your script followed by any command-line arguments.
 
 ## [Running Macro from LEAP](@id running-macro-from-LEAP)
 The [Freedonia sample model](assets/Macro.zip) includes a Visual Basic script for running Macro from LEAP. Located in the `scripts` folder, and called `LEAPMacro_MacroModelCalc.vbs`, it can be placed in a LEAP Area folder and called from LEAP using LEAP's scripting feature. See the [quick start guide](@ref quick-start) for more information.
