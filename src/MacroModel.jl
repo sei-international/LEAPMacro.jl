@@ -211,10 +211,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	ntime = 1 + (final_year - base_year)
 	# Initial autonomous growth rate
 	γ_0 = neutral_growth * ones(ns)
-	# Set up a "tradeables" filter
-	# TODO: Get rid of tradeables
-    tradeables = [true for i in 1:np] # Initialize to true
-    tradeables[params["non-tradeable-range"]] .= false
 
 	#----------------------------------
     # Read in exogenous time-varying parameters and sector-specific parameters
@@ -262,9 +258,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	#----------------------------------
     # Domestic prices using a Sraffian price system
     #----------------------------------
-	# sraffa_inverse = calc_sraffa_inverse(np, ns, tradeables, io)
-    # prices.pd = sraffa_inverse * calc_sraffa_RHS(1, np, ns, ω, tradeables, prices, io, exog)
-	# prices.pb = prices.pd
 	prices.pd = calc_dom_prices(1, np, ns, ω, prices, io, exog)
 	prices.pb = exog.xr[1] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
 
@@ -457,8 +450,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     πg = params["global-params"]["infl_default"]
     πb = ones(length(prices.pb)) * params["global-params"]["infl_default"]
     πd = ones(length(prices.pd)) * params["global-params"]["infl_default"]
-	# TODO: Replace exog.πw with exog.πw_base, replace πw_byprod with πw
-    πw_byprod = ones(length(prices.pw)) * params["global-params"]["infl_default"]
+    πw = ones(length(prices.pw)) * params["global-params"]["infl_default"]
 
 	if calc_use_matrix_tech_change
 		sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
@@ -539,7 +531,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         if previous_failed
             pd_prev = pd_prev .* (1 .+ πd)
             pb_prev = pb_prev .* (1 .+ πb)
-            pw_prev = pb_prev .* (1 .+ πw_byprod)
+            pw_prev = pb_prev .* (1 .+ πw)
             va1 = (1 + πg) * prices.Pg * g
             va2 = sum(value.(param_pb)[j] * io.D[j,:] for j in 1:np) .* g
             value_added = va1 - va2
@@ -547,7 +539,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         else
 			πd = (param_pd - pd_prev) ./ (pd_prev .+ IOlib.ϵ) # If not produced, pd_prev = 0
 	        πb = (param_pb - pb_prev) ./ pb_prev
-	        πw_byprod = (prices.pw - pw_prev) ./ pw_prev # exog.πw is a single value, applied to all products; this is by product
+	        πw = (prices.pw - pw_prev) ./ pw_prev # exog.πw_base is a single value, applied to all products; this is by product
             πg = sum(g_share .* πb)
 			val_findmd = pd_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
 	        val_findmd_share = val_findmd/sum(val_findmd)
@@ -559,7 +551,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         prev_GDP_deflator = (1 + πGDP) * prev_GDP_deflator
 
 		if tf_π_targ_use_πw
-			tf_π_targ = exog.πw[t]
+			tf_π_targ = exog.πw_base[t]
 		end
 
 		#--------------------------------
@@ -638,7 +630,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Export demand
 		#--------------------------------
-        Xmax = Xmax .* (1 + exog.world_grs[t]).^exog.export_elast_demand[t] .* ((1 .+ πw_byprod)./(1 .+ πd)).^exog.export_price_elast
+        Xmax = Xmax .* (1 + exog.world_grs[t]).^exog.export_elast_demand[t] .* ((1 .+ πw)./(1 .+ πd)).^exog.export_price_elast
 
 		#--------------------------------
 		# Final domestic consumption demand
@@ -715,16 +707,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		prices.Pg = (1 + πg) * prices.Pg
 		# Apply global inflation rate to world prices
-		prices.pw = prices.pw * (1 + exog.πw[t])
+		prices.pw = prices.pw * (1 + exog.πw_base[t])
 		# Adjust for any exogenous price indices
 		if t > 1
 			pw_spec = exog.exog_price[t,:] ./ exog.exog_price[t - 1,:]
 			pw_ndxs = findall(x -> !ismissing(x), pw_spec)
 			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
 		end
-
-		# prices.pd = sraffa_inverse * calc_sraffa_RHS(t, np, ns, ω, tradeables, prices, io, exog)
-		# prices.pb = prices.pd
 
 		io.m_frac = (value.(M) + IOlib.ϵ * io.m_frac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
 		prices.pd = calc_dom_prices(t, np, ns, ω, prices, io, exog)
@@ -745,7 +734,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		param_z = z
 		# Caluculate updated m_frac for use in goal program
 		adj_import_price_elast = max.(0, 1 .- io.m_frac) .* exog.import_price_elast
-		param_mfrac = io.m_frac .* ((1 .+ πd)./(1 .+ πw_byprod)).^adj_import_price_elast
+		param_mfrac = io.m_frac .* ((1 .+ πd)./(1 .+ πw)).^adj_import_price_elast
 		# Set maximum utilization in multiple steps
 		param_max_util = ones(ns)
 		max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[t + 1,:])

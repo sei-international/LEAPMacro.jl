@@ -39,7 +39,7 @@ end
 
 "User-specified parameters"
 mutable struct ExogParams
-    πw::Array{Float64,1} # World inflation rate x year
+    πw_base::Array{Float64,1} # World inflation rate x year
     world_grs::Array{Float64,1} # Real world GDP growth rate x year
 	working_age_grs::Array{Float64,1} # Growth rate of the working age population x year
 	αKV::Array{Float64,1} # Kaldor-Verdoorn coefficient x year
@@ -275,7 +275,7 @@ Pull in user-specified parameters from different CSV input files with filenames 
 function get_var_params(param_file::String)
     # Return an ExogParams struct
     retval = ExogParams(
-                    Array{Float64}(undef, 0), # πw
+                    Array{Float64}(undef, 0), # πw_base
                     Array{Float64}(undef, 0), # world_grs
 					Array{Float64}(undef, 0), # working_age_grs
 					Array{Float64}(undef, 0), # αKV
@@ -421,9 +421,9 @@ function get_var_params(param_file::String)
             end
             # These have defaults
             if !ismissing(world_infl_temp[year_ndx])
-                push!(retval.πw, world_infl_temp[year_ndx])
+                push!(retval.πw_base, world_infl_temp[year_ndx])
             else
-                push!(retval.πw, world_infl_default)
+                push!(retval.πw_base, world_infl_default)
             end
             if !ismissing(world_grs_temp[year_ndx])
                 push!(retval.world_grs, world_grs_temp[year_ndx])
