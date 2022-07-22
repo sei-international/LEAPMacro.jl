@@ -28,7 +28,7 @@ Imports are adjusted in order to meet the goals in the [linear goal program](@re
 
 Investment expenditure is a key variable in demand-led models, and is calculated endogenously. In Macro, investment rates depend on profitability, the past growth trajectory, capacity utilization, and the (simulated) interest rate set by the central bank.
 
-## Prices in the macro model
+## [Prices in the macro model](@id demand-led-growth-prices)
 Five prices appear in the Macro model:
   1. World prices for traded goods and services
   2. The exchange rate

@@ -65,7 +65,7 @@ q_{d,k} - \sum_{i = 1}^{n_s} \overline{D}_{ki}\overline{z}_i u_i = 0.
 u_i + \Delta u_i = \underline{u}_i^\text{max},\quad 0 \leq u_i,\Delta u_i \leq 1.
 ```
 
-## Investment goods allocation
+## [Investment goods allocation](@id lgp-investment-goods-allocation)
 `eq_inv_supply`: Total investment demand ``\overline{I}`` is supplied by a variety of sectors with shares ``\theta_k``. This is enforced by the condition
 ```math
 I_k = \underline{\theta}_k \overline{I}.
