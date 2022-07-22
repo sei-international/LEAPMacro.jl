@@ -11,7 +11,7 @@ otuputs
     └───[diagnostics]
     └───results
 ```
-The `NAME` of the folder under `outputs` is specified by the `output_folder` parameter in the [configuration file](@ref config-general-settings). The `diagnostics` folder is only present if the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config-general-settings).
+The `NAME` of the folder under `outputs` is specified by the `output_folder` parameter in the [configuration file](@ref config-general-settings). The `diagnostics` folder is only present if the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config-output-folders).
 
 Different scenarios can be specified by different configuration files, with different `output_folder` parameters set. In that case, there will be several folders:
 ```
@@ -29,15 +29,21 @@ otuputs
 
 In addition, Macro writes a log file called `LEAPMacro_log_XXXX.txt` to the main folder, where `XXXX` is the `output_folder` specified in the [configuration file](@ref config-general-settings). If the model fails, then the error message will be written to the log file.
 
+!!! info "Naming convention when Macro is run with energy sectors included"
+    The Macro model is meant to be run together with LEAP, as explained in the page on the [LEAP-Macro link](@ref leap-macro-link). LEAP calculates demand for energy and energy production, while Macro covers the rest of the economy -- the energy sectors specified in the [configuration file](@ref config-sut) are excluded from Macro's calculations. However, for calibration it can be useful to run Macro separately from LEAP, with the energy sectors included. This is done by setting `include_energy_sectors = true` when calling the `LEAPMacro.run()` function (see [Running the Macro model](@ref running-macro) for details.)
+
+    When Macro is run with energy sectors included, the output folder is named `XXXX_full`, where `XXXX` is the `output_folder` specified in the [configuration file](@ref config-general-settings).
+
+
 ## [The `diagnostics` folder](@id model-outputs-diagnostics)
 When the `report-diagnostics` parameter is set to `true`, a variety of diagnostic outputs are reported.
 
-One crucial diagnostic indicator is given in the file `nonenergy_energy_link_measure.txt`. It contains a message like the following:
+One crucial diagnostic indicator, which is motivated in [Isolating the energy sector](@ref isolate-energy) is given in the file `nonenergy_energy_link_measure.txt`. It contains a message like the following:
 ```
 Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:
-This value should be small: 2.43%.
+This value should be small: 2.52%.
 ```
-Whether the estimated parameter is sufficiently small or not depends on the purposes of the analysis. For the Freedonia sample model, it suggests that excluding the demand by the energy sector of non-energy goods and services could lead to a 2.43% discrepancy.
+Whether the estimated parameter is sufficiently small or not depends on the purposes of the analysis. For the Freedonia sample model, it suggests that excluding the demand by the energy sector of non-energy goods and services could lead to a 2.52% discrepancy.
 
 An additional set of files with names such as `model_0_2010.txt` provide an export of the [linear goal program](@ref lgp) prepared by the Macro model. Examining these files can sometimes be helpful when the log file indicates an error in JuMP (the Julia mathematical programming library). The file offers an explicit formulation of the model, with the estimated parameters:
 ```
@@ -52,9 +58,10 @@ Subject to
 
 Some of the files provide "sanity checks" on the input data. 
   * `demand_coefficients.csv`: These should sum to a total less than one down the columns
+  * `[energy_share.csv]`: If present, these should be less than one (only reported if energy sectors are excluded)
   * `imported_fraction.csv`: These should be less than one
   * `profit_margins.csv`: These should be greater than 1 but (usually) less than 2
-  * `supply_fractions.csv`: These should sum to one along rows (unless the product is not produced domestically, in which case the sum will be zero)
+  * `supply_fractions.csv`: These should sum to one along columns (unless the product is not produced domestically, in which case the sum will be zero)
 
 Other files report figures that should be close to, although not necessarily identical to, the corresponding values in the supply-use table. The differences should be explained by Macro compensating for territorial adjustments or stock changes:
   * `domestic_production.csv`
@@ -64,7 +71,6 @@ Other files report figures that should be close to, although not necessarily ide
   * `investment.csv`
   * `margins.csv`
   * `sector_output.csv`
-  * `tax_rate.csv`
   * `tot_intermediate_demand_all_products.csv`
   * `tot_intermediate_supply_all_sectors.csv`
   * `tot_intermediate_supply_non-energy_sectors.csv`: Note that these values will be lower than in the supply-use table due to the excluded energy sectors
@@ -96,7 +102,7 @@ When running with LEAP, the Macro model may be run several times to converge on 
 ![Results folder contents](assets/images/results_folder_files.png)
 
 !!! warning "Results cover only non-energy sectors"
-    The Macro model reports results only for non-energy sectors. To include all sectors, set the option `include_energy_sectors = true` when [running the Macro model](@ref running-macro). 
+    By default, the Macro model reports results only for non-energy sectors. To include all sectors, set the option `include_energy_sectors = true` when [running the Macro model](@ref running-macro). 
 
 Two of the results files (with the run number indicated by `#`) contain multiple variables:
   * `indices_#.csv`: The indices that are passed to LEAP, as specified in the [configuration file](@ref config-link-LEAP)
@@ -117,5 +123,6 @@ Investment rates are determined by the autonomous investment rate, the profit ra
   * `profit_rate_#.csv`
   * `autonomous_investment_rate_#.csv`
 
-In Macro, prices of tradeables are exogenous. If they are specified through an optional file with [real price trends for selected tradeables](@ref params-optional-price-trend), then they can drive further changes in non-tradeables prices, which are calculated endogenously by applying a markup. Prices for all products are reported in the file:
+In Macro, world prices of tradeable goods and services are exogenous, so they are not reported. Domestic prices are [calculated endogenously by applying a markup](@ref dynamics-prices). "Basic" prices of goods and services are calculated as a trade-weighted average of the world and domestic price. Domestic and basic prices are reported in the files:
+  * `domestic_prices_#.csv`
   * `basic_prices_#.csv`
