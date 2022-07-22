@@ -6,11 +6,11 @@ CurrentModule = LEAPMacro
 # [Variables](@id variables)
 The Macro model contains three types of variables:
   * The [goal program variables](@ref lgp-vars) are solved in each time step (equal to one year) using a [linear goal program](@ref lgp).
-  * The [dynamic parameters](@ref dynamic-param-vars) appear as parameters the goal program, but are updated between runs. They are shown with an overline to make them easier to identify in the equations.
-  * As the dynamic parameters are calculated, additional [intermediate variables](@ref intermed-vars) are introduced to simplify the equations.
-In addition to model variables, there are [exogenous parameters](@ref exog-param-vars), which might or might not change over time. They are shown with an underline to make them easier to identify in the equations. Some "exogenous" parameters, such as the target profit rate ``\underline{r}^*``, are in fact calculated from a combination of initial values and exogenous parameters, but are then held fixed.
+  * The [dynamic parameters](@ref dynamic-param-vars) appear as parameters in the goal program, but are updated between runs. They are shown with an overline to make them easier to identify in the equations.
+  * As the dynamic parameters are calculated, [intermediate variables](@ref intermed-vars) are introduced to simplify the equations and for reporting purposes.
+In addition to model variables, there are [exogenous parameters](@ref exog-param-vars), some of which are [optional](@ref optional-exog-param-vars). Exogenous parameters are shown with an underline to make them easier to identify in the equations. Some "exogenous" parameters, such as the target profit rate ``\underline{r}^*``, are in fact calculated from a combination of initial values and exogenous parameters, but are then held fixed.
 
-Variables and parameters are labeled with the following dimensions:
+Variables and parameters may be labeled by sector, by product, or both:
 
 | Symbol       | Definition                                          |
 |:-------------|:----------------------------------------------------|
@@ -41,7 +41,6 @@ Variables and parameters are labeled with the following dimensions:
 | Symbol                         | Definition                                                                 |
 |:-------------------------------|:---------------------------------------------------------------------------|
 | ``\overline{z}_i``             | Potential output for sector ``i``                                          |
-| ``\overline{W}_i``             | Nominal wage bill in sector ``i``                                          |
 | ``\overline{p}_{b,k}``         | Basic price for product ``k`` as an index relative to the initial year     |
 | ``\overline{P}_g``             | Price level of output as an index relative to the initial year             |
 | ``\overline{I}``               | Demand for investment goods                                                |
@@ -49,8 +48,6 @@ Variables and parameters are labeled with the following dimensions:
 | ``\overline{F}^\text{norm}_k`` | Normal level of final demand for product ``k``                             |
 | ``\overline{M}^\text{ref}_k``  | Reference level of imports for product ``k``                               |
 | ``\overline{f}_k``             | Normal level of imports of good ``k`` as a fraction of domestic demand     |
-| ``\overline{p}_{d,k}``         | Producer price for product ``k`` as an index relative to the initial year  |
-| ``\overline{p}_{w,k}``         | World price index for product ``k``                                        |
 | ``\overline{D}_{ki}``          | Intermediate demand for product ``k`` per unit of output from sector ``i`` |
 
 ## [Intermediate variables](@id intermed-vars)
@@ -58,10 +55,14 @@ Variables and parameters are labeled with the following dimensions:
 |:-----------------------|:----------------------------------------------------------------------------------------------|
 | ``g_i``                | Total output from sector ``i``                                                                |
 | ``\hat{Y}``            | Real GDP growth rate                                                                          |
-| ``\pi_\text{GDP}``     | Inflation rate for the GDP price level                                                        |
+| ``p_{d,k}``            | Producer price for product ``k`` as an index relative to the initial year                     |
+| ``p_{w,k}``            | World price index for product ``k``                                                           |
+| ``p_{x,k}``            | Export-weighted average of world and domestic prices for product ``k``                        |
 | ``\pi_{b,k}``          | Basic price inflation rate for product ``k``                                                  |
 | ``\pi_{d,k}``          | Producer price inflation rate for product ``k``                                               |
+| ``\pi_\text{GDP}``     | Inflation rate for the GDP price level                                                        |
 | ``V_k``                | Value of total final demand (household, government, exports,and investment) for product ``k`` |
+| ``W_i``                | Nominal wage bill in sector ``i``                                                             |
 | ``\hat{L}``            | Growth rate of employment                                                                     |
 | ``\hat{w}``            | Growth rate of the nominal wage                                                               |
 | ``\hat{\lambda}``      | Growth rate of labor productivity                                                             |
@@ -72,6 +73,7 @@ Variables and parameters are labeled with the following dimensions:
 | ``r_i``                | Gross rate of profit in sector ``i``                                                          |
 | ``\Pi_i``              | Gross profits in sector ``i``                                                                 |
 | ``\gamma^\text{wage}`` | Growth rate of the total wage bill                                                            |
+| ``f_k``                | Current level of imports of good ``k`` as a fraction of domestic demand                       |
 
 ## [Exogenous parameters](@id exog-param-vars)
 | Symbol                               | Definition                                                                                                                          |
@@ -80,9 +82,9 @@ Variables and parameters are labeled with the following dimensions:
 | ``\underline{w}_F``                  | In the [linear goal program](@ref lgp), the category weight penalizing departure from normal final demand                           |
 | ``\underline{w}_X``                  | In the [linear goal program](@ref lgp), the category weight penalizing departure from normal exports                                |
 | ``\underline{w}_M``                  | In the [linear goal program](@ref lgp), the category weight penalizing imports over domestic supply                                 |
-| ``\underline{\sigma}^u_i``           | Sector weight for utilization for sector ``i``                                                                                      |
-| ``\underline{\sigma}^X_k``           | Product weight for exports for product ``k``                                                                                        |
-| ``\underline{\sigma}^F_k``           | Product weight for final consumption demand for product ``k``                                                                       |
+| ``\underline{\sigma}^u_i``           | In the [linear goal program](@ref lgp), sector weight for utilization for sector ``i``                                              |
+| ``\underline{\sigma}^X_k``           | In the [linear goal program](@ref lgp), product weight for exports for product ``k``                                                |
+| ``\underline{\sigma}^F_k``           | In the [linear goal program](@ref lgp), product weight for final consumption demand for product ``k``                               |
 | ``\underline{\varphi}_u``            | For utilization sector weights, weight of value share vs. constant share                                                            |
 | ``\underline{\varphi}_F``            | For final demand sector weights, weight of value share vs. constant share                                                           |
 | ``\underline{\varphi}_X``            | For export sector weights, weight of value share vs. constant share                                                                 |
@@ -91,15 +93,14 @@ Variables and parameters are labeled with the following dimensions:
 | ``\underline{d}_k``                  | Equal to ``\underline{d}_k = 1`` if the country does _not_ produce product ``k`` and  ``\underline{d}_k = 0`` if it does produce it |
 | ``\underline{\varepsilon}_i``        | Initial energy cost share for sector ``i`` if energy excluded, otherwise zero                                                       |
 | ``\underline{e}``                    | Exchange rate                                                                                                                       |
-| ``\underline{\pi}_{w,k}``            | Inflation rate for the world price of product ``k`` (currently the same across all products)                                        |
-| ``\underline{\mu}_i``                | Profit margin in sector ``i`` over total costs                                                                                      |
+| ``\underline{\pi}_{w,k}``            | Inflation rate for the world price of product ``k``                                        |
+| ``\underline{\mu}_i``                | Profit margin in sector ``i``                                                                                      |
 | ``\underline{\alpha}_\text{KV}``     | Kaldor-Verdoorn law coefficient                                                                                                     |
 | ``\underline{\beta}_\text{KV}``      | Kaldor-Verdoorn law intercept                                                                                                       |
-| ``\underline{h}``                    | Inflation pass-through from the price of goods to the increase in the nominal wage                                                  |
+| ``\underline{h}``                    | Inflation pass-through to the nominal wage (wage indexation parameter)                                                 |
 | ``\underline{k}``                    | Response of the real wage to labor supply constraints                                                                               |
 | ``\underline{\hat{N}}``              | Growth rate of the working-age population                                                                                           |
 | ``\underline{\chi}^\pm_k``           | Allocation coefficients for positive ``(+)`` and negative ``(-)`` margins for product ``k``                                         |
-| ``\underline{\xi}``                  | Rate of adjustment of autonomous demand to realized growth rate                                                                     |
 | ``\underline{i}_{b0}``               | Central bank interest rate when GDP growth and inflation are at their targets                                                       |
 | ``\underline{\rho}_Y``               | Taylor coefficient on the GDP growth rate                                                                                           |
 | ``\underline{\rho}_\pi``             | Taylor coefficient on the inflation rate                                                                                            |
@@ -107,6 +108,7 @@ Variables and parameters are labeled with the following dimensions:
 | ``\hat{\underline{Y}}^*_\text{max}`` | Taylor rule maximum target growth rate                                                                                              |
 | ``\underline{\pi}^*``                | Taylor rule target inflation rate                                                                                                   |
 | ``\underline{\gamma}_0``             | Initial autonomous investment rate in the investment function                                                                       |
+| ``\underline{\xi}``                  | Rate of adjustment of autonomous demand to realized growth rate                                                                     |
 | ``\underline{\alpha}_\text{util}``   | Change in induced investment from a change in utilization (utilization investment sensitivity)                                      |
 | ``\underline{\alpha}_\text{profit}`` | Change in induced investment from a change in profit rate (profit rate investment sensitivity)                                      |
 | ``\underline{\alpha}_\text{bank}``   | Change in induced investment from a change in borrowing costs (interest rate investment sensitivity)                                |

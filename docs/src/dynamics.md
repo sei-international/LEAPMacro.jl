@@ -12,7 +12,7 @@ For an explanation of the different prices, see [Processing the supply-use table
 
 World prices grow at an exogenously specified inflation rate ``\underline{\pi}_{w,k}``,
 ```math
-    \overline{p}_{w,k,+1} = \left(1 + \underline{\pi}_{w,k}\right)\overline{p}_{w,k}.
+    \overline{p}_{w,k,+1} = \left(1 + \underline{\pi}_{w,k}\right)p_{w,k}.
 ```
 By default, a uniform inflation rate is applied to all traded goods, while the real price is constant, so that ``\underline{\pi}_{w,k} = \underline{\pi}_w``. However, optionally, a real price index for an individual product ``k`` can be specified: see [real price trends for selected tradeables](@ref params-optional-price-trend).
 
@@ -40,18 +40,18 @@ Basic prices are a weighted average of domestic and foreign prices, with the wei
 ```
 Basic prices are therefore
 ```math
-    \overline{p}_{b,k} = f_k \underline{e}\overline{p}_{w,k} + \left(1 - f_k\right)\overline{p}_{d,k}.
+    \overline{p}_{b,k} = f_k \underline{e}p_{w,k} + \left(1 - f_k\right)p_{d,k}.
 ```
-If ``f_k = 1``, meaning the country does not produce product ``k`` and all supply is from imports, then ``\overline{p}_{b,k} = \overline{p}_{w,k}``. Otherwise, domestic prices are set as a mark-up on costs, where costs are in terms of basic prices
+If ``f_k = 1``, meaning the country does not produce product ``k`` and all supply is from imports, then ``\overline{p}_{b,k} = p_{w,k}``. Otherwise, domestic prices are set as a mark-up on costs, where costs are in terms of basic prices
 ```math
- \overline{p}_{d,k} = \sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}
+ p_{d,k} = \sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}
     \left[
         \overline{P}_g\left(\omega_i + \varepsilon_i\right) + \sum_{l = 1}^{n_p} \overline{p}_{b,l} \overline{D}_{li}
     \right].
 ```
 Together these equations lead to a linear system in domestic prices,
 ```math
-\overline{p}_{d,k} = \overline{P}_g\sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}\left(\omega_i + \varepsilon_i\right) + \underline{e}\sum_{l = 1}^{n_p} A_{kl} f_l \overline{p}_{w,l} + \sum_{l = 1}^{n_p} A_{kl} \left(1 - f_l\right)\overline{p}_{d,l},
+p_{d,k} = \overline{P}_g\sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}\left(\omega_i + \varepsilon_i\right) + \underline{e}\sum_{l = 1}^{n_p} A_{kl} f_l \overline{p}_{w,l} + \sum_{l = 1}^{n_p} A_{kl} \left(1 - f_l\right)\overline{p}_{d,l},
 ```
 where
 ```math
@@ -81,9 +81,9 @@ The multiple of two is somewhat arbitrary, because this simply sets a scale.
 ## [Wages and labor productivity](@id dynamics-wages-labor-prod)
 The wage share ``\omega_i`` in sector ``i`` is defined as
 ```math
-\omega_i = \frac{\overline{W}_i}{g_i}.
+\omega_i = \frac{W_i}{g_i}.
 ```
-The wage bill ``\overline{W}_i`` is by definition equal to the wage rate ``w_i`` multiplied by sectoral employment ``L_i``, while output ``g_i`` is by definition equal to real labor productivity ``\lambda_i`` muliplied by the price level of output ``\overline{P}_g`` and sectoral employment. So, the wage share can also be written as
+The wage bill ``W_i`` is by definition equal to the wage rate ``w_i`` multiplied by sectoral employment ``L_i``, while output ``g_i`` is by definition equal to real labor productivity ``\lambda_i`` muliplied by the price level of output ``\overline{P}_g`` and sectoral employment. So, the wage share can also be written as
 ```math
 \omega_i = \frac{w_i L_i}{\overline{P}_g\lambda_i L_i} = \frac{1}{\overline{P}_g}\frac{w_i}{\lambda_i}.
 ```
@@ -127,12 +127,12 @@ Profitability is reflected in the sector profit rate at full utilization ``r_i``
 ```
 Basic prices are used on the cost side of this equation, while an export-weighted price ``p_{x,k}`` is used on the revenue side, where
 ```math
-p_{x,k} = \frac{X_k}{q_{s,k}} \underline{e}\overline{p}_{w,k} + \left(1 - \frac{X_k}{q_{s,k}}\right)\overline{p}_{d,k}.
+p_{x,k} = \frac{X_k}{q_{s,k}} \underline{e}p_{w,k} + \left(1 - \frac{X_k}{q_{s,k}}\right)p_{d,k}.
 ```
 
 The Macro model does not track the capital stock. Instead, it tracks potential output, which is related to the capital stock through a sector-specific capital-output ratio. The calculation for the profit rate starts with the current unit price of capital goods ``p_K``, calculated as
 ```math
-p_K = \sum_{k=1}^{n_p}\underline{\theta}_k \overline{p}_{d,k}.
+p_K = \sum_{k=1}^{n_p}\underline{\theta}_k p_{d,k}.
 ```
 The profit rate is then given by profits divided by the product of the price of capital and the capital-output ratio ``\underline{v}_i``,
 ```math
@@ -205,7 +205,7 @@ The normal level of export demand grows with global GDP (or gross world product,
 ```
 Normal final demand grows with the real wage bill to a goods-specific elasticity. The next-period nominal wage bill in sector ``i`` is calculated using variables and parameters introduced above,
 ```math
-\overline{W}_{i,+1} = \frac{1 + \hat{w}}{1 + \hat{\lambda}}\left(1 + \gamma_i\right)\overline{W}_i.
+\overline{W}_{i,+1} = \frac{1 + \hat{w}}{1 + \hat{\lambda}}\left(1 + \gamma_i\right)W_i.
 ```
 The growth in the real wage bill is given by these factors, but corrected for inflation ``\pi_g``,
 ```math
