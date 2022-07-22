@@ -10,7 +10,7 @@ ADD THE BATCH FILE FOR MAKING A PRECOMPILED VERSION
 With that in mind, here are some proposed steps. It is best to start with an existing [configuration file](@ref config), for example the one from the [Freedonia sample model](@ref quick-start):
   1. Prepare the [supply-use table](@ref sut);
   1. Estimate or assume [external parameters](@ref params);
-  1. Set the `run_leap` value to `false` in the configuration file [general settings](@ref config-general-settings);
+  1. Set the `run_leap` value to `false` in the configuration file [general settings](@ref config-leap-run-settings);
   1. Set the [initial value adjustments](@ref config-init-val-adj) to zero;
   1. Set the start and end years appropriately (see below) in the configuration file [general settings](@ref config-general-settings);
   1. [Run the model](@ref running-macro) by calling `LEAPMacro.run(CONFIG_FILE, include_energy_sectors = true)`, where `CONFIG_FILE` is the name of your [configuration file](@ref config);

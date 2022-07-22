@@ -26,7 +26,7 @@ Specifically, the objective function is
     
     The sector or product weights are given as weighted average of two possible weighting schemes: the base-year shares of the different sectors or products in output (for utilization), exports, or final demand, or equal weights. The allocations between the two possible weighting schemes are specified by the product and sector weight parameters ``\underline{\varphi}_u``, ``\underline{\varphi}_X``, and ``\underline{\varphi}_F``, which are also set in the [configuration file](@ref config-lgp-weights).
 
-When the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config-general-settings), Macro will export the structure of the LGP for each year. The output looks something like this:
+When the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config-output-folders), Macro will export the structure of the LGP for each year. The output looks something like this:
 ```
 Min 1.7333333333333334 ugap[1] + 0.5333333333333333 ugap[2] + 0.6000000000000001 ugap[3] + ...
 Subject to

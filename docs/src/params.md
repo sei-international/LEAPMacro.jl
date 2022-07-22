@@ -3,9 +3,9 @@ CurrentModule = LEAPMacro
 ```
 
 # [External parameter files](@id params)
-External parameters that are specified for all products, all sectors, or over time, are supplied in three comma-separated variable (CSV) files in the `inputs` folder. The files provided with the Freedonia sample model have the names `product_parameters.csv`, `sector_parameters.csv`, and `time_series.csv`. However, the names are set in the configuration file's [general settings](@ref config-general-settings). That means that different external parameter files can be used for different scenarios.
+External parameters that are specified for all products, all sectors, or over time, are supplied in three comma-separated variable (CSV) files in the `inputs` folder. The files provided with the Freedonia sample model have the names `product_parameters.csv`, `sector_parameters.csv`, and `time_series.csv`. However, the names are set in the configuration file's [general settings](@ref config-required-input-files). That means that different external parameter files can be used for different scenarios.
 
-The other files in the Freedonia sample model `input` folder include the [supply-use table](@ref sut) and some optional input files, which are described below.
+The other files in the Freedonia sample model `input` folder include the [supply-use table](@ref sut) and some [optional input files](@ref params-optional-input-files), which are described below.
 
 !!! info "Comma-separated variable (CSV) files"
     CSV-formatted files are plain text files that can be viewed in a text editor. They can also be opened and modified in Excel, Google Sheets, or other spreadsheet program, which is a convenient way to edit them. 
@@ -86,7 +86,7 @@ Here is the example from the Freedonia sample model:
 ![Freedonia time_series file](assets/images/time_series.png)
 
 ## [Optional input files](@id params-optional-input-files)
-In the [configuration file general settings](@ref config-general-settings), it is possible to specify any or all of four optional input files for: investment demand; potential output; maximum capacity utilization; and real prices for tradeables. For the corresponding variables, see the table of [optional exogenous parameters](@ref optional-exog-param-vars).
+In the [configuration file general settings](@ref config-optional-input-files), it is possible to specify any or all of four optional input files for: investment demand; potential output; maximum capacity utilization; and real prices for tradeables. For the corresponding variables, see the table of [optional exogenous parameters](@ref optional-exog-param-vars).
 
 ### [Investment demand](@id params-optional-exog-investment)
 The Macro model calculates investment for non-energy sectors based on expected demand and profitability: see the explanation of [potential output](@ref dynamics-potential-output) in the Technical Details. However, for public infrastructure investment -- which is driven by policy goals, rather than private profitability, and where the capital stock is not associated with a particular sector -- investment must be specified exogenously. (When externally specified investment *is* associated with a particular sector, it is better to specify potential output: see below.)
