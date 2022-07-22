@@ -15,7 +15,7 @@ Depth = 3
 
 ## [General settings](@id config-general-settings)
 
-The configuration file is made up of several blocks. The first block names a subfolder for storing outputs. It will be created inside an `outputs` folder. Different configuration files should be given different output folders so that different scenarios can be distinguished.
+The configuration file is made up of several blocks. The first block names a subfolder for storing outputs. It will be created inside an `outputs` folder (see [Output files](@ref model-outputs)). Different configuration files should be given different output folders so that different scenarios can be distinguished.
 ```yaml
 #---------------------------------------------------------------------------
 # Folder inside the "outputs" folder to store calibration, results, and diagnostics
@@ -23,6 +23,18 @@ The configuration file is made up of several blocks. The first block names a sub
 output_folder: Baseline
 ```
 
+The next block sets the start and end years for the simulation. When running with LEAP, these should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data. Also, the end year can be set closer to the start year, but Macro normally runs quickly once it is loaded, so that is rarely necessary for performance.
+```yaml
+#---------------------------------------------------------------------------
+# Start and end years for the simulation
+#   Note: the supply-use table above must be appropriate for the start year
+#---------------------------------------------------------------------------
+years:
+    start:  2010
+    end:    2040
+```
+
+### [Required input files](@id config-required-input-files)
 The next block specifies the required input files. Other, optional input files are described below. In many cases, the input files will be the same across a set of scenarios. However, it is possible that they might differ. For example, the supply-use table, given by the `SUT` parameter, could be drawn from different years for calibration purposes, and different `time_series` might distinguish different scenarios.
 ```yaml
 #---------------------------------------------------------------------------
@@ -36,6 +48,7 @@ files:
     time_series: time_series.csv
 ```
 
+### [Output folders](@id config-output-folders)
 The following block says how to manage the output folders.
 
 Ordinarily it is useful to clear the folders with each run, since files will in any case be overwritten. But sometimes during model development it is useful to set `clear-folders` to `false` temporarily -- for example, if only a few files need to be compared between one run to the next. To compare results from different runs, make a copy of output files of interest and set `clear-folders` to `false`, or copy the entire output file folder.
@@ -51,6 +64,7 @@ clear-folders:
 report-diagnostics: true
 ```
 
+### [LEAP run settings](@id config-leap-run-settings)
 The next block has settings for running LEAP. To develop the Macro model independently of LEAP, set `run_leap` to `false`. To reduce the time spent while running LEAP and Macro together, set `hide_leap` to `true`. The `max_runs` parameter can normally be left at the default value; it is quite unusual to go that far before convergence. The `max_tolerance` is the percent difference in Macro model outputs between runs. The tolerance can be tightened (a smaller value) or loosened (a larger value) depending on the needs of the analysis.
 ```yaml
 model:
@@ -64,6 +78,7 @@ model:
     max_tolerance: 1 # percent
 ```
 
+### [Optional input files](@id config-optional-input-files)
 The next block is optional, and can be entirely omitted. This block allows for additional exogenous time series that might be of interest in some studies. Any of them can be added or excluded individually. The allowed input files include:
   * `investment`: A time series of exogenous investment demand beyond that simulated by the model (e.g., public investment)
   * `pot_output`: Potential output, which will override the value simulated by the model, where the entered values are converted to an index (e.g., agricultural production might be determined by an independent crop production model)
@@ -84,17 +99,6 @@ exog-files:
     # pot_output: exog_pot_output.csv # Potential output (any units -- it is applied as an index): sectors label columns; years label rows
     # max_utilization: exog_max_util.csv # Maximum capacity utilization: sectors label columns; years label rows (must lie between 0 and 1)
     # real_price: exog_price.csv # Real prices for tradeables (any units -- it is applied as an index): products label columns; years label rows
-```
-
-The next block sets the start and end years for the simulation. When running with LEAP, these should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data. Also, the end year can be set closer to the start year, but Macro normally runs quickly once it is loaded, so that is rarely necessary for performance.
-```yaml
-#---------------------------------------------------------------------------
-# Start and end years for the simulation
-#   Note: the supply-use table above must be appropriate for the start year
-#---------------------------------------------------------------------------
-years:
-    start:  2010
-    end:    2040
 ```
 
 ## [Model parameters](@id config-model-params)
@@ -340,7 +344,7 @@ SUT_ranges:
     wages: J37:W38
 ```
 
-## [Mapping Macro variabls to LEAP variables](@id config-link-LEAP)
+## [Mapping Macro variables to LEAP variables](@id config-link-LEAP)
 The next, and final, block specifies how LEAP and Macro are linked.
 
 The first section says which LEAP scenario to use for inputs to the Macro model, the LEAP scenario to which Macro returns its results (nearly always the same as `input_scenario`), the currency unit for investment costs, and a scaling factor.

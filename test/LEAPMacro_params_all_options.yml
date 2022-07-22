@@ -2,6 +2,15 @@
 # Folder inside the "outputs" folder to store calibration, results, and diagnostics
 #---------------------------------------------------------------------------
 output_folder: Baseline_all_options
+
+#---------------------------------------------------------------------------
+# Start and end years for the simulation
+#   Note: the supply-use table above must be appropriate for the start year
+#---------------------------------------------------------------------------
+years:
+    start:  2010
+    end:    2040
+
 #---------------------------------------------------------------------------
 # Supply-use table and supplementary tables as CSV files
 #---------------------------------------------------------------------------
@@ -43,14 +52,6 @@ exog-files:
     pot_output: exog_pot_output.csv # Potential output (any units -- it is applied as an index): sectors label columns; years label rows
     max_utilization: exog_max_util.csv # Maximum capacity utilization: sectors label columns; years label rows (must lie between 0 and 1)
     real_price: exog_price.csv # Real prices for tradeables (any units -- it is applied as an index): products label columns; years label rows
-
-#---------------------------------------------------------------------------
-# Start and end years for the simulation
-#   Note: the supply-use table above must be appropriate for the start year
-#---------------------------------------------------------------------------
-years:
-    start:  2010
-    end:    2040
 
 #---------------------------------------------------------------------------
 # Adjustment parameters for initializing variables
