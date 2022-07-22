@@ -5,28 +5,28 @@ CurrentModule = LEAPMacro
 # [Linear goal program](@id lgp)
 For the list of variables, their symbols, and their definitions, see the [Variables](@ref variables) page.
 
-The Macro model solves, in each year, a linear goal program (LGP) that seeks the following objectives:
+The Macro model solves, in each year, a linear goal program (LGP) that seeks the following, potentially competing, objectives:
 1. Full utilization
-2. Meeting normal final demand
-3. Meeting normal export demand
-4. Minimizing imports
-Objectives 1-3 are expressed in terms of a gap between a target level and the modeled level. Objective 4 is expressed in terms of excess imports over base-year levels. All goal variables are scaled so that they take values between zero and one.
-
-Specifically, the objective function is
+2. Meeting or exceeding a "normal" level of final demand
+3. Meeting or exceeding normal export demand
+4. Minimizing the gap between normal and realized imports
+As with any goal program, the individual objectives are expressed in terms of a gap between a target level and the modeled level. The objective function is a weighted sum of the separate objectives:
 ```math
 \min \underline{w}_u\sum_{i = 1}^{n_s} \underline{\sigma}^u_i\Delta u_i +
      \underline{w}_X\sum_{k = 1}^{n_p} \underline{\sigma}^K_k\Delta s_{X,k} +
      \underline{w}_F\sum_{k = 1}^{n_p} \underline{\sigma}^F_k\Delta s_{F,k} +
      \underline{w}_M\sum_{k = 1}^{n_p} \left(\psi^+_k + \psi^-_k\right).
 ```
+All goal variables are scaled so that they take values between zero and one.
+
 !!! note "Sector and product specific weights vs. category weights"
     In the objective function, there are four "category weights", ``\underline{w}_u``, ``\underline{w}_X``, ``\underline{w}_F``, and ``\underline{w}_M``. The category weights are specified in the [configuration file](@ref config-lgp-weights).
     
-    In addition, there are sector or product-specific weights for for utilization, exports, and final demand, but not for imports. The reason is that while weights are needed to capture the relative importance of certain goods in output, the export basket, and household final demand, import flexibility simply allows for demand to be met when domestic production is insufficient, a consideration that does not privilege one sector over another.
+    In addition, there are sector or product-specific weights for for utilization, exports, and final demand, but not for imports. The reason is that while weights are needed to capture the relative importance of certain goods in output, the export basket, and household final demand, import flexibility simply allows for demand to be met when domestic production is insufficient, a consideration that does not privilege one product over another.
     
     The sector or product weights are given as weighted average of two possible weighting schemes: the base-year shares of the different sectors or products in output (for utilization), exports, or final demand, or equal weights. The allocations between the two possible weighting schemes are specified by the product and sector weight parameters ``\underline{\varphi}_u``, ``\underline{\varphi}_X``, and ``\underline{\varphi}_F``, which are also set in the [configuration file](@ref config-lgp-weights).
 
-When the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config-output-folders), Macro will export the structure of the LGP for each year. The output looks something like this:
+When the `report-diagnostics` parameter is set to `true` in the [configuration file](@ref config-output-folders), Macro will export the structure of the LGP for each year to [the `diagnostics` folder](@ref model-outputs-diagnostics) in a set of files with names like `model_0_yyyy.txt`. The output looks something like this:
 ```
 Min 1.7333333333333334 ugap[1] + 0.5333333333333333 ugap[2] + 0.6000000000000001 ugap[3] + ...
 Subject to
@@ -36,21 +36,21 @@ Subject to
  eq_util[4] : ugap[4] + u[4] == 1.0
 ...
 ```
-Each equation is labeled, for example by `eq_util`. For reference, for each equation listed below, the label is provided along with a motivation and a mathematical expression.
+Each equation in the file is labeled, for example by `eq_util`. For reference, the label is provided for each equation listed below, along with a motivation and a mathematical expression.
 
 ## Domestic goods market equilibrium
 `eq_totsupply`: Equilibrium in the domestic goods market is met when domestic supply equals total demand (the sum of final demand and demand for intermediate goods, exports, and investment goods), net of imports, and corrected by margins. This is enforced by the condition
 ```math
-q_{s,k} = q_{d,k} - m^+_k + m^-_k + X_k + F_k + I_k - M_k
+q_{s,k} = q_{d,k} - m^+_k + m^-_k + X_k + F_k + I_k - M_k.
 ```
 
-`eq_no_dom_prod`: If the country does not produce a particular product, `k`, then ``q_{s,k}`` must equal zero. This is enforced by the condition
+`eq_no_dom_prod`: If the country does not produce a particular product ``k``, then ``q_{s,k}`` must equal zero. This is enforced by the condition
 ```math
 q_{s,k}\underline{d}_k = 0.
 ```
 
 ## Supply of intermediate goods
-`eq_intdmd`: Intermediate goods are required for production and are given by technical coefficients (the input-output relationships). Intermediate demand is determined by
+`eq_intdmd`: Intermediate goods are required for production and are given by technical coefficients (calculated from the [use table](@ref process-sut) and possibly [updated dynamically](@ref dynamics-intermed-dmd-coeff)). Intermediate demand is determined by
 ```math
 q_{d,k} - \sum_{i = 1}^{n_s} \overline{D}_{ki}\overline{z}_i u_i = 0.
 ```
@@ -66,7 +66,7 @@ u_i + \Delta u_i = \underline{u}_i^\text{max},\quad 0 \leq u_i,\Delta u_i \leq 1
 ```
 
 ## Investment goods allocation
-`eq_inv_supply`: Total investment ``\overline{I}`` is supplied by a variety of sectors with shares ``\theta_k``. This is enforced by the condition
+`eq_inv_supply`: Total investment demand ``\overline{I}`` is supplied by a variety of sectors with shares ``\theta_k``. This is enforced by the condition
 ```math
 I_k = \underline{\theta}_k \overline{I}.
 ```
@@ -101,8 +101,7 @@ M_k = \overline{f}_k\left(q_{d,k} + F_k + I_k\right) + \left(\psi^+_k - \psi^-_k
 ```math
 m^+_k = \underline{\chi}^+_k \left(q_{s,k} + M_k\right).
 ```
-`eq_margneg`: They are allocated across products that correspond to the supply of those goods,
+`eq_margneg`: Margins are allocated across products that correspond to the supply of those goods,
 ```math
 m^-_k = \underline{\chi}^-_k \sum_{l = 1}^{n_p} m^+_l.
 ```
-
