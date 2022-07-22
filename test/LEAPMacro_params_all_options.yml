@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------------
 # Folder inside the "outputs" folder to store calibration, results, and diagnostics
 #---------------------------------------------------------------------------
-output_folder: Baseline
+output_folder: Baseline_all_options
 
 #---------------------------------------------------------------------------
 # Start and end years for the simulation
@@ -48,10 +48,10 @@ model:
 #   * Include only those products where values are specified -- for others the real price will be held constant
 #   * Prices for non-tradeables will be ignored; they are calculated internally by Macro
 exog-files:
-    # investment: exog_invest.csv # Time series of exogenous investment demand, additional to that simulated by the model
-    # pot_output: exog_pot_output.csv # Potential output (any units -- it is applied as an index): sectors label columns; years label rows
-    # max_utilization: exog_max_util.csv # Maximum capacity utilization: sectors label columns; years label rows (must lie between 0 and 1)
-    # real_price: exog_price.csv # Real prices for tradeables (any units -- it is applied as an index): products label columns; years label rows
+    investment: exog_invest.csv # Time series of exogenous investment demand, additional to that simulated by the model
+    pot_output: exog_pot_output.csv # Potential output (any units -- it is applied as an index): sectors label columns; years label rows
+    max_utilization: exog_max_util.csv # Maximum capacity utilization: sectors label columns; years label rows (must lie between 0 and 1)
+    real_price: exog_price.csv # Real prices for tradeables (any units -- it is applied as an index): products label columns; years label rows
 
 #---------------------------------------------------------------------------
 # Adjustment parameters for initializing variables
@@ -126,7 +126,7 @@ wage-fcn:
 # Uncomment rate_constant line below to endogenize changes in the scaled Use matrix
 tech-param-change:
     # Rate constant: Note that if this is too large then it can create instabilities
-    # rate_constant: 0.1 # 1/year
+    rate_constant: 0.1 # 1/year
 
 #---------------------------------------------------------------------------
 # Demand model parameters

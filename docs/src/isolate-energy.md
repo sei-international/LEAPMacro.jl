@@ -3,7 +3,7 @@ CurrentModule = LEAPMacro
 ```
 
 # [Isolating the energy sector](@id isolate-energy)
-The Macro model uses an approximation to a full input-output system that includes both energy and non-energy sectors.
+The Macro model uses an approximation to separate a full input-output system, with both energy and non-energy sectors, into energy and a non-energy sub-systems.
 
 To explain the approximation, start with the full system written in matrix form. Total output is given by a vector ``\mathbf{g}``, technical (inter-industry) coefficients by a matrix ``\mathbf{A}``, a further set of technical coefficients matching final demand to different supplying sectors ``\mathbf{S}``, combined household and government final demand ``\mathbf{F}``, investment demand ``\mathbf{I}``, exports ``\mathbf{X}``, imports ``\mathbf{M}``, and margins[^1] ``\mathbf{m}``. Separating into sub-matrices for energy (``E``) and non-energy (``N``) sectors, the system can be written
 ```math
@@ -65,13 +65,14 @@ To explain the approximation, start with the full system written in matrix form.
 ```
 Investment goods are produced only by the non-energy sector, so only one non-zero vector appears in the equations above, ``\mathbf{I}_N``. However, demand can originate in either the energy or non-energy sectors.
 
+The full system above can be written in terms of two linked systems. The balance for the energy system is
+```math
+\left(\mathbb{I} - \mathbf{A}_{EE}\right)\cdot\mathbf{g}_E = \mathbf{A}_{EN}\cdot\mathbf{g}_N +
+    \mathbf{S}_{EE}\cdot\left(\mathbf{F}_E + \mathbf{X}_E - \mathbf{M}_E - \mathbf{m}_E\right).
+```
+
 !!! note "LEAP as an input-output system"
-    The full system above can be written in terms of two linked systems. The balance for the energy system is
-    ```math
-    \left(\mathbb{I} - \mathbf{A}_{EE}\right)\cdot\mathbf{g}_E = \mathbf{A}_{EN}\cdot\mathbf{g}_N +
-        \mathbf{S}_{EE}\cdot\left(\mathbf{F}_E + \mathbf{X}_E - \mathbf{M}_E - \mathbf{m}_E\right).
-    ```
-    This is essentially the system that LEAP solves: it takes final demand for energy, adds it to demand for energy from non-energy economic sectors, and takes account of transfers of energy between energy production and transformation sub-sectors.
+    The energy sub-system is essentially the system that LEAP solves: LEAP takes final demand for energy, adds it to demand for energy from non-energy economic sectors, and takes account of transfers of energy between energy production and transformation sub-sectors.
 
 The non-energy system is
 ```math

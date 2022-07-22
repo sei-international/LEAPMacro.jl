@@ -26,8 +26,8 @@ Total sales by businesses, net of intermediate payments, is "value added". In th
 ## Format of the supply-use table
 The supply-use table is the most flexible of the Macro model input files. That is because supply-use tables vary widely in their level of detail and layout. However, Macro does have some restrictions, so some processing is normally required:
   * All of the tables must be in a single comma-separated variable (CSV) file;
-  * The tables and columns must be oriented in a specific direction;
-  * To be summed together, groups of columns must be next to each other.
+  * The tables and columns must be oriented in a specific direction, with products labeling rows and sectors labeling columns;
+  * To be summed together, groups of columns or groups of rows must be next to each other.
 
 !!! info "Aggregate products that are close substitutes"
     Because of the Macro model logic, it is best if the table is not too disaggregated. Specifically, different products should not be close substitutes for one another. For example, if crops are represented, then "cereals" might be a useful category, but reporting different cereal grains as separate products -- such as rice, wheat, maize, and sorghum -- could be problematic if they are readily substituted in diets. If one of those grains were very unlikely to be substituted for the others, such as rice, then "rice" and "other cereals" could be a reasonable level of aggregation.
@@ -44,7 +44,7 @@ The link between the supply-use table file and the Macro model is specified in t
 
 In addition to the matrices there are columns (with entries for each product) and rows (with entries for each sector). Macro does not require all of the columns and rows in the table to be identified -- it uses a subset of them. Furthermore, it will sum up adjacent columns and rows. For example, in Macro, "final demand" includes household and government expenditure. There may be many households listed, particularly in a social accounting matrix.
 
-See the section on [linking to the supply-use table](@ref config-sut) in the documentation for the [configuration file](@ref config).
+For more details, see the section on [linking to the supply-use table](@ref config-sut) in the documentation for the [configuration file](@ref config).
 
 !!! info "Terminology for supply-use tables"
     There are standard short-hand terms used in economic modeling that are named more descriptively in most supply-use tables or social accounting matrices. For example, "investment" is usually reported as "gross fixed capital formation" (GFCF), to distinguish it from net fixed capital formation (net of depreciation) and additions to inventories. Here is a partial list:

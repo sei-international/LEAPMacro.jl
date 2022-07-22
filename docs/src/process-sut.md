@@ -45,9 +45,9 @@ and supply shares are calculated as
 ## Adjusting for stock changes and taxes
 Stock changes and the tax correction are distributed over categories of demand by defining
 ```math
-a_k \equiv \frac{\Delta B_k - T^d_k}{F_k + X_k + I_k},
+c_k \equiv \frac{\Delta B_k - T^d_k}{F_k + X_k + I_k},
 ```
 and then transforming final demand, exports, and investment in the following way:
 ```math
-F_k \rightarrow (1 + a_k)F_k,\; X_k \rightarrow (1 + a_k)X_k,\; I_k \rightarrow (1 + a_k)I_k.
+F_k \rightarrow (1 + c_k)F_k,\; X_k \rightarrow (1 + c_k)X_k,\; I_k \rightarrow (1 + c_k)I_k.
 ```

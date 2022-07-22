@@ -39,7 +39,7 @@ end
 
 "User-specified parameters"
 mutable struct ExogParams
-    πw::Array{Float64,1} # World inflation rate x year
+    πw_base::Array{Float64,1} # World inflation rate x year
     world_grs::Array{Float64,1} # Real world GDP growth rate x year
 	working_age_grs::Array{Float64,1} # Growth rate of the working age population x year
 	αKV::Array{Float64,1} # Kaldor-Verdoorn coefficient x year
@@ -275,7 +275,7 @@ Pull in user-specified parameters from different CSV input files with filenames 
 function get_var_params(param_file::String)
     # Return an ExogParams struct
     retval = ExogParams(
-                    Array{Float64}(undef, 0), # πw
+                    Array{Float64}(undef, 0), # πw_base
                     Array{Float64}(undef, 0), # world_grs
 					Array{Float64}(undef, 0), # working_age_grs
 					Array{Float64}(undef, 0), # αKV
@@ -317,8 +317,8 @@ function get_var_params(param_file::String)
         if haskey(exog_file_list, "pot_output") && !isnothing(exog_file_list["pot_output"]) && isfile(joinpath("inputs",exog_file_list["pot_output"]))
             exog_pot_output_df = CSV.read(joinpath("inputs",exog_file_list["pot_output"]), DataFrame)
         end
-        if haskey(exog_file_list, "max_util") && !isnothing(exog_file_list["max_util"]) && isfile(joinpath("inputs",exog_file_list["max_util"]))
-            exog_max_util_df = CSV.read(joinpath("inputs",exog_file_list["max_util"]), DataFrame)
+        if haskey(exog_file_list, "max_utilization") && !isnothing(exog_file_list["max_utilization"]) && isfile(joinpath("inputs",exog_file_list["max_utilization"]))
+            exog_max_util_df = CSV.read(joinpath("inputs",exog_file_list["max_utilization"]), DataFrame)
         end
         if haskey(exog_file_list, "real_price") && !isnothing(exog_file_list["real_price"]) && isfile(joinpath("inputs",exog_file_list["real_price"]))
             exog_real_price_df = CSV.read(joinpath("inputs",exog_file_list["real_price"]), DataFrame)
@@ -386,11 +386,19 @@ function get_var_params(param_file::String)
     xr_temp = time_series[!,:exchange_rate]
 
     # Kaldor-Verdoorn parameters
-    αKV_temp = time_series[!,:KV_coeff]
     αKV_default = params["labor-prod-fcn"]["KV_coeff_default"]
+    if hasproperty(time_series, :KV_coeff)
+        αKV_temp = time_series[!,:KV_coeff]
+    else
+        αKV_temp = fill(αKV_default, length(time_series[!,:year]))
+    end
 
-	βKV_temp = time_series[!,:KV_intercept]
     βKV_default = params["labor-prod-fcn"]["KV_intercept_default"]
+    if hasproperty(time_series, :KV_intercept)
+        βKV_temp = time_series[!,:KV_intercept]
+    else
+        βKV_temp = fill(βKV_default, length(time_series[!,:year]))
+    end
 
     #--------------------------------------------------------------------------------------
     # Fill in by looping over years
@@ -413,9 +421,9 @@ function get_var_params(param_file::String)
             end
             # These have defaults
             if !ismissing(world_infl_temp[year_ndx])
-                push!(retval.πw, world_infl_temp[year_ndx])
+                push!(retval.πw_base, world_infl_temp[year_ndx])
             else
-                push!(retval.πw, world_infl_default)
+                push!(retval.πw_base, world_infl_default)
             end
             if !ismissing(world_grs_temp[year_ndx])
                 push!(retval.world_grs, world_grs_temp[year_ndx])
@@ -499,7 +507,7 @@ function get_var_params(param_file::String)
             else
                 invalid_sec_codes_str = "Sector code '" * invalid_sec_codes[1] * "'"
             end
-            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["max_util"] * "' not valid"))
+            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["max_utilization"] * "' not valid"))
         end
         for row in eachrow(exog_max_util_df)
             data_year = floor(Int64, row[:year])
