@@ -273,7 +273,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     init_profit_rate = init_profit/I_nextper
 	# Capital productivity
     capital_output_ratio = profit_share_rel_capprice / init_profit_rate
-	replace!(capital_output_ratio, NaN=>0) # replace NaN with 0
+	replace!(capital_output_ratio, NaN=>0) # In this case, catch divide-by-zero by replacing NaN with zero
 	# Initialize for the investment function
 	targ_profit_rate = init_profit_rate
 
