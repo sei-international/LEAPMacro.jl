@@ -452,6 +452,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     πd = ones(length(prices.pd)) * params["global-params"]["infl_default"]
     πw = ones(length(prices.pw)) * params["global-params"]["infl_default"]
 
+	TOT_index = 1.0
+	RER_index = 1.0
+	XR_index = 1.0
+
 	if calc_use_matrix_tech_change
 		sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
 		intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
@@ -501,7 +505,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	# Create a file to hold scalar variables
 	scalar_var_list = ["GDP gr", "curr acct surplus to GDP ratio", "curr acct surplus", "real GDP",
 					   "GDP deflator", "labor productivity gr", "labor force gr", "wage rate gr",
-					   "wage per effective worker gr", "real investment", "central bank rate"]
+					   "wage per effective worker gr", "real investment", "central bank rate",
+					   "terms of trade index", "real xr index", "nominal xr index"]
 	to_quoted_string_vec(scalar_var_list)
 	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
 
@@ -531,7 +536,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         if previous_failed
             pd_prev = pd_prev .* (1 .+ πd)
             pb_prev = pb_prev .* (1 .+ πb)
-            pw_prev = pb_prev .* (1 .+ πw)
+            pw_prev = pw_prev .* (1 .+ πw)
             va1 = (1 + πg) * prices.Pg * g
             va2 = sum(value.(param_pb)[j] * io.D[j,:] for j in 1:np) .* g
             value_added = va1 - va2
@@ -546,6 +551,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
             πGDP = sum(val_findmd_share .* πd)
             pd_prev = param_pd
             pb_prev = param_pb
+			pw_prev = prices.pw
         end
         GDP_deflator = prev_GDP_deflator
         prev_GDP_deflator = (1 + πGDP) * prev_GDP_deflator
@@ -553,6 +559,15 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		if tf_π_targ_use_πw
 			tf_π_targ = exog.πw_base[t]
 		end
+
+		π_imp = sum(πw .* value.(M))/sum(value.(M))
+		π_exp = sum(πw .* value.(X))/sum(value.(X))
+
+		TOT_index *= (1 + π_exp)/(1 + π_imp)
+		if t > 1
+			XR_index *= exog.xr[t]/exog.xr[t-1]
+		end
+		RER_index *= XR_index * (1 + π_imp)/(1 + πGDP)
 
 		#--------------------------------
 		# GDP
@@ -684,7 +699,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		output_var(params, param_pd, "domestic_prices", run, year, "a")
 		# Scalar variables
 		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
-							w_gr, ω_gr, value.(I_tot), i_bank]
+							w_gr, ω_gr, value.(I_tot), i_bank, TOT_index, RER_index, XR_index]
 		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
 
 		if t == ntime
