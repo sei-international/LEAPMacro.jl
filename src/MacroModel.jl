@@ -7,6 +7,24 @@ include("./IOlib.jl")
 include("./LEAPfunctions.jl")
 using .IOlib, .LEAPfunctions
 
+"Parameters for the Taylor function"
+mutable struct TaylorFunction
+	γ0::Float64
+	min_γ0::Float64
+	max_γ0::Float64
+	gr_resp::Float64
+	π_targ::Float64
+	π_targ_use_πw::Bool
+	infl_resp::Float64
+	i_targ::Float64
+	i_targ0::Float64
+	i_targ_max::Float64
+	i_targ_min::Float64
+	i_targ_coeff::Float64
+	i_targ_xr_sens::Float64
+	i_targ_adj_time::Float64
+end
+
 """
     output_var(params, values, filename, index, rowlabel, mode)
 
@@ -184,14 +202,23 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	ϕf = params["objective-fcn"]["product_sector_weight_factors"]["final_demand_cov"]
 	ϕx = params["objective-fcn"]["product_sector_weight_factors"]["exports_cov"]
 	# Taylor function
-	tf_γ0 = neutral_growth
-	tf_min_γ0 = params["taylor-fcn"]["neutral_growth_band"][1]
-	tf_max_γ0 = params["taylor-fcn"]["neutral_growth_band"][2]
-    tf_i_targ = params["taylor-fcn"]["target_intrate"]
-    tf_gr_resp = params["taylor-fcn"]["gr_resp"]
-    tf_π_targ = params["taylor-fcn"]["target_infl"]
-	tf_π_targ_use_πw = isnothing(tf_π_targ)
-    tf_infl_resp = params["taylor-fcn"]["infl_resp"]
+	tf = TaylorFunction(
+		neutral_growth, # γ0
+		params["taylor-fcn"]["neutral_growth_band"][1], # min_γ0
+		params["taylor-fcn"]["neutral_growth_band"][2], # max_γ0
+		params["taylor-fcn"]["gr_resp"], # gr_resp
+		params["taylor-fcn"]["target_infl"], # π_targ
+		isnothing(params["taylor-fcn"]["target_infl"]), # π_targ_use_πw
+		params["taylor-fcn"]["infl_resp"], # infl_resp
+		params["taylor-fcn"]["target_intrate"]["init"], # i_targ
+		params["taylor-fcn"]["target_intrate"]["init"], # i_targ0
+		params["taylor-fcn"]["target_intrate"]["band"][2], # i_targ_max
+		params["taylor-fcn"]["target_intrate"]["band"][1], # i_targ_min
+		NaN, # i_targ_coeff
+		params["taylor-fcn"]["target_intrate"]["xr_sens"], # i_targ_xr_sens
+		params["taylor-fcn"]["target_intrate"]["adj_time"] # i_targ_adj_time
+	)
+	tf.i_targ_coeff = (tf.i_targ_max - tf.i_targ0)/(tf.i_targ0 - tf.i_targ_min)
 	# Wage rate function
 	infl_passthrough = params["wage-fcn"]["infl_passthrough"]
 	lab_constr_coeff = params["wage-fcn"]["lab_constr_coeff"]
@@ -245,7 +272,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
     util_sens = util_sens_scalar * ones(ns)
 	# Initial values: These will change endogenously over time
 	γ = γ_0
-	i_bank = tf_i_targ
+	i_bank = tf.i_targ
 
 	#----------------------------------
     # Wages
@@ -552,8 +579,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         GDP_deflator = prev_GDP_deflator
         prev_GDP_deflator = (1 + πGDP) * prev_GDP_deflator
 
-		if tf_π_targ_use_πw
-			tf_π_targ = exog.πw_base[t]
+		if tf.π_targ_use_πw
+			tf.π_targ = exog.πw_base[t]
 		end
 
 		π_imp = sum(πw .* value.(M))/sum(value.(M))
@@ -624,7 +651,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Investment function
 		γ_u = util_sens .* (value.(u) .- 1)
 		γ_r = profit_sens * (profit_rate .- targ_profit_rate)
-		γ_i = -intrate_sens * (i_bank - tf_i_targ) * ones(ns)
+		# TODO: Evaluate this change
+		γ_i = -intrate_sens * (i_bank - tf.i_targ0) * ones(ns)
         γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
 		# Override default behavior if production is exogenously specified
 		if t > 1
@@ -708,9 +736,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Update Taylor rule
 		#--------------------------------
-        i_bank = tf_i_targ + tf_gr_resp * (GDP_gr - tf_γ0) + tf_infl_resp * (πGDP - tf_π_targ)
+		# TODO: evaluate the following code
+		tf_i_targ_ref = tf.i_targ_min + (tf.i_targ_max - tf.i_targ_min)/(1 + tf.i_targ_coeff * prices.XR^tf.i_targ_xr_sens)
+		tf.i_targ = tf.i_targ + (1/tf.i_targ_adj_time) * (tf_i_targ_ref - tf.i_targ)
+		# END EVALUATION
+        i_bank = tf.i_targ + tf.gr_resp * (GDP_gr - tf.γ0) + tf.infl_resp * (πGDP - tf.π_targ)
 		# Apply adaptive expectations, then bound
-		tf_γ0 = min(max(tf_γ0 + growth_adj * (GDP_gr - tf_γ0), tf_min_γ0), tf_max_γ0)
+		tf.γ0 = min(max(tf.γ0 + growth_adj * (GDP_gr - tf.γ0), tf.min_γ0), tf.max_γ0)
 
 		#--------------------------------
 		# Update potential output
