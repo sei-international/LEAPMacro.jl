@@ -309,6 +309,11 @@ function get_var_params(param_file::String)
     time_series = CSV.read(joinpath("inputs",params["files"]["time_series"]), DataFrame)
     prod_codes = product_info[prod_ndxs,:code]
 
+    # Catch if the "xr-is-normal" flag is present or not, default to false
+    if !haskey(params["files"], "xr-is-nominal") || isnothing(params["files"]["xr-is-nominal"])
+        params["files"]["xr-is-nominal"] = false
+    end
+
     # Optional files
     exog_investment_df = nothing
     exog_pot_output_df = nothing
