@@ -34,7 +34,12 @@ mutable struct PriceData
     pd::Array{Float64,1}
     pw::Array{Float64,1}
     Pg::Float64
-    Pc::Float64
+    Pw::Float64
+    Px::Float64
+    Pm::Float64
+    Ptrade::Float64
+    XR::Float64
+    RER::Float64
 end
 
 "User-specified parameters"
@@ -303,6 +308,11 @@ function get_var_params(param_file::String)
     product_info = CSV.read(joinpath("inputs",params["files"]["product_info"]), DataFrame)
     time_series = CSV.read(joinpath("inputs",params["files"]["time_series"]), DataFrame)
     prod_codes = product_info[prod_ndxs,:code]
+
+    # Catch if the "xr-is-normal" flag is present or not, default to false
+    if !haskey(params["files"], "xr-is-nominal") || isnothing(params["files"]["xr-is-nominal"])
+        params["files"]["xr-is-nominal"] = false
+    end
 
     # Optional files
     exog_investment_df = nothing
@@ -791,7 +801,13 @@ function prices_init(np::Int64, io::IOdata)
     return PriceData(ones(np), #pb
                      ones(np), #pd
                      ones(np), #pw in domestic currency (converted using xr in ModelCalculations)
-                     1,1)
+                     1, # Pg
+                     1, # Pw
+                     1, # Px
+                     1, # Pm
+                     1, # Ptrade
+                     1, # XR
+                     1) # RER
 end
 
 end

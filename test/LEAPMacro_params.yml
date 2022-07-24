@@ -20,6 +20,7 @@ files:
     sector_info: sector_parameters.csv
     product_info: product_parameters.csv
     time_series: time_series.csv
+    xr-is-nominal: false
 
 # Say whether to clear the contents of the results, calibration, and diagnostic folders before the run
 clear-folders:
@@ -83,7 +84,11 @@ taylor-fcn:
     # Allowable range for neutral growth
     neutral_growth_band: [0.02, 0.06]
     # Target interest rate (as a fraction, e.g., 2%/year = 0.02)
-    target_intrate: 0.02
+    target_intrate:
+        init: 0.04
+        band: [0.01, 0.10]
+        xr_sens: 1
+        adj_time: 2 # years
     # Target inflation rate
     target_infl: 0.02
     # Response of the central bank rate to a change in the GDP growth rate
