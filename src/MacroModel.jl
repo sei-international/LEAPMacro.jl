@@ -591,7 +591,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		prices.Px *= (1 + π_exp)
 		prices.Ptrade *= (1 + π_trade)
 
-		if params["files"]["xr-is-nominal"]
+		if params["files"]["xr-is-real"]
 			exog.xr[t] *= prices.Pg/prices.Ptrade
 		end
 

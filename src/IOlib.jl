@@ -310,8 +310,8 @@ function get_var_params(param_file::String)
     prod_codes = product_info[prod_ndxs,:code]
 
     # Catch if the "xr-is-normal" flag is present or not, default to false
-    if !haskey(params["files"], "xr-is-nominal") || isnothing(params["files"]["xr-is-nominal"])
-        params["files"]["xr-is-nominal"] = false
+    if !haskey(params["files"], "xr-is-real") || isnothing(params["files"]["xr-is-real"])
+        params["files"]["xr-is-real"] = false
     end
 
     # Optional files
