@@ -36,6 +36,8 @@ years:
 
 ### [Required input files](@id config-required-input-files)
 The next block specifies the required input files. Other, optional input files are described below. In many cases, the input files will be the same across a set of scenarios. However, it is possible that they might differ. For example, the supply-use table, given by the `SUT` parameter, could be drawn from different years for calibration purposes, and different `time_series` might distinguish different scenarios.
+
+This block also contains a flag saying whether the exchange rate time series, in the `time_series` file, is for the nominal or real exchange rate. This line can be omitted, in which case the default is for a nominal exchange rate. To specify a real exchange rate, set this equal to `true`.
 ```yaml
 #---------------------------------------------------------------------------
 # Supply-use table and supplementary tables as CSV files
@@ -46,6 +48,7 @@ files:
     sector_info: sector_parameters.csv
     product_info: product_parameters.csv
     time_series: time_series.csv
+    xr-is-real: false
 ```
 
 ### [Output folders](@id config-output-folders)
@@ -144,7 +147,11 @@ The next block contains the parameters for implementing a "Taylor rule", which a
 
 The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
   * `neutral_growth_band` : ``[\hat{\underline{Y}}^*_\text{min},\hat{\underline{Y}}^*_\text{max}]``
-  * `target_intrate` : ``\underline{i}_{b0}``
+  * `target_intrate` :
+    * `init` : ``\underline{i}^\text{init}_{b0}``
+    * `band` : ``[\underline{i}^\text{min}_{b0},\underline{i}^\text{max}_{b0}]``
+    * `xr_sens` : ``\underline{b}_\text{xr}``
+    * `adj_time` : ``\underline{T}_\text{xr}``
   * `target_infl` : ``\underline{\pi}^*``
   * `gr_resp` : ``\underline{\rho}_Y``
   * `infl_resp` : ``\underline{\rho}_\pi``
@@ -156,7 +163,11 @@ taylor-fcn:
     # Allowable range for neutral growth
     neutral_growth_band: [0.02, 0.06]
     # Target interest rate (as a fraction, e.g., 2%/year = 0.02)
-    target_intrate: 0.02
+    target_intrate:
+        init: 0.04
+        band: [0.01, 0.10]
+        xr_sens: 1
+        adj_time: 2 # years
     # Target inflation rate
     target_infl: 0.02
     # Response of the central bank rate to a change in the GDP growth rate

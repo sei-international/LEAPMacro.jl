@@ -167,15 +167,27 @@ Autonomous investment follows adaptive expectations, with an initial value ``\ga
 ## [Central bank lending rate](@id dynamics-taylor-rule)
 The central bank lending rate is updated through a Taylor rule of the form
 ```math
-i_b = \underline{i}_{b0} + \underline{\rho}_Y\left(\hat{Y} - \hat{Y}^*\right) + \underline{\rho}_\pi\left(\pi_\text{GDP} - \underline{\pi}^*\right).
+i_b = i_{b0} + \underline{\rho}_Y\left(\hat{Y} - \hat{Y}^*\right) + \underline{\rho}_\pi\left(\pi_\text{GDP} - \underline{\pi}^*\right).
 ```
-In Taylor’s original paper, the coefficients were ``i_{b0} = 2\%``/year, ``\underline{\rho}_Y = \underline{\rho}_\pi = 0.5``, but they can be set by the user in the [configuration file](@ref config-taylor-rule), together with the target inflation rate ``\underline{\pi}^*`` and a permissible band for the target GDP growth rate, ``[\hat{\underline{Y}}^*_\text{min},\hat{\underline{Y}}^*_\text{max}]``.
+In Taylor’s original paper, the coefficients were ``\underline{\rho}_Y = \underline{\rho}_\pi = 0.5``, but they can be set by the user in the [configuration file](@ref config-taylor-rule). Other parameters include initial, minimum, and maximum values for ``i_{b0}``, the target inflation rate ``\underline{\pi}^*``, and a permissible band for the target GDP growth rate, ``[\hat{\underline{Y}}^*_\text{min},\hat{\underline{Y}}^*_\text{max}]``.
 
-The initial value for the target GDP growth rate is the initial value for the autonomous investment rate, ``\hat{Y}^* = \gamma_{i0}``. It then adjusts through adaptive expectations, with the same rate of adapation as for autonomous investment, while keeping within the user-specified band,
+The initial value for the target GDP growth rate is the initial value for the autonomous investment rate, ``\hat{Y}^* = \gamma_{i0}``. It adjusts through adaptive expectations, with the same rate of adaptation as for autonomous investment, while keeping within the user-specified band,
 ```math
 \hat{Y}^* = \min\left\{\hat{\underline{Y}}^*_\text{max}, \max\left[\hat{\underline{Y}}^*_\text{min},
                        \hat{Y}^* + \underline{\xi}\left(\hat{Y} - \hat{Y}^*\right)\right]\right\}.
 ```
+
+The neutral interest rate ``i_{b0}`` can also adjust, depending on the nominal exchange rate ``\underline{e}``. A target level ``i^*_{b0}`` is calculated as a function of the nominal exchange rate relative to its initial value ``\underline{e}/\underline{e}_0``:
+```math
+    i^*_{b0} = \underline{i}^\text{min}_{b0} + \frac{\underline{i}^\text{max}_{b0} - \underline{i}^\text{min}_{b0}}{1 + a_\text{xr}(\underline{e}/\underline{e}_0)^{\underline{b}_\text{xr}}},\quad a_\text{xr} = \frac{\underline{i}^\text{max}_{b0} - \underline{i}^\text{init}_{b0}}{\underline{i}^\text{init}_{b0} - \underline{i}^\text{min}_{b0}}.
+```
+A example graph of this function is shown below for the case ``\underline{i}^\text{min}_{b0} = 0.01``, ``\underline{i}^\text{max}_{b0} = 0.10``, ``\underline{i}^\text{init}_{b0} = 0.04``. The neutral rate then moves towards the target as
+```math
+    i_{b0,+1} = i_{b0} + \frac{1}{\underline{T}_\text{xr}}\left(i^*_{b0} - i_{b0}\right).
+```
+To make the interest rate insensitive to the exchange rate, set ``\underline{b}_\text{xr} = 0``.
+
+![Target neutral interest rate vs. exchange rate](assets/images/ib0_vs_XR_curve.svg)
 
 ## [Demand for investment goods](@id dynamics-inv-dmd)
 Total next-period demand for investment goods ``\overline{I}_{+1}`` is given by two terms: 1) the sum across sectors of current potential output multiplied by the capital-output ratio and the gross rate of increase in potential output (the net rate plus the depreciation rate); 2) exogenous investment ``\underline{I}_\text{exog}``, if any (see [optional exogenous parameters](@ref optional-exog-param-vars) and the format for the [exogenous investment demand file](@ref params-optional-exog-investment)). That is,

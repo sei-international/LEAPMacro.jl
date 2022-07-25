@@ -587,18 +587,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		π_exp = sum(πw .* value.(X))/sum(value.(X))
 		π_trade = sum(πw .* (value.(X) + value.(M)))/sum(value.(X) + value.(M))
 
-		prices.Pm *= (1 + π_imp)
-		prices.Px *= (1 + π_exp)
-		prices.Ptrade *= (1 + π_trade)
-
-		if params["files"]["xr-is-real"]
-			exog.xr[t] *= prices.Pg/prices.Ptrade
-		end
-
-		if t > 1
-			prices.XR *= exog.xr[t]/exog.xr[t-1]
-		end
-
 		#--------------------------------
 		# GDP
 		#--------------------------------
@@ -655,7 +643,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Investment function
 		γ_u = util_sens .* (value.(u) .- 1)
 		γ_r = profit_sens * (profit_rate .- targ_profit_rate)
-		# TODO: Evaluate this change
 		γ_i = -intrate_sens * (i_bank - tf.i_targ0) * ones(ns)
         γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
 		# Override default behavior if production is exogenously specified
@@ -740,10 +727,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Update Taylor rule
 		#--------------------------------
-		# TODO: evaluate the following code
 		tf_i_targ_ref = tf.i_targ_min + (tf.i_targ_max - tf.i_targ_min)/(1 + tf.i_targ_coeff * prices.XR^tf.i_targ_xr_sens)
 		tf.i_targ = tf.i_targ + (1/tf.i_targ_adj_time) * (tf_i_targ_ref - tf.i_targ)
-		# END EVALUATION
         i_bank = tf.i_targ + tf.gr_resp * (GDP_gr - tf.γ0) + tf.infl_resp * (πGDP - tf.π_targ)
 		# Apply adaptive expectations, then bound
 		tf.γ0 = min(max(tf.γ0 + growth_adj * (GDP_gr - tf.γ0), tf.min_γ0), tf.max_γ0)
@@ -757,14 +742,25 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Update prices
 		#--------------------------------
 		prices.Pg = (1 + πg) * prices.Pg
-		# Apply global inflation rate to world prices
+		prices.Pm *= (1 + π_imp)
+		prices.Px *= (1 + π_exp)
+		prices.Ptrade *= (1 + π_trade)
+		# For pw, first apply global inflation rate to world prices
 		prices.pw = prices.pw * (1 + exog.πw_base[t])
-		# Adjust for any exogenous price indices
+		# Then adjust for any exogenous price indices
 		if t > 1
 			pw_spec = exog.exog_price[t,:] ./ exog.exog_price[t - 1,:]
 			pw_ndxs = findall(x -> !ismissing(x), pw_spec)
 			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
 		end
+		# If the specified XR series is real, convert to nominal using modeled price indices
+		if params["files"]["xr-is-real"]
+			exog.xr[t] *= prices.Pg/prices.Ptrade
+		end
+		# Calculate XR trend
+		if t > 1
+			prices.XR *= exog.xr[t]/exog.xr[t-1]
+		end	
 
 		io.m_frac = (value.(M) + IOlib.ϵ * io.m_frac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
 		prices.pd = calc_dom_prices(t, np, ns, ω, prices, io, exog)
