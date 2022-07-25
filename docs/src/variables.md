@@ -70,6 +70,7 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\gamma_i``           | Rate of net investment demand in sector ``i``                                                 |
 | ``\gamma_{i0}``        | The autonomous (smoothed) component of the rate of net investment demand in sector ``i``      |
 | ``i_b``                | Central bank interest rate                                                                    |
+| ``i_{b0}``             | Central bank interest rate when GDP growth and inflation are at their targets                 |
 | ``r_i``                | Gross rate of profit in sector ``i``                                                          |
 | ``\Pi_i``              | Gross profits in sector ``i``                                                                 |
 | ``\gamma^\text{wage}`` | Growth rate of the total wage bill                                                            |
@@ -93,15 +94,19 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\underline{d}_k``                  | Equal to ``\underline{d}_k = 1`` if the country does _not_ produce product ``k`` and  ``\underline{d}_k = 0`` if it does produce it |
 | ``\underline{\varepsilon}_i``        | Initial energy cost share for sector ``i`` if energy excluded, otherwise zero                                                       |
 | ``\underline{e}``                    | Exchange rate                                                                                                                       |
-| ``\underline{\pi}_{w,k}``            | Inflation rate for the world price of product ``k``                                        |
-| ``\underline{\mu}_i``                | Profit margin in sector ``i``                                                                                      |
+| ``\underline{\pi}_{w,k}``            | Inflation rate for the world price of product ``k``                                                                                 |
+| ``\underline{\mu}_i``                | Profit margin in sector ``i``                                                                                                       |
 | ``\underline{\alpha}_\text{KV}``     | Kaldor-Verdoorn law coefficient                                                                                                     |
 | ``\underline{\beta}_\text{KV}``      | Kaldor-Verdoorn law intercept                                                                                                       |
-| ``\underline{h}``                    | Inflation pass-through to the nominal wage (wage indexation parameter)                                                 |
+| ``\underline{h}``                    | Inflation pass-through to the nominal wage (wage indexation parameter)                                                              |
 | ``\underline{k}``                    | Response of the real wage to labor supply constraints                                                                               |
 | ``\underline{\hat{N}}``              | Growth rate of the working-age population                                                                                           |
 | ``\underline{\chi}^\pm_k``           | Allocation coefficients for positive ``(+)`` and negative ``(-)`` margins for product ``k``                                         |
-| ``\underline{i}_{b0}``               | Central bank interest rate when GDP growth and inflation are at their targets                                                       |
+| ``\underline{i}^\text{init}_{b0}``   | Initial value for ``i_{b0}``                                                                                                        |
+| ``\underline{i}^\text{min}_{b0}``    | Minimum value for ``i_{b0}``                                                                                                        |
+| ``\underline{i}^\text{max}_{b0}``    | Maximum value for ``i_{b0}``                                                                                                        |
+| ``\underline{b}_\text{xr}``          | Sensitivity of ``i_{b0}`` to changes in the exchange rate                                                                           |
+| ``\underline{T}_\text{xr}``          | Adaptation time for ``i_{b0}`` to adjust to the target                                                                              |
 | ``\underline{\rho}_Y``               | Taylor coefficient on the GDP growth rate                                                                                           |
 | ``\underline{\rho}_\pi``             | Taylor coefficient on the inflation rate                                                                                            |
 | ``\hat{\underline{Y}}^*_\text{min}`` | Taylor rule minimum target growth rate                                                                                              |
