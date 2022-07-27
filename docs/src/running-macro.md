@@ -10,12 +10,19 @@ When running Macro multiple times -- for example, when calibrating -- it is best
 
 The only command needed is `LEAPMacro.run()`, which is defined as follows, with the default values indicated:
 ```julia
-function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stack::Bool = false, include_energy_sectors::Bool = false)
+function run(config_file::AbstractString = "LEAPMacro_params.yml";
+             dump_err_stack::Bool = false,
+             include_energy_sectors::Bool = false,
+             continue_if_error::Bool = false)
 ```
 The options are:
   * `config_file`: The name of the [configuration file](@ref config), if it is not `LEAPMacro_params.yml`;
   * `dump_err_stack`: Report detailed information about an error in the [log file](@ref model-outputs) (useful when debugging the Macro code, but not much use when debugging a model);
-  * `include_energy_sectors`: Run the model with the [energy sectors](@ref config-sut) included (only useful in standalone mode, without LEAP, particularly when calibrating).
+  * `include_energy_sectors`: Run the model with the [energy sectors](@ref config-sut) included (only useful in standalone mode, without LEAP, particularly when calibrating);
+  * `continue_if_error`: Try to continue if the linear goal program returns an error.
+
+!!! info "When to use `continue_if_error`"
+    The `continue_if_error` flag has very limited utility. Ordinarily it should be set to `false`, because the results cannot be trusted, and any LEAP indices are set to `NaN` (Not a Number). It is useful when running LEAP-Macro many times using different inputs; for example, during an automated calibration or when running an ensemble of LEAP scenarios. In that case, it _may_ enable calculations to proceed even if one particular run gives an error. There is a chance that the program may halt anyway, if the error is too severe to recover from.
 
 For example, each of the following is a valid call to the `run()` function:
 ```julia
@@ -53,13 +60,19 @@ function parse_commandline()
         "--include-energy-sectors", "-e"
             help = "include energy sectors in the model simulation"
             action = :store_true
+        "--continue-if-error", "-c"
+            help = "try to continue if the linear goal program returns an error"
+            action = :store_true
     end
 
     return parse_args(argp)
 end
 
 parsed_args = parse_commandline()
-LEAPMacro.run(parsed_args["config_file"], dump_err_stack = parsed_args["verbose_errors"], include_energy_sectors = parsed_args["include_energy_sectors"])
+LEAPMacro.run(parsed_args["config_file"],
+              dump_err_stack = parsed_args["verbose_errors"],
+              include_energy_sectors = parsed_args["include_energy_sectors"],
+              continue_if_error = parsed_args["continue_if_error"])
 ```
 !!! tip "Speeding up LEAPMacro with a pre-compiled system image"
     If Macro will be run multiple times from the command line, execution can be speeded up by pre-compiling the LEAPMacro plugin. In the [sample files](assets/Macro.zip), there is a Windows batch file, `make_LEAPMacro_sysimage.bat`. Running this batch file (from the command line or by double-clicking) will generate a "system image" called `LEAPMacro-sysimage.so`. After running the batch file, put the system image in the folder where you want to run Macro and call Julia with an additional `sysimage` argument -- `julia --sysimage=LEAPMacro-sysimage.so ...` -- where `...` is the name of your script followed by any command-line arguments.

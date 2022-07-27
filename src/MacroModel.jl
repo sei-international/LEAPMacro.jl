@@ -133,11 +133,11 @@ end
 
 
 """
-    ModelCalculations(file::String, I_en::Array, run::Int64)
+    ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_error::Bool)
 
 Implement the Macro model. This is the main function.
 """
-function ModelCalculations(file::String, I_en::Array, run::Int64)
+function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_error::Bool)
 
     #------------status
     @info "Loading data..."
@@ -471,6 +471,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 	pd_prev = prices.pd/(1 + params["global-params"]["infl_default"])
     pb_prev = param_pb/(1 + params["global-params"]["infl_default"])
     prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/(1 + neutral_growth)
+	prev_g = value.(u) .* z
+	prev_g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
 
 	prev_GDP_deflator = 1
     prev_GDP_gr = neutral_growth
@@ -546,8 +548,15 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Output
 		#--------------------------------
-        g = value.(u) .* z
-		g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
+		if !previous_failed
+			g = value.(u) .* z
+			g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
+			prev_g = g
+			prev_g_share = g_share
+		else
+			g = prev_g
+			g_share = prev_g_share
+		end
 
 		#--------------------------------
 		# Price indices and deflators
@@ -564,41 +573,39 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
             va2 = sum(value.(param_pb)[j] * io.D[j,:] for j in 1:np) .* g
             value_added = va1 - va2
             πGDP = sum(value_added)/sum(value_added_at_prev_prices) - 1
+			π_imp = params["global-params"]["infl_default"]
+			π_exp = params["global-params"]["infl_default"]
+			π_trade = params["global-params"]["infl_default"]
+            GDP_gr = prev_GDP_gr
+			GDP = prev_GDP * (1 + GDP_gr)
         else
 			πd = (param_pd - pd_prev) ./ (pd_prev .+ IOlib.ϵ) # If not produced, pd_prev = 0
 	        πb = (param_pb - pb_prev) ./ pb_prev
 	        πw = (prices.pw - pw_prev) ./ pw_prev # exog.πw_base is a single value, applied to all products; this is by product
             πg = sum(g_share .* πb)
+			π_imp = sum(πw .* value.(M))/sum(value.(M))
+			π_exp = sum(πw .* value.(X))/sum(value.(X))
+			π_trade = sum(πw .* (value.(X) + value.(M)))/sum(value.(X) + value.(M))
 			val_findmd = pd_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
 	        val_findmd_share = val_findmd/sum(val_findmd)
             πGDP = sum(val_findmd_share .* πd)
             pd_prev = param_pd
             pb_prev = param_pb
 			pw_prev = prices.pw
+			#--------------------------------
+			# GDP
+			#--------------------------------
+			GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/prev_GDP_deflator
+            GDP_gr = GDP/prev_GDP - 1.0
         end
+		prev_GDP = GDP
+		prev_GDP_gr = GDP_gr
         GDP_deflator = prev_GDP_deflator
         prev_GDP_deflator = (1 + πGDP) * prev_GDP_deflator
 
 		if tf.π_targ_use_πw
 			tf.π_targ = exog.πw_base[t]
 		end
-
-		π_imp = sum(πw .* value.(M))/sum(value.(M))
-		π_exp = sum(πw .* value.(X))/sum(value.(X))
-		π_trade = sum(πw .* (value.(X) + value.(M)))/sum(value.(X) + value.(M))
-
-		#--------------------------------
-		# GDP
-		#--------------------------------
-        GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/GDP_deflator
-        if previous_failed
-            GDP_gr = prev_GDP_gr
-            prev_GDP = prev_GDP * (1 + GDP_gr)
-        else
-            GDP_gr = GDP/prev_GDP - 1.0
-            prev_GDP = GDP
-            prev_GDP_gr = GDP_gr
-        end
 
 		#--------------------------------
 		# Wages and the labor force
@@ -615,7 +622,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Update use matrix
 		#--------------------------------
-		if calc_use_matrix_tech_change
+		if calc_use_matrix_tech_change && !previous_failed
 			sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ g
 			intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 			D_hat = intermed_tech_change_intercept + intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
@@ -628,28 +635,34 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		#--------------------------------
 		# Profits
 		#--------------------------------
-		# First, update the Vnorm matrix
-		io.Vnorm = Diagonal(1 ./ g) * io.S * Diagonal(value.(qs))
-		# Calculate export-weighted price
-		export_share = value.(X) ./ (value.(qs) .+ IOlib.ϵ)
-		px = exog.xr[t] * export_share .* prices.pw + (1 .- export_share) .* prices.pd
-		profit_per_output = io.Vnorm * px - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
-		pK = dot(θ, prices.pb)
-		profit_rate = profit_per_output ./ (pK * capital_output_ratio)
+		if !previous_failed
+			# First, update the Vnorm matrix
+			io.Vnorm = Diagonal(1 ./ (g .+ IOlib.ϵ)) * io.S * Diagonal(value.(qs))
+			# Calculate export-weighted price
+			export_share = value.(X) ./ (value.(qs) .+ IOlib.ϵ)
+			px = exog.xr[t] * export_share .* prices.pw + (1 .- export_share) .* prices.pd
+			profit_per_output = io.Vnorm * px - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
+			pK = dot(θ, prices.pb)
+			profit_rate = profit_per_output ./ (pK * capital_output_ratio)
+		else
+			profit_rate = fill(NaN, ns)
+		end
 
 		#--------------------------------
 		# Investment
 		#--------------------------------
-		# Investment function
-		γ_u = util_sens .* (value.(u) .- 1)
-		γ_r = profit_sens * (profit_rate .- targ_profit_rate)
-		γ_i = -intrate_sens * (i_bank - tf.i_targ0) * ones(ns)
-        γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
-		# Override default behavior if production is exogenously specified
-		if t > 1
-			γ_spec = exog.exog_pot_output[t,:] ./ exog.exog_pot_output[t - 1,:] .- 1.0
-			pot_output_ndxs = findall(x -> !ismissing(x), γ_spec)
-			γ[pot_output_ndxs] .= γ_spec[pot_output_ndxs]
+		if !previous_failed
+			# Investment function
+			γ_u = util_sens .* (value.(u) .- 1)
+			γ_r = profit_sens * (profit_rate .- targ_profit_rate)
+			γ_i = -intrate_sens * (i_bank - tf.i_targ0) * ones(ns)
+			γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
+			# Override default behavior if production is exogenously specified
+			if t > 1
+				γ_spec = exog.exog_pot_output[t,:] ./ exog.exog_pot_output[t - 1,:] .- 1.0
+				pot_output_ndxs = findall(x -> !ismissing(x), γ_spec)
+				γ[pot_output_ndxs] .= γ_spec[pot_output_ndxs]
+			end
 		end
 
 		# Non-energy investment, by sector and total
@@ -672,7 +685,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		W_curr = sum(W)
         W = ((1 + w_gr)/(1 + λ_gr)) * W .* (1 .+ γ)
         wage_ratio = (1/(1 + πGDP)) * sum(W)/W_curr
-        Fmax = Fmax .* wage_ratio.^exog.wage_elast_demand[t]
+        Fmax = Fmax .* max.(IOlib.ϵ,wage_ratio).^exog.wage_elast_demand[t]
 
 		#--------------------------------
 		# Calculate indices to pass to LEAP
@@ -699,25 +712,42 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 		# Reporting
 		#--------------------------------
 		# These variables are only reported, not used
-		CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
-		CA_to_GDP_ratio = CA_surplus/GDP
+		if !previous_failed
+			CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
+			CA_to_GDP_ratio = CA_surplus/GDP
+		else
+			CA_surplus = NaN
+			CA_to_GDP_ratio = NaN
+		end
+
+		if !previous_failed
+			u_report = value.(u)
+			F_report = value.(F)
+			M_report = value.(M)
+			X_report = value.(X)
+		else
+			u_report = fill(NaN, ns)
+			F_report = fill(NaN, np)
+			M_report = fill(NaN, np)
+			X_report = fill(NaN, np)
+		end
 
 		# Sector variables
 		output_var(params, g, "sector_output", run, year, "a")
 		output_var(params, z, "potential_sector_output", run, year, "a")
-		output_var(params, value.(u), "capacity_utilization", run, year, "a")
+		output_var(params, u_report, "capacity_utilization", run, year, "a")
 		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
 		output_var(params, profit_rate, "profit_rate", run, year, "a")
 		output_var(params, γ_0, "autonomous_investment_rate", run, year, "a")
 	    # Product variables
-		output_var(params, value.(F), "final_demand", run, year, "a")
-		output_var(params, value.(M), "imports", run, year, "a")
-		output_var(params, value.(X), "exports", run, year, "a")
+		output_var(params, F_report, "final_demand", run, year, "a")
+		output_var(params, M_report, "imports", run, year, "a")
+		output_var(params, X_report, "exports", run, year, "a")
 		output_var(params, param_pb, "basic_prices", run, year, "a")
 		output_var(params, param_pd, "domestic_prices", run, year, "a")
 		# Scalar variables
 		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
-							w_gr, ω_gr, value.(I_tot), i_bank, prices.Px/prices.Pm,
+							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
 							prices.XR * prices.Ptrade/prices.Pg, prices.XR]
 		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
 
@@ -762,14 +792,18 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
 			prices.XR *= exog.xr[t]/exog.xr[t-1]
 		end	
 
-		io.m_frac = (value.(M) + IOlib.ϵ * io.m_frac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
+		if !previous_failed
+			io.m_frac = (value.(M) + IOlib.ϵ * io.m_frac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
+		end
 		prices.pd = calc_dom_prices(t, np, ns, ω, prices, io, exog)
 		prices.pb = exog.xr[t] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
 		
 		#--------------------------------
 		# Update the linear goal program
 		#--------------------------------
-		param_Mref = 2 * value.(M) # Allow for some extra slack -- this just sets a scale
+		if !previous_failed
+			param_Mref = 2 * value.(M) # Allow for some extra slack -- this just sets a scale
+		end
 		param_Pg = prices.Pg
 		param_Xmax = Xmax
 		param_Fmax = Fmax
@@ -827,9 +861,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64)
         if previous_failed
 			finndx = length(LEAP_indices) + 2 # Adds column for year and for GDP
             indices[t,2:finndx] = fill(NaN, (finndx - 2) + 1)
+			if !continue_if_error
+				throw(ErrorException("Linear goal program failed to solve: $status"))
+			end
         end
-
-
     end
 
     # Make indices into indices
@@ -877,11 +912,11 @@ function resultcomparison(params, run::Int64)
 end
 
 """
-    runleapmacromodel(file::String, logile::IOStream, include_energy_sectors::Bool = false)
+    runleapmacromodel(file::String, logile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 
 Iteratively run the Macro model and LEAP until convergence.
 """
-function runleapmacromodel(file::String, logfile::IOStream, include_energy_sectors::Bool = false)
+function runleapmacromodel(file::String, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 
     ## get base_year and final_year, and force fresh start with global_params
     params = IOlib.parse_input_file(file, force = true, include_energy_sectors = include_energy_sectors)
@@ -910,7 +945,7 @@ function runleapmacromodel(file::String, logfile::IOStream, include_energy_secto
 		print("Macro model run ($run)...")
         @info "Macro model run ($run)..."
         #------------status
-        indices = ModelCalculations(file, I_en, run)
+        indices = ModelCalculations(file, I_en, run, continue_if_error)
 
         ## Compare run results
         if run >= 1

@@ -143,12 +143,12 @@ Net potential output in sector ``i`` (that is, accounting for depreciation) grow
 ```math
 \gamma_i = \max\left[\gamma_{i0} + \underline{\alpha}_\text{util}\left(u_i - 1\right) +
            \underline{\alpha}_\text{profit}\left(r_i - \underline{r}^*\right) -
-           \underline{\alpha}_\text{bank}\left(i_b - \underline{i}_{b0}\right),
+           \underline{\alpha}_\text{bank}\left(i_b - \underline{i}^\text{init}_{b0}\right),
            -\underline{\delta}_i\right].
 ```
 The first term ``\gamma_{i0}`` is "autonomous investment". It represents long-run expectations. The other terms make up "induced investment" due to short-term changes in utilization, profits, and borrowing costs.
 
-The target value for utilization is full utilization, ``u_i = 1``, while for the bank rate it is the neutral bank rate that enters the Taylor function, ``\underline{i}_{b0}`` (see below). The target for the profit rate, ``\underline{r}^*``, is calculated by Macro during an internal calibration step to be consistent with starting values for investment and profits, using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).
+The target value for utilization is full utilization, ``u_i = 1``, while for the bank rate it is the initial value for the neutral bank rate that enters the Taylor function, ``\underline{i}^\text{init}_{b0}`` (see below). The target for the profit rate, ``\underline{r}^*``, is calculated by Macro during an internal calibration step to be consistent with starting values for investment and profits, using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).
 
 If potential output is specified exogenously through the variable ``\underline{z}_i^\text{exog}``, then 
 ```math
