@@ -22,7 +22,7 @@ The options are:
   * `continue_if_error`: Try to continue if the linear goal program returns an error.
 
 !!! info "When to use `continue_if_error`"
-    The `continue_if_error` flag has very limited utility. Ordinarily it should be set to `false`, because the results cannot be trusted, and any LEAP indices are set to `NaN` (Not a Number). It is useful when running LEAP-Macro many times using different inputs; for example, during an automated calibration or when running an ensemble of LEAP scenarios. In that case, it _may_ enable calculations to proceed even if one particular run gives an error. There is a chance that the program may halt anyway, if the error is too severe to recover from.
+    The `continue_if_error` flag should ordinarily be set to `false`. When there is an error, the results cannot be trusted, and some reported outputs and all LEAP indices are set to `NaN` (Not a Number). Nevertheless, it has some use. It is most useful when running LEAP-Macro many times using different inputs; for example, during an automated calibration or when running an ensemble of LEAP scenarios. In that case, setting the flag to `true` _may_ enable calculations to proceed even if one particular run gives an error. However, there is a chance that the program will halt anyway, if the error is too severe to recover from.
 
 For example, each of the following is a valid call to the `run()` function:
 ```julia
