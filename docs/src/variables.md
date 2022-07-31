@@ -60,6 +60,7 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``p_{x,k}``            | Export-weighted average of world and domestic prices for product ``k``                        |
 | ``\pi_{b,k}``          | Basic price inflation rate for product ``k``                                                  |
 | ``\pi_{d,k}``          | Producer price inflation rate for product ``k``                                               |
+| ``\pi_F``              | Inflation rate for domestic final demand                                                      |
 | ``\pi_\text{GDP}``     | Inflation rate for the GDP price level                                                        |
 | ``V_k``                | Value of total final demand (household, government, exports,and investment) for product ``k`` |
 | ``W_i``                | Nominal wage bill in sector ``i``                                                             |
