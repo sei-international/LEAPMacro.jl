@@ -172,7 +172,7 @@ Autonomous investment follows adaptive expectations, with an initial value ``\ga
 ## [Central bank lending rate](@id dynamics-taylor-rule)
 The central bank lending rate is updated through a Taylor rule of the form
 ```math
-i_b = i_{b0} + \underline{\rho}_Y\left(\hat{Y} - \hat{Y}^*\right) + \underline{\rho}_\pi\left(\pi_\text{GDP} - \underline{\pi}^*\right).
+i_b = i_{b0} + \underline{\rho}_Y\left(\hat{Y} - \hat{Y}^*\right) + \underline{\rho}_\pi\left(\pi_F - \underline{\pi}^*\right).
 ```
 In Taylor’s original paper, the coefficients were ``\underline{\rho}_Y = \underline{\rho}_\pi = 0.5``, but they can be set by the user in the [configuration file](@ref config-taylor-rule). Other parameters include initial, minimum, and maximum values for ``i_{b0}``, the target inflation rate ``\underline{\pi}^*``, and a permissible band for the target GDP growth rate, ``[\hat{\underline{Y}}^*_\text{min},\hat{\underline{Y}}^*_\text{max}]``.
 
