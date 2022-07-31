@@ -224,9 +224,9 @@ Normal final demand grows with the real wage bill to a goods-specific elasticity
 ```math
 \overline{W}_{i,+1} = \frac{1 + \hat{w}}{1 + \hat{\lambda}}\left(1 + \gamma_i\right)W_i.
 ```
-The growth in the real wage bill is given by these factors, but corrected for inflation ``\pi_g``,
+The growth in the real wage bill is given by these factors, but corrected for domestic final demand inflation ``\pi_F``,
 ```math
-\gamma^\text{wage} = \frac{1}{1 + \pi_\text{GDP}}\frac{\sum_{i=1}^{n_s}\overline{W}_{i,+1}}{\sum_{j=1}^{n_s}\overline{W}_j} - 1.
+\gamma^\text{wage} = \frac{1}{1 + \pi_F}\frac{\sum_{i=1}^{n_s}\overline{W}_{i,+1}}{\sum_{j=1}^{n_s}\overline{W}_j} - 1.
 ```
 The updated normal household demand is then given by
 ```math
