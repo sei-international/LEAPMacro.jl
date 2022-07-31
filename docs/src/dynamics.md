@@ -25,7 +25,12 @@ where the inflation rate ``\pi_g`` is given by the averge of the rate of increas
     \pi_g = \frac{\sum_{k = 1}^{n_p} q_{s,k}\pi_{b,k}}{\sum_{k = l}^{n_p} q_{s,l}}, \quad \pi_{b,k} = \frac{p_{b,k}-p_{b,k,-1}}{p_{b,k,-1}}.
 ```
 
-The GDP deflator ``\pi_\text{GDP}`` is an index that grows at the average of the rate of increase of producers' prices weighted by the value of final demand. The value of final demand for good ``k`` is
+The domestic final demand inflation rate ``\pi_F``is the average of the rate of increase of basic prices weighted by the value of domestic final demand,
+```math
+    \pi_F = \frac{\sum_{k = 1}^{n_p} F_k\pi_{b,k}}{\sum_{k = l}^{n_p} F_l}.
+```
+
+The GDP inflation rate ``\pi_\text{GDP}`` is the average of the rate of increase of domestic prices weighted by the value of final demand. The value of final demand for good ``k`` is
 ```math
     V_k = \overline{p}_{d,k,-1}\left(F_k + X_k + I_k - M_k\right).
 ```
@@ -96,9 +101,9 @@ The growth rate of total employment, ``L``, is then given (using a standard appr
 \hat{L} = \hat{Y} - \hat{\lambda} = \left(1 - \underline{\alpha}_\text{KV}\right)\hat{Y} - \underline{\beta}_\text{KV}.
 ```
 
-Wages are observed to rise in a tight labor market and fall otherwise. That behavior is captured in the model through a "conflict" mechanism, which views nominal wage changes as a consequence of bargaining between parties with unequal and shifting bargaining power -- employers and employees. The real wage is assumed to rise faster than labor productivity when employment growth is higher than working-age population growth ``\hat{\underline{N}}`` (an exogenous input to Macro), with a proportionality factor ``\underline{k}``, and fall otherwise. The nominal wage is then equal to the real wage adjustment plus an inflation pass-through (or wage indexation) parameter ``\underline{h}`` multiplied by the inflation rate. As with labor productivity, a common growth rate ``\hat{w}`` is applied in each sector,
+Wages are observed to rise in a tight labor market and fall otherwise. That behavior is captured in the model through a "conflict" mechanism, which views nominal wage changes as a consequence of bargaining between parties with unequal and shifting bargaining power -- employers and employees. The real wage is assumed to rise faster than labor productivity when employment growth is higher than working-age population growth ``\hat{\underline{N}}`` (an exogenous input to Macro), with a proportionality factor ``\underline{k}``, and fall otherwise. The nominal wage is then equal to the real wage adjustment plus an inflation pass-through (or wage indexation) parameter ``\underline{h}`` multiplied by the domestic final demand inflation rate. As with labor productivity, a common growth rate ``\hat{w}`` is applied in each sector,
 ```math
-\hat{w}_i = \hat{w} = \underline{h}\pi_\text{GDP} + \hat{\lambda}\left[1 + \underline{k}\left(\hat{L} - \hat{\underline{N}}\right)\right].
+\hat{w}_i = \hat{w} = \underline{h}\pi_F + \hat{\lambda}\left[1 + \underline{k}\left(\hat{L} - \hat{\underline{N}}\right)\right].
 ```
 
 With the above expressions, the growth rate of the wage share can be calculated,

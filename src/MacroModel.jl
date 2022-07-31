@@ -477,6 +477,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	prev_GDP_deflator = 1
     prev_GDP_gr = neutral_growth
     πg = params["global-params"]["infl_default"]
+	πF = params["global-params"]["infl_default"]
     πb = ones(length(prices.pb)) * params["global-params"]["infl_default"]
     πd = ones(length(prices.pd)) * params["global-params"]["infl_default"]
     πw = ones(length(prices.pw)) * params["global-params"]["infl_default"]
@@ -583,6 +584,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	        πb = (param_pb - pb_prev) ./ pb_prev
 	        πw = (prices.pw - pw_prev) ./ pw_prev # exog.πw_base is a single value, applied to all products; this is by product
             πg = sum(g_share .* πb)
+			πF = sum(πb .* value.(F))/sum(value.(F))
 			π_imp = sum(πw .* value.(M))/sum(value.(M))
 			π_exp = sum(πw .* value.(X))/sum(value.(X))
 			π_trade = sum(πw .* (value.(X) + value.(M)))/sum(value.(X) + value.(M))
@@ -615,7 +617,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 
 		lab_force_index *= 1 + L_gr
 
-		w_gr = infl_passthrough * πGDP + λ_gr * (1.0 + lab_constr_coeff * (L_gr - exog.working_age_grs[t]))
+		w_gr = infl_passthrough * πF + λ_gr * (1.0 + lab_constr_coeff * (L_gr - exog.working_age_grs[t]))
 		ω_gr = w_gr - λ_gr - πg
 		ω = (1.0 + ω_gr) * ω
 
