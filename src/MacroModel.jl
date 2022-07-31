@@ -739,7 +739,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		#--------------------------------
 		tf_i_targ_ref = tf.i_targ_min + (tf.i_targ_max - tf.i_targ_min)/(1 + tf.i_targ_coeff * prices.XR^tf.i_targ_xr_sens)
 		tf.i_targ = tf.i_targ + (1/tf.i_targ_adj_time) * (tf_i_targ_ref - tf.i_targ)
-        i_bank = tf.i_targ + tf.gr_resp * (GDP_gr - tf.γ0) + tf.infl_resp * (πGDP - tf.π_targ)
+        i_bank = tf.i_targ + tf.gr_resp * (GDP_gr - tf.γ0) + tf.infl_resp * (πF - tf.π_targ)
 		# Apply adaptive expectations, then bound
 		tf.γ0 = min(max(tf.γ0 + growth_adj * (GDP_gr - tf.γ0), tf.min_γ0), tf.max_γ0)
 
