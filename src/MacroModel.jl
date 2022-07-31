@@ -732,28 +732,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 			X_report = fill(NaN, np)
 		end
 
-		# Sector variables
-		output_var(params, g, "sector_output", run, year, "a")
-		output_var(params, z, "potential_sector_output", run, year, "a")
-		output_var(params, u_report, "capacity_utilization", run, year, "a")
-		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
-		output_var(params, profit_rate, "profit_rate", run, year, "a")
-		output_var(params, γ_0, "autonomous_investment_rate", run, year, "a")
-	    # Product variables
-		output_var(params, F_report, "final_demand", run, year, "a")
-		output_var(params, M_report, "imports", run, year, "a")
-		output_var(params, X_report, "exports", run, year, "a")
-		output_var(params, param_pb, "basic_prices", run, year, "a")
-		output_var(params, param_pd, "domestic_prices", run, year, "a")
-		# Scalar variables
-		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
-							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
-							prices.XR * prices.Ptrade/prices.Pg, prices.XR]
-		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
-
-		if t == ntime
-			break
-		end
 		#--------------------------------
 		# Update Taylor rule
 		#--------------------------------
@@ -762,11 +740,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
         i_bank = tf.i_targ + tf.gr_resp * (GDP_gr - tf.γ0) + tf.infl_resp * (πGDP - tf.π_targ)
 		# Apply adaptive expectations, then bound
 		tf.γ0 = min(max(tf.γ0 + growth_adj * (GDP_gr - tf.γ0), tf.min_γ0), tf.max_γ0)
-
-		#--------------------------------
-		# Update potential output
-		#--------------------------------
-        z = (1 .+ γ) .* z
 
 		#--------------------------------
 		# Update prices
@@ -798,6 +771,34 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		prices.pd = calc_dom_prices(t, np, ns, ω, prices, io, exog)
 		prices.pb = exog.xr[t] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
 		
+		# Sector variables
+		output_var(params, g, "sector_output", run, year, "a")
+		output_var(params, z, "potential_sector_output", run, year, "a")
+		output_var(params, u_report, "capacity_utilization", run, year, "a")
+		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
+		output_var(params, profit_rate, "profit_rate", run, year, "a")
+		output_var(params, γ_0, "autonomous_investment_rate", run, year, "a")
+	    # Product variables
+		output_var(params, F_report, "final_demand", run, year, "a")
+		output_var(params, M_report, "imports", run, year, "a")
+		output_var(params, X_report, "exports", run, year, "a")
+		output_var(params, param_pb, "basic_prices", run, year, "a")
+		output_var(params, param_pd, "domestic_prices", run, year, "a")
+		# Scalar variables
+		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
+							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
+							prices.XR * prices.Ptrade/prices.Pg, prices.XR]
+		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
+
+		if t == ntime
+			break
+		end
+
+		#--------------------------------
+		# Update potential output
+		#--------------------------------
+        z = (1 .+ γ) .* z
+
 		#--------------------------------
 		# Update the linear goal program
 		#--------------------------------
