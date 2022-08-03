@@ -70,7 +70,7 @@ function outputtoleap(file::String, indices::Array, run::Int64)
     # send results to LEAP
     ndxrows = final_year - base_year + 1
     try
-        for i = 1:size(branch_df, 1) # loops through each branch path
+        for i = axes(branch_df, 1) # loops through each branch path
             branch = branch_df[i,:branch]
             variable = branch_df[i,:variable]
             lasthistoricalyear = branch_df[i,:last_historical_year]

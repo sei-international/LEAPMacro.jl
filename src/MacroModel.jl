@@ -49,7 +49,7 @@ This function converts `svec` in-place, so should only be run once. Double quota
 are removed to avoid that problem.
 """
 function to_quoted_string_vec(svec)
-	for i in 1:length(svec)
+	for i in eachindex(svec)
 		svec[i] = replace(string('\"', svec[i], '\"'), "\"\"" => "\"")
 	end
 end
@@ -703,7 +703,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 			indices[t,curr_index] = lab_force_index
 		end
 	
- 		for i in 1:length(LEAP_indices)
+ 		for i in eachindex(LEAP_indices)
 			indices[t, curr_index + i] = 0
 			for j in LEAP_indices[i]
 				indices[t, curr_index + i] += g[j]
@@ -903,7 +903,7 @@ function resultcomparison(params, run::Int64)
     max_diff = 0
 
     # Compares run data
-    for i = 2:size(file1_dat, 2)
+    for i = axes(file1_dat, 2)[2:end]
         diff = abs.((file1_dat[:,i]-file2_dat[:,i])./file2_dat[:,i]*100)
         deleteat!(diff, findall(x->isnan(x), diff))
         if maximum(diff) > max_diff

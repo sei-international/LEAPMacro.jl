@@ -71,7 +71,7 @@ function write_matrix_to_csv(filename, array, rownames, colnames)
         # Write header
 		write(io, string("", ',', join(colnames, ','), "\r\n"))
         # Write each row
-        for i in 1:length(rownames)
+        for i in eachindex(rownames)
             write(io, string(rownames[i], ',', join(array[i,:], ','), "\r\n"))
         end
 	end
@@ -86,7 +86,7 @@ function write_vector_to_csv(filename, vector, varname, rownames)
 	open(filename, "w") do io
         # Write header
 		write(io, string("", ',', varname, "\r\n"))
-        for i in 1:length(rownames)
+        for i in eachindex(rownames)
             write(io, string(rownames[i], ',', vector[i], "\r\n"))
         end
 	end
@@ -166,7 +166,7 @@ end
 First convert strings in a Dataframe to floats and then convert the Dataframe to a Matrix.
 """
 function df_to_mat(df)
-    for x = 1:size(df,2)
+    for x = axes(df,2)
         df[!,x] = map(string_to_float, df[!,x]) # converts string to float
     end
     mat = Matrix(df) # convert dataframe to matrix
@@ -265,7 +265,7 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
 	global_params["LEAP_sector_names"] = [x["name"] for x in global_params["LEAP-sectors"]]
 	LEAP_sector_codes = [x["codes"] for x in global_params["LEAP-sectors"]]
 	global_params["LEAP_sector_indices"] = Array{Any}(undef,length(LEAP_sector_codes))
-	for i in 1:length(LEAP_sector_codes)
+	for i in eachindex(LEAP_sector_codes)
 		global_params["LEAP_sector_indices"][i] = findall([in(x, LEAP_sector_codes[i]) for x in global_params["included_sector_codes"]])
 	end
 
