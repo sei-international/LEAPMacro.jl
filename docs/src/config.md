@@ -153,6 +153,7 @@ The correspondence between the parameters and the [model variables](@ref exog-pa
     * `xr_sens` : ``\underline{b}_\text{xr}``
     * `adj_time` : ``\underline{T}_\text{xr}``
   * `target_infl` : ``\underline{\pi}^*``
+  * `init_infl` : ``\underline{\pi}_d^\text{init}``
   * `gr_resp` : ``\underline{\rho}_Y``
   * `infl_resp` : ``\underline{\rho}_\pi``
 ```yaml
@@ -168,8 +169,10 @@ taylor-fcn:
         band: [0.01, 0.10]
         xr_sens: 1
         adj_time: 2 # years
-    # Target inflation rate
+    # Target inflation rate (if missing or if value set to "~", will use global inflation rate)
     target_infl: 0.02
+    # Initial inflation rate for domestic prices (if missing, or if value set to "~", will use target inflation rate)
+    init_infl: 0.04
     # Response of the central bank rate to a change in the GDP growth rate
     gr_resp: 0.50
     # Response of the central bank rate to a change in the inflation rate

@@ -113,6 +113,7 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\hat{\underline{Y}}^*_\text{min}`` | Taylor rule minimum target growth rate                                                                                              |
 | ``\hat{\underline{Y}}^*_\text{max}`` | Taylor rule maximum target growth rate                                                                                              |
 | ``\underline{\pi}^*``                | Taylor rule target inflation rate                                                                                                   |
+| ``\underline{\pi}_d^\text{init}``    | Initial domestic price inflation rate                                                                                               |
 | ``\underline{\gamma}_0``             | Initial autonomous investment rate in the investment function                                                                       |
 | ``\underline{\xi}``                  | Rate of adjustment of autonomous demand to realized growth rate                                                                     |
 | ``\underline{\alpha}_\text{util}``   | Change in induced investment from a change in utilization (utilization investment sensitivity)                                      |

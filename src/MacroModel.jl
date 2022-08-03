@@ -15,6 +15,7 @@ mutable struct TaylorFunction
 	gr_resp::Float64
 	π_targ::Float64
 	π_targ_use_πw::Bool
+	π_init::Float64
 	infl_resp::Float64
 	i_targ::Float64
 	i_targ0::Float64
@@ -177,6 +178,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 
 	io, np, ns = IOlib.supplyusedata(file)
 	prices = IOlib.prices_init(np, io)
+    # Read in exogenous time-varying parameters and sector-specific parameters
+	exog = IOlib.get_var_params(file)
+	# Convert pw into global currency
+	prices.pw = prices.pw/exog.xr[1]
 
 	#############################################################################
 	#
@@ -207,8 +212,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		params["taylor-fcn"]["neutral_growth_band"][1], # min_γ0
 		params["taylor-fcn"]["neutral_growth_band"][2], # max_γ0
 		params["taylor-fcn"]["gr_resp"], # gr_resp
-		params["taylor-fcn"]["target_infl"], # π_targ
-		isnothing(params["taylor-fcn"]["target_infl"]), # π_targ_use_πw
+		0.0, # π_targ, assigned below
+		!haskey(params["taylor-fcn"], "target_infl") || isnothing(params["taylor-fcn"]["target_infl"]), # π_targ_use_πw
+		0.0, # π_init, assigned below
 		params["taylor-fcn"]["infl_resp"], # infl_resp
 		params["taylor-fcn"]["target_intrate"]["init"], # i_targ
 		params["taylor-fcn"]["target_intrate"]["init"], # i_targ0
@@ -219,6 +225,18 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		params["taylor-fcn"]["target_intrate"]["adj_time"] # i_targ_adj_time
 	)
 	tf.i_targ_coeff = (tf.i_targ_max - tf.i_targ0)/(tf.i_targ0 - tf.i_targ_min)
+	# If params["taylor-fcn"]["target_infl"] not present, use world inflation rate
+	if !tf.π_targ_use_πw
+		tf.π_targ = params["taylor-fcn"]["target_infl"]
+	else
+		tf.π_targ = exog.πw_base[1]
+	end
+	# If params["taylor-fcn"]["init_infl"] not present, use target
+	if haskey(params["taylor-fcn"], "init_infl") && !isnothing(params["taylor-fcn"]["init_infl"])
+		tf.π_init = params["taylor-fcn"]["init_infl"]
+	else
+		tf.π_init = tf.π_targ
+	end
 	# Wage rate function
 	infl_passthrough = params["wage-fcn"]["infl_passthrough"]
 	lab_constr_coeff = params["wage-fcn"]["lab_constr_coeff"]
@@ -238,13 +256,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	ntime = 1 + (final_year - base_year)
 	# Initial autonomous growth rate
 	γ_0 = neutral_growth * ones(ns)
-
-	#----------------------------------
-    # Read in exogenous time-varying parameters and sector-specific parameters
-    #----------------------------------
-	exog = IOlib.get_var_params(file)
-	# Convert pw into global currency
-	prices.pw = prices.pw/exog.xr[1]
 
 	#############################################################################
 	#
@@ -467,21 +478,21 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	#--------------------------------
 	# Initialize variables for calculating inflation, growth rates, etc.
 	#--------------------------------
-	pw_prev = prices.pw/(1 + params["global-params"]["infl_default"])
-	pd_prev = prices.pd/(1 + params["global-params"]["infl_default"])
-    pb_prev = param_pb/(1 + params["global-params"]["infl_default"])
+    πd = ones(length(prices.pd)) * tf.π_init
+    πw = ones(length(prices.pw)) * exog.πw_base[1]
+    πb = ones(length(prices.pb)) .* (io.m_frac .* πw + (1 .- io.m_frac) .* πd)
+
+	pw_prev = prices.pw ./ (1 .+ πw)
+	pd_prev = prices.pd ./ (1 .+ πd)
+    pb_prev = param_pb ./ (1 .+ πb)
     prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/(1 + neutral_growth)
 	prev_g = value.(u) .* z
 	prev_g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
 
 	prev_GDP_deflator = 1
     prev_GDP_gr = neutral_growth
-    πg = params["global-params"]["infl_default"]
-	πF = params["global-params"]["infl_default"]
-    πb = ones(length(prices.pb)) * params["global-params"]["infl_default"]
-    πd = ones(length(prices.pd)) * params["global-params"]["infl_default"]
-    πw = ones(length(prices.pw)) * params["global-params"]["infl_default"]
-
+    πg = sum(prev_g_share .* πb)
+	πF = sum(πb .* value.(F))/sum(value.(F))
 	if calc_use_matrix_tech_change
 		sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
 		intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
@@ -574,9 +585,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
             va2 = sum(value.(param_pb)[j] * io.D[j,:] for j in 1:np) .* g
             value_added = va1 - va2
             πGDP = sum(value_added)/sum(value_added_at_prev_prices) - 1
-			π_imp = params["global-params"]["infl_default"]
-			π_exp = params["global-params"]["infl_default"]
-			π_trade = params["global-params"]["infl_default"]
+			π_imp = exog.πw_base[1]
+			π_exp = exog.πw_base[1]
+			π_trade = exog.πw_base[1]
             GDP_gr = prev_GDP_gr
 			GDP = prev_GDP * (1 + GDP_gr)
         else
@@ -588,9 +599,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 			π_imp = sum(πw .* value.(M))/sum(value.(M))
 			π_exp = sum(πw .* value.(X))/sum(value.(X))
 			π_trade = sum(πw .* (value.(X) + value.(M)))/sum(value.(X) + value.(M))
-			val_findmd = pd_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
+			val_findmd = pb_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
 	        val_findmd_share = val_findmd/sum(val_findmd)
-            πGDP = sum(val_findmd_share .* πd)
+            πGDP = sum(val_findmd_share .* πb)
             pd_prev = param_pd
             pb_prev = param_pb
 			pw_prev = prices.pw
