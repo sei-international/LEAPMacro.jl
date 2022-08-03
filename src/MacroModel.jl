@@ -599,9 +599,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 			π_imp = sum(πw .* value.(M))/sum(value.(M))
 			π_exp = sum(πw .* value.(X))/sum(value.(X))
 			π_trade = sum(πw .* (value.(X) + value.(M)))/sum(value.(X) + value.(M))
-			val_findmd = pd_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
+			val_findmd = pb_prev .* (value.(X) + value.(F) + value.(I_supply) - value.(M))
 	        val_findmd_share = val_findmd/sum(val_findmd)
-            πGDP = sum(val_findmd_share .* πd)
+            πGDP = sum(val_findmd_share .* πb)
             pd_prev = param_pd
             pb_prev = param_pb
 			pw_prev = prices.pw

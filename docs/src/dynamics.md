@@ -30,13 +30,13 @@ The domestic final demand inflation rate ``\pi_F``is the average of the rate of 
     \pi_F = \frac{\sum_{k = 1}^{n_p} F_k\pi_{b,k}}{\sum_{k = l}^{n_p} F_l}.
 ```
 
-The GDP inflation rate ``\pi_\text{GDP}`` is the average of the rate of increase of domestic prices weighted by the value of final demand. The value of final demand for good ``k`` is
+The GDP inflation rate ``\pi_\text{GDP}`` is the average of the rate of increase of basic prices weighted by the value of total final demand. The value of final demand for good ``k`` is
 ```math
-    V_k = \overline{p}_{d,k,-1}\left(F_k + X_k + I_k - M_k\right).
+    V_k = \overline{p}_{b,k,-1}\left(F_k + X_k + I_k - M_k\right).
 ```
 The GDP inflation rate is calculated as
 ```math
-    \pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{d,k}}{\sum_{k = l}^{n_p} V_l}, \quad \pi_{d,k} = \frac{p_{d,k}-p_{d,k,-1}}{p_{d,k,-1}}.
+    \pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{b,k}}{\sum_{k = l}^{n_p} V_l}.
 ```
 
 Basic prices are a weighted average of domestic and foreign prices, with the weight given by the import fraction ``f_k``, where
