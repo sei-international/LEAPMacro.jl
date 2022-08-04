@@ -103,22 +103,20 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\underline{k}``                    | Response of the real wage to labor supply constraints                                                                               |
 | ``\underline{\hat{N}}``              | Growth rate of the working-age population                                                                                           |
 | ``\underline{\chi}^\pm_k``           | Allocation coefficients for positive ``(+)`` and negative ``(-)`` margins for product ``k``                                         |
-| ``\underline{i}^\text{init}_{b0}``   | Initial value for ``i_{b0}``                                                                                                        |
-| ``\underline{i}^\text{min}_{b0}``    | Minimum value for ``i_{b0}``                                                                                                        |
-| ``\underline{i}^\text{max}_{b0}``    | Maximum value for ``i_{b0}``                                                                                                        |
+| ``\underline{i}^\text{init}_{b0}``   | Initial value for ``i_{b0}`` |
+| ``\underline{i}^\text{min}_{b0}, \underline{i}^\text{max}_{b0}``   | Minimum and maximum values for ``i_{b0}`` |
 | ``\underline{b}_\text{xr}``          | Sensitivity of ``i_{b0}`` to changes in the exchange rate                                                                           |
 | ``\underline{T}_\text{xr}``          | Adaptation time for ``i_{b0}`` to adjust to the target                                                                              |
 | ``\underline{\rho}_Y``               | Taylor coefficient on the GDP growth rate                                                                                           |
 | ``\underline{\rho}_\pi``             | Taylor coefficient on the inflation rate                                                                                            |
-| ``\hat{\underline{Y}}^*_\text{min}`` | Taylor rule minimum target growth rate                                                                                              |
-| ``\hat{\underline{Y}}^*_\text{max}`` | Taylor rule maximum target growth rate                                                                                              |
+| ``\hat{\underline{Y}}^*_\text{min}, \hat{\underline{Y}}^*_\text{max}`` | Minimum and maximum target growth rates for the Taylor rule    |
 | ``\underline{\pi}^*``                | Taylor rule target inflation rate                                                                                                   |
 | ``\underline{\pi}_d^\text{init}``    | Initial domestic price inflation rate                                                                                               |
 | ``\underline{\gamma}_0``             | Initial autonomous investment rate in the investment function                                                                       |
 | ``\underline{\xi}``                  | Rate of adjustment of autonomous demand to realized growth rate                                                                     |
-| ``\underline{\alpha}_\text{util}``   | Change in induced investment from a change in utilization (utilization investment sensitivity)                                      |
-| ``\underline{\alpha}_\text{profit}`` | Change in induced investment from a change in profit rate (profit rate investment sensitivity)                                      |
-| ``\underline{\alpha}_\text{bank}``   | Change in induced investment from a change in borrowing costs (interest rate investment sensitivity)                                |
+| ``\underline{\alpha}_\text{util}``   | Response of induced investment to capacity utilization (utilization investment sensitivity)                                      |
+| ``\underline{\alpha}_\text{profit}`` | Response of induced investment to profitability (profit rate investment sensitivity)                                      |
+| ``\underline{\alpha}_\text{bank}``   | Response of induced investment to borrowing costs (interest rate investment sensitivity)                                |
 | ``\underline{r}^*``                  | Target rate of gross profit (in the investment function)                                                                            |
 | ``\underline{\delta}_i``             | Depreciation rate for sector ``i``                                                                                                  |
 | ``\underline{v}_i``                  | Capital-output ratio in sector ``i``                                                                                                |
@@ -126,8 +124,7 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\underline{\gamma}^\text{world}``  | Growth rate of world GDP (also termed gross world product, GWP)                                                                     |
 | ``\underline{\eta}^\text{exp}_k``    | Elasticity of normal export demand for product ``k`` with respect to a change in GWP                                                |
 | ``\underline{\eta}^\text{wage}_k``   | Elasticity of normal final demand for product ``k`` with respect to a change in the wage bill                                       |
-| ``\underline{\phi}^\text{exp}_k``    | Elasticity of export demand with respect to relative price changes                                                                  |
-| ``\underline{\phi}^\text{imp}_k``    | Elasticity of import demand with respect to relative price changes                                                                  |
+| ``\underline{\phi}^\text{exp}_k, \underline{\phi}^\text{imp}_k``    | Elasticities of export and import demand with respect to relative price changes  |
 
 ## [Optional exogenous parameters](@id optional-exog-param-vars)
 The following are optional exogenous parameters:
