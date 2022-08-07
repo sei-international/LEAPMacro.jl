@@ -757,7 +757,12 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		#--------------------------------
 		# Update prices
 		#--------------------------------
-		prices.Pg = (1 + πg) * prices.Pg
+		# If the specified XR series is real, convert to nominal using modeled price indices
+		if params["files"]["xr-is-real"]
+			exog.xr[t] *= prices.Pg/prices.Ptrade
+		end
+		prices.RER = prices.XR * prices.Ptrade/prices.Pg
+		prices.Pg *= (1 + πg)
 		prices.Pm *= (1 + π_imp)
 		prices.Px *= (1 + π_exp)
 		prices.Ptrade *= (1 + π_trade)
@@ -768,10 +773,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 			pw_spec = exog.exog_price[t,:] ./ exog.exog_price[t - 1,:]
 			pw_ndxs = findall(x -> !ismissing(x), pw_spec)
 			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
-		end
-		# If the specified XR series is real, convert to nominal using modeled price indices
-		if params["files"]["xr-is-real"]
-			exog.xr[t] *= prices.Pg/prices.Ptrade
 		end
 		# Calculate XR trend
 		if t > 1
@@ -800,7 +801,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		# Scalar variables
 		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
-							prices.XR * prices.Ptrade/prices.Pg, prices.XR]
+							prices.RER, prices.XR]
 		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
 
 		if t == ntime
