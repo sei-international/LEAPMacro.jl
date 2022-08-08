@@ -75,6 +75,7 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``r_i``                | Gross rate of profit in sector ``i``                                                          |
 | ``\Pi_i``              | Gross profits in sector ``i``                                                                 |
 | ``\gamma^\text{wage}`` | Growth rate of the total wage bill                                                            |
+| ``\gamma^\text{world}_\text{smooth}``  | Smoothed growth rate of world GDP (also termed gross world product, GWP)      |
 | ``f_k``                | Current level of imports of good ``k`` as a fraction of domestic demand                       |
 
 ## [Exogenous parameters](@id exog-param-vars)

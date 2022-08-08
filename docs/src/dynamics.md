@@ -3,7 +3,7 @@ CurrentModule = LEAPMacro
 ```
 
 # [Dynamics](@id dynamics)
-In between runs of the [linear goal program](@ref lgp), the [dynamic parameters](@ref dynamic-param-vars) and [intermediate variables](@ref intermed-vars) are updated.
+In between runs of the [linear goal program](@ref lgp), the [dynamic parameters](@ref dynamic-param-vars) and [intermediate variables](@ref intermed-vars) are updated. After the dynamic parameters have been updated, the [linear goal program](@ref lgp) is run for the subsequent year.
 
 In the equations below, a subscript ``+1`` indicates the next-year's value, and a subscript ``-1`` the previous year's value. An underline indicates an [exogenous parameter](@ref exog-param-vars), while an overline is a [dynamic parameter](@ref dynamic-param-vars).
 
@@ -216,11 +216,33 @@ Substituting this expression into the equation for investment demand and solving
 The calibrated value for ``\underline{r}^*`` is found by setting ``\overline{z}_i = g_i`` and ``\gamma_i = \underline{\gamma}_0``. That value is then used to calculate capital-output ratios.
 
 ## [Export demand and final demand](@id dynamics-demand-fcns)
-The normal level of export demand grows with global GDP (or gross world product, GWP) to a goods-specific elasticity, modified by the relative change in domestic and world prices,
+For most products, the normal level of export demand grows with global GDP (or gross world product, GWP) to a goods-specific elasticity, modified by the relative change in domestic and world prices,
 ```math
 \overline{X}^\text{norm}_{k,+1} = \left(1 + \underline{\gamma}^\text{world}\right)^{\underline{\eta}^\text{exp}_k} \left(\frac{1 + \underline{\pi}_{w,k}}{1 + \pi_{d,k}}\right)^{\underline{\phi}^\text{exp}_k} \overline{X}^\text{norm}_k.
 ```
-Normal final demand grows with the real wage bill to a goods-specific elasticity. The next-period nominal wage bill in sector ``i`` is calculated using variables and parameters introduced above,
+When potential output is exogenously specified, normal export demand is assumed to be supply-inelastic -- that is, it more or less keeps pace with the change in potential output -- but still responds to relative prices and fluctuations in global GDP. Fluctuations in global GDP are calculated relative to a smoothed trend,
+```math
+\gamma^\text{world}_\text{smooth} = \gamma^\text{world}_{\text{smooth},-1} + \underline{\xi}\left(\underline{\gamma}^\text{world} - \gamma^\text{world}_{\text{smooth},-1}\right)
+```
+One complicating factor is that potential output is a characteristic of a sector, whereas export demand is for products. The connection is through the supply matrix. Defining a matrix
+```math
+    \Omega_{ik} = \frac{1}{g_i}S_{ik}q_{s,k},
+```
+potential production ``q_{s,k}^*`` of product ``k`` is given by
+```math
+    q_{s,k}^* = \sum_{i=1}^{n_s} z_i\Omega_{ik},
+```
+while the fraction ``f_k^\text{exog}`` of potential output of product ``k`` due to exogenously specified sector output is
+```math
+    f_k^\text{exog} = \frac{\sum_{i=1}^{n_s}\underline{z}_i^\text{exog}\Omega_{ik}}{\sum_{i=1}^{n_s} z_i\Omega_{ik}}.
+```
+With these defintions, an extended expression for the change in the normal level of exports is given by
+```math
+\overline{X}^\text{norm}_{k,+1} = \left[1 + f_k^\text{exog}\left(\frac{q_{s,k,+1}^*}{q_{s,k}^*} - 1\right)\right] \left(\frac{1 + \underline{\gamma}^\text{world}}{1 + f_k^\text{exog}\gamma^\text{world}_\text{smooth}}\right)^{\underline{\eta}^\text{exp}_k} \left(\frac{1 + \underline{\pi}_{w,k}}{1 + \pi_{d,k}}\right)^{\underline{\phi}^\text{exp}_k} \overline{X}^\text{norm}_k.
+```
+When ``f_k^\text{exog} = 0``, this reduces to the default formula.
+
+Normal domestic final demand grows with the real wage bill to a goods-specific elasticity. The next-period nominal wage bill in sector ``i`` is calculated using variables and parameters introduced above,
 ```math
 \overline{W}_{i,+1} = \frac{1 + \hat{w}}{1 + \hat{\lambda}}\left(1 + \gamma_i\right)W_i.
 ```
@@ -228,11 +250,7 @@ The growth in the real wage bill is given by these factors, but corrected for do
 ```math
 \gamma^\text{wage} = \frac{1}{1 + \pi_F}\frac{\sum_{i=1}^{n_s}\overline{W}_{i,+1}}{\sum_{j=1}^{n_s}\overline{W}_j} - 1.
 ```
-The updated normal household demand is then given by
+The updated normal domestic final demand is then given by
 ```math
 \overline{F}^\text{norm}_{k,+1} = \left(1 + \underline{\gamma}^\text{wage}\right)^{\underline{\eta}^\text{wage}_k}\overline{F}^\text{norm}_k.
 ```
-
-After the dynamic parameters have been updated, the [linear goal program](@ref lgp) is run for the subsequent year.
-
-

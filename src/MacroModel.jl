@@ -178,8 +178,12 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 
 	io, np, ns = IOlib.supplyusedata(file)
 	prices = IOlib.prices_init(np, io)
-    # Read in exogenous time-varying parameters and sector-specific parameters
 	exog = IOlib.get_var_params(file)
+
+	# For exogenous potential output and world prices, values must be specified for all years, so get indices for first year
+	pot_output_ndxs = findall(x -> !ismissing(x), exog.exog_pot_output[1,:])
+	pw_ndxs = findall(x -> !ismissing(x), exog.exog_price[1,:])
+
 	# Convert pw into global currency
 	prices.pw = prices.pw/exog.xr[1]
 
@@ -489,6 +493,14 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	prev_g = value.(u) .* z
 	prev_g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
 
+	smoothed_world_gr = params["global-params"]["gr_default"]
+
+	if !all(ismissing.(exog.exog_pot_output[1,:]))
+		prev_exog_pot_prod = sum(exog.exog_pot_output[1,i] * io.Vnorm[i,:] for i in pot_output_ndxs)
+	else
+		prev_exog_pot_prod = zeros(np)
+	end
+
 	prev_GDP_deflator = 1
     prev_GDP_gr = neutral_growth
     πg = sum(prev_g_share .* πb)
@@ -673,7 +685,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 			# Override default behavior if production is exogenously specified
 			if t > 1
 				γ_spec = exog.exog_pot_output[t,:] ./ exog.exog_pot_output[t - 1,:] .- 1.0
-				pot_output_ndxs = findall(x -> !ismissing(x), γ_spec)
 				γ[pot_output_ndxs] .= γ_spec[pot_output_ndxs]
 			end
 		end
@@ -689,7 +700,25 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		#--------------------------------
 		# Export demand
 		#--------------------------------
-        Xmax = Xmax .* (1 + exog.world_grs[t]).^exog.export_elast_demand[t] .* ((1 .+ πw)./(1 .+ πd)).^exog.export_price_elast
+		if !all(ismissing.(exog.exog_pot_output[t,:]))
+			# Export demand is calculated differently when potential output is exogenously specified
+			exog_pot_prod = sum(exog.exog_pot_output[t,i] * io.Vnorm[i,:] for i in pot_output_ndxs)
+			# -- extent of externally specified output
+			pot_prod_spec_factor = sum(io.Vnorm[i,:] * z[i] for i in pot_output_ndxs) ./ (io.Vnorm' * z .+ IOlib.ϵ)
+		else
+			exog_pot_prod = zeros(np)
+			pot_prod_spec_factor = zeros(np)
+		end
+		# -- scale factor
+		Xmax_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* exog_pot_prod ./ (prev_exog_pot_prod .+ IOlib.ϵ)
+		prev_exog_pot_prod = exog_pot_prod
+		# -- income factor
+		smoothed_world_gr += growth_adj * (exog.world_grs[t] - smoothed_world_gr)
+		Xmax_income_factor = (1 + exog.world_grs[t]) ./ (1 .+ pot_prod_spec_factor * smoothed_world_gr)
+		# -- price factor
+		Xmax_price_factor = (1 .+ πw)./(1 .+ πd)
+		# -- updated value
+        Xmax = Xmax .* Xmax_scale_factor .* Xmax_income_factor.^exog.export_elast_demand[t] .* Xmax_price_factor.^exog.export_price_elast
 
 		#--------------------------------
 		# Final domestic consumption demand
@@ -771,7 +800,6 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		# Then adjust for any exogenous price indices
 		if t > 1
 			pw_spec = exog.exog_price[t,:] ./ exog.exog_price[t - 1,:]
-			pw_ndxs = findall(x -> !ismissing(x), pw_spec)
 			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
 		end
 		# Calculate XR trend
