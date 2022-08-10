@@ -303,6 +303,7 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
             global_params["LEAP-info"]["inv_costs_scale"] = 1.0
         end
     else
+        global_params["LEAP-info"] = Dict()
         global_params["LEAP-info"]["input_scenario"] = ""
         global_params["LEAP-info"]["result_scenario"] = ""
         global_params["LEAP-info"]["inv_costs_unit"] = default_inv_costs_unit
