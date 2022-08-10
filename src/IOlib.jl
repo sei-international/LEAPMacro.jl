@@ -262,12 +262,52 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
 	# These indices are with respect to the list of included product codes, not the full list
 	global_params["non-tradeable-range"] = findall(in(global_params["non_tradeable_products"]).(global_params["included_product_codes"]))
 
-	global_params["LEAP_sector_names"] = [x["name"] for x in global_params["LEAP-sectors"]]
-	LEAP_sector_codes = [x["codes"] for x in global_params["LEAP-sectors"]]
-	global_params["LEAP_sector_indices"] = Array{Any}(undef,length(LEAP_sector_codes))
-	for i in eachindex(LEAP_sector_codes)
-		global_params["LEAP_sector_indices"][i] = findall([in(x, LEAP_sector_codes[i]) for x in global_params["included_sector_codes"]])
-	end
+    if haskey(global_params, "LEAP-sectors")
+        global_params["LEAP_sector_names"] = [x["name"] for x in global_params["LEAP-sectors"]]
+        LEAP_sector_codes = [x["codes"] for x in global_params["LEAP-sectors"]]
+        global_params["LEAP_sector_indices"] = Array{Any}(undef,length(LEAP_sector_codes))
+        for i in eachindex(LEAP_sector_codes)
+            global_params["LEAP_sector_indices"][i] = findall([in(x, LEAP_sector_codes[i]) for x in global_params["included_sector_codes"]])
+        end
+    else
+        global_params["LEAP_sector_names"] = []
+        global_params["LEAP_sector_indices"] = []
+    end
+
+    # Check that LEAP-info keys are reported
+    default_inv_costs_unit = "U.S. Dollar"
+    if haskey(global_params, "LEAP-info")
+        # Key "scenario" is specified, which overrides "input_scenario" and "result_scenario"
+        if haskey(global_params["LEAP-info"], "scenario") && !isnothing(global_params["LEAP-info"]["scenario"])
+            global_params["LEAP-info"]["input_scenario"] = global_params["LEAP-info"]["scenario"]
+            global_params["LEAP-info"]["result_scenario"] = global_params["LEAP-info"]["scenario"]
+        end
+        # Key "input_scenario" is missing, so default to empty string (so that the currently loaded scenario in LEAP is used)
+        if !haskey(global_params["LEAP-info"], "input_scenario") || isnothing(global_params["LEAP-info"]["input_scenario"])
+            global_params["LEAP-info"]["input_scenario"] = ""
+        end
+        # Key "result_scenario" is not specified, so it defaults to "input_scenario"
+        if !haskey(global_params["LEAP-info"], "result_scenario") || isnothing(global_params["LEAP-info"]["result_scenario"])
+            global_params["LEAP-info"]["result_scenario"] = global_params["LEAP-info"]["input_scenario"]
+        end
+        # Key "region" is missing, so default to empty string
+        if !haskey(global_params["LEAP-info"], "region") || isnothing(global_params["LEAP-info"]["region"])
+            global_params["LEAP-info"]["region"] = ""
+        end
+        # Key "inv_costs_unit" is missing, so apply the default
+        if !haskey(global_params["LEAP-info"], "inv_costs_unit") || isnothing(global_params["LEAP-info"]["inv_costs_unit"])
+            global_params["LEAP-info"]["inv_costs_unit"] = default_inv_costs_unit
+        end
+        # Key "inv_costs_scale" is missing, so default to 1.0
+        if !haskey(global_params["LEAP-info"], "inv_costs_scale") || isnothing(global_params["LEAP-info"]["inv_costs_scale"])
+            global_params["LEAP-info"]["inv_costs_scale"] = 1.0
+        end
+    else
+        global_params["LEAP-info"]["input_scenario"] = ""
+        global_params["LEAP-info"]["result_scenario"] = ""
+        global_params["LEAP-info"]["inv_costs_unit"] = default_inv_costs_unit
+        global_params["LEAP-info"]["inv_costs_scale"] = 1.0
+    end
 
     return global_params
 end
