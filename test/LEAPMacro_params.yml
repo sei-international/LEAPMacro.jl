@@ -204,29 +204,32 @@ SUT_ranges:
 #---------------------------------------------------------------------------
 # Parameters for running LEAP with the Macro model (LEAP-Macro)
 #---------------------------------------------------------------------------
+# Core information for the LEAP application (optional)
 LEAP-info:
-    # This can be, e.g., a baseline scenario
-    input_scenario: Baseline
-    # This is the scenario from which LEAP results are drawn
-    result_scenario: Baseline
+    # This can be, e.g., a baseline scenario (alternatively, can specify input_scenario and result_scenario separately)
+    scenario: Baseline
+    # The region (if any -- can omit, or enter a "~", meaning no value)
+    region: ~
     # Currency units for investment costs
     inv_costs_unit: U.S. Dollar
     # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
     inv_costs_scale: 1.0e+6
 
-# Association between LEAP and supply-use sectors
+# Association between Macro's GDP result and LEAP (optional)
 GDP-branch:
     name: GDP
     branch: Key\GDP
     variable: Activity Level
     last_historical_year: 2010
 
+# Association between Macro's employment result and LEAP (optional)
 Employment-branch:
     name: Employment
     branch: Key\Employment
     variable: Activity Level
     last_historical_year: 2010
 
+# Association between Macro sectors and LEAP sectors (optional)
 LEAP-sectors:
  - {
     name: Iron and Steel,

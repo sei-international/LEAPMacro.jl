@@ -83,7 +83,7 @@ function outputtoleap(file::String, indices::Array, run::Int64)
             else
                 newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
             end
-            setbranchvar_expression(LEAP, branch, variable, newexpression, scenario=params["LEAP-info"]["input_scenario"])
+            setbranchvar_expression(LEAP, branch, variable, newexpression, region = params["LEAP-info"]["region"], scenario=params["LEAP-info"]["input_scenario"])
 
         end
         LEAP.SaveArea()

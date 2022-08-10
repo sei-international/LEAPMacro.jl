@@ -358,32 +358,46 @@ SUT_ranges:
     wages: J37:W38
 ```
 
-## [Mapping Macro variables to LEAP variables](@id config-link-LEAP)
-The next, and final, block specifies how LEAP and Macro are linked.
+## [Mapping Macro to LEAP](@id config-link-LEAP)
+The next, and final, block specifies how LEAP and Macro are linked. Each of these entries is optional.
 
-The first section says which LEAP scenario to use for inputs to the Macro model, the LEAP scenario to which Macro returns its results (nearly always the same as `input_scenario`), the currency unit for investment costs, and a scaling factor.
+The first section says which LEAP scenario to send and retrieve results to and from, for which region, the currency unit for investment costs, and a scaling factor.
 
 As an example for setting the scaling factor, if entries in the Macro model input files are in millions of US dollars, and investment costs in LEAP are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).
+
+If this section is omitted, then results are sent to and retrieved from the scenario currently active in LEAP, and for the currently active region (if any regions are specified). The `inv_costs_units` parameter is set to `U.S. Dollar`, and `inv_costs_scale` is set to 1.0.
 ```yaml
 #---------------------------------------------------------------------------
 # Parameters for running LEAP with the Macro model (LEAP-Macro)
 #---------------------------------------------------------------------------
+# Core information for the LEAP application (optional)
 LEAP-info:
-    # This can be, e.g., a baseline scenario
-    input_scenario: Baseline
-    # This is the scenario from which LEAP results are drawn
-    result_scenario: Baseline
+    # This can be, e.g., a baseline scenario (alternatively, can specify input_scenario and result_scenario separately)
+    scenario: Baseline
+    # The region (if any -- can omit, or enter a "~", meaning no value)
+    region: ~
     # Currency units for investment costs
     inv_costs_unit: U.S. Dollar
     # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
     inv_costs_scale: 1.0e+6
 ```
+Alternatively, separate scenarios can be specified if LEAP receives inputs from Macro for one scenario (`input_scenario`), but sends results back to Macro from another scenario (`result_scenario`). In this case, `scenario` should be omitted, or set to "~" (meaning "no value"). For example,
+```yaml
+#---------------------------------------------------------------------------
+# Parameters for running LEAP with the Macro model (LEAP-Macro)
+#---------------------------------------------------------------------------
+# Core information for the LEAP application (optional)
+LEAP-info:
+    input_scenario: Baseline
+    result_cenario: Capital Plan
+    ...
+```
 
 The remaining sections specify where in LEAP to put indices as calculated by Macro. For each index, LEAP should contain at least one historical value, while the index supplied by Macro is applied to the last historical value in the specified `result_scenario`. Indices appear as columns in an `indices_#.csv` file in the [`results` output folder](@ref model-outputs-results), where `#` is the run number.
 
-The first index, which is optional, is for GDP. The entry in the configuration file gives the name for the index, the LEAP branch and variable where the index should be inserted and, to cover cases where the last historical year is after the base year, the last historical year.
+The first index is for GDP. It can be omitted, but if it is present, the entry in the configuration file gives the name for the index, the LEAP branch and variable where the index should be inserted and, to cover cases where the last historical year is after the base year, the last historical year.
 ```yaml
-# Association between LEAP and supply-use sectors
+# Association between Macro's GDP result and LEAP (optional)
 GDP-branch:
     name: GDP
     branch: Key\GDP
@@ -391,8 +405,9 @@ GDP-branch:
     last_historical_year: 2010
 ```
 
-The second index, for employment, is also optional. It has the same structure as for GDP.
+The second index is also optional, and has the same structure as for GDP.
 ```yaml
+# Association between Macro's employment result and LEAP (optional)
 Employment-branch:
     name: Employment
     branch: Key\Employment
@@ -400,10 +415,11 @@ Employment-branch:
     last_historical_year: 2010
 ```
 
-Finally, the `LEAP-sectors` parameter contains a list of indices. For each of these, Macro will sum up production[^3] across all of the sector codes listed. It will then calculate an index starting in the base year, and insert the index into the specified branches. In some cases, the same index might be applied to different branches. For example, if the supply-use table has a "services" sector but no transport, while LEAP has both a services and a commercial transport sector, the same index could be used to drive both.
+Finally, the `LEAP-sectors` parameter, if present, contains a list of indices. For each of these, Macro will sum up production[^3] across all of the sector codes listed. It will then calculate an index starting in the base year, and insert the index into the specified branches. In some cases, the same index might be applied to different branches. For example, if the supply-use table has a "services" sector but no transport, while LEAP has both a services and a commercial transport sector, the same index could be used to drive both.
 
-While the GDP and Employment entries can be omitted from the file if they are not needed, to exclude the `LEAP-sectors` entry, simply set it to an empty list: `LEAP-sectors: []`.
+If no sectoral aggregation is desired, then this entry can be excluded entirely, or set to an empty list: `LEAP-sectors: []`.
 ```yaml
+# Association between Macro sectors and LEAP sectors (optional)
 LEAP-sectors:
  - {
     name: Iron and Steel,
