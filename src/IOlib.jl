@@ -302,8 +302,12 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
         if !haskey(global_params["LEAP-info"], "inv_costs_scale") || isnothing(global_params["LEAP-info"]["inv_costs_scale"])
             global_params["LEAP-info"]["inv_costs_scale"] = 1.0
         end
+        if !haskey(global_params["LEAP-info"], "last_historical_year") || isnothing(global_params["LEAP-info"]["last_historical_year"])
+            global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
+        end
     else
         global_params["LEAP-info"] = Dict()
+        global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
         global_params["LEAP-info"]["input_scenario"] = ""
         global_params["LEAP-info"]["result_scenario"] = ""
         global_params["LEAP-info"]["inv_costs_unit"] = default_inv_costs_unit

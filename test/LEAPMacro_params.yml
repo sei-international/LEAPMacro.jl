@@ -206,6 +206,8 @@ SUT_ranges:
 #---------------------------------------------------------------------------
 # Core information for the LEAP application (optional)
 LEAP-info:
+    # The last historical year (equal to LEAP's First Scenario Year - 1): if missing, it is set equal to the the start year
+    last_historical_year: 2010
     # This can be, e.g., a baseline scenario (alternatively, can specify input_scenario and result_scenario separately)
     scenario: Baseline
     # The region (if any -- can omit, or enter a "~", meaning no value)
@@ -220,14 +222,12 @@ GDP-branch:
     name: GDP
     branch: Key\GDP
     variable: Activity Level
-    last_historical_year: 2010
 
 # Association between Macro's employment result and LEAP (optional)
 Employment-branch:
     name: Employment
     branch: Key\Employment
     variable: Activity Level
-    last_historical_year: 2010
 
 # Association between Macro sectors and LEAP sectors (optional)
 LEAP-sectors:
@@ -237,8 +237,7 @@ LEAP-sectors:
     branches: [
         {
          branch: Demand\Industry\Iron and Steel,
-         variable: Activity Level,
-         last_historical_year: 2010
+         variable: Activity Level
         }
     ]
    }
@@ -248,8 +247,7 @@ LEAP-sectors:
     branches: [
         {
          branch: Demand\Industry\Pulp and Paper,
-         variable: Activity Level,
-         last_historical_year: 2010
+         variable: Activity Level
         }
     ]
    }
@@ -259,8 +257,7 @@ LEAP-sectors:
     branches: [
         {
          branch: Demand\Industry\Other Industry,
-         variable: Activity Level,
-         last_historical_year: 2010
+         variable: Activity Level
         }
     ]
    }
@@ -270,8 +267,7 @@ LEAP-sectors:
     branches: [
         {
          branch: Demand\Transport\Freight,
-         variable: Activity Level,
-         last_historical_year: 2010
+         variable: Activity Level
         }
     ]
    }
@@ -281,8 +277,7 @@ LEAP-sectors:
     branches: [
         {
          branch: Demand\Commercial,
-         variable: Activity Level,
-         last_historical_year: 2010
+         variable: Activity Level
         }
     ]
    }
