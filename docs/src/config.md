@@ -361,17 +361,19 @@ SUT_ranges:
 ## [Mapping Macro to LEAP](@id config-link-LEAP)
 The next, and final, block specifies how LEAP and Macro are linked. Each of these entries is optional.
 
-The first section says which LEAP scenario to send and retrieve results to and from, for which region, the currency unit for investment costs, and a scaling factor.
+The first section says which LEAP scenario to send and retrieve results to and from, for which region, the currency unit for investment costs, and a scaling factor. It also identifies the first historical year, if that is different from the start year. (The `last_historical_year` is the year just before LEAP's `First Scenario Year`.)
 
 As an example for setting the scaling factor, if entries in the Macro model input files are in millions of US dollars, and investment costs in LEAP are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).
 
-If this section is omitted, then results are sent to and retrieved from the scenario currently active in LEAP, and for the currently active region (if any regions are specified). The `inv_costs_units` parameter is set to `U.S. Dollar`, and `inv_costs_scale` is set to 1.0.
+If this section is omitted, then results are sent to and retrieved from the scenario currently active in LEAP, and for the currently active region (if any regions are specified). The `last_historical_year` is set to the start year, `inv_costs_units` is set to `U.S. Dollar`, and `inv_costs_scale` is set to 1.0.
 ```yaml
 #---------------------------------------------------------------------------
 # Parameters for running LEAP with the Macro model (LEAP-Macro)
 #---------------------------------------------------------------------------
 # Core information for the LEAP application (optional)
 LEAP-info:
+    # The last historical year (equal to LEAP's First Scenario Year - 1): if missing, it is set equal to the the start year
+    last_historical_year: 2010
     # This can be, e.g., a baseline scenario (alternatively, can specify input_scenario and result_scenario separately)
     scenario: Baseline
     # The region (if any -- can omit, or enter a "~", meaning no value)
@@ -388,8 +390,11 @@ Alternatively, separate scenarios can be specified if LEAP receives inputs from 
 #---------------------------------------------------------------------------
 # Core information for the LEAP application (optional)
 LEAP-info:
+    # The last historical year (equal to LEAP's First Scenario Year - 1): if missing, it is set equal to the the start year
+    last_historical_year: 2010
+    # Scenarios
     input_scenario: Baseline
-    result_cenario: Capital Plan
+    result_scenario: Capital Plan
     ...
 ```
 
@@ -402,7 +407,6 @@ GDP-branch:
     name: GDP
     branch: Key\GDP
     variable: Activity Level
-    last_historical_year: 2010
 ```
 
 The second index is also optional, and has the same structure as for GDP.
@@ -412,7 +416,6 @@ Employment-branch:
     name: Employment
     branch: Key\Employment
     variable: Activity Level
-    last_historical_year: 2010
 ```
 
 Finally, the `LEAP-sectors` parameter, if present, contains a list of indices. For each of these, Macro will sum up production[^3] across all of the sector codes listed. It will then calculate an index starting in the base year, and insert the index into the specified branches. In some cases, the same index might be applied to different branches. For example, if the supply-use table has a "services" sector but no transport, while LEAP has both a services and a commercial transport sector, the same index could be used to drive both.
@@ -427,8 +430,7 @@ LEAP-sectors:
     branches: [
         {
          branch: Demand\Industry\Iron and Steel,
-         variable: Activity Level,
-         last_historical_year: 2010
+         variable: Activity Level
         }
     ]
    }
@@ -438,8 +440,7 @@ LEAP-sectors:
     branches: [
         {
          branch: Demand\Industry\Other Industry,
-         variable: Activity Level,
-         last_historical_year: 2010
+         variable: Activity Level
         }
     ]
    }

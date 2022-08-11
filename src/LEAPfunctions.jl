@@ -44,14 +44,14 @@ function outputtoleap(file::String, indices::Array, run::Int64)
         col += 1
         append!(branch_data[:branch], [params["GDP-branch"]["branch"]])
         append!(branch_data[:variable], [params["GDP-branch"]["variable"]])
-        append!(branch_data[:last_historical_year], [params["GDP-branch"]["last_historical_year"]])
+        append!(branch_data[:last_historical_year], [params["LEAP-info"]["last_historical_year"]])
         append!(branch_data[:col], [col])
     end
     if haskey(params, "Employment-branch")
         col += 1
         append!(branch_data[:branch], [params["Employment-branch"]["branch"]])
         append!(branch_data[:variable], [params["Employment-branch"]["variable"]])
-        append!(branch_data[:last_historical_year], [params["Employment-branch"]["last_historical_year"]])
+        append!(branch_data[:last_historical_year], [params["LEAP-info"]["last_historical_year"]])
         append!(branch_data[:col], [col])
     end
 
@@ -60,7 +60,7 @@ function outputtoleap(file::String, indices::Array, run::Int64)
 		for branch in leap_sector["branches"]
 			append!(branch_data[:branch], [branch["branch"]])
 			append!(branch_data[:variable], [branch["variable"]])
-			append!(branch_data[:last_historical_year], [branch["last_historical_year"]])
+			append!(branch_data[:last_historical_year], [params["LEAP-info"]["last_historical_year"]])
 			append!(branch_data[:col], [col])
 		end
 	end
@@ -146,7 +146,7 @@ function interp_expression(base_year::Int64, newdata::Array; lasthistoricalyear:
         year = base_year + 1
     end
 
-    # Incorporates IO model data into the rest of the expression
+    # Incorporates Macro results into the rest of the expression
     for i = diff:size(newdata,1)
         if isnan(newdata[i]) == false
             newexpression = string(newexpression, year, ", ", newdata[i], ", ")
