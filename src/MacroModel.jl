@@ -47,17 +47,17 @@ function output_var(params::Dict, values::NumOrArray, filename::AbstractString, 
 end # output_var
 
 """
-    to_quoted_string_vec(svec::Vector)
+    to_quoted_string_vec!(svec::Vector)
 
 Convert a vector of strings by wrapping each string in quotes (for putting into CSV files).
 This function converts `svec` in-place, so should only be run once. Double quotation marks
 are removed to avoid that problem.
 """
-function to_quoted_string_vec(svec::Vector)
+function to_quoted_string_vec!(svec::Vector)
 	for i in eachindex(svec)
 		svec[i] = replace(string('\"', svec[i], '\"'), "\"\"" => "\"")
 	end
-end # to_quoted_string_vec
+end # to_quoted_string_vec!
 
 """
     calc_sraffa_matrix(np::Integer, ns::Integer, io::IOdata)
@@ -537,8 +537,8 @@ function ModelCalculations(params::Dict, leapvals::LEAPfunctions.LEAPresults, ru
 	sector_names = params["included_sector_names"]
 	product_names = params["included_product_names"]
 	# Quote the sector and product names (for putting into CSV files)
-	to_quoted_string_vec(sector_names)
-	to_quoted_string_vec(product_names)
+	to_quoted_string_vec!(sector_names)
+	to_quoted_string_vec!(product_names)
 
 	# Create files for sector variables
 	output_var(params, sector_names, "sector_output", run, "", "w")
@@ -558,7 +558,7 @@ function ModelCalculations(params::Dict, leapvals::LEAPfunctions.LEAPresults, ru
 					   "GDP deflator", "labor productivity gr", "labor force gr", "wage rate gr",
 					   "wage per effective worker gr", "real investment", "central bank rate",
 					   "terms of trade index", "real xr index", "nominal xr index"]
-	to_quoted_string_vec(scalar_var_list)
+	to_quoted_string_vec!(scalar_var_list)
 	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
 
 	#############################################################################
