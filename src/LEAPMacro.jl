@@ -19,6 +19,7 @@ include("./LEAPfunctions.jl")
 include("./MacroModel.jl")
 using .IOlib, .LEAPfunctions, .MacroModel
 
+"Run LEAP-Macro by calling `runleapmacromodel`"
 function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stack::Bool = false, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 	# Ensure needed folders exist
 	if !isdir("inputs")

@@ -30,11 +30,7 @@ mutable struct TaylorFunction
 	i_targ_adj_time::AbstractFloat
 end
 
-"""
-    output_var(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer, rowlabel::Union{Number,String}, mode::AbstractString)
-
-Report output values by writing to specified CSV files.
-"""
+"Report output values by writing to specified CSV files."
 function output_var(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer, rowlabel::Union{Number,String}, mode::AbstractString)
 	if isa(values, Array)
 		usevalue = join(values, ',')
@@ -47,8 +43,6 @@ function output_var(params::Dict, values::NumOrArray, filename::AbstractString, 
 end # output_var
 
 """
-    to_quoted_string_vec!(svec::Vector)
-
 Convert a vector of strings by wrapping each string in quotes (for putting into CSV files).
 This function converts `svec` in-place, so should only be run once. Double quotation marks
 are removed to avoid that problem.
@@ -60,12 +54,10 @@ function to_quoted_string_vec!(svec::Vector)
 end # to_quoted_string_vec!
 
 """
-    calc_sraffa_matrix(np::Integer, ns::Integer, io::IOdata)
+Calculate the Sraffa matrix, which is used to calculate domestic prices
 	# np: number of products
 	# ns: number of sectors
 	# io: IOdata data structure
-
-Calculate the Sraffa matrix, which is used to calculate domestic prices
 """
 function calc_sraffa_matrix(np::Integer, ns::Integer, io::IOdata)
 	sraffa_matrix = Array{Float64}(undef, np, np)
@@ -79,14 +71,12 @@ function calc_sraffa_matrix(np::Integer, ns::Integer, io::IOdata)
 end # calc_sraffa_matrix
 
 """
-    calc_dom_prices(t::Integer, np::Integer, ns::Integer, ω::Array{Float64,1}, prices::PriceData, io::IOdata, exog::ExogParams)
+Evaluate the Sraffa system to get domestic prices
 	# t: time index (for exchange rate)
 	# np: number of products
 	# ns: number of sectors
 	# ω: wage share by sector
 	# io: IOdata data structure
-
-Evaluate the Sraffa system to get domestic prices
 """
 function calc_dom_prices(t::Integer, np::Integer, ns::Integer, ω::Array{Float64,1}, prices::PriceData, io::IOdata, exog::ExogParams)
 	sraffa_matrix = calc_sraffa_matrix(np, ns, io)
@@ -103,15 +93,12 @@ end # calc_dom_prices
 
 
 """
-    intermed_tech_change(α::Array{Float64,2}, k::NumOrVector, θ::NumOrVector = 2.0, c::NumOrVector = nothing, b::NumOrVector = nothing)
-	
+Calculate growth rate of intermediate demand coefficients (that is, io.D entries), or the intercepts (for initialization)	
 	α(np,ns) = matrix of cost shares
 	k = single value or a vector (ns) of rate coefficients
 	θ = single value or vector (ns) of exponents
 	c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
 	b(np,ns) = matrix of weights (if b = nothing it is set to one)
-
-Calculate growth rate of intermediate demand coefficients (that is, io.D entries), or the intercepts (for initialization)
 """
 function intermed_tech_change(α::Array{Float64,2}, k::NumOrVector, θ::NumOrVector = 2.0, c::NumOrVector = nothing, b::NumOrVector = nothing)
 	# Initialize values
@@ -137,11 +124,7 @@ function intermed_tech_change(α::Array{Float64,2}, k::NumOrVector, θ::NumOrVec
 end # intermed_tech_change
 
 
-"""
-    ModelCalculations(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Integer, continue_if_error::Bool)
-
-Implement the Macro model. This is the main function.
-"""
+"Implement the Macro model. This is the main function for LEAP-Macro"
 function ModelCalculations(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Integer, continue_if_error::Bool)
 
     #------------status
@@ -928,12 +911,7 @@ function ModelCalculations(params::Dict, leapvals::LEAPfunctions.LEAPresults, ru
     return indices
 end # ModelCalculations
 
-"""
-    resultcomparison(params::Dict, run::Integer)
-
-Compare the GDP and value added indices generated from different runs and calculate the maximum difference.
-Indices are specified in the YAML configuration file.
-"""
+"Compare the GDP, employment, and value added indices generated from different runs and calculate the maximum difference."
 function resultcomparison(params::Dict, run::Integer)
     # Obtains data from indices files for current run and previous run
     file1 = joinpath(params["results_path"], string("indices_",run,".csv"))
@@ -956,11 +934,7 @@ function resultcomparison(params::Dict, run::Integer)
     return max_diff
 end # resultcomparison
 
-"""
-    runleapmacromodel(param_file::AbstractString, logile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
-
-Iteratively run the Macro model and LEAP until convergence.
-"""
+"Iteratively run the Macro model and LEAP until convergence. This is the primary entry point for LEAP-Macro."
 function runleapmacromodel(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 
     ## get base_year and final_year, and force fresh start with global_params

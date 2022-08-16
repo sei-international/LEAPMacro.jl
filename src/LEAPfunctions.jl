@@ -11,33 +11,21 @@ mutable struct LEAPresults
     I_en::Array{Any,1} # Investment in the energy sector x year
 end
 
-"""
-    LEAPresults_init(params::Dict)
-
-Return a LEAPresults struct initialized to zero
-"""
+"Return a LEAPresults struct initialized to zero"
 function LEAPresults_init(params::Dict)
     return LEAPresults(
         zeros(1 + (params["years"]["end"] - params["years"]["start"])) # I_en
     )
 end # LEAPresults_init
 
-"""
-    visible(state::Bool)
-
-Hide or show LEAP by setting visibility.
-"""
+"Hide or show LEAP by setting visibility."
 function visible(state::Bool)
 	LEAP = connecttoleap()
 	LEAP.Visible = state
 	disconnectfromleap(LEAP)
 end # visible
 
-"""
-    outputtoleap(params::Dict, indices::Array)
-
-First obtain LEAP branch info from the YAML config file and then send Macro model results to LEAP.
-"""
+"First obtain LEAP branch info from `params` and then send Macro model results to LEAP."
 function outputtoleap(params::Dict, indices::Array)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
@@ -103,8 +91,6 @@ function outputtoleap(params::Dict, indices::Array)
 end # outputtoleap
 
 """
-    connecttoleap()
-
 Connect to the currently running instance of LEAP, if one exists; otherwise starts an instance of LEAP.
 
 Return a `PyObject` corresponding to the instance.
@@ -130,20 +116,12 @@ function connecttoleap()
 	end
 end  # connecttoleap
 
-"""
-    disconnectfromleap(LEAPPyObj)
-
-Wrapper for PyCall's pydecref(obj), after saving
-"""
+"Wrapper for PyCall's `pydecref(obj)``, after saving"
 function disconnectfromleap(LEAPPyObj)
 	pydecref(LEAPPyObj)
 end # disconnectfromleap
 
-"""
-    interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
-
-Create LEAP Interp expression from an array of values.
-"""
+"Create LEAP Interp expression from an array of values."
 function interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
     # Creates start of expression. Includes historical data if available
     if lasthistoricalyear > 0
@@ -171,8 +149,6 @@ function interp_expression(base_year::Integer, newdata::Array; lasthistoricalyea
 end # interp_expression
 
 """
-    setbranchvar_expression(leapapplication::PyObject, branch::AbstractString, variable::AbstractString, newexpression::AbstractString; region::AbstractString = "", scenario::AbstractString = "")
-
 Set a LEAP branch-variable expression.
 
 The region and scenario arguments can be omitted by leaving them as empty strings.
@@ -195,11 +171,7 @@ function setbranchvar_expression(leapapplication::PyObject, branch::AbstractStri
     leapapplication.Refresh()
 end  # setbranchvarexpression
 
-"""
-    calculateleap(scen_name::AbstractString)
-
-Calculate the LEAP model, returning results for the specified scenario.
-"""
+"Calculate the LEAP model, returning results for the specified scenario."
 function calculateleap(scen_name::AbstractString)
     # connects program to LEAP
     LEAP = connecttoleap()
@@ -212,11 +184,7 @@ function calculateleap(scen_name::AbstractString)
     end
 end # calculateleap
 
-"""
-    energyinvestment(params::Dict, run::Integer)
-
-Obtain energy investment data from the LEAP model.
-"""
+"Obtain energy investment data from the LEAP model."
 function energyinvestment(params::Dict, run::Integer)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
