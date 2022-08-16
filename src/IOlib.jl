@@ -30,13 +30,13 @@ mutable struct PriceData
     pb::Array{Float64,1}
     pd::Array{Float64,1}
     pw::Array{Float64,1}
-    Pg::Float64
-    Pw::Float64
-    Px::Float64
-    Pm::Float64
-    Ptrade::Float64
-    XR::Float64
-    RER::Float64
+    Pg::AbstractFloat
+    Pw::AbstractFloat
+    Px::AbstractFloat
+    Pm::AbstractFloat
+    Ptrade::AbstractFloat
+    XR::AbstractFloat
+    RER::AbstractFloat
 end
 
 "User-specified parameters"
@@ -59,11 +59,11 @@ mutable struct ExogParams
 end
 
 """
-    write_matrix_to_csv(filename, array, colnames, rownames)
+    write_matrix_to_csv(filename::AbstractString, array::Array, rownames::Vector, colnames::Vector)
 
 Write a matrix to a CSV file.
 """
-function write_matrix_to_csv(filename, array, rownames, colnames)
+function write_matrix_to_csv(filename::AbstractString, array::Array, rownames::Vector, colnames::Vector)
 	open(filename, "w") do io
         # Write header
 		write(io, string("", ',', join(colnames, ','), "\r\n"))
@@ -72,14 +72,14 @@ function write_matrix_to_csv(filename, array, rownames, colnames)
             write(io, string(rownames[i], ',', join(array[i,:], ','), "\r\n"))
         end
 	end
-end
+end # write_matrix_to_csv
 
 """
-    write_vector_to_csv(filename, vector, varname, rownames)
+    write_vector_to_csv(filename::AbstractString, vector::Vector, varname::AbstractString, rownames::Vector)
 
 Write a vector to a CSV file.
 """
-function write_vector_to_csv(filename, vector, varname, rownames)
+function write_vector_to_csv(filename::AbstractString, vector::Vector, varname::AbstractString, rownames::Vector)
 	open(filename, "w") do io
         # Write header
 		write(io, string("", ',', varname, "\r\n"))
@@ -87,25 +87,25 @@ function write_vector_to_csv(filename, vector, varname, rownames)
             write(io, string(rownames[i], ',', vector[i], "\r\n"))
         end
 	end
-end
+end # write_vector_to_csv
 
 """
-    string_to_float(str)
+    string_to_float(str::Union{Missing,AbstractString})
 
 Convert strings in Dataframe to floats and fill in missing values with 0.
 """
-function string_to_float(str)
+function string_to_float(str::Union{Missing,AbstractString})
     try return(parse(Float64, str)) catch
         return(0.0) # Missing values set to zero
     end
-end
+end # string_to_float
 
 """
-    char_index_to_int(str)
+    char_index_to_int(str::AbstractString)
 
 Convert an index in the form of characters as used in Excel (e.g., "AC") into an integer index
 """
-function char_index_to_int(str)
+function char_index_to_int(str::AbstractString)
 	str_up = uppercase(str)
 	mult = 26^length(str_up) # 26 is number of characters in the Roman alphabet
 	ndx = 0
@@ -114,14 +114,14 @@ function char_index_to_int(str)
 		ndx += mult * (Int(c) - Int('A') + 1)
 	end
 	return(Int(ndx))
-end
+end # char_index_to_int
 
 """
-    excel_ref_to_rowcol(str)
+    excel_ref_to_rowcol(str::AbstractString)
 
 Convert a cell reference in Excel form (e.g., "AB3") to [row, col] (eg., [3,28])
 """
-function excel_ref_to_rowcol(str)
+function excel_ref_to_rowcol(str::AbstractString)
 	m = match(r"([A-Za-z]+)([0-9]+)", strip(str)) # Be tolerant of leading and trailing spaces
 	if m === nothing
 		error("Cell reference '$str' is not in the correct format (e.g., 'AB3')")
@@ -130,24 +130,24 @@ function excel_ref_to_rowcol(str)
 		c = m.captures
 		return[parse(Int64,c[2]),char_index_to_int(c[1])]
 	end
-end
+end # excel_ref_to_rowcol
 
 """
-    excel_cell_to_float(df, str)
+    excel_cell_to_float(df::DataFrame, str::AbstractString)
 
 Find the value of a cell in dataframe df referenced in Excel form (e.g., "AB3") and convert to float
 """
-function excel_cell_to_float(df, str)
+function excel_cell_to_float(df::DataFrame, str::AbstractString)
 	rowcol = excel_ref_to_rowcol(str)
 	return string_to_float(df[rowcol[1],rowcol[2]])
-end
+end # excel_cell_to_float
 
 """
-    excel_range_to_rowcol_pair(str)
+    excel_range_to_rowcol_pair(str::AbstractString)
 
 Convert a cell range in Excel form (e.g., "AB3:BG10") to [[row, col],[row,col]]
 """
-function excel_range_to_rowcol_pair(str)
+function excel_range_to_rowcol_pair(str::AbstractString)
 	range_ends = split(str,":")
 	if length(range_ends) != 2
 		error("Cell range '$str' is not in the correct format (e.g., 'AB3:BG10')")
@@ -155,38 +155,38 @@ function excel_range_to_rowcol_pair(str)
 	else
 		return excel_ref_to_rowcol.(range_ends)
 	end
-end
+end # excel_range_to_rowcol_pair
 
 """
-    df_to_mat(df)
+    df_to_mat(df::DataFrame)
 
 First convert strings in a Dataframe to floats and then convert the Dataframe to a Matrix.
 """
-function df_to_mat(df)
+function df_to_mat(df::DataFrame)
     for x = axes(df,2)
         df[!,x] = map(string_to_float, df[!,x]) # converts string to float
     end
     mat = Matrix(df) # convert dataframe to matrix
     return mat
-end
+end # df_to_mat
 
 """
-    excel_range_to_mat(df, str)
+    excel_range_to_mat(df::DataFrame, str::AbstractString)
 
 Extract a range in Excel format from a dataframe and return a numeric matrix
 """
-function excel_range_to_mat(df, str)
+function excel_range_to_mat(df::DataFrame, str::AbstractString)
 	rng = excel_range_to_rowcol_pair(str)
 	return df_to_mat(df[rng[1][1]:rng[2][1],rng[1][2]:rng[2][2]])
-end
+end # excel_range_to_mat
 
 """
-    parse_param_file(YAML_file::String; include_energy_sectors::Bool = false)
+    parse_param_file(YAML_file::AbstractString; include_energy_sectors::Bool = false)
 
 Read in YAML input file and convert ranges if necessary.
 Force: reset global_params
 """
-function parse_param_file(YAML_file::String; include_energy_sectors::Bool = false)
+function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Bool = false)
     global_params = YAML.load_file(YAML_file)
 
     global_params["include-energy-sectors"] = include_energy_sectors
@@ -306,14 +306,14 @@ function parse_param_file(YAML_file::String; include_energy_sectors::Bool = fals
     end
 
     return global_params
-end
+end # parse_param_file
 
 """
-    get_var_params(params)
+    get_var_params(params::Dict)
 
 Pull in user-specified parameters from different CSV input files with filenames specified in the YAML configuration file.
 """
-function get_var_params(params)
+function get_var_params(params::Dict)
     # Return an ExogParams struct
     retval = ExogParams(
                     Array{Float64}(undef, 0), # πw_base
@@ -586,10 +586,10 @@ function get_var_params(params)
 
     return retval
 
-end
+end # get_var_params
 
 """
-    energy_nonenergy_link_measure(params)
+    energy_nonenergy_link_measure(params::Dict)
 
 Calculate a measure of how important the demand for non-energy goods from the energy sector is.
 
@@ -599,7 +599,7 @@ technical coefficients and the other for the matrix with A_{NE} sub-block exclud
 The sum of the elements of a Leontief inverse can be interpreted as the change in total output
 from an increase in final demand that is the same across all sectors.
 """
-function energy_nonenergy_link_measure(params)
+function energy_nonenergy_link_measure(params::Dict)
 	full_sector_ndxs = sort(vcat(params["sector-indexes"],params["energy-sector-indexes"]))
 	full_product_ndxs = sort(vcat(params["product-indexes"],params["energy-product-indexes"]))
 	ns = length(full_sector_ndxs)
@@ -648,14 +648,14 @@ function energy_nonenergy_link_measure(params)
 	#--------------------------------
 	return 1.0 - sum(L_reduced)/sum(L)
 
-end
+end # energy_nonenergy_link_measure
 
 """
-    supplyusedata(params)
+    supplyusedata(params::Dict)
 
 Pull in supply-use data from CSV input files.
 """
-function supplyusedata(params)
+function supplyusedata(params::Dict)
     retval = IOdata(Array{Float64}(undef, 0, 0), # D
                     Array{Float64}(undef, 0, 0), # S
                     Array{Float64}(undef, 0, 0), # Vnorm
@@ -820,15 +820,15 @@ function supplyusedata(params)
 
     return retval, np, ns
 
-end
+end # supplyusedata
 
 """
-    prices_init(np::Int64, io::IOdata)
+    prices_init(np::Integer, io::IOdata)
 
 Initialize price structure.
 """
 # All domestic prices are initialized to one
-function prices_init(np::Int64, io::IOdata)
+function prices_init(np::Integer, io::IOdata)
     return PriceData(ones(np), #pb
                      ones(np), #pd
                      ones(np), #pw in domestic currency (converted using xr in ModelCalculations)
@@ -839,6 +839,6 @@ function prices_init(np::Int64, io::IOdata)
                      1, # Ptrade
                      1, # XR
                      1) # RER
-end
+end # prices_init
 
-end
+end # IOlib

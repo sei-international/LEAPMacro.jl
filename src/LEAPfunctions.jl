@@ -12,15 +12,15 @@ mutable struct LEAPresults
 end
 
 """
-    init_LEAPresults()
+    LEAPresults_init(params::Dict)
 
 Return a LEAPresults struct initialized to zero
 """
-function LEAPresults_init(params)
+function LEAPresults_init(params::Dict)
     return LEAPresults(
         zeros(1 + (params["years"]["end"] - params["years"]["start"])) # I_en
     )
-end
+end # LEAPresults_init
 
 """
     visible(state::Bool)
@@ -31,14 +31,14 @@ function visible(state::Bool)
 	LEAP = connecttoleap()
 	LEAP.Visible = state
 	disconnectfromleap(LEAP)
-end
+end # visible
 
 """
-    outputtoleap(params, indices::Array)
+    outputtoleap(params::Dict, indices::Array)
 
 First obtain LEAP branch info from the YAML config file and then send Macro model results to LEAP.
 """
-function outputtoleap(params, indices::Array, run::Int64)
+function outputtoleap(params::Dict, indices::Array)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
@@ -100,7 +100,7 @@ function outputtoleap(params, indices::Array, run::Int64)
     finally
 	    disconnectfromleap(LEAP)
     end
-end
+end # outputtoleap
 
 """
     connecttoleap()
@@ -137,14 +137,14 @@ Wrapper for PyCall's pydecref(obj), after saving
 """
 function disconnectfromleap(LEAPPyObj)
 	pydecref(LEAPPyObj)
-end
+end # disconnectfromleap
 
 """
-    interp_expression(base_year::Int64, newdata::Array; lasthistoricalyear::Int64=0)
+    interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
 
 Create LEAP Interp expression from an array of values.
 """
-function interp_expression(base_year::Int64, newdata::Array; lasthistoricalyear::Int64=0)
+function interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
     # Creates start of expression. Includes historical data if available
     if lasthistoricalyear > 0
         newexpression = string("If(year <= ", lasthistoricalyear, ", ScenarioValue(Current Accounts), Value(", base_year,") * Interp(")
@@ -168,17 +168,17 @@ function interp_expression(base_year::Int64, newdata::Array; lasthistoricalyear:
         year = year + 1
     end
     return newexpression
-end
+end # interp_expression
 
 """
-    setbranchvar_expression(leapapplication::PyObject, branch::String, variable::String, newexpression::String; region::String = "", scenario::String = "")
+    setbranchvar_expression(leapapplication::PyObject, branch::AbstractString, variable::AbstractString, newexpression::AbstractString; region::AbstractString = "", scenario::AbstractString = "")
 
 Set a LEAP branch-variable expression.
 
 The region and scenario arguments can be omitted by leaving them as empty strings.
 Note that performance is best if neither region nor scenario is specified.
 """
-function setbranchvar_expression(leapapplication::PyObject, branch::String, variable::String, newexpression::String; region::String = "", scenario::String = "")
+function setbranchvar_expression(leapapplication::PyObject, branch::AbstractString, variable::AbstractString, newexpression::AbstractString; region::AbstractString = "", scenario::AbstractString = "")
     # Set ActiveRegion and ActiveScenario as Julia doesn't allow a function call (ExpressionRS) to be set to a value
     if region != ""
         leapapplication.ActiveRegion = region
@@ -196,11 +196,11 @@ function setbranchvar_expression(leapapplication::PyObject, branch::String, vari
 end  # setbranchvarexpression
 
 """
-    calculateleap(scen_name::String)
+    calculateleap(scen_name::AbstractString)
 
 Calculate the LEAP model, returning results for the specified scenario.
 """
-function calculateleap(scen_name::String)
+function calculateleap(scen_name::AbstractString)
     # connects program to LEAP
     LEAP = connecttoleap()
     try
@@ -210,14 +210,14 @@ function calculateleap(scen_name::String)
     finally
 	    disconnectfromleap(LEAP)
     end
-end
+end # calculateleap
 
 """
-    energyinvestment(params, run::Int64)
+    energyinvestment(params::Dict, run::Integer)
 
 Obtain energy investment data from the LEAP model.
 """
-function energyinvestment(params, run::Int64)
+function energyinvestment(params::Dict, run::Integer)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
@@ -248,6 +248,6 @@ function energyinvestment(params, run::Int64)
     writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, ',')
 
     return leapvals
-end
+end # energyinvestment
 
-end
+end # LEAPfunctions
