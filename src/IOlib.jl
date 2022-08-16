@@ -1,11 +1,8 @@
 module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
-export supplyusedata, inputoutputcalc, prices_init, parse_input_file, write_matrix_to_csv, write_vector_to_csv,
+export supplyusedata, inputoutputcalc, prices_init, parse_param_file, write_matrix_to_csv, write_vector_to_csv,
        IOdata, PriceData, ExogParams, ϵ
-
-"Global variable to store the result of parsing the configuration file"
-global_params = nothing
 
 "Small number for avoiding divide-by-zero problems"
 const ϵ = 1.0e-11
@@ -184,18 +181,12 @@ function excel_range_to_mat(df, str)
 end
 
 """
-    parse_input_file(YAML_file::String; force::Bool = false, include_energy_sectors::Bool = false)
+    parse_param_file(YAML_file::String; include_energy_sectors::Bool = false)
 
 Read in YAML input file and convert ranges if necessary.
 Force: reset global_params
 """
-function parse_input_file(YAML_file::String; force::Bool = false, include_energy_sectors::Bool = false)
-	global global_params
-
-	if !force & !isnothing(global_params)
-		return global_params
-	end
-
+function parse_param_file(YAML_file::String; include_energy_sectors::Bool = false)
     global_params = YAML.load_file(YAML_file)
 
     global_params["include-energy-sectors"] = include_energy_sectors
@@ -318,11 +309,11 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
 end
 
 """
-    get_var_params(param_file::String)
+    get_var_params(params)
 
 Pull in user-specified parameters from different CSV input files with filenames specified in the YAML configuration file.
 """
-function get_var_params(param_file::String)
+function get_var_params(params)
     # Return an ExogParams struct
     retval = ExogParams(
                     Array{Float64}(undef, 0), # πw_base
@@ -341,7 +332,6 @@ function get_var_params(param_file::String)
                     Array{Float64}(undef, 0), # export_price_elast
                     Array{Float64}(undef, 0)) # import_price_elast          
 
-    params = parse_input_file(param_file)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
     nyears = final_year - base_year + 1
@@ -599,7 +589,7 @@ function get_var_params(param_file::String)
 end
 
 """
-    energy_nonenergy_link_measure(param_file::String)
+    energy_nonenergy_link_measure(params)
 
 Calculate a measure of how important the demand for non-energy goods from the energy sector is.
 
@@ -609,9 +599,7 @@ technical coefficients and the other for the matrix with A_{NE} sub-block exclud
 The sum of the elements of a Leontief inverse can be interpreted as the change in total output
 from an increase in final demand that is the same across all sectors.
 """
-function energy_nonenergy_link_measure(param_file::String)
-	params = parse_input_file(param_file)
-
+function energy_nonenergy_link_measure(params)
 	full_sector_ndxs = sort(vcat(params["sector-indexes"],params["energy-sector-indexes"]))
 	full_product_ndxs = sort(vcat(params["product-indexes"],params["energy-product-indexes"]))
 	ns = length(full_sector_ndxs)
@@ -663,11 +651,11 @@ function energy_nonenergy_link_measure(param_file::String)
 end
 
 """
-    supplyusedata(param_file::String)
+    supplyusedata(params)
 
 Pull in supply-use data from CSV input files.
 """
-function supplyusedata(param_file::String)
+function supplyusedata(params)
     retval = IOdata(Array{Float64}(undef, 0, 0), # D
                     Array{Float64}(undef, 0, 0), # S
                     Array{Float64}(undef, 0, 0), # Vnorm
@@ -682,9 +670,7 @@ function supplyusedata(param_file::String)
                     Array{Float64}(undef, 0), # m_frac
                     Array{Float64}(undef, 0), # energy_share
                     Array{Float64}(undef, 0)) # μ
-    # Reads in key parameters from the YAML config file
-    params = parse_input_file(param_file)
-
+    
 	sector_ndxs = params["sector-indexes"]
 	product_ndxs = params["product-indexes"]
 
@@ -825,7 +811,7 @@ function supplyusedata(param_file::String)
         write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients.csv"), retval.D, params["included_product_codes"], params["included_sector_codes"])
 		# Write out nonenergy-energy link metric
         open(joinpath(params["diagnostics_path"],"nonenergy_energy_link_measure.txt"), "w") do fhndl
-			R = 100 .* energy_nonenergy_link_measure(param_file)
+			R = 100 .* energy_nonenergy_link_measure(params)
 			A_NE_metric_string = @sprintf("This value should be small: %.2f%%.", R)
 			println(fhndl, "Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:")
 		    println(fhndl, A_NE_metric_string)

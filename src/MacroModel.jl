@@ -134,17 +134,15 @@ end
 
 
 """
-    ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_error::Bool)
+    ModelCalculations(params, leapvals::LEAPfunctions.LEAPresults, run::Int64, continue_if_error::Bool)
 
 Implement the Macro model. This is the main function.
 """
-function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_error::Bool)
+function ModelCalculations(params, leapvals::LEAPfunctions.LEAPresults, run::Int64, continue_if_error::Bool)
 
     #------------status
     @info "Loading data..."
     #------------status
-
-    params = IOlib.parse_input_file(file)
 
 	# Clean up folders if requested
 	if run == 0
@@ -176,9 +174,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 
 	end
 
-	io, np, ns = IOlib.supplyusedata(file)
+	io, np, ns = IOlib.supplyusedata(params)
 	prices = IOlib.prices_init(np, io)
-	exog = IOlib.get_var_params(file)
+	exog = IOlib.get_var_params(params)
 
 	# For exogenous potential output and world prices, values must be specified for all years, so get indices for first year
 	pot_output_ndxs = findall(x -> !ismissing(x), exog.exog_pot_output[1,:])
@@ -280,7 +278,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	# Total investment
     I_total = sum(io.I)
 	# Track non-energy investment separate from energy investment (which is supplied from LEAP)
-    I_ne = I_total - I_en[1]
+    I_ne = I_total - leapvals.I_en[1]
     # Share of supply of investment goods
     θ = io.I / sum(io.I)
 	# Investment function parameter -- make a vector
@@ -693,7 +691,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
         I_ne_disag = z .* (γ + exog.δ) .* capital_output_ratio
         I_ne = sum(I_ne_disag)
 		# Combine with energy investment and any additional exogenous investment
-        I_total = I_ne + I_en[t] + exog.I_addl[t]
+        I_total = I_ne + leapvals.I_en[t] + exog.I_addl[t]
 		# Update autonomous investment term
         γ_0 = γ_0 + growth_adj * (γ - γ_0)
 
@@ -955,20 +953,17 @@ function resultcomparison(params, run::Int64)
 end
 
 """
-    runleapmacromodel(file::String, logile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
+    runleapmacromodel(param_file::String, logile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 
 Iteratively run the Macro model and LEAP until convergence.
 """
-function runleapmacromodel(file::String, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
+function runleapmacromodel(param_file::String, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 
     ## get base_year and final_year, and force fresh start with global_params
-    params = IOlib.parse_input_file(file, force = true, include_energy_sectors = include_energy_sectors)
-    base_year = params["years"]["start"]
-    final_year = params["years"]["end"]
-    ntime = 1 + (final_year - base_year)
+    params = IOlib.parse_param_file(param_file, include_energy_sectors = include_energy_sectors)
 
     # set model run parameters and initial values
-    I_en = zeros(ntime, 1)
+    leapvals = LEAPfunctions.LEAPresults_init(params)
     run_leap = params["model"]["run_leap"]
     if run_leap
         max_runs = params["model"]["max_runs"]
@@ -988,7 +983,7 @@ function runleapmacromodel(file::String, logfile::IOStream, include_energy_secto
 		print("Macro model run ($run)...")
         @info "Macro model run ($run)..."
         #------------status
-        indices = ModelCalculations(file, I_en, run, continue_if_error)
+        indices = ModelCalculations(params, leapvals, run, continue_if_error)
 
         ## Compare run results
         if run >= 1
@@ -1016,7 +1011,7 @@ function runleapmacromodel(file::String, logfile::IOStream, include_energy_secto
             #------------status
             @info "Sending Macro output to LEAP..."
             #------------status
-            LEAPfunctions.outputtoleap(file, indices, run)
+            LEAPfunctions.outputtoleap(params, indices, run)
             ## Run LEAP model
 			try
 				#------------status
@@ -1030,7 +1025,7 @@ function runleapmacromodel(file::String, logfile::IOStream, include_energy_secto
 				@info "Obtaining LEAP results..."
 				flush(logfile)
 				#------------status
-				I_en = LEAPfunctions.energyinvestment(file, run)
+				leapvals = LEAPfunctions.energyinvestment(params, run)
 			finally
 				if params["model"]["hide_leap"]
 					#------------status

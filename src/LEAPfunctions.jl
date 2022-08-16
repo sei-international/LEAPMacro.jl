@@ -1,10 +1,26 @@
 module LEAPfunctions
 using DelimitedFiles, PyCall, DataFrames, CSV
 
-export visible, outputtoleap, calculateleap, energyinvestment
+export visible, outputtoleap, calculateleap, energyinvestment, LEAPresults
 
 include("./IOlib.jl")
 using .IOlib
+
+"Values passed from LEAP to Macro"
+mutable struct LEAPresults
+    I_en::Array{Any,1} # Investment in the energy sector x year
+end
+
+"""
+    init_LEAPresults()
+
+Return a LEAPresults struct initialized to zero
+"""
+function LEAPresults_init(params)
+    return LEAPresults(
+        zeros(1 + (params["years"]["end"] - params["years"]["start"])) # I_en
+    )
+end
 
 """
     visible(state::Bool)
@@ -18,17 +34,11 @@ function visible(state::Bool)
 end
 
 """
-    outputtoleap(file::String, indices::Array)
+    outputtoleap(params, indices::Array)
 
 First obtain LEAP branch info from the YAML config file and then send Macro model results to LEAP.
 """
-function outputtoleap(file::String, indices::Array, run::Int64)
-    # LEAP parameters from config file
-    if run == 0
-        params = IOlib.parse_input_file(file, force = true)
-    else
-        params = IOlib.parse_input_file(file)
-    end
+function outputtoleap(params, indices::Array, run::Int64)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
@@ -203,17 +213,11 @@ function calculateleap(scen_name::String)
 end
 
 """
-    energyinvestment(file::String, run::Int64)
+    energyinvestment(params, run::Int64)
 
 Obtain energy investment data from the LEAP model.
 """
-function energyinvestment(file::String, run::Int64)
-    # LEAP parameters from config file
-    if run == 0
-        params = IOlib.parse_input_file(file, force = true)
-    else
-        params = IOlib.parse_input_file(file)
-    end
+function energyinvestment(params, run::Int64)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
@@ -224,33 +228,26 @@ function energyinvestment(file::String, run::Int64)
     LEAP.ActiveView = "Results"
     LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
 
+    leapvals = LEAPresults_init(params) # Initialize to zero
     nrows = (final_year - base_year) + 1
-    I_en = Array{Float64}(undef, nrows)
     I_en_temp = Array{Float64}(undef, nrows)
 
-    n_energy = 0
     try
         for b in LEAP.Branches
             if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
                 for y = base_year:final_year
                     I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
                 end
-                I_en = hcat(I_en, I_en_temp)
-                n_energy += 1
+                leapvals.I_en += I_en_temp
             end
         end
     finally
     	disconnectfromleap(LEAP)
     end
 
-    if n_energy > 0
-        I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
-    else
-        I_en .= 0.0
-    end
-    writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), I_en, ',')
+    writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, ',')
 
-    return I_en
+    return leapvals
 end
 
 end
