@@ -1,7 +1,7 @@
 module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
-export process_sut, inputoutputcalc, initialize_prices, parse_param_file, write_matrix_to_csv, write_vector_to_csv,
+export process_sut, initialize_prices, parse_param_file, write_matrix_to_csv, write_vector_to_csv,
        IOdata, PriceData, ExogParams, ϵ
 
 "Small number for avoiding divide-by-zero problems"
@@ -49,9 +49,9 @@ mutable struct ExogParams
 	xr::Array{Float64,1} # Nominal exchange rate x year
     δ::Array{Float64,1} # ns
     I_addl::Array{Any,1} # Additional investment x year
-    exog_pot_output::Array{Any,2} # Exogenously specified potential output (converted to index)
-    exog_max_util::Array{Any,2} # Exogenous max capacity utilization (forced to lie between 0 and 1)
-    exog_price::Array{Any,2} # Exogenously specified real prices (converted to index)
+    exog_pot_output::Array{Any,2} # Exogenously specified potential output (converted to index) ns x year
+    exog_max_util::Array{Any,2} # Exogenous max capacity utilization (forced to lie between 0 and 1) ns x year
+    exog_price::Array{Any,2} # Exogenously specified real prices (converted to index) np x year
     export_elast_demand::Array{Any,1} # np x year
     wage_elast_demand::Array{Any,1} # np x year
     export_price_elast::Array{Any,1} # np
@@ -460,7 +460,7 @@ function get_var_params(params::Dict)
     retval.I_addl = zeros(length(sim_years))
     retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
     retval.exog_max_util = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
-    retval.exog_price = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
+    retval.exog_price = Array{Union{Missing, Float64}}(missing, length(sim_years), length(prod_ndxs))
 
     if !isnothing(exog_investment_df)
         for row in eachrow(exog_investment_df)
