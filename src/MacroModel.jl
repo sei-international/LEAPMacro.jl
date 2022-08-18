@@ -986,7 +986,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 				#------------status
 				@info "Hiding LEAP to improve performance..."
 				#------------status
-				LEAPfunctions.visible(false)
+				LEAPfunctions.hide_leap(true)
 			end
 
             #------------status
@@ -1012,7 +1012,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 					#------------status
 					@info "Restoring LEAP..."
 					#------------status
-					LEAPfunctions.visible(true)
+					LEAPfunctions.hide_leap(false)
 				end
 				flush(logfile)
 			end

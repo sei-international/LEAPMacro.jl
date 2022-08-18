@@ -1,7 +1,7 @@
 module LEAPfunctions
 using DelimitedFiles, PyCall, DataFrames, CSV
 
-export visible, outputtoleap, calculateleap, energyinvestment, LEAPresults
+export hide_leap, outputtoleap, calculateleap, energyinvestment, LEAPresults
 
 "Values passed from LEAP to Macro"
 mutable struct LEAPresults
@@ -16,10 +16,11 @@ function initialize_leapresults(params::Dict)
 end # initialize_leapresults
 
 "Hide or show LEAP by setting visibility."
-function visible(state::Bool)
+function hide_leap(state::Bool)
 	LEAP = connecttoleap()
+	LEAP.Visible = !state
 	disconnectfromleap(LEAP)
-end # visible
+end # hide_leap
 
 "First obtain LEAP branch info from `params` and then send Macro model results to LEAP."
 function outputtoleap(params::Dict, indices::Array)
