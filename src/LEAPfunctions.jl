@@ -1,7 +1,7 @@
 module LEAPfunctions
 using DelimitedFiles, PyCall, DataFrames, CSV
 
-export hide_leap, send_results_to_leap, calculateleap, get_results_from_leap, LEAPresults
+export hide_leap, send_results_to_leap, calculate_leap, get_results_from_leap, LEAPresults
 
 "Values passed from LEAP to Macro"
 mutable struct LEAPresults
@@ -17,9 +17,9 @@ end # initialize_leapresults
 
 "Hide or show LEAP by setting visibility."
 function hide_leap(state::Bool)
-	LEAP = connecttoleap()
+	LEAP = connect_to_leap()
 	LEAP.Visible = !state
-	disconnectfromleap(LEAP)
+	disconnect_from_leap(LEAP)
 end # hide_leap
 
 "First obtain LEAP branch info from `params` and then send Macro model results to LEAP."
@@ -28,7 +28,7 @@ function send_results_to_leap(params::Dict, indices::Array)
     final_year = params["years"]["end"]
 
     # connects program to LEAP
-    LEAP = connecttoleap()
+    LEAP = connect_to_leap()
 
     # Set ActiveView
     LEAP.ActiveView = "Analysis"
@@ -83,7 +83,7 @@ function send_results_to_leap(params::Dict, indices::Array)
         end
         LEAP.SaveArea()
     finally
-	    disconnectfromleap(LEAP)
+	    disconnect_from_leap(LEAP)
     end
 end # send_results_to_leap
 
@@ -93,7 +93,7 @@ Connect to the currently running instance of LEAP, if one exists; otherwise star
 Return a `PyObject` corresponding to the instance.
 If LEAP cannot be started, return `missing`
 """
-function connecttoleap()
+function connect_to_leap()
 	try
 		LEAPPyObj = pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
         max_loops = 5
@@ -111,12 +111,12 @@ function connecttoleap()
         error("Cannot connect to LEAP. Is it installed?")
 		return missing
 	end
-end  # connecttoleap
+end  # connect_to_leap
 
 "Wrapper for PyCall's `pydecref(obj)``, after saving"
-function disconnectfromleap(LEAPPyObj)
+function disconnect_from_leap(LEAPPyObj)
 	pydecref(LEAPPyObj)
-end # disconnectfromleap
+end # disconnect_from_leap
 
 "Create LEAP Interp expression from an array of values."
 function interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
@@ -169,17 +169,17 @@ function setbranchvar_expression(leapapplication::PyObject, branch::AbstractStri
 end  # setbranchvarexpression
 
 "Calculate the LEAP model, returning results for the specified scenario."
-function calculateleap(scen_name::AbstractString)
+function calculate_leap(scen_name::AbstractString)
     # connects program to LEAP
-    LEAP = connecttoleap()
+    LEAP = connect_to_leap()
     try
         LEAP.Scenario(scen_name).ResultsShown = true
         LEAP.Calculate()
         LEAP.SaveArea()
     finally
-	    disconnectfromleap(LEAP)
+	    disconnect_from_leap(LEAP)
     end
-end # calculateleap
+end # calculate_leap
 
 "Obtain energy investment data from the LEAP model."
 function get_results_from_leap(params::Dict, run::Integer)
@@ -187,7 +187,7 @@ function get_results_from_leap(params::Dict, run::Integer)
     final_year = params["years"]["end"]
 
     # connects program to LEAP
-    LEAP = connecttoleap()
+    LEAP = connect_to_leap()
 
     # Set ActiveView and ActiveScenario
     LEAP.ActiveView = "Results"
@@ -207,7 +207,7 @@ function get_results_from_leap(params::Dict, run::Integer)
             end
         end
     finally
-    	disconnectfromleap(LEAP)
+    	disconnect_from_leap(LEAP)
     end
 
     writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, ',')

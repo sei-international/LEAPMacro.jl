@@ -949,7 +949,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
     if run_leap
         max_runs = params["model"]["max_runs"]
         ## checks that user has LEAP installed
-        if ismissing(LEAPfunctions.connecttoleap())
+        if ismissing(LEAPfunctions.connect_to_leap())
             @error "Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file."
             return
         end
@@ -999,7 +999,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 				@info "Running LEAP model..."
 				flush(logfile)
 				#------------status
-				LEAPfunctions.calculateleap(params["LEAP-info"]["result_scenario"])
+				LEAPfunctions.calculate_leap(params["LEAP-info"]["result_scenario"])
 
 				## Obtain energy investment data from LEAP
 				#------------status
