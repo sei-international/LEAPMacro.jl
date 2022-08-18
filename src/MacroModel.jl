@@ -37,6 +37,12 @@ mutable struct TaylorFunction
 	i_targ_adj_time::AbstractFloat
 end
 
+"Parameters for wage adjustment"
+mutable struct WageAdjustment
+	h::AbstractFloat
+	k::AbstractFloat
+end
+
 "Report output values by writing to specified CSV files."
 function write_values_to_csv(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer, rowlabel::Union{Number,String}, mode::AbstractString)
 	if isa(values, Array)
@@ -247,9 +253,10 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		tf.π_init = tf.π_targ
 	end
 	# Wage rate function
-	infl_passthrough = params["wage-fcn"]["infl_passthrough"]
-	lab_constr_coeff = params["wage-fcn"]["lab_constr_coeff"]
-	LEAP_indices = params["LEAP_sector_indices"]
+	wage_fn = WageAdjustment(
+		params["wage-fcn"]["infl_passthrough"], # h
+		params["wage-fcn"]["lab_constr_coeff"] # k
+	)
 	# Optionally update technical coefficients (the scaled Use matrix, io.D)
 	calc_use_matrix_tech_change = haskey(params, "tech-param-change") && !isnothing(params["tech-param-change"]) && haskey(params["tech-param-change"], "rate_constant")
 	if calc_use_matrix_tech_change
@@ -257,6 +264,8 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	else
 		tech_change_rate_constant = 0.0 # Not used in this case, but assign a value
 	end
+	# Link to LEAP
+	LEAP_indices = params["LEAP_sector_indices"]
 
 	#----------------------------------
     # Calculate variables based on parameters
@@ -638,7 +647,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 
 		lab_force_index *= 1 + L_gr
 
-		w_gr = infl_passthrough * πF + λ_gr * (1.0 + lab_constr_coeff * (L_gr - exog.working_age_grs[t]))
+		w_gr = wage_fn.h * πF + λ_gr * (1.0 + wage_fn.k * (L_gr - exog.working_age_grs[t]))
 		ω_gr = w_gr - λ_gr - πg
 		ω = (1.0 + ω_gr) * ω
 
