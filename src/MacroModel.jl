@@ -1,7 +1,7 @@
 module MacroModel
 using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Printf, Suppressor
 
-export runleapmacromodel
+export leapmacro
 
 include("./IOlib.jl")
 include("./LEAPfunctions.jl")
@@ -938,7 +938,7 @@ function resultcomparison(params::Dict, run::Integer)
 end # resultcomparison
 
 "Iteratively run the Macro model and LEAP until convergence. This is the primary entry point for LEAP-Macro."
-function runleapmacromodel(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
+function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 
     ## get base_year and final_year, and force fresh start with global_params
     params = IOlib.parse_param_file(param_file, include_energy_sectors = include_energy_sectors)
@@ -1023,6 +1023,6 @@ function runleapmacromodel(param_file::AbstractString, logfile::IOStream, includ
 
     end
 
-end # runleapmacromodel
+end # leapmacro
 
 end # MacroModel
