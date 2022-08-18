@@ -287,9 +287,7 @@ function get_var_params(params::Dict)
                     Array{Float64}(undef, 0), # export_price_elast
                     Array{Float64}(undef, 0)) # import_price_elast          
 
-    base_year = params["years"]["start"]
-    final_year = params["years"]["end"]
-    nyears = final_year - base_year + 1
+    sim_years = params["years"]["start"]:params["years"]["end"]
     sec_ndxs = params["sector-indexes"]
     prod_ndxs = params["product-indexes"]
 
@@ -368,8 +366,8 @@ function get_var_params(params::Dict)
     #--------------------------------------------------------------------------------------
     # Time series
     #--------------------------------------------------------------------------------------
-    start_year = floor(Int64, time_series[1,:year])
-    end_year = start_year + length(time_series[!,:year]) - 1
+    data_start_year = floor(Int64, time_series[1,:year])
+    data_end_year = data_start_year + length(time_series[!,:year]) - 1
 
     # World inflation rate (apply to world prices only, others induced)
     world_infl_temp = time_series[!,:world_infl_rate]
@@ -403,9 +401,9 @@ function get_var_params(params::Dict)
     #--------------------------------------------------------------------------------------
     # Fill in by looping over years
     #--------------------------------------------------------------------------------------
-    for year in base_year:final_year
-        if year in start_year:end_year
-            year_ndx = year - start_year + 1
+    for year in sim_years
+        if year in data_start_year:data_end_year
+            year_ndx = year - data_start_year + 1
             # These have no defaults: check first
             if !ismissing(working_age_grs_temp[year_ndx])
                 push!(retval.working_age_grs, working_age_grs_temp[year_ndx])
@@ -441,11 +439,11 @@ function get_var_params(params::Dict)
                 push!(retval.βKV, βKV_default)
             end
         else
-			error_string = "Year " * string(year) * " is not in time series range " * string(start_year) * ":" * string(end_year)
+			error_string = "Year " * string(year) * " is not in time series range " * string(data_start_year) * ":" * string(data_end_year)
             throw(DomainError(year, error_string))
         end
 
-        deltat = max(0, year - base_year + 1) # Year past the end of calibration period
+        deltat = max(0, year - sim_years[1] + 1) # Year past the end of calibration period
 
         # Bring high values down, but don't bring low values up
         export_elast_demand_temp = export_elast_demand0 - (1 - exp(-export_elast_decay * deltat)) * (export_elast_demand0 - asympt_export_elast)
@@ -459,16 +457,16 @@ function get_var_params(params::Dict)
     # Optional files
     #--------------------------------------------------------------------------------------
 
-    retval.I_addl = zeros(nyears)
-    retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
-    retval.exog_max_util = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
-    retval.exog_price = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
+    retval.I_addl = zeros(length(sim_years))
+    retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
+    retval.exog_max_util = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
+    retval.exog_price = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
 
     if !isnothing(exog_investment_df)
         for row in eachrow(exog_investment_df)
             data_year = floor(Int64, row[:year])
-            if data_year in base_year:final_year
-                retval.I_addl[data_year - base_year + 1] = row[:addl_investment]
+            if data_year in sim_years
+                retval.I_addl[data_year - sim_years[1] + 1] = row[:addl_investment]
             end
        end
     end
@@ -489,8 +487,8 @@ function get_var_params(params::Dict)
         end
         for row in eachrow(exog_pot_output_df)
             data_year = floor(Int64, row[:year])
-            if data_year in base_year:final_year
-                retval.exog_pot_output[data_year - base_year + 1, data_sec_ndxs] .= Vector(row[2:end])
+            if data_year in sim_years
+                retval.exog_pot_output[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
             end
        end
     end
@@ -511,8 +509,8 @@ function get_var_params(params::Dict)
         end
         for row in eachrow(exog_max_util_df)
             data_year = floor(Int64, row[:year])
-            if data_year in base_year:final_year
-                retval.exog_max_util[data_year - base_year + 1, data_sec_ndxs] .= Vector(row[2:end])
+            if data_year in sim_years
+                retval.exog_max_util[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
             end
        end
     end
@@ -533,8 +531,8 @@ function get_var_params(params::Dict)
         end
         for row in eachrow(exog_real_price_df)
             data_year = floor(Int64, row[:year])
-            if data_year in base_year:final_year
-                retval.exog_price[data_year - base_year + 1, data_prod_ndxs] .= Vector(row[2:end])
+            if data_year in sim_years
+                retval.exog_price[data_year - sim_years[1] + 1, data_prod_ndxs] .= Vector(row[2:end])
             end
        end
     end
