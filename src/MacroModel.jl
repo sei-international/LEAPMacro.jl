@@ -104,15 +104,15 @@ end # calc_dom_prices
 
 """
 Calculate growth rate of intermediate demand coefficients (that is, io.D entries), or the intercepts (for initialization)	
-	α(np,ns) = matrix of cost shares
+	σ(np,ns) = matrix of cost shares
 	k = single value or a vector (ns) of rate coefficients
 	θ = single value or vector (ns) of exponents
 	c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
 	b(np,ns) = matrix of weights (if b = nothing it is set to one)
 """
-function calc_intermed_techchange(α::Array{Float64,2}, k::NumOrVector, θ::NumOrVector = 2.0, c::NumOrVector = nothing, b::NumOrVector = nothing)
+function calc_intermed_techchange(σ::Array{Float64,2}, k::NumOrVector, θ::NumOrVector = 2.0, c::NumOrVector = nothing, b::NumOrVector = nothing)
 	# Initialize values
-	(np, ns) = size(α)
+	(np, ns) = size(σ)
 	if isa(k, Number)
 		k = k * ones(ns)
 	end
@@ -126,9 +126,9 @@ function calc_intermed_techchange(α::Array{Float64,2}, k::NumOrVector, θ::NumO
 		c = zeros(np, ns)
 	end
 	
-	cost_shares_exponentiated = [α[p,s]^θ[s] for p in 1:np, s in 1:ns]
+	cost_shares_exponentiated = [σ[p,s]^θ[s] for p in 1:np, s in 1:ns]
 	denom = sum(cost_shares_exponentiated .* b, dims = 1).^(1.0 .- 1.0 ./ θ)'
-	num = [(cost_shares_exponentiated .* b ./ (α .+ IOlib.ϵ))[p,s] * k[s] for p in 1:np, s in 1:ns]
+	num = [(cost_shares_exponentiated .* b ./ (σ .+ IOlib.ϵ))[p,s] * k[s] for p in 1:np, s in 1:ns]
 
 	return c .- num ./ (denom .+ IOlib.ϵ)
 end # calc_intermed_techchange
