@@ -185,8 +185,7 @@ end # calculate_leap
 
 "Obtain energy investment data from the LEAP model."
 function get_results_from_leap(params::Dict, run::Integer)
-    base_year = params["years"]["start"]
-    final_year = params["years"]["end"]
+    sim_years = params["years"]["start"]:params["years"]["end"]
 
     # connects program to LEAP
     LEAP = connect_to_leap()
@@ -196,14 +195,17 @@ function get_results_from_leap(params::Dict, run::Integer)
     LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
 
     leapvals = initialize_leapresults(params) # Initialize to zero
-    nrows = (final_year - base_year) + 1
-    I_en_temp = Array{Float64}(undef, nrows)
+
+    #--------------------------------
+    # Investment expenditure
+    #--------------------------------
+    I_en_temp = Array{Float64}(undef, length(sim_years))
 
     try
         for b in LEAP.Branches
             if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
-                for y = base_year:final_year
-                    I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
+                for t in eachindex(sim_years)
+                    I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
                 end
                 leapvals.I_en += I_en_temp
             end
