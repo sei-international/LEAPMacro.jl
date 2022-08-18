@@ -776,7 +776,7 @@ end # supplyusedata
 function prices_init(np::Integer, io::IOdata)
     return PriceData(ones(np), #pb
                      ones(np), #pd
-                     ones(np), #pw in domestic currency (converted using xr in ModelCalculations)
+                     ones(np), #pw in domestic currency (converted using xr in macro_main)
                      1, # Pg
                      1, # Pw
                      1, # Px

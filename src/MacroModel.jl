@@ -153,7 +153,7 @@ function clean_folders(params::Dict)
 end
 
 "Implement the Macro model. This is the main function for LEAP-Macro"
-function ModelCalculations(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Integer, continue_if_error::Bool)
+function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Integer, continue_if_error::Bool)
 
     #------------status
     @info "Loading data..."
@@ -912,7 +912,7 @@ function ModelCalculations(params::Dict, leapvals::LEAPfunctions.LEAPresults, ru
 	mdl = nothing
 
     return indices
-end # ModelCalculations
+end # macro_main
 
 "Compare the GDP, employment, and value added indices generated from different runs and calculate the maximum difference."
 function resultcomparison(params::Dict, run::Integer)
@@ -964,7 +964,7 @@ function runleapmacromodel(param_file::AbstractString, logfile::IOStream, includ
 		print("Macro model run ($run)...")
         @info "Macro model run ($run)..."
         #------------status
-        indices = ModelCalculations(params, leapvals, run, continue_if_error)
+        indices = macro_main(params, leapvals, run, continue_if_error)
 
         ## Compare run results
         if run >= 1
