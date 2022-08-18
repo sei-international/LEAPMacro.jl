@@ -194,7 +194,6 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	# Years
 	years = params["years"]["start"]:params["years"]["end"]
 	# Investment function
-    neutral_growth = params["investment-fcn"]["init_neutral_growth"]
     util_sens_scalar = params["investment-fcn"]["util_sens"]
     profit_sens = params["investment-fcn"]["profit_sens"]
     intrate_sens = params["investment-fcn"]["intrate_sens"]
@@ -209,7 +208,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	ϕx = params["objective-fcn"]["product_sector_weight_factors"]["exports_cov"]
 	# Taylor function
 	tf = TaylorFunction(
-		neutral_growth, # γ0
+		params["investment-fcn"]["init_neutral_growth"], # γ0
 		params["taylor-fcn"]["neutral_growth_band"][1], # min_γ0
 		params["taylor-fcn"]["neutral_growth_band"][2], # max_γ0
 		params["taylor-fcn"]["gr_resp"], # gr_resp
@@ -254,7 +253,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
     # Calculate variables based on parameters
     #----------------------------------
 	# Initial autonomous growth rate
-	γ_0 = neutral_growth * ones(ns)
+	γ_0 = params["investment-fcn"]["init_neutral_growth"] * ones(ns)
 
 	#############################################################################
 	#
@@ -304,7 +303,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	# Intermediate variables
 	profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
 	price_of_capital = dot(θ,prices.pb)
-	I_nextper = (1 + neutral_growth) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
+	I_nextper = (1 + params["investment-fcn"]["init_neutral_growth"]) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
 	profit_share_rel_capprice = (1/price_of_capital) * profit_per_output
 	init_profit = sum((γ_0 + exog.δ) .* io.g .* profit_share_rel_capprice)
     init_profit_rate = init_profit/I_nextper
@@ -484,7 +483,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	pw_prev = prices.pw ./ (1 .+ πw)
 	pd_prev = prices.pd ./ (1 .+ πd)
     pb_prev = param_pb ./ (1 .+ πb)
-    prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/(1 + neutral_growth)
+    prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/(1 + params["investment-fcn"]["init_neutral_growth"])
 	prev_g = value.(u) .* z
 	prev_g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
 
@@ -497,7 +496,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	end
 
 	prev_GDP_deflator = 1
-    prev_GDP_gr = neutral_growth
+    prev_GDP_gr = params["investment-fcn"]["init_neutral_growth"]
     πg = sum(prev_g_share .* πb)
 	πF = sum(πb .* value.(F))/sum(value.(F))
 	if calc_use_matrix_tech_change
