@@ -148,17 +148,17 @@ end # calc_intermed_techchange
 
 "Clean up folders if specified in params"
 function clean_folders(params::Dict)
-	if params["clear-folders"]["results"] & isdir(params["results_path"])
+	if params["clear-folders"]["results"] && isdir(params["results_path"])
 		for f in readdir(params["results_path"])
 			rm(joinpath(params["results_path"], f))
 		end
 	end
-	if params["clear-folders"]["calibration"] & isdir(params["calibration_path"])
+	if params["clear-folders"]["calibration"] && isdir(params["calibration_path"])
 		for f in readdir(params["calibration_path"])
 			rm(joinpath(params["calibration_path"], f))
 		end
 	end
-	if params["clear-folders"]["diagnostics"] & isdir(params["diagnostics_path"])
+	if params["clear-folders"]["diagnostics"] && isdir(params["diagnostics_path"])
 		for f in readdir(params["diagnostics_path"])
 			rm(joinpath(params["diagnostics_path"], f))
 		end

@@ -97,7 +97,7 @@ function connect_to_leap()
 	try
 		LEAPPyObj = pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
         max_loops = 5
-        while !LEAPPyObj.ProgramStarted & max_loops > 0
+        while !LEAPPyObj.ProgramStarted && max_loops > 0
             sleep(5)
             max_loops -= 1
         end
