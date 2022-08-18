@@ -123,6 +123,34 @@ function intermed_tech_change(α::Array{Float64,2}, k::NumOrVector, θ::NumOrVec
 	return c .- num ./ (denom .+ IOlib.ϵ)
 end # intermed_tech_change
 
+"Clean up folders if specified in params"
+function clean_folders(params::Dict)
+	if params["clear-folders"]["results"] & isdir(params["results_path"])
+		for f in readdir(params["results_path"])
+			rm(joinpath(params["results_path"], f))
+		end
+	end
+	if params["clear-folders"]["calibration"] & isdir(params["calibration_path"])
+		for f in readdir(params["calibration_path"])
+			rm(joinpath(params["calibration_path"], f))
+		end
+	end
+	if params["clear-folders"]["diagnostics"] & isdir(params["diagnostics_path"])
+		for f in readdir(params["diagnostics_path"])
+			rm(joinpath(params["diagnostics_path"], f))
+		end
+		if !params["report-diagnostics"]
+			rm(params["diagnostics_path"])
+		end
+	end
+
+	# Ensure that they exist
+	mkpath(params["results_path"])
+	mkpath(params["calibration_path"])
+	if params["report-diagnostics"]
+		mkpath(params["diagnostics_path"])
+	end
+end
 
 "Implement the Macro model. This is the main function for LEAP-Macro"
 function ModelCalculations(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Integer, continue_if_error::Bool)
@@ -133,32 +161,7 @@ function ModelCalculations(params::Dict, leapvals::LEAPfunctions.LEAPresults, ru
 
 	# Clean up folders if requested
 	if run == 0
-		if params["clear-folders"]["results"] & isdir(params["results_path"])
-			for f in readdir(params["results_path"])
-				rm(joinpath(params["results_path"], f))
-			end
-		end
-		if params["clear-folders"]["calibration"] & isdir(params["calibration_path"])
-			for f in readdir(params["calibration_path"])
-				rm(joinpath(params["calibration_path"], f))
-			end
-		end
-		if params["clear-folders"]["diagnostics"] & isdir(params["diagnostics_path"])
-			for f in readdir(params["diagnostics_path"])
-				rm(joinpath(params["diagnostics_path"], f))
-			end
-			if !params["report-diagnostics"]
-				rm(params["diagnostics_path"])
-			end
-		end
-
-		# Ensure that they exist
-		mkpath(params["results_path"])
-		mkpath(params["calibration_path"])
-		if params["report-diagnostics"]
-			mkpath(params["diagnostics_path"])
-		end
-
+		clean_folders(params)
 	end
 
 	io, np, ns = IOlib.supplyusedata(params)
