@@ -915,7 +915,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 end # macro_main
 
 "Compare the GDP, employment, and value added indices generated from different runs and calculate the maximum difference."
-function resultcomparison(params::Dict, run::Integer)
+function compare_results(params::Dict, run::Integer)
     # Obtains data from indices files for current run and previous run
     file1 = joinpath(params["results_path"], string("indices_",run,".csv"))
     file2 = joinpath(params["results_path"], string("indices_",run-1,".csv"))
@@ -935,7 +935,7 @@ function resultcomparison(params::Dict, run::Integer)
     end
 
     return max_diff
-end # resultcomparison
+end # compare_results
 
 "Iteratively run the Macro model and LEAP until convergence. This is the primary entry point for LEAP-Macro."
 function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
@@ -968,7 +968,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 
         ## Compare run results
         if run >= 1
-            tolerance = resultcomparison(params, run)
+            tolerance = compare_results(params, run)
             if tolerance <= max_tolerance
                 @info @sprintf("Convergence in run number %d at %.2f%% ≤ %.2f%% target...", run, tolerance, max_tolerance)
                 return
