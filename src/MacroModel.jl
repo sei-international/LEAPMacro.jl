@@ -972,6 +972,12 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
     end
     max_tolerance = params["model"]["max_tolerance"]
 
+	if include_energy_sectors
+		energy_sect_string = " (including energy sectors)"
+	else
+		energy_sect_string = ""
+	end
+	println("With configuration file '$param_file'" * energy_sect_string * ":")
     for run = 0:max_runs
         ## Run Macro model
         #------------status
