@@ -49,9 +49,9 @@ mutable struct ExogParams
 	xr::Array{Float64,1} # Nominal exchange rate x year
     δ::Array{Float64,1} # ns
     I_addl::Array{Any,1} # Additional investment x year
-    exog_pot_output::Array{Any,2} # Exogenously specified potential output (converted to index) ns x year
-    exog_max_util::Array{Any,2} # Exogenous max capacity utilization (forced to lie between 0 and 1) ns x year
-    exog_price::Array{Any,2} # Exogenously specified real prices (converted to index) np x year
+    pot_output::Array{Any,2} # Exogenously specified potential output (converted to index) ns x year
+    max_util::Array{Any,2} # Exogenous max capacity utilization (forced to lie between 0 and 1) ns x year
+    price::Array{Any,2} # Exogenously specified real prices (converted to index) np x year
     export_elast_demand::Array{Any,1} # np x year
     wage_elast_demand::Array{Any,1} # np x year
     export_price_elast::Array{Any,1} # np
@@ -279,9 +279,9 @@ function get_var_params(params::Dict)
 					Array{Float64}(undef, 0), # xr
                     Array{Float64}(undef, 0), # δ
                     Array{Any}(undef, 0), # I_addl
-                    Array{Any}(undef, 0, 0), # exog_pot_output
-                    Array{Any}(undef, 0, 0), # exog_max_util
-                    Array{Any}(undef, 0, 0), # exog_price
+                    Array{Any}(undef, 0, 0), # pot_output
+                    Array{Any}(undef, 0, 0), # max_util
+                    Array{Any}(undef, 0, 0), # price
                     [], # export_elast_demand
                     [], # wage_elast_demand
                     Array{Float64}(undef, 0), # export_price_elast
@@ -303,23 +303,23 @@ function get_var_params(params::Dict)
     end
 
     # Optional files
-    exog_investment_df = nothing
-    exog_pot_output_df = nothing
-    exog_max_util_df = nothing
-    exog_real_price_df = nothing
+    investment_df = nothing
+    pot_output_df = nothing
+    max_util_df = nothing
+    real_price_df = nothing
     if haskey(params, "exog-files") && !isnothing(params["exog-files"])
-        exog_file_list = params["exog-files"]
-        if haskey(exog_file_list, "investment") && !isnothing(exog_file_list["investment"]) && isfile(joinpath("inputs",exog_file_list["investment"]))
-            exog_investment_df = CSV.read(joinpath("inputs",exog_file_list["investment"]), DataFrame)
+        file_list = params["exog-files"]
+        if haskey(file_list, "investment") && !isnothing(file_list["investment"]) && isfile(joinpath("inputs",file_list["investment"]))
+            investment_df = CSV.read(joinpath("inputs",file_list["investment"]), DataFrame)
         end
-        if haskey(exog_file_list, "pot_output") && !isnothing(exog_file_list["pot_output"]) && isfile(joinpath("inputs",exog_file_list["pot_output"]))
-            exog_pot_output_df = CSV.read(joinpath("inputs",exog_file_list["pot_output"]), DataFrame)
+        if haskey(file_list, "pot_output") && !isnothing(file_list["pot_output"]) && isfile(joinpath("inputs",file_list["pot_output"]))
+            pot_output_df = CSV.read(joinpath("inputs",file_list["pot_output"]), DataFrame)
         end
-        if haskey(exog_file_list, "max_utilization") && !isnothing(exog_file_list["max_utilization"]) && isfile(joinpath("inputs",exog_file_list["max_utilization"]))
-            exog_max_util_df = CSV.read(joinpath("inputs",exog_file_list["max_utilization"]), DataFrame)
+        if haskey(file_list, "max_utilization") && !isnothing(file_list["max_utilization"]) && isfile(joinpath("inputs",file_list["max_utilization"]))
+            max_util_df = CSV.read(joinpath("inputs",file_list["max_utilization"]), DataFrame)
         end
-        if haskey(exog_file_list, "real_price") && !isnothing(exog_file_list["real_price"]) && isfile(joinpath("inputs",exog_file_list["real_price"]))
-            exog_real_price_df = CSV.read(joinpath("inputs",exog_file_list["real_price"]), DataFrame)
+        if haskey(file_list, "real_price") && !isnothing(file_list["real_price"]) && isfile(joinpath("inputs",file_list["real_price"]))
+            real_price_df = CSV.read(joinpath("inputs",file_list["real_price"]), DataFrame)
         end
     end
     
@@ -458,12 +458,12 @@ function get_var_params(params::Dict)
     #--------------------------------------------------------------------------------------
 
     retval.I_addl = zeros(length(sim_years))
-    retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
-    retval.exog_max_util = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
-    retval.exog_price = Array{Union{Missing, Float64}}(missing, length(sim_years), length(prod_ndxs))
+    retval.pot_output = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
+    retval.max_util = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
+    retval.price = Array{Union{Missing, Float64}}(missing, length(sim_years), length(prod_ndxs))
 
-    if !isnothing(exog_investment_df)
-        for row in eachrow(exog_investment_df)
+    if !isnothing(investment_df)
+        for row in eachrow(investment_df)
             data_year = floor(Int64, row[:year])
             if data_year in sim_years
                 retval.I_addl[data_year - sim_years[1] + 1] = row[:addl_investment]
@@ -471,8 +471,8 @@ function get_var_params(params::Dict)
        end
     end
 
-    if !isnothing(exog_pot_output_df)
-        data_sec_codes = names(exog_pot_output_df)[2:end]
+    if !isnothing(pot_output_df)
+        data_sec_codes = names(pot_output_df)[2:end]
         # Using findfirst: there should only be one entry per code
         data_sec_ndxs = [findfirst(params["included_sector_codes"] .== sec_code) for sec_code in data_sec_codes]
         # Confirm that the sectors are included
@@ -485,16 +485,16 @@ function get_var_params(params::Dict)
             end
             throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["pot_output"] * "' not valid"))
         end
-        for row in eachrow(exog_pot_output_df)
+        for row in eachrow(pot_output_df)
             data_year = floor(Int64, row[:year])
             if data_year in sim_years
-                retval.exog_pot_output[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
+                retval.pot_output[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
             end
        end
     end
 
-    if !isnothing(exog_max_util_df)
-        data_sec_codes = names(exog_max_util_df)[2:end]
+    if !isnothing(max_util_df)
+        data_sec_codes = names(max_util_df)[2:end]
         # Using findfirst: there should only be one entry per code
         data_sec_ndxs = [findfirst(params["included_sector_codes"] .== sec_code) for sec_code in data_sec_codes]
         # Confirm that the sectors are included
@@ -507,16 +507,16 @@ function get_var_params(params::Dict)
             end
             throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["max_utilization"] * "' not valid"))
         end
-        for row in eachrow(exog_max_util_df)
+        for row in eachrow(max_util_df)
             data_year = floor(Int64, row[:year])
             if data_year in sim_years
-                retval.exog_max_util[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
+                retval.max_util[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
             end
        end
     end
 
-    if !isnothing(exog_real_price_df)
-        data_prod_codes = names(exog_real_price_df)[2:end]
+    if !isnothing(real_price_df)
+        data_prod_codes = names(real_price_df)[2:end]
         # Using findfirst: there should only be one entry per code
         data_prod_ndxs = [findfirst(params["included_product_codes"] .== prod_code) for prod_code in data_prod_codes]
         # Confirm that the products are included
@@ -529,10 +529,10 @@ function get_var_params(params::Dict)
             end
             throw(DomainError(invalid_prod_codes, invalid_prod_codes_str * " in input file '" * params["exog-files"]["real_price"] * "' not valid"))
         end
-        for row in eachrow(exog_real_price_df)
+        for row in eachrow(real_price_df)
             data_year = floor(Int64, row[:year])
             if data_year in sim_years
-                retval.exog_price[data_year - sim_years[1] + 1, data_prod_ndxs] .= Vector(row[2:end])
+                retval.price[data_year - sim_years[1] + 1, data_prod_ndxs] .= Vector(row[2:end])
             end
        end
     end

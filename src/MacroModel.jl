@@ -76,6 +76,11 @@ function stringvec_to_quotedstringvec!(svec::Vector)
 	end
 end # stringvec_to_quotedstringvec!
 
+"Function to preemptively take values from A first, then B, based on whether values are `missing`"
+function get_nonmissing_values(A, B)
+	return [if !ismissing(A[i]) A[i] else B[i] end for i in CartesianIndices(A)]
+end
+
 """
 Calculate the Sraffa matrix, which is used to calculate domestic prices
 	# np: number of products
@@ -191,9 +196,13 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	prices = IOlib.initialize_prices(np, io)
 	exog = IOlib.get_var_params(params)
 
+	# Preferentially take exogenous values from LEAP, if specified, if not then from file
+	exog.pot_output = get_nonmissing_values(leapvals.pot_output, exog.pot_output)
+	exog.price = get_nonmissing_values(leapvals.price, exog.price)
+
 	# For exogenous potential output and world prices, values must be specified for all years, so get indices for first year
-	pot_output_ndxs = findall(x -> !ismissing(x), exog.exog_pot_output[1,:])
-	pw_ndxs = findall(x -> !ismissing(x), exog.exog_price[1,:])
+	pot_output_ndxs = findall(x -> !ismissing(x), exog.pot_output[1,:])
+	pw_ndxs = findall(x -> !ismissing(x), exog.price[1,:])
 
 	# Convert pw into global currency
 	prices.pw = prices.pw/exog.xr[1]
@@ -366,8 +375,8 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	param_mfrac = io.m_frac
 	# Initialize maximum utilization in multiple steps
 	param_max_util = ones(ns)
-	max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[1,:])
-	param_max_util[max_util_ndxs] .= exog.exog_max_util[1,max_util_ndxs]
+	max_util_ndxs = findall(x -> !ismissing(x), exog.max_util[1,:])
+	param_max_util[max_util_ndxs] .= exog.max_util[1,max_util_ndxs]
 	#----------------------------------
     # Variables
     #----------------------------------
@@ -501,10 +510,10 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 
 	smoothed_world_gr = params["global-params"]["gr_default"]
 
-	if !all(ismissing.(exog.exog_pot_output[1,:]))
-		prev_exog_pot_prod = sum(exog.exog_pot_output[1,i] * io.Vnorm[i,:] for i in pot_output_ndxs)
+	if !all(ismissing.(exog.pot_output[1,:]))
+		prev_pot_prod = sum(exog.pot_output[1,i] * io.Vnorm[i,:] for i in pot_output_ndxs)
 	else
-		prev_exog_pot_prod = zeros(np)
+		prev_pot_prod = zeros(np)
 	end
 
 	prev_GDP_deflator = 1
@@ -687,7 +696,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 			γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
 			# Override default behavior if production is exogenously specified
 			if t > 1
-				γ_spec = exog.exog_pot_output[t,:] ./ exog.exog_pot_output[t - 1,:] .- 1.0
+				γ_spec = exog.pot_output[t,:] ./ exog.pot_output[t - 1,:] .- 1.0
 				γ[pot_output_ndxs] .= γ_spec[pot_output_ndxs]
 			end
 		end
@@ -703,18 +712,18 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		#--------------------------------
 		# Export demand
 		#--------------------------------
-		if !all(ismissing.(exog.exog_pot_output[t,:]))
+		if !all(ismissing.(exog.pot_output[t,:]))
 			# Export demand is calculated differently when potential output is exogenously specified
-			exog_pot_prod = sum(exog.exog_pot_output[t,i] * io.Vnorm[i,:] for i in pot_output_ndxs)
+			pot_prod = sum(exog.pot_output[t,i] * io.Vnorm[i,:] for i in pot_output_ndxs)
 			# -- extent of externally specified output
 			pot_prod_spec_factor = sum(io.Vnorm[i,:] * z[i] for i in pot_output_ndxs) ./ (io.Vnorm' * z .+ IOlib.ϵ)
 		else
-			exog_pot_prod = zeros(np)
+			pot_prod = zeros(np)
 			pot_prod_spec_factor = zeros(np)
 		end
 		# -- scale factor
-		Xmax_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* exog_pot_prod ./ (prev_exog_pot_prod .+ IOlib.ϵ)
-		prev_exog_pot_prod = exog_pot_prod
+		Xmax_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* pot_prod ./ (prev_pot_prod .+ IOlib.ϵ)
+		prev_pot_prod = pot_prod
 		# -- income factor
 		smoothed_world_gr += growth_adj * (exog.world_grs[t] - smoothed_world_gr)
 		Xmax_income_factor = (1 + exog.world_grs[t]) ./ (1 .+ pot_prod_spec_factor * smoothed_world_gr)
@@ -802,7 +811,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		prices.pw = prices.pw * (1 + exog.πw_base[t])
 		# Then adjust for any exogenous price indices
 		if t > 1
-			pw_spec = exog.exog_price[t,:] ./ exog.exog_price[t - 1,:]
+			pw_spec = exog.price[t,:] ./ exog.price[t - 1,:]
 			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
 		end
 		# Calculate XR trend
@@ -864,8 +873,8 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		param_mfrac = io.m_frac .* ((1 .+ πd)./(1 .+ πw)).^adj_import_price_elast
 		# Set maximum utilization in multiple steps
 		param_max_util = ones(ns)
-		max_util_ndxs = findall(x -> !ismissing(x), exog.exog_max_util[t + 1,:])
-		param_max_util[max_util_ndxs] .= exog.exog_max_util[t + 1,max_util_ndxs]
+		max_util_ndxs = findall(x -> !ismissing(x), exog.max_util[t + 1,:])
+		param_max_util[max_util_ndxs] .= exog.max_util[t + 1,max_util_ndxs]
 
 		for i in 1:ns
 			set_normalized_coefficient(eq_io[i], u[i], -param_Pg * param_z[i])
