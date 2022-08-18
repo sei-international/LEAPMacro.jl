@@ -192,8 +192,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	#############################################################################
 
 	# Years
-    base_year = params["years"]["start"]
-    final_year = params["years"]["end"]
+	years = params["years"]["start"]:params["years"]["end"]
 	# Investment function
     neutral_growth = params["investment-fcn"]["init_neutral_growth"]
     util_sens_scalar = params["investment-fcn"]["util_sens"]
@@ -254,8 +253,6 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	#----------------------------------
     # Calculate variables based on parameters
     #----------------------------------
-	# Number of time steps
-	ntime = 1 + (final_year - base_year)
 	# Initial autonomous growth rate
 	γ_0 = neutral_growth * ones(ns)
 
@@ -437,7 +434,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		@info optim_output
 	end
     status = primal_status(mdl)
-    @info "Calibrating for $base_year: $status"
+    @info "Calibrating for " * string(years[1]) * ": $status"
 
 	# Sector variables
     IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
@@ -511,8 +508,6 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 
 	lab_force_index = 1
 
-    year = base_year
-
 	#--------------------------------
 	# Initialize array of indices to pass to LEAP
 	#--------------------------------
@@ -524,7 +519,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		labels = vcat(labels, params["Employment-branch"]["name"])
 	end
 	labels = vcat(labels, params["LEAP_sector_names"])
-    indices = Array{Float64}(undef, ntime, length(labels))
+    indices = Array{Float64}(undef, length(years), length(labels))
 
 	#------------------------------------------
     # Initialize files for writing results
@@ -562,11 +557,10 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
     # Loop over years
 	#
 	#############################################################################
-	base_year_plusone = base_year + 1
-    @info "Running from $base_year_plusone to $final_year:"
+    @info "Running from " * string(years[2]) * " to " * string(last(years)) * ":"
 
     previous_failed = false
-    for t in 1:ntime
+    for t in eachindex(years)
 		#--------------------------------
 		# Output
 		#--------------------------------
@@ -651,7 +645,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 			D_hat = calc_intermed_techchange_intercept + calc_intermed_techchange(intermed_cost_shares, tech_change_rate_constant)
 			io.D = io.D .* exp.(D_hat) # This ensures that io.D will not become negative
 			if params["report-diagnostics"]
-				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(year) * ".csv"), io.D, params["included_product_codes"], params["included_sector_codes"])
+				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(years[t]) * ".csv"), io.D, params["included_product_codes"], params["included_sector_codes"])
 			end
 		end
 
@@ -730,7 +724,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		#--------------------------------
 		# Calculate indices to pass to LEAP
 		#--------------------------------
-        indices[t,1] = year
+        indices[t,1] = years[t]
 		curr_index = 1
 		if haskey(params, "GDP-branch")
 			curr_index += 1
@@ -812,25 +806,25 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		prices.pb = exog.xr[t] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
 		
 		# Sector variables
-		append_row_to_csv(params, g, "sector_output", run, year)
-		append_row_to_csv(params, z, "potential_sector_output", run, year)
-		append_row_to_csv(params, u_report, "capacity_utilization", run, year)
-		append_row_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year)
-		append_row_to_csv(params, profit_rate, "profit_rate", run, year)
-		append_row_to_csv(params, γ_0, "autonomous_investment_rate", run, year)
+		append_row_to_csv(params, g, "sector_output", run, years[t])
+		append_row_to_csv(params, z, "potential_sector_output", run, years[t])
+		append_row_to_csv(params, u_report, "capacity_utilization", run, years[t])
+		append_row_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, years[t])
+		append_row_to_csv(params, profit_rate, "profit_rate", run, years[t])
+		append_row_to_csv(params, γ_0, "autonomous_investment_rate", run, years[t])
 	    # Product variables
-		append_row_to_csv(params, F_report, "final_demand", run, year)
-		append_row_to_csv(params, M_report, "imports", run, year)
-		append_row_to_csv(params, X_report, "exports", run, year)
-		append_row_to_csv(params, param_pb, "basic_prices", run, year)
-		append_row_to_csv(params, param_pd, "domestic_prices", run, year)
+		append_row_to_csv(params, F_report, "final_demand", run, years[t])
+		append_row_to_csv(params, M_report, "imports", run, years[t])
+		append_row_to_csv(params, X_report, "exports", run, years[t])
+		append_row_to_csv(params, param_pb, "basic_prices", run, years[t])
+		append_row_to_csv(params, param_pd, "domestic_prices", run, years[t])
 		# Scalar variables
 		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
 							prices.RER, prices.XR]
-		append_row_to_csv(params, scalar_var_vals, "collected_variables", run, year)
+		append_row_to_csv(params, scalar_var_vals, "collected_variables", run, years[t])
 
-		if t == ntime
+		if t == length(years)
 			break
 		end
 
@@ -884,7 +878,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		fix(I_tot, param_I_tot)
 
 		if params["report-diagnostics"]
-			open(joinpath(params["diagnostics_path"], string("model_", run, "_", year, ".txt")), "w") do f
+			open(joinpath(params["diagnostics_path"], string("model_", run, "_", years[t], ".txt")), "w") do f
 				print(f, mdl)
 			end
 		end
@@ -895,9 +889,8 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 			@info optim_output
 		end
         status = primal_status(mdl)
-		# Increment year to report the correct year is being calculated
-		year += 1
-        @info "Simulating for $year: $status"
+		# Add one to year to report the year currently being calculated
+        @info "Simulating for " * string(years[t + 1]) * ": $status"
         previous_failed = status != MOI.FEASIBLE_POINT
         if previous_failed
 			finndx = length(LEAP_indices) + 2 # Adds column for year and for GDP
@@ -910,7 +903,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 
     # Make indices into indices
     indices_0 = indices[1,:]
-    for t = 1:ntime
+    for t in eachindex(years)
         indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
     end
     open(joinpath(params["results_path"], string("indices_",run,".csv")), "w") do io
@@ -950,7 +943,7 @@ end # compare_results
 "Iteratively run the Macro model and LEAP until convergence. This is the primary entry point for LEAP-Macro."
 function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 
-    ## get base_year and final_year, and force fresh start with global_params
+    # Read in global parameters
     params = IOlib.parse_param_file(param_file, include_energy_sectors = include_energy_sectors)
 
     # set model run parameters and initial values
