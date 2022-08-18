@@ -74,11 +74,11 @@ function send_results_to_leap(params::Dict, indices::Array)
             end_ndx = (col+1)*ndxrows
 
             if lasthistoricalyear > base_year
-                newexpression = interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
+                newexpression = build_interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
             else
-                newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
+                newexpression = build_interp_expression(base_year, indices[start_ndx:end_ndx])
             end
-            setbranchvar_expression(LEAP, branch, variable, newexpression, region = params["LEAP-info"]["region"], scenario=params["LEAP-info"]["input_scenario"])
+            set_branchvar_expression(LEAP, branch, variable, newexpression, region = params["LEAP-info"]["region"], scenario=params["LEAP-info"]["input_scenario"])
 
         end
         LEAP.SaveArea()
@@ -121,7 +121,7 @@ function disconnect_from_leap(LEAPPyObj)
 end # disconnect_from_leap
 
 "Create LEAP Interp expression from an array of values."
-function interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
+function build_interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
     # Creates start of expression. Includes historical data if available
     if lasthistoricalyear > 0
         newexpression = string("If(year <= ", lasthistoricalyear, ", ScenarioValue(Current Accounts), Value(", base_year,") * Interp(")
@@ -145,7 +145,7 @@ function interp_expression(base_year::Integer, newdata::Array; lasthistoricalyea
         year = year + 1
     end
     return newexpression
-end # interp_expression
+end # build_interp_expression
 
 """
 Set a LEAP branch-variable expression.
@@ -153,7 +153,7 @@ Set a LEAP branch-variable expression.
 The region and scenario arguments can be omitted by leaving them as empty strings.
 Note that performance is best if neither region nor scenario is specified.
 """
-function setbranchvar_expression(leapapplication::PyObject, branch::AbstractString, variable::AbstractString, newexpression::AbstractString; region::AbstractString = "", scenario::AbstractString = "")
+function set_branchvar_expression(leapapplication::PyObject, branch::AbstractString, variable::AbstractString, newexpression::AbstractString; region::AbstractString = "", scenario::AbstractString = "")
     # Set ActiveRegion and ActiveScenario as Julia doesn't allow a function call (ExpressionRS) to be set to a value
     if region != ""
         leapapplication.ActiveRegion = region
@@ -168,7 +168,7 @@ function setbranchvar_expression(leapapplication::PyObject, branch::AbstractStri
 
     # Refresh LEAP display
     leapapplication.Refresh()
-end  # setbranchvarexpression
+end  # set_branchvar_expression
 
 "Calculate the LEAP model, returning results for the specified scenario."
 function calculate_leap(scen_name::AbstractString)
