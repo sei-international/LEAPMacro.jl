@@ -31,7 +31,7 @@ mutable struct TaylorFunction
 end
 
 "Report output values by writing to specified CSV files."
-function output_var(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer, rowlabel::Union{Number,String}, mode::AbstractString)
+function write_values_to_csv(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer, rowlabel::Union{Number,String}, mode::AbstractString)
 	if isa(values, Array)
 		usevalue = join(values, ',')
 	else
@@ -40,18 +40,18 @@ function output_var(params::Dict, values::NumOrArray, filename::AbstractString, 
 	open(joinpath(params["results_path"], string(filename, "_", index,".csv")), mode) do io
 		write(io, string(rowlabel, ',', usevalue, "\r\n"))
 	end
-end # output_var
+end # write_values_to_csv
 
 """
 Convert a vector of strings by wrapping each string in quotes (for putting into CSV files).
 This function converts `svec` in-place, so should only be run once. Double quotation marks
 are removed to avoid that problem.
 """
-function to_quoted_string_vec!(svec::Vector)
+function stringvec_to_quotedstringvec!(svec::Vector)
 	for i in eachindex(svec)
 		svec[i] = replace(string('\"', svec[i], '\"'), "\"\"" => "\"")
 	end
-end # to_quoted_string_vec!
+end # stringvec_to_quotedstringvec!
 
 """
 Calculate the Sraffa matrix, which is used to calculate domestic prices
@@ -523,29 +523,29 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	sector_names = params["included_sector_names"]
 	product_names = params["included_product_names"]
 	# Quote the sector and product names (for putting into CSV files)
-	to_quoted_string_vec!(sector_names)
-	to_quoted_string_vec!(product_names)
+	stringvec_to_quotedstringvec!(sector_names)
+	stringvec_to_quotedstringvec!(product_names)
 
 	# Create files for sector variables
-	output_var(params, sector_names, "sector_output", run, "", "w")
-	output_var(params, sector_names, "potential_sector_output", run, "", "w")
-	output_var(params, sector_names, "capacity_utilization", run, "", "w")
-	output_var(params, sector_names, "real_value_added", run, "", "w")
-	output_var(params, sector_names, "profit_rate", run, "", "w")
-	output_var(params, sector_names, "autonomous_investment_rate", run, "", "w")
+	write_values_to_csv(params, sector_names, "sector_output", run, "", "w")
+	write_values_to_csv(params, sector_names, "potential_sector_output", run, "", "w")
+	write_values_to_csv(params, sector_names, "capacity_utilization", run, "", "w")
+	write_values_to_csv(params, sector_names, "real_value_added", run, "", "w")
+	write_values_to_csv(params, sector_names, "profit_rate", run, "", "w")
+	write_values_to_csv(params, sector_names, "autonomous_investment_rate", run, "", "w")
 	# Create files for product variables
-	output_var(params, product_names, "final_demand", run, "", "w")
-	output_var(params, product_names, "imports", run, "", "w")
-	output_var(params, product_names, "exports", run, "", "w")
-	output_var(params, product_names, "basic_prices", run, "", "w")
-	output_var(params, product_names, "domestic_prices", run, "", "w")
+	write_values_to_csv(params, product_names, "final_demand", run, "", "w")
+	write_values_to_csv(params, product_names, "imports", run, "", "w")
+	write_values_to_csv(params, product_names, "exports", run, "", "w")
+	write_values_to_csv(params, product_names, "basic_prices", run, "", "w")
+	write_values_to_csv(params, product_names, "domestic_prices", run, "", "w")
 	# Create a file to hold scalar variables
 	scalar_var_list = ["GDP gr", "curr acct surplus to GDP ratio", "curr acct surplus", "real GDP",
 					   "GDP deflator", "labor productivity gr", "labor force gr", "wage rate gr",
 					   "wage per effective worker gr", "real investment", "central bank rate",
 					   "terms of trade index", "real xr index", "nominal xr index"]
-	to_quoted_string_vec!(scalar_var_list)
-	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
+	stringvec_to_quotedstringvec!(scalar_var_list)
+	write_values_to_csv(params, scalar_var_list, "collected_variables", run, "", "w")
 
 	#############################################################################
 	#
@@ -802,23 +802,23 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		prices.pb = exog.xr[t] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
 		
 		# Sector variables
-		output_var(params, g, "sector_output", run, year, "a")
-		output_var(params, z, "potential_sector_output", run, year, "a")
-		output_var(params, u_report, "capacity_utilization", run, year, "a")
-		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
-		output_var(params, profit_rate, "profit_rate", run, year, "a")
-		output_var(params, γ_0, "autonomous_investment_rate", run, year, "a")
+		write_values_to_csv(params, g, "sector_output", run, year, "a")
+		write_values_to_csv(params, z, "potential_sector_output", run, year, "a")
+		write_values_to_csv(params, u_report, "capacity_utilization", run, year, "a")
+		write_values_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
+		write_values_to_csv(params, profit_rate, "profit_rate", run, year, "a")
+		write_values_to_csv(params, γ_0, "autonomous_investment_rate", run, year, "a")
 	    # Product variables
-		output_var(params, F_report, "final_demand", run, year, "a")
-		output_var(params, M_report, "imports", run, year, "a")
-		output_var(params, X_report, "exports", run, year, "a")
-		output_var(params, param_pb, "basic_prices", run, year, "a")
-		output_var(params, param_pd, "domestic_prices", run, year, "a")
+		write_values_to_csv(params, F_report, "final_demand", run, year, "a")
+		write_values_to_csv(params, M_report, "imports", run, year, "a")
+		write_values_to_csv(params, X_report, "exports", run, year, "a")
+		write_values_to_csv(params, param_pb, "basic_prices", run, year, "a")
+		write_values_to_csv(params, param_pd, "domestic_prices", run, year, "a")
 		# Scalar variables
 		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
 							prices.RER, prices.XR]
-		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
+		write_values_to_csv(params, scalar_var_vals, "collected_variables", run, year, "a")
 
 		if t == ntime
 			break
