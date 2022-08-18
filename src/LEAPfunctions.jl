@@ -1,7 +1,7 @@
 module LEAPfunctions
 using DelimitedFiles, PyCall, DataFrames, CSV
 
-export hide_leap, outputtoleap, calculateleap, energyinvestment, LEAPresults
+export hide_leap, send_results_to_leap, calculateleap, get_results_from_leap, LEAPresults
 
 "Values passed from LEAP to Macro"
 mutable struct LEAPresults
@@ -23,7 +23,7 @@ function hide_leap(state::Bool)
 end # hide_leap
 
 "First obtain LEAP branch info from `params` and then send Macro model results to LEAP."
-function outputtoleap(params::Dict, indices::Array)
+function send_results_to_leap(params::Dict, indices::Array)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
@@ -85,7 +85,7 @@ function outputtoleap(params::Dict, indices::Array)
     finally
 	    disconnectfromleap(LEAP)
     end
-end # outputtoleap
+end # send_results_to_leap
 
 """
 Connect to the currently running instance of LEAP, if one exists; otherwise starts an instance of LEAP.
@@ -182,7 +182,7 @@ function calculateleap(scen_name::AbstractString)
 end # calculateleap
 
 "Obtain energy investment data from the LEAP model."
-function energyinvestment(params::Dict, run::Integer)
+function get_results_from_leap(params::Dict, run::Integer)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
@@ -213,6 +213,6 @@ function energyinvestment(params::Dict, run::Integer)
     writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, ',')
 
     return leapvals
-end # energyinvestment
+end # get_results_from_leap
 
 end # LEAPfunctions

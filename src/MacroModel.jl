@@ -992,7 +992,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
             #------------status
             @info "Sending Macro output to LEAP..."
             #------------status
-            LEAPfunctions.outputtoleap(params, indices)
+            LEAPfunctions.send_results_to_leap(params, indices)
             ## Run LEAP model
 			try
 				#------------status
@@ -1006,7 +1006,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 				@info "Obtaining LEAP results..."
 				flush(logfile)
 				#------------status
-				leapvals = LEAPfunctions.energyinvestment(params, run)
+				leapvals = LEAPfunctions.get_results_from_leap(params, run)
 			finally
 				if params["model"]["hide_leap"]
 					#------------status
