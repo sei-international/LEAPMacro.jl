@@ -100,7 +100,7 @@ Calculate growth rate of intermediate demand coefficients (that is, io.D entries
 	c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
 	b(np,ns) = matrix of weights (if b = nothing it is set to one)
 """
-function intermed_tech_change(α::Array{Float64,2}, k::NumOrVector, θ::NumOrVector = 2.0, c::NumOrVector = nothing, b::NumOrVector = nothing)
+function calc_intermed_techchange(α::Array{Float64,2}, k::NumOrVector, θ::NumOrVector = 2.0, c::NumOrVector = nothing, b::NumOrVector = nothing)
 	# Initialize values
 	(np, ns) = size(α)
 	if isa(k, Number)
@@ -121,7 +121,7 @@ function intermed_tech_change(α::Array{Float64,2}, k::NumOrVector, θ::NumOrVec
 	num = [(cost_shares_exponentiated .* b ./ (α .+ IOlib.ϵ))[p,s] * k[s] for p in 1:np, s in 1:ns]
 
 	return c .- num ./ (denom .+ IOlib.ϵ)
-end # intermed_tech_change
+end # calc_intermed_techchange
 
 "Clean up folders if specified in params"
 function clean_folders(params::Dict)
@@ -496,7 +496,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	if calc_use_matrix_tech_change
 		sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
 		intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
-		intermed_tech_change_intercept = -intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
+		calc_intermed_techchange_intercept = -calc_intermed_techchange(intermed_cost_shares, tech_change_rate_constant)
 	end
 
 	lab_force_index = 1
@@ -638,7 +638,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		if calc_use_matrix_tech_change && !previous_failed
 			sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ g
 			intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
-			D_hat = intermed_tech_change_intercept + intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
+			D_hat = calc_intermed_techchange_intercept + calc_intermed_techchange(intermed_cost_shares, tech_change_rate_constant)
 			io.D = io.D .* exp.(D_hat) # This ensures that io.D will not become negative
 			if params["report-diagnostics"]
 				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(year) * ".csv"), io.D, params["included_product_codes"], params["included_sector_codes"])
