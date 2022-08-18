@@ -9,16 +9,15 @@ mutable struct LEAPresults
 end
 
 "Return a LEAPresults struct initialized to zero"
-function LEAPresults_init(params::Dict)
+function initialize_leapresults(params::Dict)
     return LEAPresults(
         zeros(1 + (params["years"]["end"] - params["years"]["start"])) # I_en
     )
-end # LEAPresults_init
+end # initialize_leapresults
 
 "Hide or show LEAP by setting visibility."
 function visible(state::Bool)
 	LEAP = connecttoleap()
-	LEAP.Visible = state
 	disconnectfromleap(LEAP)
 end # visible
 
@@ -193,7 +192,7 @@ function energyinvestment(params::Dict, run::Integer)
     LEAP.ActiveView = "Results"
     LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
 
-    leapvals = LEAPresults_init(params) # Initialize to zero
+    leapvals = initialize_leapresults(params) # Initialize to zero
     nrows = (final_year - base_year) + 1
     I_en_temp = Array{Float64}(undef, nrows)
 

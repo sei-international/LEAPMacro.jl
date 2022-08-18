@@ -165,7 +165,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	end
 
 	io, np, ns = IOlib.process_sut(params)
-	prices = IOlib.prices_init(np, io)
+	prices = IOlib.initialize_prices(np, io)
 	exog = IOlib.get_var_params(params)
 
 	# For exogenous potential output and world prices, values must be specified for all years, so get indices for first year
@@ -944,7 +944,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
     params = IOlib.parse_param_file(param_file, include_energy_sectors = include_energy_sectors)
 
     # set model run parameters and initial values
-    leapvals = LEAPfunctions.LEAPresults_init(params)
+    leapvals = LEAPfunctions.initialize_leapresults(params)
     run_leap = params["model"]["run_leap"]
     if run_leap
         max_runs = params["model"]["max_runs"]

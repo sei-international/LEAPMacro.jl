@@ -1,7 +1,7 @@
 module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
-export process_sut, inputoutputcalc, prices_init, parse_param_file, write_matrix_to_csv, write_vector_to_csv,
+export process_sut, inputoutputcalc, initialize_prices, parse_param_file, write_matrix_to_csv, write_vector_to_csv,
        IOdata, PriceData, ExogParams, ϵ
 
 "Small number for avoiding divide-by-zero problems"
@@ -773,7 +773,7 @@ end # process_sut
 
 "Initialize price structure."
 # All domestic prices are initialized to one
-function prices_init(np::Integer, io::IOdata)
+function initialize_prices(np::Integer, io::IOdata)
     return PriceData(ones(np), #pb
                      ones(np), #pd
                      ones(np), #pw in domestic currency (converted using xr in macro_main)
@@ -784,6 +784,6 @@ function prices_init(np::Integer, io::IOdata)
                      1, # Ptrade
                      1, # XR
                      1) # RER
-end # prices_init
+end # initialize_prices
 
 end # IOlib
