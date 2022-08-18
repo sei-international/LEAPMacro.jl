@@ -979,6 +979,9 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
         @info "Macro model run ($run)..."
         #------------status
         indices = macro_main(params, leapvals, run, continue_if_error)
+		#------------status
+		println("completed")
+        #------------status
 
         ## Compare run results
         if run >= 1
@@ -1031,9 +1034,6 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 				flush(logfile)
 			end
         end
-		#------------status
-		println("completed")
-        #------------status
 
     end
 
