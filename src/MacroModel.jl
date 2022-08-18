@@ -164,7 +164,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		clean_folders(params)
 	end
 
-	io, np, ns = IOlib.supplyusedata(params)
+	io, np, ns = IOlib.process_sut(params)
 	prices = IOlib.prices_init(np, io)
 	exog = IOlib.get_var_params(params)
 

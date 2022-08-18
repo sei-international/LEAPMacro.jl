@@ -1,7 +1,7 @@
 module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
-export supplyusedata, inputoutputcalc, prices_init, parse_param_file, write_matrix_to_csv, write_vector_to_csv,
+export process_sut, inputoutputcalc, prices_init, parse_param_file, write_matrix_to_csv, write_vector_to_csv,
        IOdata, PriceData, ExogParams, ϵ
 
 "Small number for avoiding divide-by-zero problems"
@@ -603,8 +603,8 @@ function energy_nonenergy_link_measure(params::Dict)
 
 end # energy_nonenergy_link_measure
 
-"Pull in supply-use data from CSV input files."
-function supplyusedata(params::Dict)
+"Process supply-use data from CSV input file."
+function process_sut(params::Dict)
     retval = IOdata(Array{Float64}(undef, 0, 0), # D
                     Array{Float64}(undef, 0, 0), # S
                     Array{Float64}(undef, 0, 0), # Vnorm
@@ -769,7 +769,7 @@ function supplyusedata(params::Dict)
 
     return retval, np, ns
 
-end # supplyusedata
+end # process_sut
 
 "Initialize price structure."
 # All domestic prices are initialized to one
