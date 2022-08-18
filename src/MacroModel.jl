@@ -11,6 +11,13 @@ using .IOlib, .LEAPfunctions
 NumOrArray = Union{Nothing,Number,Array}
 NumOrVector = Union{Nothing,Number,Vector}
 
+"Parameters for investment function"
+mutable struct InvestmentFunction
+	util::AbstractFloat
+	profit::AbstractFloat
+	bank::AbstractFloat
+end
+
 "Parameters for the Taylor function"
 mutable struct TaylorFunction
 	γ0::AbstractFloat
@@ -194,9 +201,11 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	# Years
 	years = params["years"]["start"]:params["years"]["end"]
 	# Investment function
-    util_sens_scalar = params["investment-fcn"]["util_sens"]
-    profit_sens = params["investment-fcn"]["profit_sens"]
-    intrate_sens = params["investment-fcn"]["intrate_sens"]
+	α = InvestmentFunction(
+		params["investment-fcn"]["util_sens"], # util
+		params["investment-fcn"]["profit_sens"], # profit
+		params["investment-fcn"]["intrate_sens"] # bank
+	)
     growth_adj = params["investment-fcn"]["growth_adj"]
 	# Linear program objective function
     wu = params["objective-fcn"]["category_weights"]["utilization"]
@@ -277,8 +286,6 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
     I_ne = I_total - leapvals.I_en[1]
     # Share of supply of investment goods
     θ = io.I / sum(io.I)
-	# Investment function parameter -- make a vector
-    util_sens = util_sens_scalar * ones(ns)
 	# Initial values: These will change endogenously over time
 	γ = γ_0
 	i_bank = tf.i_targ
@@ -669,9 +676,9 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		#--------------------------------
 		if !previous_failed
 			# Investment function
-			γ_u = util_sens .* (value.(u) .- 1)
-			γ_r = profit_sens * (profit_rate .- targ_profit_rate)
-			γ_i = -intrate_sens * (i_bank - tf.i_targ0) * ones(ns)
+			γ_u = α.util * (value.(u) .- 1)
+			γ_r = α.profit * (profit_rate .- targ_profit_rate)
+			γ_i = -α.bank * (i_bank - tf.i_targ0) * ones(ns)
 			γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
 			# Override default behavior if production is exogenously specified
 			if t > 1
