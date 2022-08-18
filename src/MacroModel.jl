@@ -1,37 +1,50 @@
 module MacroModel
 using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Printf, Suppressor
 
-export runleapmacromodel
+export leapmacro
 
 include("./IOlib.jl")
 include("./LEAPfunctions.jl")
 using .IOlib, .LEAPfunctions
 
-"Parameters for the Taylor function"
-mutable struct TaylorFunction
-	γ0::Float64
-	min_γ0::Float64
-	max_γ0::Float64
-	gr_resp::Float64
-	π_targ::Float64
-	π_targ_use_πw::Bool
-	π_init::Float64
-	infl_resp::Float64
-	i_targ::Float64
-	i_targ0::Float64
-	i_targ_max::Float64
-	i_targ_min::Float64
-	i_targ_coeff::Float64
-	i_targ_xr_sens::Float64
-	i_targ_adj_time::Float64
+# Declared type unions
+NumOrArray = Union{Nothing,Number,Array}
+NumOrVector = Union{Nothing,Number,Vector}
+
+"Parameters for investment function"
+mutable struct InvestmentFunction
+	util::AbstractFloat
+	profit::AbstractFloat
+	bank::AbstractFloat
 end
 
-"""
-    output_var(params, values, filename, index, rowlabel, mode)
+"Parameters for the Taylor function"
+mutable struct TaylorFunction
+	γ0::AbstractFloat
+	min_γ0::AbstractFloat
+	max_γ0::AbstractFloat
+	gr_resp::AbstractFloat
+	π_targ::AbstractFloat
+	π_targ_use_πw::Bool
+	π_init::AbstractFloat
+	infl_resp::AbstractFloat
+	i_targ::AbstractFloat
+	i_targ0::AbstractFloat
+	i_targ_max::AbstractFloat
+	i_targ_min::AbstractFloat
+	i_targ_coeff::AbstractFloat
+	i_targ_xr_sens::AbstractFloat
+	i_targ_adj_time::AbstractFloat
+end
 
-Report output values by writing to specified CSV files.
-"""
-function output_var(params, values, filename, index, rowlabel, mode)
+"Parameters for wage adjustment"
+mutable struct WageAdjustment
+	h::AbstractFloat
+	k::AbstractFloat
+end
+
+"Report output values by writing to specified CSV files."
+function write_values_to_csv(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer, rowlabel::Union{Number,String}, mode::AbstractString)
 	if isa(values, Array)
 		usevalue = join(values, ',')
 	else
@@ -40,30 +53,36 @@ function output_var(params, values, filename, index, rowlabel, mode)
 	open(joinpath(params["results_path"], string(filename, "_", index,".csv")), mode) do io
 		write(io, string(rowlabel, ',', usevalue, "\r\n"))
 	end
+end # write_values_to_csv
+
+"Convenience wrapper for write_values_to_csv"
+function write_header_to_csv(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer)
+	write_values_to_csv(params, values, filename, index, "", "w")
+end
+
+"Convenience wrapper for write_values_to_csv"
+function append_row_to_csv(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer, rowlabel::Union{Number,String})
+	write_values_to_csv(params, values, filename, index, rowlabel, "a")
 end
 
 """
-    to_quoted_string_vec(svec)
-
 Convert a vector of strings by wrapping each string in quotes (for putting into CSV files).
 This function converts `svec` in-place, so should only be run once. Double quotation marks
 are removed to avoid that problem.
 """
-function to_quoted_string_vec(svec)
+function stringvec_to_quotedstringvec!(svec::Vector)
 	for i in eachindex(svec)
 		svec[i] = replace(string('\"', svec[i], '\"'), "\"\"" => "\"")
 	end
-end
+end # stringvec_to_quotedstringvec!
 
 """
-    calc_sraffa_matrix(np::Int64, ns::Int64, io::IOdata)
+Calculate the Sraffa matrix, which is used to calculate domestic prices
 	# np: number of products
 	# ns: number of sectors
 	# io: IOdata data structure
-
-Calculate the Sraffa matrix, which is used to calculate domestic prices
 """
-function calc_sraffa_matrix(np::Int64, ns::Int64, io::IOdata)
+function calc_sraffa_matrix(np::Integer, ns::Integer, io::IOdata)
 	sraffa_matrix = Array{Float64}(undef, np, np)
 	# Domestic prices
 	for i in 1:np
@@ -72,19 +91,17 @@ function calc_sraffa_matrix(np::Int64, ns::Int64, io::IOdata)
 		end
 	end
     return sraffa_matrix
-end
+end # calc_sraffa_matrix
 
 """
-    calc_dom_prices(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, prices::PriceData, io::IOdata, exog::ExogParams)
+Evaluate the Sraffa system to get domestic prices
 	# t: time index (for exchange rate)
 	# np: number of products
 	# ns: number of sectors
 	# ω: wage share by sector
 	# io: IOdata data structure
-
-Evaluate the Sraffa system to get domestic prices
 """
-function calc_dom_prices(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, prices::PriceData, io::IOdata, exog::ExogParams)
+function calc_dom_prices(t::Integer, np::Integer, ns::Integer, ω::Array{Float64,1}, prices::PriceData, io::IOdata, exog::ExogParams)
 	sraffa_matrix = calc_sraffa_matrix(np, ns, io)
 	wage_vector = Array{Float64}(undef, np)
 	world_price_vector = Array{Float64}(undef, np)
@@ -95,23 +112,20 @@ function calc_dom_prices(t::Int64, np::Int64, ns::Int64, ω::Array{Float64,1}, p
 	sraffa_RHS = wage_vector + world_price_vector
 	# Solve the Sraffa system and return the result
 	inv(LinearAlgebra.I - [sraffa_matrix[i,j] * (1 - io.m_frac[j]) for i in 1:np, j in 1:np]) * sraffa_RHS
-end
+end # calc_dom_prices
 
 
 """
-    intermed_tech_change(α, k, θ = nothing, b = nothing)
-	
-	α(np,ns) = matrix of cost shares
+Calculate growth rate of intermediate demand coefficients (that is, io.D entries), or the intercepts (for initialization)	
+	σ(np,ns) = matrix of cost shares
 	k = single value or a vector (ns) of rate coefficients
 	θ = single value or vector (ns) of exponents
 	c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
 	b(np,ns) = matrix of weights (if b = nothing it is set to one)
-
-Calculate growth rate of intermediate demand coefficients (that is, io.D entries), or the intercepts (for initialization)
 """
-function intermed_tech_change(α, k, θ = 2.0, c = nothing, b = nothing)
+function calc_intermed_techchange(σ::Array{Float64,2}, k::NumOrVector, θ::NumOrVector = 2.0, c::NumOrVector = nothing, b::NumOrVector = nothing)
 	# Initialize values
-	(np, ns) = size(α)
+	(np, ns) = size(σ)
 	if isa(k, Number)
 		k = k * ones(ns)
 	end
@@ -125,60 +139,57 @@ function intermed_tech_change(α, k, θ = 2.0, c = nothing, b = nothing)
 		c = zeros(np, ns)
 	end
 	
-	cost_shares_exponentiated = [α[p,s]^θ[s] for p in 1:np, s in 1:ns]
+	cost_shares_exponentiated = [σ[p,s]^θ[s] for p in 1:np, s in 1:ns]
 	denom = sum(cost_shares_exponentiated .* b, dims = 1).^(1.0 .- 1.0 ./ θ)'
-	num = [(cost_shares_exponentiated .* b ./ (α .+ IOlib.ϵ))[p,s] * k[s] for p in 1:np, s in 1:ns]
+	num = [(cost_shares_exponentiated .* b ./ (σ .+ IOlib.ϵ))[p,s] * k[s] for p in 1:np, s in 1:ns]
 
 	return c .- num ./ (denom .+ IOlib.ϵ)
+end # calc_intermed_techchange
+
+"Clean up folders if specified in params"
+function clean_folders(params::Dict)
+	if params["clear-folders"]["results"] && isdir(params["results_path"])
+		for f in readdir(params["results_path"])
+			rm(joinpath(params["results_path"], f))
+		end
+	end
+	if params["clear-folders"]["calibration"] && isdir(params["calibration_path"])
+		for f in readdir(params["calibration_path"])
+			rm(joinpath(params["calibration_path"], f))
+		end
+	end
+	if params["clear-folders"]["diagnostics"] && isdir(params["diagnostics_path"])
+		for f in readdir(params["diagnostics_path"])
+			rm(joinpath(params["diagnostics_path"], f))
+		end
+		if !params["report-diagnostics"]
+			rm(params["diagnostics_path"])
+		end
+	end
+
+	# Ensure that they exist
+	mkpath(params["results_path"])
+	mkpath(params["calibration_path"])
+	if params["report-diagnostics"]
+		mkpath(params["diagnostics_path"])
+	end
 end
 
-
-"""
-    ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_error::Bool)
-
-Implement the Macro model. This is the main function.
-"""
-function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_error::Bool)
+"Implement the Macro model. This is the main function for LEAP-Macro"
+function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Integer, continue_if_error::Bool)
 
     #------------status
     @info "Loading data..."
     #------------status
 
-    params = IOlib.parse_input_file(file)
-
 	# Clean up folders if requested
 	if run == 0
-		if params["clear-folders"]["results"] & isdir(params["results_path"])
-			for f in readdir(params["results_path"])
-				rm(joinpath(params["results_path"], f))
-			end
-		end
-		if params["clear-folders"]["calibration"] & isdir(params["calibration_path"])
-			for f in readdir(params["calibration_path"])
-				rm(joinpath(params["calibration_path"], f))
-			end
-		end
-		if params["clear-folders"]["diagnostics"] & isdir(params["diagnostics_path"])
-			for f in readdir(params["diagnostics_path"])
-				rm(joinpath(params["diagnostics_path"], f))
-			end
-			if !params["report-diagnostics"]
-				rm(params["diagnostics_path"])
-			end
-		end
-
-		# Ensure that they exist
-		mkpath(params["results_path"])
-		mkpath(params["calibration_path"])
-		if params["report-diagnostics"]
-			mkpath(params["diagnostics_path"])
-		end
-
+		clean_folders(params)
 	end
 
-	io, np, ns = IOlib.supplyusedata(file)
-	prices = IOlib.prices_init(np, io)
-	exog = IOlib.get_var_params(file)
+	io, np, ns = IOlib.process_sut(params)
+	prices = IOlib.initialize_prices(np, io)
+	exog = IOlib.get_var_params(params)
 
 	# For exogenous potential output and world prices, values must be specified for all years, so get indices for first year
 	pot_output_ndxs = findall(x -> !ismissing(x), exog.exog_pot_output[1,:])
@@ -194,13 +205,13 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	#############################################################################
 
 	# Years
-    base_year = params["years"]["start"]
-    final_year = params["years"]["end"]
+	years = params["years"]["start"]:params["years"]["end"]
 	# Investment function
-    neutral_growth = params["investment-fcn"]["init_neutral_growth"]
-    util_sens_scalar = params["investment-fcn"]["util_sens"]
-    profit_sens = params["investment-fcn"]["profit_sens"]
-    intrate_sens = params["investment-fcn"]["intrate_sens"]
+	α = InvestmentFunction(
+		params["investment-fcn"]["util_sens"], # util
+		params["investment-fcn"]["profit_sens"], # profit
+		params["investment-fcn"]["intrate_sens"] # bank
+	)
     growth_adj = params["investment-fcn"]["growth_adj"]
 	# Linear program objective function
     wu = params["objective-fcn"]["category_weights"]["utilization"]
@@ -212,7 +223,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	ϕx = params["objective-fcn"]["product_sector_weight_factors"]["exports_cov"]
 	# Taylor function
 	tf = TaylorFunction(
-		neutral_growth, # γ0
+		params["investment-fcn"]["init_neutral_growth"], # γ0
 		params["taylor-fcn"]["neutral_growth_band"][1], # min_γ0
 		params["taylor-fcn"]["neutral_growth_band"][2], # max_γ0
 		params["taylor-fcn"]["gr_resp"], # gr_resp
@@ -242,9 +253,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		tf.π_init = tf.π_targ
 	end
 	# Wage rate function
-	infl_passthrough = params["wage-fcn"]["infl_passthrough"]
-	lab_constr_coeff = params["wage-fcn"]["lab_constr_coeff"]
-	LEAP_indices = params["LEAP_sector_indices"]
+	wage_fn = WageAdjustment(
+		params["wage-fcn"]["infl_passthrough"], # h
+		params["wage-fcn"]["lab_constr_coeff"] # k
+	)
 	# Optionally update technical coefficients (the scaled Use matrix, io.D)
 	calc_use_matrix_tech_change = haskey(params, "tech-param-change") && !isnothing(params["tech-param-change"]) && haskey(params["tech-param-change"], "rate_constant")
 	if calc_use_matrix_tech_change
@@ -252,14 +264,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	else
 		tech_change_rate_constant = 0.0 # Not used in this case, but assign a value
 	end
-
-	#----------------------------------
-    # Calculate variables based on parameters
-    #----------------------------------
-	# Number of time steps
-	ntime = 1 + (final_year - base_year)
+	# Link to LEAP
+	LEAP_indices = params["LEAP_sector_indices"]
 	# Initial autonomous growth rate
-	γ_0 = neutral_growth * ones(ns)
+	γ_0 = params["investment-fcn"]["init_neutral_growth"] * ones(ns)
 
 	#############################################################################
 	#
@@ -280,11 +288,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	# Total investment
     I_total = sum(io.I)
 	# Track non-energy investment separate from energy investment (which is supplied from LEAP)
-    I_ne = I_total - I_en[1]
+    I_ne = I_total - leapvals.I_en[1]
     # Share of supply of investment goods
     θ = io.I / sum(io.I)
-	# Investment function parameter -- make a vector
-    util_sens = util_sens_scalar * ones(ns)
 	# Initial values: These will change endogenously over time
 	γ = γ_0
 	i_bank = tf.i_targ
@@ -309,7 +315,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	# Intermediate variables
 	profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
 	price_of_capital = dot(θ,prices.pb)
-	I_nextper = (1 + neutral_growth) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
+	I_nextper = (1 + params["investment-fcn"]["init_neutral_growth"]) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
 	profit_share_rel_capprice = (1/price_of_capital) * profit_per_output
 	init_profit = sum((γ_0 + exog.δ) .* io.g .* profit_share_rel_capprice)
     init_profit_rate = init_profit/I_nextper
@@ -439,7 +445,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		@info optim_output
 	end
     status = primal_status(mdl)
-    @info "Calibrating for $base_year: $status"
+    @info "Calibrating for " * string(years[1]) * ": $status"
 
 	# Sector variables
     IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
@@ -489,7 +495,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	pw_prev = prices.pw ./ (1 .+ πw)
 	pd_prev = prices.pd ./ (1 .+ πd)
     pb_prev = param_pb ./ (1 .+ πb)
-    prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/(1 + neutral_growth)
+    prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/(1 + params["investment-fcn"]["init_neutral_growth"])
 	prev_g = value.(u) .* z
 	prev_g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
 
@@ -502,18 +508,16 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	end
 
 	prev_GDP_deflator = 1
-    prev_GDP_gr = neutral_growth
+    prev_GDP_gr = params["investment-fcn"]["init_neutral_growth"]
     πg = sum(prev_g_share .* πb)
 	πF = sum(πb .* value.(F))/sum(value.(F))
 	if calc_use_matrix_tech_change
 		sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
 		intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
-		intermed_tech_change_intercept = -intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
+		calc_intermed_techchange_intercept = -calc_intermed_techchange(intermed_cost_shares, tech_change_rate_constant)
 	end
 
 	lab_force_index = 1
-
-    year = base_year
 
 	#--------------------------------
 	# Initialize array of indices to pass to LEAP
@@ -526,7 +530,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		labels = vcat(labels, params["Employment-branch"]["name"])
 	end
 	labels = vcat(labels, params["LEAP_sector_names"])
-    indices = Array{Float64}(undef, ntime, length(labels))
+    indices = Array{Float64}(undef, length(years), length(labels))
 
 	#------------------------------------------
     # Initialize files for writing results
@@ -535,40 +539,39 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	sector_names = params["included_sector_names"]
 	product_names = params["included_product_names"]
 	# Quote the sector and product names (for putting into CSV files)
-	to_quoted_string_vec(sector_names)
-	to_quoted_string_vec(product_names)
+	stringvec_to_quotedstringvec!(sector_names)
+	stringvec_to_quotedstringvec!(product_names)
 
 	# Create files for sector variables
-	output_var(params, sector_names, "sector_output", run, "", "w")
-	output_var(params, sector_names, "potential_sector_output", run, "", "w")
-	output_var(params, sector_names, "capacity_utilization", run, "", "w")
-	output_var(params, sector_names, "real_value_added", run, "", "w")
-	output_var(params, sector_names, "profit_rate", run, "", "w")
-	output_var(params, sector_names, "autonomous_investment_rate", run, "", "w")
+	write_header_to_csv(params, sector_names, "sector_output", run)
+	write_header_to_csv(params, sector_names, "potential_sector_output", run)
+	write_header_to_csv(params, sector_names, "capacity_utilization", run)
+	write_header_to_csv(params, sector_names, "real_value_added", run)
+	write_header_to_csv(params, sector_names, "profit_rate", run)
+	write_header_to_csv(params, sector_names, "autonomous_investment_rate", run)
 	# Create files for product variables
-	output_var(params, product_names, "final_demand", run, "", "w")
-	output_var(params, product_names, "imports", run, "", "w")
-	output_var(params, product_names, "exports", run, "", "w")
-	output_var(params, product_names, "basic_prices", run, "", "w")
-	output_var(params, product_names, "domestic_prices", run, "", "w")
+	write_header_to_csv(params, product_names, "final_demand", run)
+	write_header_to_csv(params, product_names, "imports", run)
+	write_header_to_csv(params, product_names, "exports", run)
+	write_header_to_csv(params, product_names, "basic_prices", run)
+	write_header_to_csv(params, product_names, "domestic_prices", run)
 	# Create a file to hold scalar variables
 	scalar_var_list = ["GDP gr", "curr acct surplus to GDP ratio", "curr acct surplus", "real GDP",
 					   "GDP deflator", "labor productivity gr", "labor force gr", "wage rate gr",
 					   "wage per effective worker gr", "real investment", "central bank rate",
 					   "terms of trade index", "real xr index", "nominal xr index"]
-	to_quoted_string_vec(scalar_var_list)
-	output_var(params, scalar_var_list, "collected_variables", run, "", "w")
+	stringvec_to_quotedstringvec!(scalar_var_list)
+	write_header_to_csv(params, scalar_var_list, "collected_variables", run)
 
 	#############################################################################
 	#
-    # Loop over years
+    # Run simulation
 	#
 	#############################################################################
-	base_year_plusone = base_year + 1
-    @info "Running from $base_year_plusone to $final_year:"
+    @info "Running from " * string(years[2]) * " to " * string(last(years)) * ":"
 
     previous_failed = false
-    for t in 1:ntime
+    for t in eachindex(years)
 		#--------------------------------
 		# Output
 		#--------------------------------
@@ -640,7 +643,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 
 		lab_force_index *= 1 + L_gr
 
-		w_gr = infl_passthrough * πF + λ_gr * (1.0 + lab_constr_coeff * (L_gr - exog.working_age_grs[t]))
+		w_gr = wage_fn.h * πF + λ_gr * (1.0 + wage_fn.k * (L_gr - exog.working_age_grs[t]))
 		ω_gr = w_gr - λ_gr - πg
 		ω = (1.0 + ω_gr) * ω
 
@@ -650,10 +653,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		if calc_use_matrix_tech_change && !previous_failed
 			sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ g
 			intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
-			D_hat = intermed_tech_change_intercept + intermed_tech_change(intermed_cost_shares, tech_change_rate_constant)
+			D_hat = calc_intermed_techchange_intercept + calc_intermed_techchange(intermed_cost_shares, tech_change_rate_constant)
 			io.D = io.D .* exp.(D_hat) # This ensures that io.D will not become negative
 			if params["report-diagnostics"]
-				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(year) * ".csv"), io.D, params["included_product_codes"], params["included_sector_codes"])
+				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(years[t]) * ".csv"), io.D, params["included_product_codes"], params["included_sector_codes"])
 			end
 		end
 
@@ -678,9 +681,9 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		#--------------------------------
 		if !previous_failed
 			# Investment function
-			γ_u = util_sens .* (value.(u) .- 1)
-			γ_r = profit_sens * (profit_rate .- targ_profit_rate)
-			γ_i = -intrate_sens * (i_bank - tf.i_targ0) * ones(ns)
+			γ_u = α.util * (value.(u) .- 1)
+			γ_r = α.profit * (profit_rate .- targ_profit_rate)
+			γ_i = -α.bank * (i_bank - tf.i_targ0) * ones(ns)
 			γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
 			# Override default behavior if production is exogenously specified
 			if t > 1
@@ -693,7 +696,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
         I_ne_disag = z .* (γ + exog.δ) .* capital_output_ratio
         I_ne = sum(I_ne_disag)
 		# Combine with energy investment and any additional exogenous investment
-        I_total = I_ne + I_en[t] + exog.I_addl[t]
+        I_total = I_ne + leapvals.I_en[t] + exog.I_addl[t]
 		# Update autonomous investment term
         γ_0 = γ_0 + growth_adj * (γ - γ_0)
 
@@ -732,7 +735,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		#--------------------------------
 		# Calculate indices to pass to LEAP
 		#--------------------------------
-        indices[t,1] = year
+        indices[t,1] = years[t]
 		curr_index = 1
 		if haskey(params, "GDP-branch")
 			curr_index += 1
@@ -814,25 +817,25 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		prices.pb = exog.xr[t] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
 		
 		# Sector variables
-		output_var(params, g, "sector_output", run, year, "a")
-		output_var(params, z, "potential_sector_output", run, year, "a")
-		output_var(params, u_report, "capacity_utilization", run, year, "a")
-		output_var(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, year, "a")
-		output_var(params, profit_rate, "profit_rate", run, year, "a")
-		output_var(params, γ_0, "autonomous_investment_rate", run, year, "a")
+		append_row_to_csv(params, g, "sector_output", run, years[t])
+		append_row_to_csv(params, z, "potential_sector_output", run, years[t])
+		append_row_to_csv(params, u_report, "capacity_utilization", run, years[t])
+		append_row_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, years[t])
+		append_row_to_csv(params, profit_rate, "profit_rate", run, years[t])
+		append_row_to_csv(params, γ_0, "autonomous_investment_rate", run, years[t])
 	    # Product variables
-		output_var(params, F_report, "final_demand", run, year, "a")
-		output_var(params, M_report, "imports", run, year, "a")
-		output_var(params, X_report, "exports", run, year, "a")
-		output_var(params, param_pb, "basic_prices", run, year, "a")
-		output_var(params, param_pd, "domestic_prices", run, year, "a")
+		append_row_to_csv(params, F_report, "final_demand", run, years[t])
+		append_row_to_csv(params, M_report, "imports", run, years[t])
+		append_row_to_csv(params, X_report, "exports", run, years[t])
+		append_row_to_csv(params, param_pb, "basic_prices", run, years[t])
+		append_row_to_csv(params, param_pd, "domestic_prices", run, years[t])
 		# Scalar variables
 		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
 							prices.RER, prices.XR]
-		output_var(params, scalar_var_vals, "collected_variables", run, year, "a")
+		append_row_to_csv(params, scalar_var_vals, "collected_variables", run, years[t])
 
-		if t == ntime
+		if t == length(years)
 			break
 		end
 
@@ -886,7 +889,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 		fix(I_tot, param_I_tot)
 
 		if params["report-diagnostics"]
-			open(joinpath(params["diagnostics_path"], string("model_", run, "_", year, ".txt")), "w") do f
+			open(joinpath(params["diagnostics_path"], string("model_", run, "_", years[t], ".txt")), "w") do f
 				print(f, mdl)
 			end
 		end
@@ -897,9 +900,8 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 			@info optim_output
 		end
         status = primal_status(mdl)
-		# Increment year to report the correct year is being calculated
-		year += 1
-        @info "Simulating for $year: $status"
+		# Add one to year to report the year currently being calculated
+        @info "Simulating for " * string(years[t + 1]) * ": $status"
         previous_failed = status != MOI.FEASIBLE_POINT
         if previous_failed
 			finndx = length(LEAP_indices) + 2 # Adds column for year and for GDP
@@ -912,7 +914,7 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 
     # Make indices into indices
     indices_0 = indices[1,:]
-    for t = 1:ntime
+    for t in eachindex(years)
         indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
     end
     open(joinpath(params["results_path"], string("indices_",run,".csv")), "w") do io
@@ -924,15 +926,10 @@ function ModelCalculations(file::String, I_en::Array, run::Int64, continue_if_er
 	mdl = nothing
 
     return indices
-end # ModelCalculations
+end # macro_main
 
-"""
-    resultcomparison(params, run::Int64)
-
-Compare the GDP and value added indices generated from different runs and calculate the maximum difference.
-Indices are specified in the YAML configuration file.
-"""
-function resultcomparison(params, run::Int64)
+"Compare the GDP, employment, and value added indices generated from different runs and calculate the maximum difference."
+function compare_results(params::Dict, run::Integer)
     # Obtains data from indices files for current run and previous run
     file1 = joinpath(params["results_path"], string("indices_",run,".csv"))
     file2 = joinpath(params["results_path"], string("indices_",run-1,".csv"))
@@ -952,28 +949,21 @@ function resultcomparison(params, run::Int64)
     end
 
     return max_diff
-end
+end # compare_results
 
-"""
-    runleapmacromodel(file::String, logile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
+"Iteratively run the Macro model and LEAP until convergence. This is the primary entry point for LEAP-Macro."
+function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 
-Iteratively run the Macro model and LEAP until convergence.
-"""
-function runleapmacromodel(file::String, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
-
-    ## get base_year and final_year, and force fresh start with global_params
-    params = IOlib.parse_input_file(file, force = true, include_energy_sectors = include_energy_sectors)
-    base_year = params["years"]["start"]
-    final_year = params["years"]["end"]
-    ntime = 1 + (final_year - base_year)
+    # Read in global parameters
+    params = IOlib.parse_param_file(param_file, include_energy_sectors = include_energy_sectors)
 
     # set model run parameters and initial values
-    I_en = zeros(ntime, 1)
+    leapvals = LEAPfunctions.initialize_leapresults(params)
     run_leap = params["model"]["run_leap"]
     if run_leap
         max_runs = params["model"]["max_runs"]
         ## checks that user has LEAP installed
-        if ismissing(LEAPfunctions.connecttoleap())
+        if ismissing(LEAPfunctions.connect_to_leap())
             @error "Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file."
             return
         end
@@ -982,17 +972,26 @@ function runleapmacromodel(file::String, logfile::IOStream, include_energy_secto
     end
     max_tolerance = params["model"]["max_tolerance"]
 
+	if include_energy_sectors
+		energy_sect_string = " (including energy sectors)"
+	else
+		energy_sect_string = ""
+	end
+	println("With configuration file '$param_file'" * energy_sect_string * ":")
     for run = 0:max_runs
         ## Run Macro model
         #------------status
 		print("Macro model run ($run)...")
         @info "Macro model run ($run)..."
         #------------status
-        indices = ModelCalculations(file, I_en, run, continue_if_error)
+        indices = macro_main(params, leapvals, run, continue_if_error)
+		#------------status
+		println("completed")
+        #------------status
 
         ## Compare run results
         if run >= 1
-            tolerance = resultcomparison(params, run)
+            tolerance = compare_results(params, run)
             if tolerance <= max_tolerance
                 @info @sprintf("Convergence in run number %d at %.2f%% ≤ %.2f%% target...", run, tolerance, max_tolerance)
                 return
@@ -1010,43 +1009,40 @@ function runleapmacromodel(file::String, logfile::IOStream, include_energy_secto
 				#------------status
 				@info "Hiding LEAP to improve performance..."
 				#------------status
-				LEAPfunctions.visible(false)
+				LEAPfunctions.hide_leap(true)
 			end
 
             #------------status
             @info "Sending Macro output to LEAP..."
             #------------status
-            LEAPfunctions.outputtoleap(file, indices, run)
+            LEAPfunctions.send_results_to_leap(params, indices)
             ## Run LEAP model
 			try
 				#------------status
 				@info "Running LEAP model..."
 				flush(logfile)
 				#------------status
-				LEAPfunctions.calculateleap(params["LEAP-info"]["result_scenario"])
+				LEAPfunctions.calculate_leap(params["LEAP-info"]["result_scenario"])
 
 				## Obtain energy investment data from LEAP
 				#------------status
 				@info "Obtaining LEAP results..."
 				flush(logfile)
 				#------------status
-				I_en = LEAPfunctions.energyinvestment(file, run)
+				leapvals = LEAPfunctions.get_results_from_leap(params, run)
 			finally
 				if params["model"]["hide_leap"]
 					#------------status
 					@info "Restoring LEAP..."
 					#------------status
-					LEAPfunctions.visible(true)
+					LEAPfunctions.hide_leap(false)
 				end
 				flush(logfile)
 			end
         end
-		#------------status
-		println("completed")
-        #------------status
 
     end
 
-end # runleapmacromodel
+end # leapmacro
 
-end
+end # MacroModel

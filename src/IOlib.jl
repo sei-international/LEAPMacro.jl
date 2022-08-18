@@ -1,11 +1,8 @@
 module IOlib
 using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
 
-export supplyusedata, inputoutputcalc, prices_init, parse_input_file, write_matrix_to_csv, write_vector_to_csv,
+export process_sut, inputoutputcalc, initialize_prices, parse_param_file, write_matrix_to_csv, write_vector_to_csv,
        IOdata, PriceData, ExogParams, ϵ
-
-"Global variable to store the result of parsing the configuration file"
-global_params = nothing
 
 "Small number for avoiding divide-by-zero problems"
 const ϵ = 1.0e-11
@@ -33,13 +30,13 @@ mutable struct PriceData
     pb::Array{Float64,1}
     pd::Array{Float64,1}
     pw::Array{Float64,1}
-    Pg::Float64
-    Pw::Float64
-    Px::Float64
-    Pm::Float64
-    Ptrade::Float64
-    XR::Float64
-    RER::Float64
+    Pg::AbstractFloat
+    Pw::AbstractFloat
+    Px::AbstractFloat
+    Pm::AbstractFloat
+    Ptrade::AbstractFloat
+    XR::AbstractFloat
+    RER::AbstractFloat
 end
 
 "User-specified parameters"
@@ -61,12 +58,8 @@ mutable struct ExogParams
     import_price_elast::Array{Any,1} # np
 end
 
-"""
-    write_matrix_to_csv(filename, array, colnames, rownames)
-
-Write a matrix to a CSV file.
-"""
-function write_matrix_to_csv(filename, array, rownames, colnames)
+"Write a matrix to a CSV file."
+function write_matrix_to_csv(filename::AbstractString, array::Array, rownames::Vector, colnames::Vector)
 	open(filename, "w") do io
         # Write header
 		write(io, string("", ',', join(colnames, ','), "\r\n"))
@@ -75,14 +68,10 @@ function write_matrix_to_csv(filename, array, rownames, colnames)
             write(io, string(rownames[i], ',', join(array[i,:], ','), "\r\n"))
         end
 	end
-end
+end # write_matrix_to_csv
 
-"""
-    write_vector_to_csv(filename, vector, varname, rownames)
-
-Write a vector to a CSV file.
-"""
-function write_vector_to_csv(filename, vector, varname, rownames)
+"Write a vector to a CSV file."
+function write_vector_to_csv(filename::AbstractString, vector::Vector, varname::AbstractString, rownames::Vector)
 	open(filename, "w") do io
         # Write header
 		write(io, string("", ',', varname, "\r\n"))
@@ -90,25 +79,17 @@ function write_vector_to_csv(filename, vector, varname, rownames)
             write(io, string(rownames[i], ',', vector[i], "\r\n"))
         end
 	end
-end
+end # write_vector_to_csv
 
-"""
-    string_to_float(str)
-
-Convert strings in Dataframe to floats and fill in missing values with 0.
-"""
-function string_to_float(str)
+"Convert strings in Dataframe to floats and fill in missing values with 0."
+function string_to_float(str::Union{Missing,AbstractString})
     try return(parse(Float64, str)) catch
         return(0.0) # Missing values set to zero
     end
-end
+end # string_to_float
 
-"""
-    char_index_to_int(str)
-
-Convert an index in the form of characters as used in Excel (e.g., "AC") into an integer index
-"""
-function char_index_to_int(str)
+"Convert an index in the form of characters as used in Excel (e.g., 'AC') into an integer index"
+function char_index_to_int(str::AbstractString)
 	str_up = uppercase(str)
 	mult = 26^length(str_up) # 26 is number of characters in the Roman alphabet
 	ndx = 0
@@ -117,14 +98,10 @@ function char_index_to_int(str)
 		ndx += mult * (Int(c) - Int('A') + 1)
 	end
 	return(Int(ndx))
-end
+end # char_index_to_int
 
-"""
-    excel_ref_to_rowcol(str)
-
-Convert a cell reference in Excel form (e.g., "AB3") to [row, col] (eg., [3,28])
-"""
-function excel_ref_to_rowcol(str)
+"Convert a cell reference in Excel form (e.g., 'AB3') to [row, col] (eg., [3,28])"
+function excel_ref_to_rowcol(str::AbstractString)
 	m = match(r"([A-Za-z]+)([0-9]+)", strip(str)) # Be tolerant of leading and trailing spaces
 	if m === nothing
 		error("Cell reference '$str' is not in the correct format (e.g., 'AB3')")
@@ -133,24 +110,16 @@ function excel_ref_to_rowcol(str)
 		c = m.captures
 		return[parse(Int64,c[2]),char_index_to_int(c[1])]
 	end
-end
+end # excel_ref_to_rowcol
 
-"""
-    excel_cell_to_float(df, str)
-
-Find the value of a cell in dataframe df referenced in Excel form (e.g., "AB3") and convert to float
-"""
-function excel_cell_to_float(df, str)
+"Find the value of a cell in dataframe df referenced in Excel form (e.g., 'AB3') and convert to float"
+function excel_cell_to_float(df::DataFrame, str::AbstractString)
 	rowcol = excel_ref_to_rowcol(str)
 	return string_to_float(df[rowcol[1],rowcol[2]])
-end
+end # excel_cell_to_float
 
-"""
-    excel_range_to_rowcol_pair(str)
-
-Convert a cell range in Excel form (e.g., "AB3:BG10") to [[row, col],[row,col]]
-"""
-function excel_range_to_rowcol_pair(str)
+"Convert a cell range in Excel form (e.g., 'AB3:BG10') to [[row, col],[row,col]]"
+function excel_range_to_rowcol_pair(str::AbstractString)
 	range_ends = split(str,":")
 	if length(range_ends) != 2
 		error("Cell range '$str' is not in the correct format (e.g., 'AB3:BG10')")
@@ -158,44 +127,25 @@ function excel_range_to_rowcol_pair(str)
 	else
 		return excel_ref_to_rowcol.(range_ends)
 	end
-end
+end # excel_range_to_rowcol_pair
 
-"""
-    df_to_mat(df)
-
-First convert strings in a Dataframe to floats and then convert the Dataframe to a Matrix.
-"""
-function df_to_mat(df)
+"First convert strings in a Dataframe to floats and then convert the Dataframe to a Matrix."
+function df_to_mat(df::DataFrame)
     for x = axes(df,2)
         df[!,x] = map(string_to_float, df[!,x]) # converts string to float
     end
     mat = Matrix(df) # convert dataframe to matrix
     return mat
-end
+end # df_to_mat
 
-"""
-    excel_range_to_mat(df, str)
-
-Extract a range in Excel format from a dataframe and return a numeric matrix
-"""
-function excel_range_to_mat(df, str)
+"Extract a range in Excel format from a dataframe and return a numeric matrix"
+function excel_range_to_mat(df::DataFrame, str::AbstractString)
 	rng = excel_range_to_rowcol_pair(str)
 	return df_to_mat(df[rng[1][1]:rng[2][1],rng[1][2]:rng[2][2]])
-end
+end # excel_range_to_mat
 
-"""
-    parse_input_file(YAML_file::String; force::Bool = false, include_energy_sectors::Bool = false)
-
-Read in YAML input file and convert ranges if necessary.
-Force: reset global_params
-"""
-function parse_input_file(YAML_file::String; force::Bool = false, include_energy_sectors::Bool = false)
-	global global_params
-
-	if !force & !isnothing(global_params)
-		return global_params
-	end
-
+"Read in YAML input file and convert ranges if necessary."
+function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Bool = false)
     global_params = YAML.load_file(YAML_file)
 
     global_params["include-energy-sectors"] = include_energy_sectors
@@ -315,14 +265,10 @@ function parse_input_file(YAML_file::String; force::Bool = false, include_energy
     end
 
     return global_params
-end
+end # parse_param_file
 
-"""
-    get_var_params(param_file::String)
-
-Pull in user-specified parameters from different CSV input files with filenames specified in the YAML configuration file.
-"""
-function get_var_params(param_file::String)
+"Pull in user-specified parameters from different CSV input files with filenames specified in the YAML configuration file."
+function get_var_params(params::Dict)
     # Return an ExogParams struct
     retval = ExogParams(
                     Array{Float64}(undef, 0), # πw_base
@@ -341,10 +287,7 @@ function get_var_params(param_file::String)
                     Array{Float64}(undef, 0), # export_price_elast
                     Array{Float64}(undef, 0)) # import_price_elast          
 
-    params = parse_input_file(param_file)
-    base_year = params["years"]["start"]
-    final_year = params["years"]["end"]
-    nyears = final_year - base_year + 1
+    sim_years = params["years"]["start"]:params["years"]["end"]
     sec_ndxs = params["sector-indexes"]
     prod_ndxs = params["product-indexes"]
 
@@ -423,8 +366,8 @@ function get_var_params(param_file::String)
     #--------------------------------------------------------------------------------------
     # Time series
     #--------------------------------------------------------------------------------------
-    start_year = floor(Int64, time_series[1,:year])
-    end_year = start_year + length(time_series[!,:year]) - 1
+    data_start_year = floor(Int64, time_series[1,:year])
+    data_end_year = data_start_year + length(time_series[!,:year]) - 1
 
     # World inflation rate (apply to world prices only, others induced)
     world_infl_temp = time_series[!,:world_infl_rate]
@@ -458,9 +401,9 @@ function get_var_params(param_file::String)
     #--------------------------------------------------------------------------------------
     # Fill in by looping over years
     #--------------------------------------------------------------------------------------
-    for year in base_year:final_year
-        if year in start_year:end_year
-            year_ndx = year - start_year + 1
+    for year in sim_years
+        if year in data_start_year:data_end_year
+            year_ndx = year - data_start_year + 1
             # These have no defaults: check first
             if !ismissing(working_age_grs_temp[year_ndx])
                 push!(retval.working_age_grs, working_age_grs_temp[year_ndx])
@@ -496,11 +439,11 @@ function get_var_params(param_file::String)
                 push!(retval.βKV, βKV_default)
             end
         else
-			error_string = "Year " * string(year) * " is not in time series range " * string(start_year) * ":" * string(end_year)
+			error_string = "Year " * string(year) * " is not in time series range " * string(data_start_year) * ":" * string(data_end_year)
             throw(DomainError(year, error_string))
         end
 
-        deltat = max(0, year - base_year + 1) # Year past the end of calibration period
+        deltat = max(0, year - sim_years[1] + 1) # Year past the end of calibration period
 
         # Bring high values down, but don't bring low values up
         export_elast_demand_temp = export_elast_demand0 - (1 - exp(-export_elast_decay * deltat)) * (export_elast_demand0 - asympt_export_elast)
@@ -514,16 +457,16 @@ function get_var_params(param_file::String)
     # Optional files
     #--------------------------------------------------------------------------------------
 
-    retval.I_addl = zeros(nyears)
-    retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
-    retval.exog_max_util = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
-    retval.exog_price = Array{Union{Missing, Float64}}(missing, nyears, length(sec_ndxs))
+    retval.I_addl = zeros(length(sim_years))
+    retval.exog_pot_output = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
+    retval.exog_max_util = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
+    retval.exog_price = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
 
     if !isnothing(exog_investment_df)
         for row in eachrow(exog_investment_df)
             data_year = floor(Int64, row[:year])
-            if data_year in base_year:final_year
-                retval.I_addl[data_year - base_year + 1] = row[:addl_investment]
+            if data_year in sim_years
+                retval.I_addl[data_year - sim_years[1] + 1] = row[:addl_investment]
             end
        end
     end
@@ -544,8 +487,8 @@ function get_var_params(param_file::String)
         end
         for row in eachrow(exog_pot_output_df)
             data_year = floor(Int64, row[:year])
-            if data_year in base_year:final_year
-                retval.exog_pot_output[data_year - base_year + 1, data_sec_ndxs] .= Vector(row[2:end])
+            if data_year in sim_years
+                retval.exog_pot_output[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
             end
        end
     end
@@ -566,8 +509,8 @@ function get_var_params(param_file::String)
         end
         for row in eachrow(exog_max_util_df)
             data_year = floor(Int64, row[:year])
-            if data_year in base_year:final_year
-                retval.exog_max_util[data_year - base_year + 1, data_sec_ndxs] .= Vector(row[2:end])
+            if data_year in sim_years
+                retval.exog_max_util[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
             end
        end
     end
@@ -588,30 +531,26 @@ function get_var_params(param_file::String)
         end
         for row in eachrow(exog_real_price_df)
             data_year = floor(Int64, row[:year])
-            if data_year in base_year:final_year
-                retval.exog_price[data_year - base_year + 1, data_prod_ndxs] .= Vector(row[2:end])
+            if data_year in sim_years
+                retval.exog_price[data_year - sim_years[1] + 1, data_prod_ndxs] .= Vector(row[2:end])
             end
        end
     end
 
     return retval
 
-end
+end # get_var_params
 
 """
-    energy_nonenergy_link_measure(param_file::String)
-
 Calculate a measure of how important the demand for non-energy goods from the energy sector is.
 
 The measure is a ratio of the sum of the elements of two Leontief inverses: one for the whole matrix of
-technical coefficients and the other for the matrix with A_{NE} sub-block excluded.
+technical coefficients and the other for the matrix with the ``A_{NE}`` sub-block excluded.
 
 The sum of the elements of a Leontief inverse can be interpreted as the change in total output
 from an increase in final demand that is the same across all sectors.
 """
-function energy_nonenergy_link_measure(param_file::String)
-	params = parse_input_file(param_file)
-
+function energy_nonenergy_link_measure(params::Dict)
 	full_sector_ndxs = sort(vcat(params["sector-indexes"],params["energy-sector-indexes"]))
 	full_product_ndxs = sort(vcat(params["product-indexes"],params["energy-product-indexes"]))
 	ns = length(full_sector_ndxs)
@@ -660,14 +599,10 @@ function energy_nonenergy_link_measure(param_file::String)
 	#--------------------------------
 	return 1.0 - sum(L_reduced)/sum(L)
 
-end
+end # energy_nonenergy_link_measure
 
-"""
-    supplyusedata(param_file::String)
-
-Pull in supply-use data from CSV input files.
-"""
-function supplyusedata(param_file::String)
+"Process supply-use data from CSV input file."
+function process_sut(params::Dict)
     retval = IOdata(Array{Float64}(undef, 0, 0), # D
                     Array{Float64}(undef, 0, 0), # S
                     Array{Float64}(undef, 0, 0), # Vnorm
@@ -682,9 +617,7 @@ function supplyusedata(param_file::String)
                     Array{Float64}(undef, 0), # m_frac
                     Array{Float64}(undef, 0), # energy_share
                     Array{Float64}(undef, 0)) # μ
-    # Reads in key parameters from the YAML config file
-    params = parse_input_file(param_file)
-
+    
 	sector_ndxs = params["sector-indexes"]
 	product_ndxs = params["product-indexes"]
 
@@ -825,7 +758,7 @@ function supplyusedata(param_file::String)
         write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients.csv"), retval.D, params["included_product_codes"], params["included_sector_codes"])
 		# Write out nonenergy-energy link metric
         open(joinpath(params["diagnostics_path"],"nonenergy_energy_link_measure.txt"), "w") do fhndl
-			R = 100 .* energy_nonenergy_link_measure(param_file)
+			R = 100 .* energy_nonenergy_link_measure(params)
 			A_NE_metric_string = @sprintf("This value should be small: %.2f%%.", R)
 			println(fhndl, "Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:")
 		    println(fhndl, A_NE_metric_string)
@@ -834,18 +767,14 @@ function supplyusedata(param_file::String)
 
     return retval, np, ns
 
-end
+end # process_sut
 
-"""
-    prices_init(np::Int64, io::IOdata)
-
-Initialize price structure.
-"""
+"Initialize price structure."
 # All domestic prices are initialized to one
-function prices_init(np::Int64, io::IOdata)
+function initialize_prices(np::Integer, io::IOdata)
     return PriceData(ones(np), #pb
                      ones(np), #pd
-                     ones(np), #pw in domestic currency (converted using xr in ModelCalculations)
+                     ones(np), #pw in domestic currency (converted using xr in macro_main)
                      1, # Pg
                      1, # Pw
                      1, # Px
@@ -853,6 +782,6 @@ function prices_init(np::Int64, io::IOdata)
                      1, # Ptrade
                      1, # XR
                      1) # RER
-end
+end # initialize_prices
 
-end
+end # IOlib

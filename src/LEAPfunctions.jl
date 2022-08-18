@@ -1,39 +1,34 @@
 module LEAPfunctions
 using DelimitedFiles, PyCall, DataFrames, CSV
 
-export visible, outputtoleap, calculateleap, energyinvestment
+export hide_leap, send_results_to_leap, calculate_leap, get_results_from_leap, LEAPresults
 
-include("./IOlib.jl")
-using .IOlib
-
-"""
-    visible(state::Bool)
-
-Hide or show LEAP by setting visibility.
-"""
-function visible(state::Bool)
-	LEAP = connecttoleap()
-	LEAP.Visible = state
-	disconnectfromleap(LEAP)
+"Values passed from LEAP to Macro"
+mutable struct LEAPresults
+    I_en::Array{Any,1} # Investment in the energy sector x year
 end
 
-"""
-    outputtoleap(file::String, indices::Array)
+"Return a LEAPresults struct initialized to zero"
+function initialize_leapresults(params::Dict)
+    return LEAPresults(
+        zeros(1 + (params["years"]["end"] - params["years"]["start"])) # I_en
+    )
+end # initialize_leapresults
 
-First obtain LEAP branch info from the YAML config file and then send Macro model results to LEAP.
-"""
-function outputtoleap(file::String, indices::Array, run::Int64)
-    # LEAP parameters from config file
-    if run == 0
-        params = IOlib.parse_input_file(file, force = true)
-    else
-        params = IOlib.parse_input_file(file)
-    end
+"Hide or show LEAP by setting visibility."
+function hide_leap(state::Bool)
+	LEAP = connect_to_leap()
+	LEAP.Visible = !state
+	disconnect_from_leap(LEAP)
+end # hide_leap
+
+"First obtain LEAP branch info from `params` and then send Macro model results to LEAP."
+function send_results_to_leap(params::Dict, indices::Array)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
     # connects program to LEAP
-    LEAP = connecttoleap()
+    LEAP = connect_to_leap()
 
     # Set ActiveView
     LEAP.ActiveView = "Analysis"
@@ -79,32 +74,30 @@ function outputtoleap(file::String, indices::Array, run::Int64)
             end_ndx = (col+1)*ndxrows
 
             if lasthistoricalyear > base_year
-                newexpression = interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
+                newexpression = build_interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
             else
-                newexpression = interp_expression(base_year, indices[start_ndx:end_ndx])
+                newexpression = build_interp_expression(base_year, indices[start_ndx:end_ndx])
             end
-            setbranchvar_expression(LEAP, branch, variable, newexpression, region = params["LEAP-info"]["region"], scenario=params["LEAP-info"]["input_scenario"])
+            set_branchvar_expression(LEAP, branch, variable, newexpression, region = params["LEAP-info"]["region"], scenario=params["LEAP-info"]["input_scenario"])
 
         end
         LEAP.SaveArea()
     finally
-	    disconnectfromleap(LEAP)
+	    disconnect_from_leap(LEAP)
     end
-end
+end # send_results_to_leap
 
 """
-    connecttoleap()
-
 Connect to the currently running instance of LEAP, if one exists; otherwise starts an instance of LEAP.
 
 Return a `PyObject` corresponding to the instance.
 If LEAP cannot be started, return `missing`
 """
-function connecttoleap()
+function connect_to_leap()
 	try
 		LEAPPyObj = pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
         max_loops = 5
-        while !LEAPPyObj.ProgramStarted & max_loops > 0
+        while !LEAPPyObj.ProgramStarted && max_loops > 0
             sleep(5)
             max_loops -= 1
         end
@@ -115,26 +108,20 @@ function connecttoleap()
             return LEAPPyObj
         end
 	catch
-        error("Cannot connect to LEAP. Is it installed?")
+        error("Cannot connect to LEAP. Is it installed and running?")
 		return missing
 	end
-end  # connecttoleap
+end  # connect_to_leap
 
-"""
-    disconnectfromleap(LEAPPyObj)
+"Repeatedly call PyCall's `pydecref(obj)` until null"
+function disconnect_from_leap(LEAPPyObj)
+    while !ispynull(LEAPPyObj)
+    	pydecref(LEAPPyObj)
+    end
+end # disconnect_from_leap
 
-Wrapper for PyCall's pydecref(obj), after saving
-"""
-function disconnectfromleap(LEAPPyObj)
-	pydecref(LEAPPyObj)
-end
-
-"""
-    interp_expression(base_year::Int64, newdata::Array; lasthistoricalyear::Int64=0)
-
-Create LEAP Interp expression from an array of values.
-"""
-function interp_expression(base_year::Int64, newdata::Array; lasthistoricalyear::Int64=0)
+"Create LEAP Interp expression from an array of values."
+function build_interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
     # Creates start of expression. Includes historical data if available
     if lasthistoricalyear > 0
         newexpression = string("If(year <= ", lasthistoricalyear, ", ScenarioValue(Current Accounts), Value(", base_year,") * Interp(")
@@ -158,17 +145,15 @@ function interp_expression(base_year::Int64, newdata::Array; lasthistoricalyear:
         year = year + 1
     end
     return newexpression
-end
+end # build_interp_expression
 
 """
-    setbranchvar_expression(leapapplication::PyObject, branch::String, variable::String, newexpression::String; region::String = "", scenario::String = "")
-
 Set a LEAP branch-variable expression.
 
 The region and scenario arguments can be omitted by leaving them as empty strings.
 Note that performance is best if neither region nor scenario is specified.
 """
-function setbranchvar_expression(leapapplication::PyObject, branch::String, variable::String, newexpression::String; region::String = "", scenario::String = "")
+function set_branchvar_expression(leapapplication::PyObject, branch::AbstractString, variable::AbstractString, newexpression::AbstractString; region::AbstractString = "", scenario::AbstractString = "")
     # Set ActiveRegion and ActiveScenario as Julia doesn't allow a function call (ExpressionRS) to be set to a value
     if region != ""
         leapapplication.ActiveRegion = region
@@ -183,74 +168,53 @@ function setbranchvar_expression(leapapplication::PyObject, branch::String, vari
 
     # Refresh LEAP display
     leapapplication.Refresh()
-end  # setbranchvarexpression
+end  # set_branchvar_expression
 
-"""
-    calculateleap(scen_name::String)
-
-Calculate the LEAP model, returning results for the specified scenario.
-"""
-function calculateleap(scen_name::String)
+"Calculate the LEAP model, returning results for the specified scenario."
+function calculate_leap(scen_name::AbstractString)
     # connects program to LEAP
-    LEAP = connecttoleap()
+    LEAP = connect_to_leap()
     try
         LEAP.Scenario(scen_name).ResultsShown = true
         LEAP.Calculate()
         LEAP.SaveArea()
     finally
-	    disconnectfromleap(LEAP)
+	    disconnect_from_leap(LEAP)
     end
-end
+end # calculate_leap
 
-"""
-    energyinvestment(file::String, run::Int64)
-
-Obtain energy investment data from the LEAP model.
-"""
-function energyinvestment(file::String, run::Int64)
-    # LEAP parameters from config file
-    if run == 0
-        params = IOlib.parse_input_file(file, force = true)
-    else
-        params = IOlib.parse_input_file(file)
-    end
+"Obtain energy investment data from the LEAP model."
+function get_results_from_leap(params::Dict, run::Integer)
     base_year = params["years"]["start"]
     final_year = params["years"]["end"]
 
     # connects program to LEAP
-    LEAP = connecttoleap()
+    LEAP = connect_to_leap()
 
     # Set ActiveView and ActiveScenario
     LEAP.ActiveView = "Results"
     LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
 
+    leapvals = initialize_leapresults(params) # Initialize to zero
     nrows = (final_year - base_year) + 1
-    I_en = Array{Float64}(undef, nrows)
     I_en_temp = Array{Float64}(undef, nrows)
 
-    n_energy = 0
     try
         for b in LEAP.Branches
             if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
                 for y = base_year:final_year
                     I_en_temp[(y-base_year+1)] = b.Variable("Investment Costs").Value(y, params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
                 end
-                I_en = hcat(I_en, I_en_temp)
-                n_energy += 1
+                leapvals.I_en += I_en_temp
             end
         end
     finally
-    	disconnectfromleap(LEAP)
+    	disconnect_from_leap(LEAP)
     end
 
-    if n_energy > 0
-        I_en = sum(I_en[:,2:size(I_en, 2)], dims=2)
-    else
-        I_en .= 0.0
-    end
-    writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), I_en, ',')
+    writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, ',')
 
-    return I_en
-end
+    return leapvals
+end # get_results_from_leap
 
-end
+end # LEAPfunctions
