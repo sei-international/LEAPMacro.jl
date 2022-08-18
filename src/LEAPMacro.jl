@@ -14,10 +14,8 @@ module LEAPMacro
 
 using Logging, Dates, YAML
 
-include("./IOlib.jl")
-include("./LEAPfunctions.jl")
 include("./MacroModel.jl")
-using .IOlib, .LEAPfunctions, .MacroModel
+using .MacroModel
 
 "Run LEAP-Macro by calling `leapmacro`"
 function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stack::Bool = false, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
