@@ -6,12 +6,19 @@ export hide_leap, send_results_to_leap, calculate_leap, get_results_from_leap, L
 "Values passed from LEAP to Macro"
 mutable struct LEAPresults
     I_en::Array{Any,1} # Investment in the energy sector x year
+    pot_output::Array{Any,2} # Potential output from LEAP (converted to index) ns x year
+    price::Array{Any,2} # Real prices from LEAP (converted to index) np x year
 end
 
-"Return a LEAPresults struct initialized to zero"
+"Return an initialized LEAPresults struct"
 function initialize_leapresults(params::Dict)
+    ny = params["years"]["end"] - params["years"]["start"] + 1
+	ns = length(params["sector-indexes"])
+	np = length(params["product-indexes"])
     return LEAPresults(
-        zeros(1 + (params["years"]["end"] - params["years"]["start"])) # I_en
+        zeros(ny), # I_en
+        Array{Union{Missing, Float64}}(missing, ny, ns), # pot_output
+        Array{Union{Missing, Float64}}(missing, ny, np) # price
     )
 end # initialize_leapresults
 
@@ -194,7 +201,8 @@ function get_results_from_leap(params::Dict, run::Integer)
     LEAP.ActiveView = "Results"
     LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
 
-    leapvals = initialize_leapresults(params) # Initialize to zero
+    # Initialize all elements in the LEAPresults structure (I_en = 0, others are `missing`)
+    leapvals = initialize_leapresults(params)
 
     #--------------------------------
     # Investment expenditure
