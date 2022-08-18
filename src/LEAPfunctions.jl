@@ -3,9 +3,6 @@ using DelimitedFiles, PyCall, DataFrames, CSV
 
 export visible, outputtoleap, calculateleap, energyinvestment, LEAPresults
 
-include("./IOlib.jl")
-using .IOlib
-
 "Values passed from LEAP to Macro"
 mutable struct LEAPresults
     I_en::Array{Any,1} # Investment in the energy sector x year
