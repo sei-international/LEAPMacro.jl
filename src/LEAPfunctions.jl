@@ -113,9 +113,11 @@ function connect_to_leap()
 	end
 end  # connect_to_leap
 
-"Wrapper for PyCall's `pydecref(obj)``, after saving"
+"Repeatedly call PyCall's `pydecref(obj)` until null"
 function disconnect_from_leap(LEAPPyObj)
-	pydecref(LEAPPyObj)
+    while !ispynull(LEAPPyObj)
+    	pydecref(LEAPPyObj)
+    end
 end # disconnect_from_leap
 
 "Create LEAP Interp expression from an array of values."
