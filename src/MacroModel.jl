@@ -266,10 +266,6 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	end
 	# Link to LEAP
 	LEAP_indices = params["LEAP_sector_indices"]
-
-	#----------------------------------
-    # Calculate variables based on parameters
-    #----------------------------------
 	# Initial autonomous growth rate
 	γ_0 = params["investment-fcn"]["init_neutral_growth"] * ones(ns)
 
@@ -569,7 +565,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 
 	#############################################################################
 	#
-    # Loop over years
+    # Run simulation
 	#
 	#############################################################################
     @info "Running from " * string(years[2]) * " to " * string(last(years)) * ":"
