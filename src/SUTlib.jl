@@ -138,6 +138,20 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["LEAP_sector_indices"] = []
     end
 
+    if LMlib.haskeyvalue(global_params, "LEAP-potential-output")
+        LEAP_potout_codes = [x["code"] for x in global_params["LEAP-potential-output"]]
+        global_params["LEAP_potout_indices"] = findall([in(x, LEAP_potout_codes) for x in global_params["included_sector_codes"]])
+    else
+        global_params["LEAP_potout_indices"] = []
+    end
+
+    if LMlib.haskeyvalue(global_params, "LEAP-prices")
+        LEAP_price_codes = [x["code"] for x in global_params["LEAP-prices"]]
+        global_params["LEAP_price_indices"] = findall([in(x, LEAP_price_codes) for x in global_params["included_product_codes"]])
+    else
+        global_params["LEAP_price_indices"] = []
+    end
+
     # Check that LEAP-info keys are reported
     default_inv_costs_unit = "U.S. Dollar"
     if LMlib.haskeyvalue(global_params, "LEAP-info")
