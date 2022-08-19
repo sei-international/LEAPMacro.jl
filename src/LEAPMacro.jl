@@ -24,6 +24,15 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stac
 		throw(ErrorException("The \"inputs\" folder is needed, but does not exist"))
 	end
 
+	# First check that the configuration file loads correctly
+	try
+		YAML.load_file(config_file)
+	catch err
+		exit_status = 1
+		println("Configuration file '" * config_file * "' did not load properly: " * err.problem)
+		return(exit_status)
+	end
+
 	params = YAML.load_file(config_file)
 
 	# Enable logging
