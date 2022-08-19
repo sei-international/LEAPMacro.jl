@@ -1,5 +1,5 @@
 module SUTlib
-using CSV, DataFrames, LinearAlgebra, YAML, Printf
+using CSV, DataFrames, LinearAlgebra, YAML, Printf, Logging
 
 export process_sut, initialize_prices, parse_param_file,
        SUTdata, PriceData, ExogParams
@@ -140,7 +140,15 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
 
     if LMlib.haskeyvalue(global_params, "LEAP-potential-output")
         LEAP_potout_codes = [x["code"] for x in global_params["LEAP-potential-output"]]
-        global_params["LEAP_potout_indices"] = findall([in(x, LEAP_potout_codes) for x in global_params["included_sector_codes"]])
+        # If the sector code is not included, report its index as "missing"
+        global_params["LEAP_potout_indices"] = Array{Union{Missing, Int64}}(missing, length(LEAP_potout_codes))
+        for i in eachindex(LEAP_potout_codes)
+            if LEAP_potout_codes[i] in global_params["included_sector_codes"]
+                global_params["LEAP_potout_indices"][i] = findall(x -> x == LEAP_potout_codes[i], global_params["included_sector_codes"])[1]
+            else
+                @warn "Sector code '" * LEAP_potout_codes[i] * "' is listed in 'LEAP-potential-output' but is not included in the Macro model calculations."
+            end
+        end
     else
         global_params["LEAP_potout_indices"] = []
     end

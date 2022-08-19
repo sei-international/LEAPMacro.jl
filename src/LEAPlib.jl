@@ -202,9 +202,16 @@ function get_results_from_leap(params::Dict, run::Integer)
     # connects program to LEAP
     LEAP = connect_to_leap()
 
-    # Set ActiveView and ActiveScenario
+    # Set ActiveView and, if specified, ActiveScenario and ActiveRegion
     LEAP.ActiveView = "Results"
-    LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
+
+    if params["LEAP-info"]["result_scenario"] != ""
+        LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
+    end
+
+    if params["LEAP-info"]["region"] != ""
+        LEAP.ActiveRegion = params["LEAP-info"]["region"]
+    end
 
     # Initialize all elements in the LEAPresults structure (I_en = 0, others are `missing`)
     leapvals = initialize_leapresults(params)
@@ -223,19 +230,33 @@ function get_results_from_leap(params::Dict, run::Integer)
                 leapvals.I_en += I_en_temp
             end
         end
+
+        LMlib.write_vector_to_csv(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, "energy investment", Vector(sim_years))
+
+        #--------------------------------
+        # Potential output
+        #--------------------------------
+        if LMlib.haskeyvalue(params, "LEAP-potential-output")
+            for i in eachindex(params["LEAP-potential-output"])
+                s = params["LEAP_potout_indices"][i]
+                if !ismissing(s)
+                    leapvals.pot_output[:,s] = zeros(length(sim_years))
+                    # Driver is allowed to be a sum across multiple branches
+                    for b in params["LEAP-potential-output"][i]["branches"]
+                        for t in eachindex(sim_years)
+                            leapvals.pot_output[t,s] += LEAP.Branch(b["branch"]).Variable(b["variable"]).Value(sim_years[t])
+                        end
+                    end
+                end
+            end
+        end
+
+        #--------------------------------
+        # Investment prices
+        #--------------------------------
     finally
-    	disconnect_from_leap(LEAP)
+        disconnect_from_leap(LEAP)
     end
-
-    LMlib.write_vector_to_csv(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, "energy investment", Vector(sim_years))
-
-    #--------------------------------
-    # Potential output
-    #--------------------------------
-
-    #--------------------------------
-    # Investment prices
-    #--------------------------------
 
     return leapvals
 end # get_results_from_leap
