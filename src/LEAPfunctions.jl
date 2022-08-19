@@ -29,6 +29,11 @@ function hide_leap(state::Bool)
 	disconnect_from_leap(LEAP)
 end # hide_leap
 
+"Check whether a Dict has a key and that the value is not `nothing`"
+function haskeyvalue(d::Dict, k::Any)
+    return haskey(d,k) && !isnothing(d[k])
+end
+
 "First obtain LEAP branch info from `params` and then send Macro model results to LEAP."
 function send_results_to_leap(params::Dict, indices::Array)
     base_year = params["years"]["start"]
@@ -42,14 +47,14 @@ function send_results_to_leap(params::Dict, indices::Array)
 
 	branch_data = Dict(:branch => String[], :variable => String[], :last_historical_year => Int64[], :col => Int64[])
 	col = 0
-    if haskey(params, "GDP-branch")
+    if haskeyvalue(params, "GDP-branch")
         col += 1
         append!(branch_data[:branch], [params["GDP-branch"]["branch"]])
         append!(branch_data[:variable], [params["GDP-branch"]["variable"]])
         append!(branch_data[:last_historical_year], [params["LEAP-info"]["last_historical_year"]])
         append!(branch_data[:col], [col])
     end
-    if haskey(params, "Employment-branch")
+    if haskeyvalue(params, "Employment-branch")
         col += 1
         append!(branch_data[:branch], [params["Employment-branch"]["branch"]])
         append!(branch_data[:variable], [params["Employment-branch"]["variable"]])
@@ -57,15 +62,17 @@ function send_results_to_leap(params::Dict, indices::Array)
         append!(branch_data[:col], [col])
     end
 
-	for leap_sector in params["LEAP-sectors"]
-		col += 1
-		for branch in leap_sector["branches"]
-			append!(branch_data[:branch], [branch["branch"]])
-			append!(branch_data[:variable], [branch["variable"]])
-			append!(branch_data[:last_historical_year], [params["LEAP-info"]["last_historical_year"]])
-			append!(branch_data[:col], [col])
-		end
-	end
+    if haskeyvalue(params, "LEAP-sectors")
+        for leap_sector in params["LEAP-sectors"]
+            col += 1
+            for branch in leap_sector["branches"]
+                append!(branch_data[:branch], [branch["branch"]])
+                append!(branch_data[:variable], [branch["variable"]])
+                append!(branch_data[:last_historical_year], [params["LEAP-info"]["last_historical_year"]])
+                append!(branch_data[:col], [col])
+            end
+        end
+    end
 
 	branch_df = DataFrame(branch_data)
 

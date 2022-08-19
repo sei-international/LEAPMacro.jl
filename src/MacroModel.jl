@@ -81,6 +81,11 @@ function get_nonmissing_values(A, B)
 	return [if !ismissing(A[i]) A[i] else B[i] end for i in CartesianIndices(A)]
 end
 
+"Check whether a Dict has a key and that the value is not `nothing`"
+function haskeyvalue(d::Dict, k::Any)
+    return haskey(d,k) && !isnothing(d[k])
+end
+
 """
 Calculate the Sraffa matrix, which is used to calculate domestic prices
 	# np: number of products
@@ -237,7 +242,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		params["taylor-fcn"]["neutral_growth_band"][2], # max_γ0
 		params["taylor-fcn"]["gr_resp"], # gr_resp
 		0.0, # π_targ, assigned below
-		!haskey(params["taylor-fcn"], "target_infl") || isnothing(params["taylor-fcn"]["target_infl"]), # π_targ_use_πw
+		!haskeyvalue(params["taylor-fcn"], "target_infl"), # π_targ_use_πw
 		0.0, # π_init, assigned below
 		params["taylor-fcn"]["infl_resp"], # infl_resp
 		params["taylor-fcn"]["target_intrate"]["init"], # i_targ
@@ -256,7 +261,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		tf.π_targ = exog.πw_base[1]
 	end
 	# If params["taylor-fcn"]["init_infl"] not present, use target
-	if haskey(params["taylor-fcn"], "init_infl") && !isnothing(params["taylor-fcn"]["init_infl"])
+	if haskeyvalue(params["taylor-fcn"], "init_infl")
 		tf.π_init = params["taylor-fcn"]["init_infl"]
 	else
 		tf.π_init = tf.π_targ
@@ -267,7 +272,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		params["wage-fcn"]["lab_constr_coeff"] # k
 	)
 	# Optionally update technical coefficients (the scaled Use matrix, io.D)
-	calc_use_matrix_tech_change = haskey(params, "tech-param-change") && !isnothing(params["tech-param-change"]) && haskey(params["tech-param-change"], "rate_constant")
+	calc_use_matrix_tech_change = haskeyvalue(params, "tech-param-change") && haskeyvalue(params["tech-param-change"], "rate_constant")
 	if calc_use_matrix_tech_change
 		tech_change_rate_constant = params["tech-param-change"]["rate_constant"]
 	else
@@ -532,14 +537,16 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	# Initialize array of indices to pass to LEAP
 	#--------------------------------
 	labels = ["Year"]
-	if haskey(params, "GDP-branch")
+	if haskeyvalue(params, "GDP-branch")
 		labels = vcat(labels, params["GDP-branch"]["name"])
 	end
-	if haskey(params, "Employment-branch")
+	if haskeyvalue(params, "Employment-branch")
 		labels = vcat(labels, params["Employment-branch"]["name"])
 	end
-	labels = vcat(labels, params["LEAP_sector_names"])
-    indices = Array{Float64}(undef, length(years), length(labels))
+	if haskeyvalue(params, "LEAP_sector_names")
+		labels = vcat(labels, params["LEAP_sector_names"])
+	end
+	indices = Array{Float64}(undef, length(years), length(labels))
 
 	#------------------------------------------
     # Initialize files for writing results
@@ -746,11 +753,11 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		#--------------------------------
         indices[t,1] = years[t]
 		curr_index = 1
-		if haskey(params, "GDP-branch")
+		if haskeyvalue(params, "GDP-branch")
 			curr_index += 1
 			indices[t,curr_index] = GDP
 		end
-		if haskey(params, "Employment-branch")
+		if haskeyvalue(params, "Employment-branch")
 			curr_index += 1
 			indices[t,curr_index] = lab_force_index
 		end

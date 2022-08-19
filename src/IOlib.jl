@@ -144,6 +144,11 @@ function excel_range_to_mat(df::DataFrame, str::AbstractString)
 	return df_to_mat(df[rng[1][1]:rng[2][1],rng[1][2]:rng[2][2]])
 end # excel_range_to_mat
 
+"Check whether a Dict has a key and that the value is not `nothing`"
+function haskeyvalue(d::Dict, k::Any)
+    return haskey(d,k) && !isnothing(d[k])
+end
+
 "Read in YAML input file and convert ranges if necessary."
 function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Bool = false)
     global_params = YAML.load_file(YAML_file)
@@ -212,7 +217,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
 	# These indices are with respect to the list of included product codes, not the full list
 	global_params["non-tradeable-range"] = findall(in(global_params["non_tradeable_products"]).(global_params["included_product_codes"]))
 
-    if haskey(global_params, "LEAP-sectors")
+    if haskeyvalue(global_params, "LEAP-sectors")
         global_params["LEAP_sector_names"] = [x["name"] for x in global_params["LEAP-sectors"]]
         LEAP_sector_codes = [x["codes"] for x in global_params["LEAP-sectors"]]
         global_params["LEAP_sector_indices"] = Array{Any}(undef,length(LEAP_sector_codes))
@@ -226,33 +231,33 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
 
     # Check that LEAP-info keys are reported
     default_inv_costs_unit = "U.S. Dollar"
-    if haskey(global_params, "LEAP-info")
+    if haskeyvalue(global_params, "LEAP-info")
         # Key "scenario" is specified, which overrides "input_scenario" and "result_scenario"
-        if haskey(global_params["LEAP-info"], "scenario") && !isnothing(global_params["LEAP-info"]["scenario"])
+        if haskeyvalue(global_params["LEAP-info"], "scenario")
             global_params["LEAP-info"]["input_scenario"] = global_params["LEAP-info"]["scenario"]
             global_params["LEAP-info"]["result_scenario"] = global_params["LEAP-info"]["scenario"]
         end
         # Key "input_scenario" is missing, so default to empty string (so that the currently loaded scenario in LEAP is used)
-        if !haskey(global_params["LEAP-info"], "input_scenario") || isnothing(global_params["LEAP-info"]["input_scenario"])
+        if !haskeyvalue(global_params["LEAP-info"], "input_scenario")
             global_params["LEAP-info"]["input_scenario"] = ""
         end
         # Key "result_scenario" is not specified, so it defaults to "input_scenario"
-        if !haskey(global_params["LEAP-info"], "result_scenario") || isnothing(global_params["LEAP-info"]["result_scenario"])
+        if !haskeyvalue(global_params["LEAP-info"], "result_scenario")
             global_params["LEAP-info"]["result_scenario"] = global_params["LEAP-info"]["input_scenario"]
         end
         # Key "region" is missing, so default to empty string
-        if !haskey(global_params["LEAP-info"], "region") || isnothing(global_params["LEAP-info"]["region"])
+        if !haskeyvalue(global_params["LEAP-info"], "region")
             global_params["LEAP-info"]["region"] = ""
         end
         # Key "inv_costs_unit" is missing, so apply the default
-        if !haskey(global_params["LEAP-info"], "inv_costs_unit") || isnothing(global_params["LEAP-info"]["inv_costs_unit"])
+        if !haskeyvalue(global_params["LEAP-info"], "inv_costs_unit")
             global_params["LEAP-info"]["inv_costs_unit"] = default_inv_costs_unit
         end
         # Key "inv_costs_scale" is missing, so default to 1.0
-        if !haskey(global_params["LEAP-info"], "inv_costs_scale") || isnothing(global_params["LEAP-info"]["inv_costs_scale"])
+        if !haskeyvalue(global_params["LEAP-info"], "inv_costs_scale")
             global_params["LEAP-info"]["inv_costs_scale"] = 1.0
         end
-        if !haskey(global_params["LEAP-info"], "last_historical_year") || isnothing(global_params["LEAP-info"]["last_historical_year"])
+        if !haskeyvalue(global_params["LEAP-info"], "last_historical_year")
             global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
         end
     else
@@ -298,7 +303,7 @@ function get_var_params(params::Dict)
     prod_codes = product_info[prod_ndxs,:code]
 
     # Catch if the "xr-is-normal" flag is present or not, default to false
-    if !haskey(params["files"], "xr-is-real") || isnothing(params["files"]["xr-is-real"])
+    if !haskeyvalue(params["files"], "xr-is-real")
         params["files"]["xr-is-real"] = false
     end
 
@@ -307,18 +312,18 @@ function get_var_params(params::Dict)
     pot_output_df = nothing
     max_util_df = nothing
     real_price_df = nothing
-    if haskey(params, "exog-files") && !isnothing(params["exog-files"])
+    if haskeyvalue(params, "exog-files")
         file_list = params["exog-files"]
-        if haskey(file_list, "investment") && !isnothing(file_list["investment"]) && isfile(joinpath("inputs",file_list["investment"]))
+        if haskeyvalue(file_list, "investment") && isfile(joinpath("inputs",file_list["investment"]))
             investment_df = CSV.read(joinpath("inputs",file_list["investment"]), DataFrame)
         end
-        if haskey(file_list, "pot_output") && !isnothing(file_list["pot_output"]) && isfile(joinpath("inputs",file_list["pot_output"]))
+        if haskeyvalue(file_list, "pot_output") && isfile(joinpath("inputs",file_list["pot_output"]))
             pot_output_df = CSV.read(joinpath("inputs",file_list["pot_output"]), DataFrame)
         end
-        if haskey(file_list, "max_utilization") && !isnothing(file_list["max_utilization"]) && isfile(joinpath("inputs",file_list["max_utilization"]))
+        if haskeyvalue(file_list, "max_utilization") && isfile(joinpath("inputs",file_list["max_utilization"]))
             max_util_df = CSV.read(joinpath("inputs",file_list["max_utilization"]), DataFrame)
         end
-        if haskey(file_list, "real_price") && !isnothing(file_list["real_price"]) && isfile(joinpath("inputs",file_list["real_price"]))
+        if haskeyvalue(file_list, "real_price") && isfile(joinpath("inputs",file_list["real_price"]))
             real_price_df = CSV.read(joinpath("inputs",file_list["real_price"]), DataFrame)
         end
     end
