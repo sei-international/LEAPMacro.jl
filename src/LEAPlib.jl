@@ -1,5 +1,5 @@
 module LEAPlib
-using DelimitedFiles, PyCall, DataFrames, CSV
+using PyCall, DataFrames, CSV
 
 export hide_leap, send_results_to_leap, calculate_leap, get_results_from_leap, LEAPresults
 
@@ -227,7 +227,15 @@ function get_results_from_leap(params::Dict, run::Integer)
     	disconnect_from_leap(LEAP)
     end
 
-    writedlm(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, ',')
+    LMlib.write_vector_to_csv(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, "energy investment", Vector(sim_years))
+
+    #--------------------------------
+    # Potential output
+    #--------------------------------
+
+    #--------------------------------
+    # Investment prices
+    #--------------------------------
 
     return leapvals
 end # get_results_from_leap

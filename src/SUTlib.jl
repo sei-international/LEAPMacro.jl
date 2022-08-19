@@ -1,5 +1,5 @@
 module SUTlib
-using CSV, DataFrames, LinearAlgebra, DelimitedFiles, YAML, Printf
+using CSV, DataFrames, LinearAlgebra, YAML, Printf
 
 export process_sut, initialize_prices, parse_param_file,
        SUTdata, PriceData, ExogParams
