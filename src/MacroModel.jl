@@ -674,8 +674,8 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 			γ_i = -α.bank * (i_bank - tf.i_targ0) * ones(ns)
 			γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
 			# Override default behavior if production is exogenously specified
-			if t > 1
-				γ_spec = exog.pot_output[t,:] ./ exog.pot_output[t - 1,:] .- 1.0
+			if t < length(years)
+				γ_spec = exog.pot_output[t + 1,:] ./ exog.pot_output[t,:] .- 1.0
 				γ[pot_output_ndxs] .= γ_spec[pot_output_ndxs]
 			end
 		end
@@ -789,8 +789,8 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 		# For pw, first apply global inflation rate to world prices
 		prices.pw = prices.pw * (1 + exog.πw_base[t])
 		# Then adjust for any exogenous price indices
-		if t > 1
-			pw_spec = exog.price[t,:] ./ exog.price[t - 1,:]
+		if t < length(years)
+			pw_spec = exog.price[t + 1,:] ./ exog.price[t,:]
 			prices.pw[pw_ndxs] .= prices.pw[pw_ndxs] .* pw_spec[pw_ndxs]
 		end
 		# Calculate XR trend
