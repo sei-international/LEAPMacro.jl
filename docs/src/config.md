@@ -420,7 +420,7 @@ Employment-branch:
 
 Finally, the `LEAP-sectors` parameter, if present, contains a list of indices. For each of these, Macro will sum up production[^3] across all of the sector codes listed. It will then calculate an index starting in the base year, and insert the index into the specified branches. In some cases, the same index might be applied to different branches. For example, if the supply-use table has a "services" sector but no transport, while LEAP has both a services and a commercial transport sector, the same index could be used to drive both.
 
-If no sectoral aggregation is desired, then this entry can be excluded entirely, or set to an empty list: `LEAP-sectors: []`.
+If no sectoral aggregation is desired, then this entry can be excluded entirely, set to `~` (meaning no value), or set to an empty list: `LEAP-sectors: []`.
 ```yaml
 # Association between Macro sectors and LEAP sectors (optional)
 LEAP-sectors:
