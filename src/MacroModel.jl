@@ -40,6 +40,21 @@ mutable struct WageAdjustment
 	k::AbstractFloat
 end
 
+"Category weights for linear goal program"
+mutable struct CategoryWeights
+	u::AbstractFloat # utilization
+	f::AbstractFloat # final demand
+	x::AbstractFloat # exports
+	m::AbstractFloat # imports
+end
+
+"Product & sector weight factors for the linear goal program"
+mutable struct ProductSectorWeightFactors
+	u::AbstractFloat # utilization
+	f::AbstractFloat # final demand
+	x::AbstractFloat # exports
+end
+
 """
 Calculate the Sraffa matrix, which is used to calculate domestic prices
 	# np: number of products
@@ -181,13 +196,17 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 	)
     growth_adj = params["investment-fcn"]["growth_adj"]
 	# Linear program objective function
-    wu = params["objective-fcn"]["category_weights"]["utilization"]
-    wf = params["objective-fcn"]["category_weights"]["final_demand_cov"]
-    wx = params["objective-fcn"]["category_weights"]["exports_cov"]
-    wm = params["objective-fcn"]["category_weights"]["imports_cov"]
-	ϕu = params["objective-fcn"]["product_sector_weight_factors"]["utilization"]
-	ϕf = params["objective-fcn"]["product_sector_weight_factors"]["final_demand_cov"]
-	ϕx = params["objective-fcn"]["product_sector_weight_factors"]["exports_cov"]
+	w = CategoryWeights(
+		params["objective-fcn"]["category_weights"]["utilization"], # u
+		params["objective-fcn"]["category_weights"]["final_demand_cov"], # f
+		params["objective-fcn"]["category_weights"]["exports_cov"], # x
+		params["objective-fcn"]["category_weights"]["imports_cov"] # m
+	)
+	ϕ = ProductSectorWeightFactors(
+		params["objective-fcn"]["product_sector_weight_factors"]["utilization"], # u
+		params["objective-fcn"]["product_sector_weight_factors"]["final_demand_cov"], # f
+		params["objective-fcn"]["product_sector_weight_factors"]["exports_cov"] # x
+	)
 	# Taylor function
 	tf = TaylorFunction(
 		params["investment-fcn"]["init_neutral_growth"], # γ0
@@ -308,9 +327,9 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 	#----------------------------------
 	# Product and sector weights for the objective function
 	#----------------------------------
-	u_sector_wt = ϕu * sut.g / sum(sut.g) + (1.0 - ϕu) * ones(ns)/ns
-	f_sector_wt = ϕf * sut.F / sum(sut.F) + (1.0 - ϕf) * ones(np)/np
-	x_sector_wt = ϕx * sut.X / sum(sut.X) + (1.0 - ϕx) * ones(np)/np
+	u_sector_wt = ϕ.u * sut.g / sum(sut.g) + (1.0 - ϕ.u) * ones(ns)/ns
+	f_sector_wt = ϕ.f * sut.F / sum(sut.F) + (1.0 - ϕ.f) * ones(np)/np
+	x_sector_wt = ϕ.x * sut.X / sum(sut.X) + (1.0 - ϕ.x) * ones(np)/np
 
 	#----------------------------------
 	# A filter for products that are domestically supplied
@@ -365,10 +384,10 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
     #----------------------------------
     # Objective function (goal program)
     #----------------------------------
-    @objective(mdl, Min, wu * sum(u_sector_wt[i] * ugap[i] for i in 1:ns) +
-					     wf * sum(f_sector_wt[i] * fgap[i] for i in 1:np) +
-						 wx * sum(x_sector_wt[i] * xgap[i] for i in 1:np) +
-						 wm * (sum(ψ_pos[i] + ψ_neg[i] for i in 1:np)))
+    @objective(mdl, Min, w.u * sum(u_sector_wt[i] * ugap[i] for i in 1:ns) +
+					     w.f * sum(f_sector_wt[i] * fgap[i] for i in 1:np) +
+						 w.x * sum(x_sector_wt[i] * xgap[i] for i in 1:np) +
+						 w.m * (sum(ψ_pos[i] + ψ_neg[i] for i in 1:np)))
 
     #----------------------------------
     # Constraints
