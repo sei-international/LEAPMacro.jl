@@ -126,6 +126,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
 	# These indices are with respect to the list of included product codes, not the full list
 	global_params["non-tradeable-range"] = findall(in(global_params["non_tradeable_products"]).(global_params["included_product_codes"]))
 
+    # LEAP sectors allow for multiple Macro sector codes (production is summed) and multiple branch/variable combos (the index is applied to each combination)
     if LMlib.haskeyvalue(global_params, "LEAP-sectors")
         global_params["LEAP_sector_names"] = [x["name"] for x in global_params["LEAP-sectors"]]
         LEAP_sector_codes = [x["codes"] for x in global_params["LEAP-sectors"]]
@@ -138,6 +139,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["LEAP_sector_indices"] = []
     end
 
+    # LEAP potential output is specified for a single Macro sector code, but allows for multiple branch/variable combos (values are summed)
     if LMlib.haskeyvalue(global_params, "LEAP-potential-output")
         LEAP_potout_codes = [x["code"] for x in global_params["LEAP-potential-output"]]
         # If the sector code is not included, report its index as "missing"
@@ -153,9 +155,13 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["LEAP_potout_indices"] = []
     end
 
+    # LEAP prices are drawn from a single LEAP branch, but can be assigned to multiple Macro product codes
     if LMlib.haskeyvalue(global_params, "LEAP-prices")
-        LEAP_price_codes = [x["code"] for x in global_params["LEAP-prices"]]
-        global_params["LEAP_price_indices"] = findall([in(x, LEAP_price_codes) for x in global_params["included_product_codes"]])
+        LEAP_price_codes = [x["codes"] for x in global_params["LEAP-prices"]]
+        global_params["LEAP_price_indices"] = Array{Any}(undef,length(LEAP_price_codes))
+        for i in eachindex(LEAP_price_codes)
+            global_params["LEAP_price_indices"][i] = findall([in(x, LEAP_price_codes[i]) for x in global_params["included_product_codes"]])
+        end
     else
         global_params["LEAP_price_indices"] = []
     end

@@ -238,7 +238,7 @@ function get_results_from_leap(params::Dict, run::Integer)
         #--------------------------------
         if LMlib.haskeyvalue(params, "LEAP-potential-output")
             for i in eachindex(params["LEAP-potential-output"])
-                s = params["LEAP_potout_indices"][i]
+                s = params["LEAP_potout_indices"][i] # This is a single value
                 if !ismissing(s)
                     leapvals.pot_output[:,s] = zeros(length(sim_years))
                     # Driver is allowed to be a sum across multiple branches
@@ -254,6 +254,19 @@ function get_results_from_leap(params::Dict, run::Integer)
         #--------------------------------
         # Investment prices
         #--------------------------------
+        if LMlib.haskeyvalue(params, "LEAP-prices")
+            for i in eachindex(params["LEAP-prices"])
+                b = params["LEAP-prices"][i] # This is a single branch/variable combination
+                for t in eachindex(sim_years)
+                    price = LEAP.Branch(b["branch"]).Variable(b["variable"]).Value(sim_years[t])
+                    # Assign price to each product in a list of product codes
+                    for p in params["LEAP_price_indices"][i]
+                        leapvals.price[t,p] = price
+                    end
+                end
+            end
+        end
+
     finally
         disconnect_from_leap(LEAP)
     end
