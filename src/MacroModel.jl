@@ -3,13 +3,10 @@ using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Print
 
 export leapmacro
 
-include("./IOlib.jl")
-include("./LEAPfunctions.jl")
-using .IOlib, .LEAPfunctions
-
-# Declared type unions
-NumOrArray = Union{Nothing,Number,Array}
-NumOrVector = Union{Nothing,Number,Vector}
+include("./SUTlib.jl")
+include("./LEAPlib.jl")
+include("./LEAPMacrolib.jl")
+using .SUTlib, .LEAPlib, .LMlib
 
 "Parameters for investment function"
 mutable struct InvestmentFunction
@@ -43,61 +40,18 @@ mutable struct WageAdjustment
 	k::AbstractFloat
 end
 
-"Report output values by writing to specified CSV files."
-function write_values_to_csv(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer, rowlabel::Union{Number,String}, mode::AbstractString)
-	if isa(values, Array)
-		usevalue = join(values, ',')
-	else
-		usevalue = values
-	end
-	open(joinpath(params["results_path"], string(filename, "_", index,".csv")), mode) do io
-		write(io, string(rowlabel, ',', usevalue, "\r\n"))
-	end
-end # write_values_to_csv
-
-"Convenience wrapper for write_values_to_csv"
-function write_header_to_csv(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer)
-	write_values_to_csv(params, values, filename, index, "", "w")
-end
-
-"Convenience wrapper for write_values_to_csv"
-function append_row_to_csv(params::Dict, values::NumOrArray, filename::AbstractString, index::Integer, rowlabel::Union{Number,String})
-	write_values_to_csv(params, values, filename, index, rowlabel, "a")
-end
-
-"""
-Convert a vector of strings by wrapping each string in quotes (for putting into CSV files).
-This function converts `svec` in-place, so should only be run once. Double quotation marks
-are removed to avoid that problem.
-"""
-function stringvec_to_quotedstringvec!(svec::Vector)
-	for i in eachindex(svec)
-		svec[i] = replace(string('\"', svec[i], '\"'), "\"\"" => "\"")
-	end
-end # stringvec_to_quotedstringvec!
-
-"Function to preemptively take values from A first, then B, based on whether values are `missing`"
-function get_nonmissing_values(A, B)
-	return [if !ismissing(A[i]) A[i] else B[i] end for i in CartesianIndices(A)]
-end
-
-"Check whether a Dict has a key and that the value is not `nothing`"
-function haskeyvalue(d::Dict, k::Any)
-    return haskey(d,k) && !isnothing(d[k])
-end
-
 """
 Calculate the Sraffa matrix, which is used to calculate domestic prices
 	# np: number of products
 	# ns: number of sectors
-	# io: IOdata data structure
+	# sut: SUTdata data structure
 """
-function calc_sraffa_matrix(np::Integer, ns::Integer, io::IOdata)
+function calc_sraffa_matrix(np::Integer, ns::Integer, sut::SUTdata)
 	sraffa_matrix = Array{Float64}(undef, np, np)
 	# Domestic prices
 	for i in 1:np
 		for j in 1:np
-			sraffa_matrix[i,j] = sum(io.μ[r] * io.S[r,i] * io.D[j,r] for r in 1:ns)
+			sraffa_matrix[i,j] = sum(sut.μ[r] * sut.S[r,i] * sut.D[j,r] for r in 1:ns)
 		end
 	end
     return sraffa_matrix
@@ -109,31 +63,30 @@ Evaluate the Sraffa system to get domestic prices
 	# np: number of products
 	# ns: number of sectors
 	# ω: wage share by sector
-	# io: IOdata data structure
+	# sut: SUTdata data structure
 """
-function calc_dom_prices(t::Integer, np::Integer, ns::Integer, ω::Array{Float64,1}, prices::PriceData, io::IOdata, exog::ExogParams)
-	sraffa_matrix = calc_sraffa_matrix(np, ns, io)
+function calc_dom_prices(t::Integer, np::Integer, ns::Integer, ω::Array{Float64,1}, prices::PriceData, sut::SUTdata, exog::ExogParams)
+	sraffa_matrix = calc_sraffa_matrix(np, ns, sut)
 	wage_vector = Array{Float64}(undef, np)
 	world_price_vector = Array{Float64}(undef, np)
 	for i in 1:np
-		wage_vector[i] = prices.Pg * sum(io.μ[r] * io.S[r,i] * (ω[r] + io.energy_share[r]) for r in 1:ns)
-		world_price_vector[i] = exog.xr[t] * sum(sraffa_matrix[i,j] * io.m_frac[j] * prices.pw[j] for j in 1:np)
+		wage_vector[i] = prices.Pg * sum(sut.μ[r] * sut.S[r,i] * (ω[r] + sut.energy_share[r]) for r in 1:ns)
+		world_price_vector[i] = exog.xr[t] * sum(sraffa_matrix[i,j] * sut.m_frac[j] * prices.pw[j] for j in 1:np)
 	end
 	sraffa_RHS = wage_vector + world_price_vector
 	# Solve the Sraffa system and return the result
-	inv(LinearAlgebra.I - [sraffa_matrix[i,j] * (1 - io.m_frac[j]) for i in 1:np, j in 1:np]) * sraffa_RHS
+	inv(LinearAlgebra.I - [sraffa_matrix[i,j] * (1 - sut.m_frac[j]) for i in 1:np, j in 1:np]) * sraffa_RHS
 end # calc_dom_prices
 
-
 """
-Calculate growth rate of intermediate demand coefficients (that is, io.D entries), or the intercepts (for initialization)	
+Calculate growth rate of intermediate demand coefficients (that is, sut.D entries), or the intercepts (for initialization)	
 	σ(np,ns) = matrix of cost shares
 	k = single value or a vector (ns) of rate coefficients
 	θ = single value or vector (ns) of exponents
 	c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
 	b(np,ns) = matrix of weights (if b = nothing it is set to one)
 """
-function calc_intermed_techchange(σ::Array{Float64,2}, k::NumOrVector, θ::NumOrVector = 2.0, c::NumOrVector = nothing, b::NumOrVector = nothing)
+function calc_intermed_techchange(σ::Array{Float64,2}, k::LMlib.NumOrVector, θ::LMlib.NumOrVector = 2.0, c::LMlib.NumOrVector = nothing, b::LMlib.NumOrVector = nothing)
 	# Initialize values
 	(np, ns) = size(σ)
 	if isa(k, Number)
@@ -151,9 +104,9 @@ function calc_intermed_techchange(σ::Array{Float64,2}, k::NumOrVector, θ::NumO
 	
 	cost_shares_exponentiated = [σ[p,s]^θ[s] for p in 1:np, s in 1:ns]
 	denom = sum(cost_shares_exponentiated .* b, dims = 1).^(1.0 .- 1.0 ./ θ)'
-	num = [(cost_shares_exponentiated .* b ./ (σ .+ IOlib.ϵ))[p,s] * k[s] for p in 1:np, s in 1:ns]
+	num = [(cost_shares_exponentiated .* b ./ (σ .+ LMlib.ϵ))[p,s] * k[s] for p in 1:np, s in 1:ns]
 
-	return c .- num ./ (denom .+ IOlib.ϵ)
+	return c .- num ./ (denom .+ LMlib.ϵ)
 end # calc_intermed_techchange
 
 "Clean up folders if specified in params"
@@ -186,7 +139,7 @@ function clean_folders(params::Dict)
 end
 
 "Implement the Macro model. This is the main function for LEAP-Macro"
-function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Integer, continue_if_error::Bool)
+function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, continue_if_error::Bool)
 
     #------------status
     @info "Loading data..."
@@ -197,13 +150,13 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		clean_folders(params)
 	end
 
-	io, np, ns = IOlib.process_sut(params)
-	prices = IOlib.initialize_prices(np, io)
-	exog = IOlib.get_var_params(params)
+	sut, np, ns = SUTlib.process_sut(params)
+	prices = SUTlib.initialize_prices(np, sut)
+	exog = SUTlib.get_var_params(params)
 
 	# Preferentially take exogenous values from LEAP, if specified, if not then from file
-	exog.pot_output = get_nonmissing_values(leapvals.pot_output, exog.pot_output)
-	exog.price = get_nonmissing_values(leapvals.price, exog.price)
+	exog.pot_output = LMlib.get_nonmissing_values(leapvals.pot_output, exog.pot_output)
+	exog.price = LMlib.get_nonmissing_values(leapvals.price, exog.price)
 
 	# For exogenous potential output and world prices, values must be specified for all years, so get indices for first year
 	pot_output_ndxs = findall(x -> !ismissing(x), exog.pot_output[1,:])
@@ -242,7 +195,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		params["taylor-fcn"]["neutral_growth_band"][2], # max_γ0
 		params["taylor-fcn"]["gr_resp"], # gr_resp
 		0.0, # π_targ, assigned below
-		!haskeyvalue(params["taylor-fcn"], "target_infl"), # π_targ_use_πw
+		!LMlib.haskeyvalue(params["taylor-fcn"], "target_infl"), # π_targ_use_πw
 		0.0, # π_init, assigned below
 		params["taylor-fcn"]["infl_resp"], # infl_resp
 		params["taylor-fcn"]["target_intrate"]["init"], # i_targ
@@ -261,7 +214,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		tf.π_targ = exog.πw_base[1]
 	end
 	# If params["taylor-fcn"]["init_infl"] not present, use target
-	if haskeyvalue(params["taylor-fcn"], "init_infl")
+	if LMlib.haskeyvalue(params["taylor-fcn"], "init_infl")
 		tf.π_init = params["taylor-fcn"]["init_infl"]
 	else
 		tf.π_init = tf.π_targ
@@ -271,8 +224,8 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		params["wage-fcn"]["infl_passthrough"], # h
 		params["wage-fcn"]["lab_constr_coeff"] # k
 	)
-	# Optionally update technical coefficients (the scaled Use matrix, io.D)
-	calc_use_matrix_tech_change = haskeyvalue(params, "tech-param-change") && haskeyvalue(params["tech-param-change"], "rate_constant")
+	# Optionally update technical coefficients (the scaled Use matrix, sut.D)
+	calc_use_matrix_tech_change = LMlib.haskeyvalue(params, "tech-param-change") && LMlib.haskeyvalue(params["tech-param-change"], "rate_constant")
 	if calc_use_matrix_tech_change
 		tech_change_rate_constant = params["tech-param-change"]["rate_constant"]
 	else
@@ -292,19 +245,19 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	#----------------------------------
     # For calibration, apply a user-specified adjustment to exports, final demands, and potential output
     #----------------------------------
-	Xmax = (1.0 + params["calib"]["max_export_adj_factor"]) * io.X
-    Fmax = (1.0 + params["calib"]["max_hh_dmd_adj_factor"]) * max.(io.F,zeros(np))
-	z = (1.0 + params["calib"]["pot_output_adj_factor"]) * io.g
+	Xmax = (1.0 + params["calib"]["max_export_adj_factor"]) * sut.X
+    Fmax = (1.0 + params["calib"]["max_hh_dmd_adj_factor"]) * max.(sut.F,zeros(np))
+	z = (1.0 + params["calib"]["pot_output_adj_factor"]) * sut.g
 
 	#----------------------------------
     # Investment
     #----------------------------------
 	# Total investment
-    I_total = sum(io.I)
+    I_total = sum(sut.I)
 	# Track non-energy investment separate from energy investment (which is supplied from LEAP)
     I_ne = I_total - leapvals.I_en[1]
     # Share of supply of investment goods
-    θ = io.I / sum(io.I)
+    θ = sut.I / sum(sut.I)
 	# Initial values: These will change endogenously over time
 	γ = γ_0
 	i_bank = tf.i_targ
@@ -312,26 +265,26 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	#----------------------------------
     # Wages
     #----------------------------------
-    W = io.W
-	ω = io.W ./ io.g
+    W = sut.W
+	ω = sut.W ./ sut.g
     replace!(ω, NaN=>0)
 	wage_ratio = 1.0
 
 	#----------------------------------
     # Domestic prices using a Sraffian price system
     #----------------------------------
-	prices.pd = calc_dom_prices(1, np, ns, ω, prices, io, exog)
-	prices.pb = exog.xr[1] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
+	prices.pd = calc_dom_prices(1, np, ns, ω, prices, sut, exog)
+	prices.pb = exog.xr[1] * sut.m_frac .* prices.pw + (1 .- sut.m_frac) .* prices.pd
 
 	#----------------------------------
     # Capital productivity of new investment
     #----------------------------------
 	# Intermediate variables
-	profit_per_output = io.Vnorm * prices.pd - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
+	profit_per_output = sut.Vnorm * prices.pd - (prices.Pg .* (ω + sut.energy_share) +  transpose(sut.D) * prices.pb)
 	price_of_capital = dot(θ,prices.pb)
 	I_nextper = (1 + params["investment-fcn"]["init_neutral_growth"]) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
 	profit_share_rel_capprice = (1/price_of_capital) * profit_per_output
-	init_profit = sum((γ_0 + exog.δ) .* io.g .* profit_share_rel_capprice)
+	init_profit = sum((γ_0 + exog.δ) .* sut.g .* profit_share_rel_capprice)
     init_profit_rate = init_profit/I_nextper
 	# Capital productivity
     capital_output_ratio = profit_share_rel_capprice / init_profit_rate
@@ -355,14 +308,14 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	#----------------------------------
 	# Product and sector weights for the objective function
 	#----------------------------------
-	u_sector_wt = ϕu * io.g / sum(io.g) + (1.0 - ϕu) * ones(ns)/ns
-	f_sector_wt = ϕf * io.F / sum(io.F) + (1.0 - ϕf) * ones(np)/np
-	x_sector_wt = ϕx * io.X / sum(io.X) + (1.0 - ϕx) * ones(np)/np
+	u_sector_wt = ϕu * sut.g / sum(sut.g) + (1.0 - ϕu) * ones(ns)/ns
+	f_sector_wt = ϕf * sut.F / sum(sut.F) + (1.0 - ϕf) * ones(np)/np
+	x_sector_wt = ϕx * sut.X / sum(sut.X) + (1.0 - ϕx) * ones(np)/np
 
 	#----------------------------------
 	# A filter for products that are domestically supplied
 	#----------------------------------
-	no_dom_production = vec(sum(io.S, dims=1)) .== 0
+	no_dom_production = vec(sum(sut.S, dims=1)) .== 0
 
 	#----------------------------------
     # Dynamic parameters
@@ -376,8 +329,8 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	param_pd = prices.pd
 	param_Pg = prices.Pg
 	param_pb = prices.pb
-	param_Mref = 2 * io.M # Allow for some extra slack -- this just sets a scale
-	param_mfrac = io.m_frac
+	param_Mref = 2 * sut.M # Allow for some extra slack -- this just sets a scale
+	param_mfrac = sut.m_frac
 	# Initialize maximum utilization in multiple steps
 	param_max_util = ones(ns)
 	max_util_ndxs = findall(x -> !ismissing(x), exog.max_util[1,:])
@@ -423,7 +376,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
     # Sector constraints
 	@constraint(mdl, eq_util[i = 1:ns], u[i] + ugap[i] == param_max_util[i])
 	# Fundamental input-output equation
-	@constraint(mdl, eq_io[i = 1:ns], sum(io.S[i,j] * param_pb[j] * qs[j] for j in 1:np) - param_Pg * param_z[i] * u[i] == 0)
+	@constraint(mdl, eq_io[i = 1:ns], sum(sut.S[i,j] * param_pb[j] * qs[j] for j in 1:np) - param_Pg * param_z[i] * u[i] == 0)
     # Product constraints
 	# Variables for objective function (goal program)
 	@constraint(mdl, eq_xshare[i = 1:np], xshare[i] + xgap[i] == 1.0)
@@ -431,7 +384,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	@constraint(mdl, eq_fshare[i = 1:np], fshare[i] + fgap[i] == 1.0)
 	@constraint(mdl, eq_F[i = 1:np], F[i] == fshare[i] * param_Fmax[i])
 	# Intermediate demand
-	@constraint(mdl, eq_intdmd[i = 1:np], qd[i] - sum(io.D[i,j] * u[j] * param_z[j] for j in 1:ns) == 0)
+	@constraint(mdl, eq_intdmd[i = 1:np], qd[i] - sum(sut.D[i,j] * u[j] * param_z[j] for j in 1:ns) == 0)
 	# Investment
 	fix(I_tot, param_I_tot)
 	@constraint(mdl, eq_inv_supply[i = 1:np], I_supply[i] == θ[i] * I_tot)
@@ -441,8 +394,8 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	# Imports
 	@constraint(mdl, eq_M[i = 1:np], M[i] == param_mfrac[i] * (qd[i] + F[i] + I_supply[i]) + param_Mref[i] * (ψ_pos[i] - ψ_neg[i]))
 	# Margins
-	@constraint(mdl, eq_margpos[i = 1:np], margins_pos[i] == io.marg_pos_ratio[i] * (qs[i] + M[i]))
-	@constraint(mdl, eq_margneg[i = 1:np], margins_neg[i] == io.marg_neg_share[i] * sum(margins_pos[j] for j in 1:np))
+	@constraint(mdl, eq_margpos[i = 1:np], margins_pos[i] == sut.marg_pos_ratio[i] * (qs[i] + M[i]))
+	@constraint(mdl, eq_margneg[i = 1:np], margins_neg[i] == sut.marg_neg_share[i] * sum(margins_pos[j] for j in 1:np))
 
     #------------------------------------------
     # Calibration run
@@ -462,20 +415,20 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
     @info "Calibrating for " * string(years[1]) * ": $status"
 
 	# Sector variables
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("sector_output_",run,".csv")), value.(u) .* z, "sector output", params["included_sector_codes"])
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("wage_share_",run,".csv")), ω, "wage share", params["included_sector_codes"])
-	IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capital_output_ratio_",run,".csv")), capital_output_ratio, "capital-output ratio", params["included_sector_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("sector_output_",run,".csv")), value.(u) .* z, "sector output", params["included_sector_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("wage_share_",run,".csv")), ω, "wage share", params["included_sector_codes"])
+	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capital_output_ratio_",run,".csv")), capital_output_ratio, "capital-output ratio", params["included_sector_codes"])
     
 	# Product variables
-	IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("exports_",run,".csv")), value.(X), "exports", params["included_product_codes"])
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("final_demand_",run,".csv")), value.(F), "final demand", params["included_product_codes"])
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("imports_",run,".csv")), value.(M), "imports", params["included_product_codes"])
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("domestic_production_",run,".csv")), value.(qs), "domestic production", params["included_product_codes"])
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("tot_intermediate_supply_non-energy_sectors_",run,".csv")), value.(qd), "intermediate supply from non-energy sectors", params["included_product_codes"])
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("basic_prices_",run,".csv")), param_pb, "basic prices", params["included_product_codes"])
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_neg_",run,".csv")), value.(margins_neg), "negative margins", params["included_product_codes"])
-    IOlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_pos_",run,".csv")), value.(margins_pos), "positive margins", params["included_product_codes"])
+	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("exports_",run,".csv")), value.(X), "exports", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("final_demand_",run,".csv")), value.(F), "final demand", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("imports_",run,".csv")), value.(M), "imports", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("domestic_production_",run,".csv")), value.(qs), "domestic production", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("tot_intermediate_supply_non-energy_sectors_",run,".csv")), value.(qd), "intermediate supply from non-energy sectors", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("basic_prices_",run,".csv")), param_pb, "basic prices", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_neg_",run,".csv")), value.(margins_neg), "negative margins", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_pos_",run,".csv")), value.(margins_pos), "positive margins", params["included_product_codes"])
 
     # First run is calibration -- now set Xmax and Fmax based on solution and run again
     Xmax = max.(Xmax, value.(X))
@@ -504,7 +457,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	#--------------------------------
     πd = ones(length(prices.pd)) * tf.π_init
     πw = ones(length(prices.pw)) * exog.πw_base[1]
-    πb = ones(length(prices.pb)) .* (io.m_frac .* πw + (1 .- io.m_frac) .* πd)
+    πb = ones(length(prices.pb)) .* (sut.m_frac .* πw + (1 .- sut.m_frac) .* πd)
 
 	pw_prev = prices.pw ./ (1 .+ πw)
 	pd_prev = prices.pd ./ (1 .+ πd)
@@ -516,7 +469,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	smoothed_world_gr = params["global-params"]["gr_default"]
 
 	if !all(ismissing.(exog.pot_output[1,:]))
-		prev_pot_prod = sum(exog.pot_output[1,i] * io.Vnorm[i,:] for i in pot_output_ndxs)
+		prev_pot_prod = sum(exog.pot_output[1,i] * sut.Vnorm[i,:] for i in pot_output_ndxs)
 	else
 		prev_pot_prod = zeros(np)
 	end
@@ -526,8 +479,8 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
     πg = sum(prev_g_share .* πb)
 	πF = sum(πb .* value.(F))/sum(value.(F))
 	if calc_use_matrix_tech_change
-		sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
-		intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+		sector_price_level = (sut.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
+		intermed_cost_shares = [pb_prev[i] * sut.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 		calc_intermed_techchange_intercept = -calc_intermed_techchange(intermed_cost_shares, tech_change_rate_constant)
 	end
 
@@ -537,13 +490,13 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	# Initialize array of indices to pass to LEAP
 	#--------------------------------
 	labels = ["Year"]
-	if haskeyvalue(params, "GDP-branch")
+	if LMlib.haskeyvalue(params, "GDP-branch")
 		labels = vcat(labels, params["GDP-branch"]["name"])
 	end
-	if haskeyvalue(params, "Employment-branch")
+	if LMlib.haskeyvalue(params, "Employment-branch")
 		labels = vcat(labels, params["Employment-branch"]["name"])
 	end
-	if haskeyvalue(params, "LEAP_sector_names")
+	if LMlib.haskeyvalue(params, "LEAP_sector_names")
 		labels = vcat(labels, params["LEAP_sector_names"])
 	end
 	indices = Array{Float64}(undef, length(years), length(labels))
@@ -555,29 +508,29 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 	sector_names = params["included_sector_names"]
 	product_names = params["included_product_names"]
 	# Quote the sector and product names (for putting into CSV files)
-	stringvec_to_quotedstringvec!(sector_names)
-	stringvec_to_quotedstringvec!(product_names)
+	LMlib.stringvec_to_quotedstringvec!(sector_names)
+	LMlib.stringvec_to_quotedstringvec!(product_names)
 
 	# Create files for sector variables
-	write_header_to_csv(params, sector_names, "sector_output", run)
-	write_header_to_csv(params, sector_names, "potential_sector_output", run)
-	write_header_to_csv(params, sector_names, "capacity_utilization", run)
-	write_header_to_csv(params, sector_names, "real_value_added", run)
-	write_header_to_csv(params, sector_names, "profit_rate", run)
-	write_header_to_csv(params, sector_names, "autonomous_investment_rate", run)
+	LMlib.write_header_to_csv(params, sector_names, "sector_output", run)
+	LMlib.write_header_to_csv(params, sector_names, "potential_sector_output", run)
+	LMlib.write_header_to_csv(params, sector_names, "capacity_utilization", run)
+	LMlib.write_header_to_csv(params, sector_names, "real_value_added", run)
+	LMlib.write_header_to_csv(params, sector_names, "profit_rate", run)
+	LMlib.write_header_to_csv(params, sector_names, "autonomous_investment_rate", run)
 	# Create files for product variables
-	write_header_to_csv(params, product_names, "final_demand", run)
-	write_header_to_csv(params, product_names, "imports", run)
-	write_header_to_csv(params, product_names, "exports", run)
-	write_header_to_csv(params, product_names, "basic_prices", run)
-	write_header_to_csv(params, product_names, "domestic_prices", run)
+	LMlib.write_header_to_csv(params, product_names, "final_demand", run)
+	LMlib.write_header_to_csv(params, product_names, "imports", run)
+	LMlib.write_header_to_csv(params, product_names, "exports", run)
+	LMlib.write_header_to_csv(params, product_names, "basic_prices", run)
+	LMlib.write_header_to_csv(params, product_names, "domestic_prices", run)
 	# Create a file to hold scalar variables
 	scalar_var_list = ["GDP gr", "curr acct surplus to GDP ratio", "curr acct surplus", "real GDP",
 					   "GDP deflator", "labor productivity gr", "labor force gr", "wage rate gr",
 					   "wage per effective worker gr", "real investment", "central bank rate",
 					   "terms of trade index", "real xr index", "nominal xr index"]
-	stringvec_to_quotedstringvec!(scalar_var_list)
-	write_header_to_csv(params, scalar_var_list, "collected_variables", run)
+	LMlib.stringvec_to_quotedstringvec!(scalar_var_list)
+	LMlib.write_header_to_csv(params, scalar_var_list, "collected_variables", run)
 
 	#############################################################################
 	#
@@ -606,14 +559,14 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		#--------------------------------
         # This is used here if the previous calculation failed, but is also reported below
         va_at_prev_prices_1 = prices.Pg * g
-        va_at_prev_prices_2 = sum(pb_prev[j] * io.D[j,:] for j in 1:np) .* g
+        va_at_prev_prices_2 = sum(pb_prev[j] * sut.D[j,:] for j in 1:np) .* g
         value_added_at_prev_prices = va_at_prev_prices_1 - va_at_prev_prices_2
         if previous_failed
             pd_prev = pd_prev .* (1 .+ πd)
             pb_prev = pb_prev .* (1 .+ πb)
             pw_prev = pw_prev .* (1 .+ πw)
             va1 = (1 + πg) * prices.Pg * g
-            va2 = sum(value.(param_pb)[j] * io.D[j,:] for j in 1:np) .* g
+            va2 = sum(value.(param_pb)[j] * sut.D[j,:] for j in 1:np) .* g
             value_added = va1 - va2
             πGDP = sum(value_added)/sum(value_added_at_prev_prices) - 1
 			π_imp = exog.πw_base[1]
@@ -622,7 +575,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
             GDP_gr = prev_GDP_gr
 			GDP = prev_GDP * (1 + GDP_gr)
         else
-			πd = (param_pd - pd_prev) ./ (pd_prev .+ IOlib.ϵ) # If not produced, pd_prev = 0
+			πd = (param_pd - pd_prev) ./ (pd_prev .+ LMlib.ϵ) # If not produced, pd_prev = 0
 	        πb = (param_pb - pb_prev) ./ pb_prev
 	        πw = (prices.pw - pw_prev) ./ pw_prev # exog.πw_base is a single value, applied to all products; this is by product
             πg = sum(g_share .* πb)
@@ -667,12 +620,12 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		# Update use matrix
 		#--------------------------------
 		if calc_use_matrix_tech_change && !previous_failed
-			sector_price_level = (io.S * (pd_prev .* value.(qs))) ./ g
-			intermed_cost_shares = [pb_prev[i] * io.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
+			sector_price_level = (sut.S * (pd_prev .* value.(qs))) ./ g
+			intermed_cost_shares = [pb_prev[i] * sut.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 			D_hat = calc_intermed_techchange_intercept + calc_intermed_techchange(intermed_cost_shares, tech_change_rate_constant)
-			io.D = io.D .* exp.(D_hat) # This ensures that io.D will not become negative
+			sut.D = sut.D .* exp.(D_hat) # This ensures that sut.D will not become negative
 			if params["report-diagnostics"]
-				IOlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(years[t]) * ".csv"), io.D, params["included_product_codes"], params["included_sector_codes"])
+				LMlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(years[t]) * ".csv"), sut.D, params["included_product_codes"], params["included_sector_codes"])
 			end
 		end
 
@@ -681,11 +634,11 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		#--------------------------------
 		if !previous_failed
 			# First, update the Vnorm matrix
-			io.Vnorm = Diagonal(1 ./ (g .+ IOlib.ϵ)) * io.S * Diagonal(value.(qs))
+			sut.Vnorm = Diagonal(1 ./ (g .+ LMlib.ϵ)) * sut.S * Diagonal(value.(qs))
 			# Calculate export-weighted price
-			export_share = value.(X) ./ (value.(qs) .+ IOlib.ϵ)
+			export_share = value.(X) ./ (value.(qs) .+ LMlib.ϵ)
 			px = exog.xr[t] * export_share .* prices.pw + (1 .- export_share) .* prices.pd
-			profit_per_output = io.Vnorm * px - (prices.Pg .* (ω + io.energy_share) +  transpose(io.D) * prices.pb)
+			profit_per_output = sut.Vnorm * px - (prices.Pg .* (ω + sut.energy_share) +  transpose(sut.D) * prices.pb)
 			pK = dot(θ, prices.pb)
 			profit_rate = profit_per_output ./ (pK * capital_output_ratio)
 		else
@@ -721,15 +674,15 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		#--------------------------------
 		if !all(ismissing.(exog.pot_output[t,:]))
 			# Export demand is calculated differently when potential output is exogenously specified
-			pot_prod = sum(exog.pot_output[t,i] * io.Vnorm[i,:] for i in pot_output_ndxs)
+			pot_prod = sum(exog.pot_output[t,i] * sut.Vnorm[i,:] for i in pot_output_ndxs)
 			# -- extent of externally specified output
-			pot_prod_spec_factor = sum(io.Vnorm[i,:] * z[i] for i in pot_output_ndxs) ./ (io.Vnorm' * z .+ IOlib.ϵ)
+			pot_prod_spec_factor = sum(sut.Vnorm[i,:] * z[i] for i in pot_output_ndxs) ./ (sut.Vnorm' * z .+ LMlib.ϵ)
 		else
 			pot_prod = zeros(np)
 			pot_prod_spec_factor = zeros(np)
 		end
 		# -- scale factor
-		Xmax_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* pot_prod ./ (prev_pot_prod .+ IOlib.ϵ)
+		Xmax_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* pot_prod ./ (prev_pot_prod .+ LMlib.ϵ)
 		prev_pot_prod = pot_prod
 		# -- income factor
 		smoothed_world_gr += growth_adj * (exog.world_grs[t] - smoothed_world_gr)
@@ -746,18 +699,18 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		W_curr = sum(W)
         W = ((1 + w_gr)/(1 + λ_gr)) * W .* (1 .+ γ)
         wage_ratio = (1/(1 + πF)) * sum(W)/W_curr
-        Fmax = Fmax .* max.(IOlib.ϵ,wage_ratio).^exog.wage_elast_demand[t]
+        Fmax = Fmax .* max.(LMlib.ϵ,wage_ratio).^exog.wage_elast_demand[t]
 
 		#--------------------------------
 		# Calculate indices to pass to LEAP
 		#--------------------------------
         indices[t,1] = years[t]
 		curr_index = 1
-		if haskeyvalue(params, "GDP-branch")
+		if LMlib.haskeyvalue(params, "GDP-branch")
 			curr_index += 1
 			indices[t,curr_index] = GDP
 		end
-		if haskeyvalue(params, "Employment-branch")
+		if LMlib.haskeyvalue(params, "Employment-branch")
 			curr_index += 1
 			indices[t,curr_index] = lab_force_index
 		end
@@ -827,29 +780,29 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		end	
 
 		if !previous_failed
-			io.m_frac = (value.(M) + IOlib.ϵ * io.m_frac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ IOlib.ϵ)
+			sut.m_frac = (value.(M) + LMlib.ϵ * sut.m_frac) ./ (value.(qd) + value.(F) + value.(I_supply) .+ LMlib.ϵ)
 		end
-		prices.pd = calc_dom_prices(t, np, ns, ω, prices, io, exog)
-		prices.pb = exog.xr[t] * io.m_frac .* prices.pw + (1 .- io.m_frac) .* prices.pd
+		prices.pd = calc_dom_prices(t, np, ns, ω, prices, sut, exog)
+		prices.pb = exog.xr[t] * sut.m_frac .* prices.pw + (1 .- sut.m_frac) .* prices.pd
 		
 		# Sector variables
-		append_row_to_csv(params, g, "sector_output", run, years[t])
-		append_row_to_csv(params, z, "potential_sector_output", run, years[t])
-		append_row_to_csv(params, u_report, "capacity_utilization", run, years[t])
-		append_row_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, years[t])
-		append_row_to_csv(params, profit_rate, "profit_rate", run, years[t])
-		append_row_to_csv(params, γ_0, "autonomous_investment_rate", run, years[t])
+		LMlib.append_row_to_csv(params, g, "sector_output", run, years[t])
+		LMlib.append_row_to_csv(params, z, "potential_sector_output", run, years[t])
+		LMlib.append_row_to_csv(params, u_report, "capacity_utilization", run, years[t])
+		LMlib.append_row_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, years[t])
+		LMlib.append_row_to_csv(params, profit_rate, "profit_rate", run, years[t])
+		LMlib.append_row_to_csv(params, γ_0, "autonomous_investment_rate", run, years[t])
 	    # Product variables
-		append_row_to_csv(params, F_report, "final_demand", run, years[t])
-		append_row_to_csv(params, M_report, "imports", run, years[t])
-		append_row_to_csv(params, X_report, "exports", run, years[t])
-		append_row_to_csv(params, param_pb, "basic_prices", run, years[t])
-		append_row_to_csv(params, param_pd, "domestic_prices", run, years[t])
+		LMlib.append_row_to_csv(params, F_report, "final_demand", run, years[t])
+		LMlib.append_row_to_csv(params, M_report, "imports", run, years[t])
+		LMlib.append_row_to_csv(params, X_report, "exports", run, years[t])
+		LMlib.append_row_to_csv(params, param_pb, "basic_prices", run, years[t])
+		LMlib.append_row_to_csv(params, param_pd, "domestic_prices", run, years[t])
 		# Scalar variables
 		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
 							prices.RER, prices.XR]
-		append_row_to_csv(params, scalar_var_vals, "collected_variables", run, years[t])
+		LMlib.append_row_to_csv(params, scalar_var_vals, "collected_variables", run, years[t])
 
 		if t == length(years)
 			break
@@ -876,8 +829,8 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 		param_pb = prices.pb
 		param_z = z
 		# Caluculate updated m_frac for use in goal program
-		adj_import_price_elast = max.(0, 1 .- io.m_frac) .* exog.import_price_elast
-		param_mfrac = io.m_frac .* ((1 .+ πd)./(1 .+ πw)).^adj_import_price_elast
+		adj_import_price_elast = max.(0, 1 .- sut.m_frac) .* exog.import_price_elast
+		param_mfrac = sut.m_frac .* ((1 .+ πd)./(1 .+ πw)).^adj_import_price_elast
 		# Set maximum utilization in multiple steps
 		param_max_util = ones(ns)
 		max_util_ndxs = findall(x -> !ismissing(x), exog.max_util[t + 1,:])
@@ -887,7 +840,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 			set_normalized_coefficient(eq_io[i], u[i], -param_Pg * param_z[i])
 			set_normalized_rhs(eq_util[i], param_max_util[i])
 			for j in 1:np
-				set_normalized_coefficient(eq_io[i], qs[j], io.S[i,j] * param_pb[j])
+				set_normalized_coefficient(eq_io[i], qs[j], sut.S[i,j] * param_pb[j])
 			end
 		end
 		for i in 1:np
@@ -899,7 +852,7 @@ function macro_main(params::Dict, leapvals::LEAPfunctions.LEAPresults, run::Inte
 			set_normalized_coefficient(eq_M[i], F[i], -param_mfrac[i])
 			set_normalized_coefficient(eq_M[i], I_supply[i], -param_mfrac[i])
 			for j in 1:ns
-				set_normalized_coefficient(eq_intdmd[i], u[j], -io.D[i,j] * param_z[j])
+				set_normalized_coefficient(eq_intdmd[i], u[j], -sut.D[i,j] * param_z[j])
 			end
 		end
 		fix(I_tot, param_I_tot)
@@ -971,15 +924,15 @@ end # compare_results
 function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
 
     # Read in global parameters
-    params = IOlib.parse_param_file(param_file, include_energy_sectors = include_energy_sectors)
+    params = SUTlib.parse_param_file(param_file, include_energy_sectors = include_energy_sectors)
 
     # set model run parameters and initial values
-    leapvals = LEAPfunctions.initialize_leapresults(params)
+    leapvals = LEAPlib.initialize_leapresults(params)
     run_leap = params["model"]["run_leap"]
     if run_leap
         max_runs = params["model"]["max_runs"]
         ## checks that user has LEAP installed
-        if ismissing(LEAPfunctions.connect_to_leap())
+        if ismissing(LEAPlib.connect_to_leap())
             @error "Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file."
             return
         end
@@ -1025,33 +978,33 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 				#------------status
 				@info "Hiding LEAP to improve performance..."
 				#------------status
-				LEAPfunctions.hide_leap(true)
+				LEAPlib.hide_leap(true)
 			end
 
             #------------status
             @info "Sending Macro output to LEAP..."
             #------------status
-            LEAPfunctions.send_results_to_leap(params, indices)
+            LEAPlib.send_results_to_leap(params, indices)
             ## Run LEAP model
 			try
 				#------------status
 				@info "Running LEAP model..."
 				flush(logfile)
 				#------------status
-				LEAPfunctions.calculate_leap(params["LEAP-info"]["result_scenario"])
+				LEAPlib.calculate_leap(params["LEAP-info"]["result_scenario"])
 
 				## Obtain energy investment data from LEAP
 				#------------status
 				@info "Obtaining LEAP results..."
 				flush(logfile)
 				#------------status
-				leapvals = LEAPfunctions.get_results_from_leap(params, run)
+				leapvals = LEAPlib.get_results_from_leap(params, run)
 			finally
 				if params["model"]["hide_leap"]
 					#------------status
 					@info "Restoring LEAP..."
 					#------------status
-					LEAPfunctions.hide_leap(false)
+					LEAPlib.hide_leap(false)
 				end
 				flush(logfile)
 			end
