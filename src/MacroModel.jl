@@ -264,8 +264,8 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 	#----------------------------------
     # For calibration, apply a user-specified adjustment to exports, final demands, and potential output
     #----------------------------------
-	Xmax = (1.0 + params["calib"]["max_export_adj_factor"]) * sut.X
-    Fmax = (1.0 + params["calib"]["max_hh_dmd_adj_factor"]) * max.(sut.F,zeros(np))
+	Xnorm = (1.0 + params["calib"]["max_export_adj_factor"]) * sut.X
+    Fnorm = (1.0 + params["calib"]["max_hh_dmd_adj_factor"]) * max.(sut.F,zeros(np))
 	z = (1.0 + params["calib"]["pot_output_adj_factor"]) * sut.g
 
 	#----------------------------------
@@ -340,8 +340,8 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
     # Dynamic parameters
     #----------------------------------
 	param_z = z
-	param_Xmax = Xmax
-	param_Fmax = Fmax
+	param_Xnorm = Xnorm
+	param_Fnorm = Fnorm
 	param_I_tot = I_total
 	param_prev_I_tot = 2 * I_total # Allow extra slack -- this sets a scale
 	param_pw = prices.pw
@@ -399,9 +399,9 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
     # Product constraints
 	# Variables for objective function (goal program)
 	@constraint(mdl, eq_xshare[i = 1:np], xshare[i] + xgap[i] == 1.0)
-	@constraint(mdl, eq_X[i = 1:np], X[i] == xshare[i] * param_Xmax[i])
+	@constraint(mdl, eq_X[i = 1:np], X[i] == xshare[i] * param_Xnorm[i])
 	@constraint(mdl, eq_fshare[i = 1:np], fshare[i] + fgap[i] == 1.0)
-	@constraint(mdl, eq_F[i = 1:np], F[i] == fshare[i] * param_Fmax[i])
+	@constraint(mdl, eq_F[i = 1:np], F[i] == fshare[i] * param_Fnorm[i])
 	# Intermediate demand
 	@constraint(mdl, eq_intdmd[i = 1:np], qd[i] - sum(sut.D[i,j] * u[j] * param_z[j] for j in 1:ns) == 0)
 	# Investment
@@ -449,14 +449,14 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
     LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_neg_",run,".csv")), value.(margins_neg), "negative margins", params["included_product_codes"])
     LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_pos_",run,".csv")), value.(margins_pos), "positive margins", params["included_product_codes"])
 
-    # First run is calibration -- now set Xmax and Fmax based on solution and run again
-    Xmax = max.(Xmax, value.(X))
-    Fmax = max.(Fmax, value.(F))
-	param_Xmax = Xmax
-	param_Fmax = Fmax
+    # First run is calibration -- now set Xnorm and Fnorm based on solution and run again
+    Xnorm = max.(Xnorm, value.(X))
+    Fnorm = max.(Fnorm, value.(F))
+	param_Xnorm = Xnorm
+	param_Fnorm = Fnorm
 	for i in 1:np
-		set_normalized_coefficient(eq_X[i], xshare[i], -param_Xmax[i])
-		set_normalized_coefficient(eq_F[i], fshare[i], -param_Fmax[i])
+		set_normalized_coefficient(eq_X[i], xshare[i], -param_Xnorm[i])
+		set_normalized_coefficient(eq_F[i], fshare[i], -param_Fnorm[i])
 	end
 	if params["report-diagnostics"]
 		open(joinpath(params["diagnostics_path"], string("model_", run, "_calib_2", ".txt")), "w") do f
@@ -701,15 +701,15 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 			pot_prod_spec_factor = zeros(np)
 		end
 		# -- scale factor
-		Xmax_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* pot_prod ./ (prev_pot_prod .+ LMlib.ϵ)
+		Xnorm_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* pot_prod ./ (prev_pot_prod .+ LMlib.ϵ)
 		prev_pot_prod = pot_prod
 		# -- income factor
 		smoothed_world_gr += growth_adj * (exog.world_grs[t] - smoothed_world_gr)
-		Xmax_income_factor = (1 + exog.world_grs[t]) ./ (1 .+ pot_prod_spec_factor * smoothed_world_gr)
+		Xnorm_income_factor = (1 + exog.world_grs[t]) ./ (1 .+ pot_prod_spec_factor * smoothed_world_gr)
 		# -- price factor
-		Xmax_price_factor = (1 .+ πw)./(1 .+ πd)
+		Xnorm_price_factor = (1 .+ πw)./(1 .+ πd)
 		# -- updated value
-        Xmax = Xmax .* Xmax_scale_factor .* Xmax_income_factor.^exog.export_elast_demand[t] .* Xmax_price_factor.^exog.export_price_elast
+        Xnorm = Xnorm .* Xnorm_scale_factor .* Xnorm_income_factor.^exog.export_elast_demand[t] .* Xnorm_price_factor.^exog.export_price_elast
 
 		#--------------------------------
 		# Final domestic consumption demand
@@ -718,7 +718,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 		W_curr = sum(W)
         W = ((1 + w_gr)/(1 + λ_gr)) * W .* (1 .+ γ)
         wage_ratio = (1/(1 + πF)) * sum(W)/W_curr
-        Fmax = Fmax .* max.(LMlib.ϵ,wage_ratio).^exog.wage_elast_demand[t]
+        Fnorm = Fnorm .* max.(LMlib.ϵ,wage_ratio).^exog.wage_elast_demand[t]
 
 		#--------------------------------
 		# Calculate indices to pass to LEAP
@@ -839,8 +839,8 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 			param_Mref = 2 * value.(M) # Allow for some extra slack -- this just sets a scale
 		end
 		param_Pg = prices.Pg
-		param_Xmax = Xmax
-		param_Fmax = Fmax
+		param_Xnorm = Xnorm
+		param_Fnorm = Fnorm
 		param_I_tot = I_total
 		param_prev_I_tot = 2 * I_total # Allow extra slack -- this sets a scale
 		param_pw = prices.pw
@@ -863,8 +863,8 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 			end
 		end
 		for i in 1:np
-			set_normalized_coefficient(eq_X[i], xshare[i], -param_Xmax[i])
-			set_normalized_coefficient(eq_F[i], fshare[i], -param_Fmax[i])
+			set_normalized_coefficient(eq_X[i], xshare[i], -param_Xnorm[i])
+			set_normalized_coefficient(eq_F[i], fshare[i], -param_Fnorm[i])
 			set_normalized_coefficient(eq_M[i], ψ_pos[i], -param_Mref[i])
 			set_normalized_coefficient(eq_M[i], ψ_neg[i], param_Mref[i])
 			set_normalized_coefficient(eq_M[i], qd[i], -param_mfrac[i])
