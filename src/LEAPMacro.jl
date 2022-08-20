@@ -29,7 +29,12 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stac
 		YAML.load_file(config_file)
 	catch err
 		exit_status = 1
-		println("Configuration file '" * config_file * "' did not load properly: " * err.problem)
+		if Sys.iswindows()
+			eol_length = 2 # YAML mis-counts lines on Windows
+		else
+			eol_length = 1
+		end
+		println("Configuration file '" * config_file * "' did not load properly: " * err.problem * " on line " * string(err.problem_mark.line ÷ eol_length))
 		return(exit_status)
 	end
 
