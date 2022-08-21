@@ -281,3 +281,7 @@ LEAP-sectors:
         }
     ]
    }
+
+LEAP-potential-output: []
+
+LEAP-prices: []
