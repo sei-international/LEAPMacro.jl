@@ -14,8 +14,8 @@ module LEAPMacro
 
 using Logging, Dates, YAML
 
-include("./MacroModel.jl")
-using .MacroModel
+include("./Macro.jl")
+using .Macro
 
 "Run LEAP-Macro by calling `leapmacro`"
 function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stack::Bool = false, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
@@ -53,7 +53,7 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stac
 	@info "Configuration file: '$config_file'"
 	exit_status = 0
 	try
-		MacroModel.leapmacro(config_file, logfile, include_energy_sectors, continue_if_error)
+		Macro.leapmacro(config_file, logfile, include_energy_sectors, continue_if_error)
 	catch err
 		exit_status = 1
 		println(string("Macro exited with an error: Please check the log file '", logfilename,"'"))
