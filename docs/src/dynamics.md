@@ -32,11 +32,6 @@ The inflation rate ``\pi_F`` of final domestic demand is the average of the rate
 
 The GDP inflation rate ``\pi_\text{GDP}`` is the average of the rate of increase of basic prices weighted by the value of total final demand. It is calculated as
 ```math
-    V_k = \overline{p}_{b,k,-1}\left(F_k + X_k + I_k - M_k\right).
-```
-The GDP inflation rate is calculated as
-```math
-    \pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{b,k}}{\sum_{k = l}^{n_p} V_l}.
     \pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{b,k}}{\sum_{k = l}^{n_p} V_l},\quad V_k = \overline{p}_{b,k,-1}\left(F_k + X_k + I_k - M_k\right).
 ```
 

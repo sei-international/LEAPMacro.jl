@@ -62,7 +62,6 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\pi_{d,k}``          | Producer price inflation rate for product ``k``                                               |
 | ``\pi_F``              | Inflation rate for domestic final demand                                                      |
 | ``\pi_\text{GDP}``     | Inflation rate for the GDP price level                                                        |
-| ``V_k``                | Value of total final demand (household, government, exports,and investment) for product ``k`` |
 | ``W_i``                | Nominal wage bill in sector ``i``                                                             |
 | ``\hat{L}``            | Growth rate of employment                                                                     |
 | ``\hat{w}``            | Growth rate of the nominal wage                                                               |
