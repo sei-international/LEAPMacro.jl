@@ -91,14 +91,44 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
 	sector_codes = all_sectors[:code]
     product_codes = all_products[:code]
 
+    # Get lists of excluded sectors other than energy, defaulting to empty list
+    if !LMlib.haskeyvalue(global_params, "excluded_sectors")
+        global_params["excluded_sectors"] = Dict()
+    end
+    if !LMlib.haskeyvalue(global_params["excluded_sectors"], "territorial_adjustment")
+        global_params["excluded_sectors"]["territorial_adjustment"] = []
+    end
+    if !LMlib.haskeyvalue(global_params["excluded_sectors"], "others")
+        global_params["excluded_sectors"]["others"] = []
+    end
 	excluded_sectors = vcat(global_params["excluded_sectors"]["territorial_adjustment"],
 							global_params["excluded_sectors"]["others"])
+
+    # Get lists of excluded products other than energy, defaulting to empty list
+    if !LMlib.haskeyvalue(global_params, "excluded_products")
+        global_params["excluded_products"] = Dict()
+    end
+    if !LMlib.haskeyvalue(global_params["excluded_products"], "territorial_adjustment")
+        global_params["excluded_products"]["territorial_adjustment"] = []
+    end
+    if !LMlib.haskeyvalue(global_params["excluded_products"], "others")
+        global_params["excluded_products"]["others"] = []
+    end
     excluded_products = vcat(global_params["excluded_products"]["territorial_adjustment"],
                             global_params["excluded_products"]["others"])
-   if !include_energy_sectors
+   
+    # Unless energy sectors & products are included in the calculation, get the lists of excluded energy sectors & products
+    if !include_energy_sectors
+        if !LMlib.haskeyvalue(global_params["excluded_sectors"], "energy")
+            global_params["excluded_sectors"]["energy"] = []
+        end
         excluded_sectors = vcat(excluded_sectors, global_params["excluded_sectors"]["energy"])
+        if !LMlib.haskeyvalue(global_params["excluded_products"], "energy")
+            global_params["excluded_products"]["energy"] = []
+        end
         excluded_products = vcat(excluded_products, global_params["excluded_products"]["energy"])
     end
+
 	# These are the indexes used for the Macro model
 	user_defined_sector_ndxs = findall(.!in(excluded_sectors).(sector_codes))
 	user_defined_product_ndxs = findall(.!in(excluded_products).(product_codes))
