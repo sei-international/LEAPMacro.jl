@@ -181,7 +181,7 @@ excluded_products:
 non_tradeable_products: [constr, comm]
 
 # Domestic production as a % share of the total of imports and domestic production must exceed this value
-domestic_production_share_threshold: 1 # percent
+domestic_production_share_threshold: 1.0 # percent
     
 SUT_ranges:
     # Matrices arranged product (rows) x sector (columns)
