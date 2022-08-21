@@ -225,7 +225,11 @@ function get_results_from_leap(params::Dict, run::Integer)
         for b in LEAP.Branches
             if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
                 for t in eachindex(sim_years)
-                    I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
+                    if params["LEAP-info"]["inv_costs_unit"] != ""
+                        I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
+                    else
+                        I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t]) / params["LEAP-info"]["inv_costs_scale"]
+                    end
                 end
                 leapvals.I_en += I_en_temp
             end
@@ -252,7 +256,7 @@ function get_results_from_leap(params::Dict, run::Integer)
         end
 
         #--------------------------------
-        # Investment prices
+        # Energy prices
         #--------------------------------
         if LMlib.haskeyvalue(params, "LEAP-prices")
             for i in eachindex(params["LEAP-prices"])

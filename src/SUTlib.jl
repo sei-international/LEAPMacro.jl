@@ -197,7 +197,6 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
     end
 
     # Check that LEAP-info keys are reported
-    default_inv_costs_unit = "U.S. Dollar"
     if LMlib.haskeyvalue(global_params, "LEAP-info")
         # Key "scenario" is specified, which overrides "input_scenario" and "result_scenario"
         if LMlib.haskeyvalue(global_params["LEAP-info"], "scenario")
@@ -218,7 +217,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         end
         # Key "inv_costs_unit" is missing, so apply the default
         if !LMlib.haskeyvalue(global_params["LEAP-info"], "inv_costs_unit")
-            global_params["LEAP-info"]["inv_costs_unit"] = default_inv_costs_unit
+            global_params["LEAP-info"]["inv_costs_unit"] = ""
         end
         # Key "inv_costs_scale" is missing, so default to 1.0
         if !LMlib.haskeyvalue(global_params["LEAP-info"], "inv_costs_scale")
@@ -232,7 +231,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
         global_params["LEAP-info"]["input_scenario"] = ""
         global_params["LEAP-info"]["result_scenario"] = ""
-        global_params["LEAP-info"]["inv_costs_unit"] = default_inv_costs_unit
+        global_params["LEAP-info"]["inv_costs_unit"] = ""
         global_params["LEAP-info"]["inv_costs_scale"] = 1.0
     end
 
