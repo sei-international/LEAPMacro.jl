@@ -6,6 +6,9 @@ CurrentModule = LEAPMacro
 
 The configuration file is written in YAML syntax and has a `.yml` extension. By default, Macro assumes the configuration file will be called `LEAPMacro_params.yml`, but other names are possible, and in fact encouraged, because each configuration file corresponds to a different scenario.
 
+!!! tip "Online YAML checkers"
+    YAML is a widely-used language for representing data. As explained on the [official YAML website](https://yaml.org/), it is a "human-friendly data serialization language for all programming languages." Because YAML is so widely used, many online tools are available. While LEAP-Macro will report an error if it finds a problem with your YAML script, the online syntax checkers are more user-friendly, including the [YAML checker](https://yamlchecker.com/) and the [YAML validator](https://onlineyamltools.com/validate-yaml).
+
 The configuration file used as an example on this page is the `LEAPMacro_params.yml` file that is distributed with the demonstration files (see the [Quick start](@ref quick-start) page).
 
 ```@contents
@@ -15,7 +18,7 @@ Depth = 3
 
 ## [General settings](@id config-general-settings)
 
-The configuration file is made up of several blocks. The first block names a subfolder for storing outputs. It will be created inside an `outputs` folder (see [Output files](@ref model-outputs)). Different configuration files should be given different output folders so that different scenarios can be distinguished.
+The configuration file is made up of several blocks. The first block names a subfolder for storing outputs. It will be created inside an `outputs` folder (see [Output files](@ref model-outputs)). Different configuration files should specify different output folders so that scenarios can be distinguished.
 ```yaml
 #---------------------------------------------------------------------------
 # Folder inside the "outputs" folder to store calibration, results, and diagnostics
@@ -23,7 +26,7 @@ The configuration file is made up of several blocks. The first block names a sub
 output_folder: Baseline
 ```
 
-The next block sets the start and end years for the simulation. When running with LEAP, these should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data. Also, the end year can be set closer to the start year, but Macro normally runs quickly once it is loaded, so that is rarely necessary for performance.
+The next block sets the start and end years for the simulation. When running with LEAP, these should normally be the same as the base year and final year in LEAP, and the start year should be appropriate for the supply-use table. However, during model development, the start year might be set to an earlier value to calibrate against historical data.
 ```yaml
 #---------------------------------------------------------------------------
 # Start and end years for the simulation
@@ -78,7 +81,7 @@ model:
     # Maximum number of iterations before stopping (ignored if run_leap = false)
     max_runs: 7
     # Tolerance in percentage difference between values for indices between runs
-    max_tolerance: 1 # percent
+    max_tolerance: 1.0 # percent
 ```
 
 ### [Optional input files](@id config-optional-input-files)
@@ -87,7 +90,9 @@ The next block is optional, and can be entirely omitted. This block allows for a
   * `pot_output`: Potential output, which will override the value simulated by the model, where the entered values are converted to an index (e.g., agricultural production might be determined by an independent crop production model)
   * `max_utilization`: Maximum capacity utilization (e.g., if an exogenous constraint prevents operation at full capacity)
   * `real_price`: Real prices for tradeables; the entered values are converted to an index by Macro and multiplied by an index of inflation at the user-specified world inflation rate
-These are explained in more detail under [external parameter files](@ref params-optional-input-files). Examples of each type of file are included in the sample Freedonia model. Any file can be commented out. Alternatively, the filename can be set to "~", meaning that it is omitted.
+The format and purpose of these files are explained in more detail under [external parameter files](@ref params-optional-input-files), and examples of each type of file are included in the sample Freedonia model.
+
+Because this block is optional, it can be deleted entirely or commented out (as in the Freedonia configuration file). Alternatively, individual files can be commented out or set to "`~`", which is the way to signal a missing value in YAML.
 ```yaml
 #---------------------------------------------------------------------------
 # Optional input files for exogenous time series (CSV files)
@@ -230,7 +235,7 @@ wage-fcn:
     # Inflation pass-through (wage indexing coefficient)
     infl_passthrough: 1.00
     # Labor supply constraint coefficient
-    lab_constr_coeff: 0.5
+    lab_constr_coeff: 0.50
 ```
 [^1]: The [Kaldor-Verdoorn law](https://www.encyclopedia.com/social-sciences/applied-and-social-sciences-magazines/verdoorns-law) states that the growth rate of labor productivity is an increasing function of the growth rate of output. In its original form it applies only to manufacturing, and the influences are weaker in services and agriculture. In the Macro model, an economy-wide labor productivity rate is calculated as an increasing function of the GDP growth rate.
 
@@ -249,7 +254,7 @@ tech-param-change:
 ```
 
 ### [Long-run demand elasticities](@id config-longrun-demand-elast)
-Initial values for demand elasticities for products with respect to domestic vs. world prices, global GDP (for exports), and the wage bill (for domestic final demand excluding investment) are specified in the [external product parameters file](@ref params-products). The way that the elasticities enter into the model is described in the page on [model dynamics](@ref dynamics-demand-fcns).
+Initial values for demand elasticities for products with respect to domestic vs. world prices, global GDP (for exports), and the wage bill (for domestic final demand excluding investment) are specified in the [external product parameters file](@ref params-products). The way that the elasticities enter into the model is described in the page on [model dynamics](@ref dynamics-export-demand).
 
 For products that are not labeled as "Engel products"[^2] (given by the parameter `engel-prods`):
   * If the initial wage elasticity is less than one, then it remains at its starting level;
@@ -274,7 +279,7 @@ wage_elast_demand:
 [^2]: [Engel's Law](https://www.investopedia.com/terms/e/engels-law.asp) states that as income rises, the proportion of income spent on food declines. That means that the income elasticity of expenditure on food is less than one.
 
 ### [Linear goal program weights](@id config-lgp-weights)
-The Macro model solves a linear goal program for each year of the simulation. As described in the documentation for the [linear goal program](@ref lgp), the objective function contains weights, which are specified in the next block.
+The Macro model solves a linear goal program for each year of the simulation. As described in the documentation for the [linear goal program](@ref lgp), the objective function contains weights, which are specified in the next block. The default weights should be suitable for most LEAP-Macro applications.
 
 The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
   * For category weights:
@@ -307,7 +312,9 @@ objective-fcn:
 ## [Linking to the supply-use table](@id config-sut)
 The next block is for specifying the structure of the [supply-use table](@ref sut) and how it relates to variables in Macro.
 
-The first section of this block specifies sectors and products that are excluded from the simulation. There are three categories:
+The first section of this block specifies sectors and products that are excluded from the simulation. The entire section or any item can be excluded. Alternatively, items can be set to the empty list `[]` or to YAML's "no value" symbol, `~`.
+
+There are three categories:
 1. First, and most important, are energy sectors and products. Those are excluded from the Macro calculation because the energy sector analysis is handled on a physical basis within LEAP, although they can optionally be included when [running the model](@ref running-macro) in stand-alone mode, without LEAP.
 2. Second are any territorial adjustments. Macro recalculates some parameters to take account of those entries. If none are present in the supply-use table, then an empty list `[]` can be entered for this parameter, as in the sample Freedonia model file shown below.
 3. Finally are any other excluded sectors and products. For example, some tables may have a "fictitious" product or sector entry.
@@ -334,7 +341,7 @@ Other products may be almost entirely imported. That can sometimes cause difficu
 non_tradeable_products: [constr, comm]
 
 # Domestic production as a % share of the total of imports and domestic production must exceed this value
-domestic_production_share_threshold: 1 # percent
+domestic_production_share_threshold: 1.0 # percent
 ```
 
 The following section specifies where to find the data needed by Macro within the supply-use table (a `CSV` file). Ranges are specified in standard spreadsheet form.
@@ -361,11 +368,12 @@ SUT_ranges:
 ## [Mapping Macro to LEAP](@id config-link-LEAP)
 The next, and final, block specifies how LEAP and Macro are linked. Each of these entries is optional.
 
-The first section says which LEAP scenario to send and retrieve results to and from, for which region, the currency unit for investment costs, and a scaling factor. It also identifies the first historical year, if that is different from the start year. (The `last_historical_year` is the year just before LEAP's `First Scenario Year`.)
+### Core LEAP model information
+The first section in this block says which LEAP scenario to send and retrieve results to and from, for which region, the currency unit for investment costs, and a scaling factor. It also identifies the first historical year, if that is different from the start year. (The `last_historical_year` is the year just before LEAP's `First Scenario Year`.)
 
 As an example for setting the scaling factor, if entries in the Macro model input files are in millions of US dollars, and investment costs in LEAP are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).
 
-If this section is omitted, then results are sent to and retrieved from the scenario currently active in LEAP, and for the currently active region (if any regions are specified). The `last_historical_year` is set to the start year, `inv_costs_units` is set to `U.S. Dollar`, and `inv_costs_scale` is set to 1.0.
+If this section is omitted, then results are sent to and retrieved from the scenario currently active in LEAP, and for the currently active region (if any regions are specified). The `last_historical_year` is set to the start year, `inv_costs_units` is set to a blank (so LEAP applies the default currency unit), and `inv_costs_scale` is set to 1.0.
 ```yaml
 #---------------------------------------------------------------------------
 # Parameters for running LEAP with the Macro model (LEAP-Macro)
@@ -383,7 +391,7 @@ LEAP-info:
     # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
     inv_costs_scale: 1.0e+6
 ```
-Alternatively, separate scenarios can be specified if LEAP receives inputs from Macro for one scenario (`input_scenario`), but sends results back to Macro from another scenario (`result_scenario`). In this case, `scenario` should be omitted, or set to "~" (meaning "no value"). For example,
+Alternatively, separate scenarios can be specified if LEAP receives inputs from Macro for one scenario (`input_scenario`), but sends results back to Macro from another scenario (`result_scenario`). In this case, `scenario` should be omitted, or set to `~` (meaning "no value"). For example,
 ```yaml
 #---------------------------------------------------------------------------
 # Parameters for running LEAP with the Macro model (LEAP-Macro)
@@ -398,7 +406,8 @@ LEAP-info:
     ...
 ```
 
-The remaining sections specify where in LEAP to put indices as calculated by Macro. For each index, LEAP should contain at least one historical value, while the index supplied by Macro is applied to the last historical value in the specified `result_scenario`. Indices appear as columns in an `indices_#.csv` file in the [`results` output folder](@ref model-outputs-results), where `#` is the run number.
+### Passing values from Macro to LEAP
+The next sections specify where in LEAP to put indices as calculated by Macro. For each index, LEAP should contain at least one historical value, while the index supplied by Macro is applied to the last historical value in the specified `result_scenario`. Indices appear as columns in an `indices_#.csv` file in the [`results` output folder](@ref model-outputs-results), where `#` is the run number.
 
 The first index is for GDP. It can be omitted, but if it is present, the entry in the configuration file gives the name for the index, the LEAP branch and variable where the index should be inserted and, to cover cases where the last historical year is after the base year, the last historical year.
 ```yaml
@@ -447,3 +456,46 @@ LEAP-sectors:
    ...
 ```
 [^3]: Production is arguably a better measure of sector activity than is value added. Value added subtracts from the value of production the cost of intermediate goods and services, to avoid double-counting when calculating gross domestic product (GDP).
+
+### Passing values from LEAP to Macro
+The final sections say how to pass results for potential output and prices from LEAP to Macro. These are in addition to investment expenditure, which is automatically collected from LEAP and passed to Macro. Any values for potential output and prices drawn from LEAP override those specified in external [input files](@ref params-optional-input-files), if any. (Investment expenditure from LEAP is added to investment specified in external input files.)
+
+The Freedonia configuration file does not specify potential output and prices from LEAP, so the entries are set equal to empty lists. Alternatively, they can be completely ommitted or set to the YAML "no value" symbol, `~`.
+```yaml
+LEAP-potential-output: []
+
+LEAP-prices: []
+```
+
+To demonstrate how these sections might look, suppose that instead of excluding the `coal` sector as is done in the [link to the supply-use table](@ref config-sut), above, it is included in the Macro model, but potential output from the sector is provided by LEAP. That can be accomplished by setting
+```yaml
+excluded_sectors:
+    energy: [petr, util]
+excluded_products:
+    energy: [petr, util]
+```
+and then adding an entry like
+```yaml
+LEAP-potential-output:
+ - {
+    branches: [
+        {
+         branch: Resources\Primary\Coal Bituminous,
+         variable: Indigenous Production
+        }
+    ],
+    code: coal
+   }
+```
+Potential output is associated with a single sector in the Macro model, but can include values from multiple LEAP branches. If more than one LEAP branch is listed, then the values are summed together.
+
+If the price of coal is available from the LEAP model, then it can be brought into Macro using an entry like
+```yaml
+LEAP-prices:
+ - {
+    branch: Resources\Primary\Coal Bituminous,
+    variable: Indigenous Cost,
+    codes: [coal]
+   }
+```
+Prices are associated with a single LEAP branch, but can be applied to multiple sectors in Macro.
