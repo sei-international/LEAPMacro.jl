@@ -55,11 +55,11 @@ Variables and parameters may be labeled by sector, by product, or both:
 |:-----------------------|:----------------------------------------------------------------------------------------------|
 | ``g_i``                | Total output from sector ``i``                                                                |
 | ``\hat{Y}``            | Real GDP growth rate                                                                          |
-| ``p_{d,k}``            | Producer price for product ``k`` as an index relative to the initial year                     |
+| ``p_{d,k}``            | Domestic price for product ``k`` as an index relative to the initial year                     |
 | ``p_{w,k}``            | World price index for product ``k``                                                           |
 | ``p_{x,k}``            | Export-weighted average of world and domestic prices for product ``k``                        |
 | ``\pi_{b,k}``          | Basic price inflation rate for product ``k``                                                  |
-| ``\pi_{d,k}``          | Producer price inflation rate for product ``k``                                               |
+| ``\pi_{d,k}``          | Domestic price inflation rate for product ``k``                                               |
 | ``\pi_F``              | Inflation rate for domestic final demand                                                      |
 | ``\pi_\text{GDP}``     | Inflation rate for the GDP price level                                                        |
 | ``W_i``                | Nominal wage bill in sector ``i``                                                             |
@@ -71,8 +71,8 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\gamma_{i0}``        | The autonomous (smoothed) component of the rate of net investment demand in sector ``i``      |
 | ``i_b``                | Central bank interest rate                                                                    |
 | ``i_{b0}``             | Central bank interest rate when GDP growth and inflation are at their targets                 |
-| ``r_i``                | Gross rate of profit in sector ``i``                                                          |
 | ``\Pi_i``              | Gross profits in sector ``i``                                                                 |
+| ``r_i``                | Gross rate of profit in sector ``i``                                                          |
 | ``\gamma^\text{wage}`` | Growth rate of the total wage bill                                                            |
 | ``\gamma^\text{world}_\text{smooth}``  | Smoothed growth rate of world GDP (also termed gross world product, GWP)      |
 | ``f_k``                | Current level of imports of good ``k`` as a fraction of domestic demand                       |
