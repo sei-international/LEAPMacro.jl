@@ -169,12 +169,12 @@ objective-fcn:
 #---------------------------------------------------------------------------
 # NOTE: Both supply and use tables must have sectors labeling columns and products labeling rows
 excluded_sectors:
-    energy: [coal, petr, util]
+    energy: [petr, util]
     territorial_adjustment: []
     others: []
 
 excluded_products:
-    energy: [coal, petr, util]
+    energy: [petr, util]
     territorial_adjustment: []
     others: []
     
@@ -282,6 +282,21 @@ LEAP-sectors:
     ]
    }
 
-LEAP-potential-output: []
+LEAP-potential-output:
+ - {
+    branches: [
+        {
+         branch: Resources\Primary\Coal Bituminous,
+         variable: Indigenous Production
+        }
+    ],
+    code: coal
+   }
 
-LEAP-prices: []
+LEAP-prices:
+ - {
+    branch: Resources\Primary\Coal Bituminous,
+    variable: Indigenous Cost,
+    codes: [coal]
+   }
+
