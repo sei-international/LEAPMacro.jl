@@ -457,7 +457,7 @@ LEAP-sectors:
 ```
 [^3]: Production is arguably a better measure of sector activity than is value added. Value added subtracts from the value of production the cost of intermediate goods and services, to avoid double-counting when calculating gross domestic product (GDP).
 
-### Passing values from LEAP to Macro
+### [Passing values from LEAP to Macro](@id config-pass-vals-LEAP-to-Macro)
 The final sections say how to pass results for potential output and prices from LEAP to Macro. These are in addition to investment expenditure, which is automatically collected from LEAP and passed to Macro. Any values for potential output and prices drawn from LEAP override those specified in external [input files](@ref params-optional-input-files), if any. (Investment expenditure from LEAP is added to investment specified in external input files.)
 
 The Freedonia configuration file does not specify potential output and prices from LEAP, so the entries are set equal to empty lists. Alternatively, they can be completely ommitted or set to the YAML "no value" symbol, `~`.
