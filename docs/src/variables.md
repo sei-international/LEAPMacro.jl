@@ -131,7 +131,8 @@ The following are optional exogenous parameters:
 
 | Symbol                          | Definition                                                                                                                        |
 |:--------------------------------|:----------------------------------------------------------------------------------------------------------------------------------|
-| ``\underline{I}_\text{exog}``   | Exogenous investment, not associated with a sector (default is 0.0)                                                               |
+| ``\underline{I}_\text{en}``   | Energy sector investment, retrieved from LEAP                                                             |
+| ``\underline{I}_\text{exog}``   | Other exogenous investment, not associated with a sector (default is 0.0)                                             |
 | ``\underline{z}_i^\text{exog}`` | Exogenously specified potential output (default is that Macro calculates potential output)                                        |
 | ``\underline{u}_i^\text{max}``  | In the [linear goal program](@ref lgp), the maximum capacity utilization (default is 1.0)                                         |
 | ``\underline{a}``               | Rate constant for endogenous intermediate demand coefficients (default is ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``) |
