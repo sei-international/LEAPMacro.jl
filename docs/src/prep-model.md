@@ -15,7 +15,7 @@ With that in mind, here are some proposed steps. It is best to start with an exi
   1. [Run the model](@ref running-macro) by calling `LEAPMacro.run(CONFIG_FILE, include_energy_sectors = true)`, where `CONFIG_FILE` is the name of your [configuration file](@ref config);
   1. Check the `LEAPMacro_log_XXXX_full.txt` log file[^1], where `XXXX` is the name of the `output_folder` setting in the configuration file [general settings](@ref config-general-settings), to check that the model ran without errors;
   1. If there were errors, troubleshoot using the [`diagnostics` files](@ref model-outputs-diagnostics);
-  1. Confirm that the reported value in the `nonenergy_energy_link_measure.txt` file in the [`diagnostics` folder](@ref model-outputs-diagnostics) is reasonably small;
+  1. Confirm that the reported value in the `nonenergy_energy_link_measure.txt` file in the [`diagnostics` folder](@ref model-outputs-diagnostics) is reasonably small (see the Tip at the end of this page for what to do if it is large);
   1. Once the model is running without errors, calibrate by adjusting [model parameters](@ref config-model-params) systematically in the configuration file;
   1. If needed, adjust [initial values](@ref config-init-val-adj) to fine-tune the calibration and, optionally, further adjust the model parameters.
 
@@ -39,3 +39,6 @@ To link to LEAP:
 
 !!! tip "Follow the LEAP-Macro tutorial"
     It is a good idea to follow the LEAP tutorial for running LEAP-Macro. It explains where to place the files and how to set up multiple scenario runs.
+
+!!! tip "What to do if the non-energy - energy link measure is large"
+    The reported value in the `nonenergy_energy_link_measure.txt` file saved in the [`diagnostics` folder](@ref model-outputs-diagnostics) is a measure of how important the energy sector is as a source of demand for non-energy goods and services. A key assumption of LEAP-Macro is that the energy sector is not an important source of non-energy demand: see [Isolating the energy sector](@ref isolate-energy). That is a reasonable assumption if the non-energy--energy link measure is a few percent at most. However, even if the value is large, it may be possible to apply LEAP-Macro. An example is given in the documentation for the [configuration file](@ref config-pass-vals-LEAP-to-Macro), where the energy sector `coal` is included in Macro's calculations, but potential production is taken from LEAP. That way, demand by the coal sector for non-energy products are calculated by Macro, but the level of activity in the coal sector is provided by LEAP.
