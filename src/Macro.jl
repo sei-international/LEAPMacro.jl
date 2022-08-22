@@ -940,12 +940,12 @@ function compare_results(params::Dict, run::Integer)
 end # compare_results
 
 "Iteratively run the Macro model and LEAP until convergence. This is the primary entry point for LEAP-Macro."
-function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
+function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, load_leap_first::Bool = false, continue_if_error::Bool = false)
 
     # Read in global parameters
     params = SUTlib.parse_param_file(param_file, include_energy_sectors = include_energy_sectors)
-
-    # set model run parameters and initial values
+	
+	# set model run parameters and initial values
     leapvals = LEAPlib.initialize_leapresults(params)
     run_leap = params["model"]["run_leap"]
     if run_leap
@@ -955,6 +955,9 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
             @error "Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file."
             return
         end
+		if load_leap_first
+			leapvals = LEAPlib.get_results_from_leap(params, 0)
+		end
     else
         max_runs = 0
     end
@@ -1012,7 +1015,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 				#------------status
 				LEAPlib.calculate_leap(params["LEAP-info"]["result_scenario"])
 
-				## Obtain energy investment data from LEAP
+				## Obtain LEAP results
 				#------------status
 				@info "Obtaining LEAP results..."
 				flush(logfile)
