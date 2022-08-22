@@ -55,14 +55,13 @@ Variables and parameters may be labeled by sector, by product, or both:
 |:-----------------------|:----------------------------------------------------------------------------------------------|
 | ``g_i``                | Total output from sector ``i``                                                                |
 | ``\hat{Y}``            | Real GDP growth rate                                                                          |
-| ``p_{d,k}``            | Producer price for product ``k`` as an index relative to the initial year                     |
+| ``p_{d,k}``            | Domestic price for product ``k`` as an index relative to the initial year                     |
 | ``p_{w,k}``            | World price index for product ``k``                                                           |
 | ``p_{x,k}``            | Export-weighted average of world and domestic prices for product ``k``                        |
 | ``\pi_{b,k}``          | Basic price inflation rate for product ``k``                                                  |
-| ``\pi_{d,k}``          | Producer price inflation rate for product ``k``                                               |
+| ``\pi_{d,k}``          | Domestic price inflation rate for product ``k``                                               |
 | ``\pi_F``              | Inflation rate for domestic final demand                                                      |
 | ``\pi_\text{GDP}``     | Inflation rate for the GDP price level                                                        |
-| ``V_k``                | Value of total final demand (household, government, exports,and investment) for product ``k`` |
 | ``W_i``                | Nominal wage bill in sector ``i``                                                             |
 | ``\hat{L}``            | Growth rate of employment                                                                     |
 | ``\hat{w}``            | Growth rate of the nominal wage                                                               |
@@ -72,8 +71,8 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\gamma_{i0}``        | The autonomous (smoothed) component of the rate of net investment demand in sector ``i``      |
 | ``i_b``                | Central bank interest rate                                                                    |
 | ``i_{b0}``             | Central bank interest rate when GDP growth and inflation are at their targets                 |
-| ``r_i``                | Gross rate of profit in sector ``i``                                                          |
 | ``\Pi_i``              | Gross profits in sector ``i``                                                                 |
+| ``r_i``                | Gross rate of profit in sector ``i``                                                          |
 | ``\gamma^\text{wage}`` | Growth rate of the total wage bill                                                            |
 | ``\gamma^\text{world}_\text{smooth}``  | Smoothed growth rate of world GDP (also termed gross world product, GWP)      |
 | ``f_k``                | Current level of imports of good ``k`` as a fraction of domestic demand                       |
@@ -132,7 +131,8 @@ The following are optional exogenous parameters:
 
 | Symbol                          | Definition                                                                                                                        |
 |:--------------------------------|:----------------------------------------------------------------------------------------------------------------------------------|
-| ``\underline{I}_\text{exog}``   | Exogenous investment, not associated with a sector (default is 0.0)                                                               |
+| ``\underline{I}_\text{en}``   | Energy sector investment, retrieved from LEAP                                                             |
+| ``\underline{I}_\text{exog}``   | Other exogenous investment, not associated with a sector (default is 0.0)                                             |
 | ``\underline{z}_i^\text{exog}`` | Exogenously specified potential output (default is that Macro calculates potential output)                                        |
 | ``\underline{u}_i^\text{max}``  | In the [linear goal program](@ref lgp), the maximum capacity utilization (default is 1.0)                                         |
 | ``\underline{a}``               | Rate constant for endogenous intermediate demand coefficients (default is ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``) |

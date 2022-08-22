@@ -25,18 +25,14 @@ where the inflation rate ``\pi_g`` is given by the averge of the rate of increas
     \pi_g = \frac{\sum_{k = 1}^{n_p} q_{s,k}\pi_{b,k}}{\sum_{k = l}^{n_p} q_{s,l}}, \quad \pi_{b,k} = \frac{p_{b,k}-p_{b,k,-1}}{p_{b,k,-1}}.
 ```
 
-The domestic final demand inflation rate ``\pi_F``is the average of the rate of increase of basic prices weighted by the value of domestic final demand,
+The inflation rate ``\pi_F`` of final domestic demand is the average of the rate of increase of basic prices weighted by the value of final domestic demand,
 ```math
     \pi_F = \frac{\sum_{k = 1}^{n_p} F_k\pi_{b,k}}{\sum_{k = l}^{n_p} F_l}.
 ```
 
-The GDP inflation rate ``\pi_\text{GDP}`` is the average of the rate of increase of basic prices weighted by the value of total final demand. The value of final demand for good ``k`` is
+The GDP inflation rate ``\pi_\text{GDP}`` is the average of the rate of increase of basic prices weighted by the value of total final demand. It is calculated as
 ```math
-    V_k = \overline{p}_{b,k,-1}\left(F_k + X_k + I_k - M_k\right).
-```
-The GDP inflation rate is calculated as
-```math
-    \pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{b,k}}{\sum_{k = l}^{n_p} V_l}.
+    \pi_\text{GDP} = \frac{\sum_{k = 1}^{n_p} V_k\pi_{b,k}}{\sum_{k = l}^{n_p} V_l},\quad V_k = \overline{p}_{b,k,-1}\left(F_k + X_k + I_k - M_k\right).
 ```
 
 Basic prices are a weighted average of domestic and foreign prices, with the weight given by the import fraction ``f_k``, where
@@ -54,7 +50,9 @@ If ``f_k = 1``, meaning the country does not produce product ``k`` and all suppl
         \overline{P}_g\left(\omega_i + \varepsilon_i\right) + \sum_{l = 1}^{n_p} \overline{p}_{b,l} \overline{D}_{li}
     \right].
 ```
-Together these equations lead to a linear system in domestic prices,
+In this equation, ``\omega_i`` is the wage share for sector ``i`` and ``\varepsilon_i`` is the energy share.
+
+Taken together, the equations above lead to a linear system in domestic prices,
 ```math
 p_{d,k} = \overline{P}_g\sum_{i = 1}^{n_s} \underline{\mu}_i\underline{S}_{ik}\left(\omega_i + \varepsilon_i\right) + \underline{e}\sum_{l = 1}^{n_p} A_{kl} f_l \overline{p}_{w,l} + \sum_{l = 1}^{n_p} A_{kl} \left(1 - f_l\right)\overline{p}_{d,l},
 ```
@@ -84,7 +82,7 @@ The multiple of two is somewhat arbitrary, because this simply sets a scale.
 [^1]: Armington elasticities play an important role in trade models, but estimates very widely, and are mainly available for high-income countries. As a general rule, long-run elasticities (e.g., annual) are larger than short-run elasticities (e.g., monthly), and estimates tend to increase with the level of disaggregation of the data. Different statistical models can give very different results (e.g., estimates from systems of supply-demand equations tend to be about twice as large as estimates based on demand alone). If possible, find estimates for the country where Macro is being applied and at a similar level of disaggregation.
 
 ## [Wages and labor productivity](@id dynamics-wages-labor-prod)
-The wage share ``\omega_i`` in sector ``i`` is defined as
+The wage share ``\omega_i`` in sector ``i`` is given by
 ```math
 \omega_i = \frac{W_i}{g_i}.
 ```
@@ -101,7 +99,7 @@ The growth rate of total employment, ``L``, is then given (using a standard appr
 \hat{L} = \hat{Y} - \hat{\lambda} = \left(1 - \underline{\alpha}_\text{KV}\right)\hat{Y} - \underline{\beta}_\text{KV}.
 ```
 
-Wages are observed to rise in a tight labor market and fall otherwise. That behavior is captured in the model through a "conflict" mechanism, which views nominal wage changes as a consequence of bargaining between parties with unequal and shifting bargaining power -- employers and employees. The real wage is assumed to rise faster than labor productivity when employment growth is higher than working-age population growth ``\hat{\underline{N}}`` (an exogenous input to Macro), with a proportionality factor ``\underline{k}``, and fall otherwise. The nominal wage is then equal to the real wage adjustment plus an inflation pass-through (or wage indexation) parameter ``\underline{h}`` multiplied by the domestic final demand inflation rate. As with labor productivity, a common growth rate ``\hat{w}`` is applied in each sector,
+Wages are observed to rise in a tight labor market and fall otherwise. That behavior is captured in the model through a "conflict" mechanism, which views nominal wage changes as a consequence of bargaining between parties with unequal and shifting bargaining power -- employers and employees. The real wage is assumed to rise faster than labor productivity when employment growth is higher than working-age population growth ``\hat{\underline{N}}`` (an exogenous [time series](@ref params-time-series) parameter), with a proportionality factor ``\underline{k}``, and fall otherwise. The nominal wage is then equal to the real wage adjustment plus an inflation pass-through (or wage indexation) parameter ``\underline{h}`` multiplied by the final domestic demand inflation rate. As with labor productivity, a common growth rate ``\hat{w}`` is applied in each sector,
 ```math
 \hat{w}_i = \hat{w} = \underline{h}\pi_F + \hat{\lambda}\left[1 + \underline{k}\left(\hat{L} - \hat{\underline{N}}\right)\right].
 ```
@@ -143,7 +141,7 @@ r_i = \frac{\Pi_i}{p_K\underline{v}_i}.
 ```
 Capital-output ratios are initialized using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).
 
-## [Potential output](@id dynamics-potential-output)
+## [Investment & potential output](@id dynamics-potential-output)
 Net potential output in sector ``i`` (that is, accounting for depreciation) grows at a rate ``\gamma_i``. Unless it is overridden by an [optional exogenous potential output](@ref config-optional-input-files), the value is determined endogenously by an investment function that responds to utilization, profitability, and borrowing costs (proxied by the central bank lending rate). The model assumes no active disinvestment, so the net growth rate is not allowed to fall below (the negative of) the depreciation rate,
 ```math
 \gamma_i = \max\left[\gamma_{i0} + \underline{\alpha}_\text{util}\left(u_i - 1\right) +
@@ -195,9 +193,9 @@ To make the interest rate insensitive to the exchange rate, set ``\underline{b}_
 ![Target neutral interest rate vs. exchange rate](assets/images/ib0_vs_XR_curve.svg)
 
 ## [Demand for investment goods](@id dynamics-inv-dmd)
-Total next-period demand for investment goods ``\overline{I}_{+1}`` is given by two terms: 1) the sum across sectors of current potential output multiplied by the capital-output ratio and the gross rate of increase in potential output (the net rate plus the depreciation rate); 2) exogenous investment ``\underline{I}_\text{exog}``, if any (see [optional exogenous parameters](@ref optional-exog-param-vars) and the format for the [exogenous investment demand file](@ref params-optional-exog-investment)). That is,
+Total next-period demand for investment goods ``\overline{I}_{+1}`` is given by three terms: 1) the sum across sectors of current potential output multiplied by the capital-output ratio and the gross rate of increase in potential output (the net rate plus the depreciation rate); 2) energy investment expenditure from LEAP ``\underline{I}_\text{en}``; 3) any other exogenous investment ``\underline{I}_\text{exog}`` (see [optional exogenous parameters](@ref optional-exog-param-vars) and the format for the [exogenous investment demand file](@ref params-optional-exog-investment)). That is,
 ```math
-\overline{I}_{+1} = \sum_{i=1}^{n_s} \overline{z}_i \underline{v}_i \left(\gamma_i + \underline{\delta}_i\right) + \underline{I}_{\text{exog},+1}.
+\overline{I}_{+1} = \sum_{i=1}^{n_s} \overline{z}_i \underline{v}_i \left(\gamma_i + \underline{\delta}_i\right) + \underline{I}_{\text{en},+1} + \underline{I}_{\text{exog},+1}.
 ```
 The total is allocated across investment goods supply shares ``\underline{\theta}_k`` in the [linear goal program](@ref lgp-investment-goods-allocation).
 
@@ -211,11 +209,11 @@ The calibration is carried out by assuming that all sectors have the same profit
 ```
 Substituting this expression into the equation for investment demand and solving for ``\underline{r}^*`` gives
 ```math
-\underline{r}^* = \frac{1}{p_K\overline{I}_{+1}}\sum_{i=1}^{n_s} \Pi_i \overline{z}_i \left(\gamma_i + \underline{\delta}_i\right)
+\underline{r}^* = \frac{1}{p_K\overline{I}_{+1}}\sum_{i=1}^{n_s} \Pi_i \overline{z}_i \left(\gamma_i + \underline{\delta}_i\right).
 ```
 The calibrated value for ``\underline{r}^*`` is found by setting ``\overline{z}_i = g_i`` and ``\gamma_i = \underline{\gamma}_0``. That value is then used to calculate capital-output ratios.
 
-## [Export demand and final demand](@id dynamics-demand-fcns)
+## [Export demand](@id dynamics-export-demand)
 For most products, the normal level of export demand grows with global GDP (or gross world product, GWP) to a goods-specific elasticity, modified by the relative change in domestic and world prices,
 ```math
 \overline{X}^\text{norm}_{k,+1} = \left(1 + \underline{\gamma}^\text{world}\right)^{\underline{\eta}^\text{exp}_k} \left(\frac{1 + \underline{\pi}_{w,k}}{1 + \pi_{d,k}}\right)^{\underline{\phi}^\text{exp}_k} \overline{X}^\text{norm}_k.
@@ -242,15 +240,16 @@ With these defintions, an extended expression for the change in the normal level
 ```
 When ``f_k^\text{exog} = 0``, this reduces to the default formula.
 
-Normal domestic final demand grows with the real wage bill to a goods-specific elasticity. The next-period nominal wage bill in sector ``i`` is calculated using variables and parameters introduced above,
+## [Final domestic demand](@id dynamics-final-dom-demand)
+Normal final domestic demand grows with the real wage bill to a goods-specific elasticity. The next-period nominal wage bill in sector ``i`` is calculated using variables and parameters introduced above,
 ```math
 \overline{W}_{i,+1} = \frac{1 + \hat{w}}{1 + \hat{\lambda}}\left(1 + \gamma_i\right)W_i.
 ```
-The growth in the real wage bill is given by these factors, but corrected for domestic final demand inflation ``\pi_F``,
+The growth in the real wage bill is given by these factors, but corrected for final domestic demand inflation ``\pi_F``,
 ```math
 \gamma^\text{wage} = \frac{1}{1 + \pi_F}\frac{\sum_{i=1}^{n_s}\overline{W}_{i,+1}}{\sum_{j=1}^{n_s}\overline{W}_j} - 1.
 ```
-The updated normal domestic final demand is then given by
+The updated normal final domestic demand is then given by
 ```math
 \overline{F}^\text{norm}_{k,+1} = \left(1 + \underline{\gamma}^\text{wage}\right)^{\underline{\eta}^\text{wage}_k}\overline{F}^\text{norm}_k.
 ```

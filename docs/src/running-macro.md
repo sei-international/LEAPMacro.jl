@@ -3,22 +3,25 @@ CurrentModule = LEAPMacro
 ```
 
 # [Running the Macro model](@id running-macro)
-Once the configuration and external parameter files have been prepared, the Macro model can be run in a stand-alone mode without LEAP. If the LEAP model is also prepared, then it can be run from LEAP.
+Once the configuration and external parameter files have been prepared, the Macro model can be run in a stand-alone mode without LEAP. If the LEAP model is also prepared, then Macro can be run from LEAP.
 
 ## Running Macro stand-alone
-When running Macro multiple times -- for example, when calibrating -- it is best to work in Julia's command-line read-eval-print loop (the REPL). That way, LEAPMacro is only included once, which speeds up subsequent runs.
+When running Macro multiple times -- for example, when calibrating -- it is best to work in Julia's command-line read-eval-print loop (the REPL). That way, the LEAPMacro library is only included once, which speeds up subsequent runs. Alternatively, Macro can be run stand-alone from the Windows Command Prompt, as explained below.
 
+### Running from Julia's REPL
 The only command needed is `LEAPMacro.run()`, which is defined as follows, with the default values indicated:
 ```julia
 function run(config_file::AbstractString = "LEAPMacro_params.yml";
              dump_err_stack::Bool = false,
              include_energy_sectors::Bool = false,
+             load_leap_first::Bool = false,
              continue_if_error::Bool = false)
 ```
 The options are:
   * `config_file`: The name of the [configuration file](@ref config), if it is not `LEAPMacro_params.yml`;
   * `dump_err_stack`: Report detailed information about an error in the [log file](@ref model-outputs) (useful when debugging the Macro code, but not much use when debugging a model);
   * `include_energy_sectors`: Run the model with the [energy sectors](@ref config-sut) included (only useful in standalone mode, without LEAP, particularly when calibrating);
+  * `load_leap_first`: Pull results from LEAP before running Macro (useful when LEAP has already been run and results are available);
   * `continue_if_error`: Try to continue if the linear goal program returns an error.
 
 !!! info "When to use `continue_if_error`"
@@ -33,16 +36,19 @@ LEAPMacro.run("LEAPMacro_params_Calibration.yml", include_energy_sectors = true)
 ```
 
 If the `config_file` argument is not specified, then it is set equal to `LEAPMacro_params.yml`. If that is the name of the [configuration file](@ref config), then after [installing the LEAP-Macro package](@ref installation), the model can be run by simply typing the following commands in the Julia REPL:
-```julia
+```
 julia> import LEAPMacro
 
 julia> LEAPMacro.run()
+With configuration file 'LEAPMacro_params.yml':
 Macro model run (0)...completed
 0
 ```
-### Running from the command line
-In some circumstances it can be helpful to specify options as command-line parameters and run Macro from the Windows command line. The ArgParse Julia package makes that relatively easy. Here is a sample script:
+
+### Running from the Windows Command Prompt
+In some circumstances it can be helpful to specify options as command-line parameters and run Macro from the Windows Command Prompt. The ArgParse Julia package makes that relatively easy. Here is a sample script, which can be saved as `runleapmacro.jl`:
 ```julia
+# script 'runleapmacro.jl'
 using LEAPMacro
 using ArgParse
 
@@ -74,8 +80,17 @@ LEAPMacro.run(parsed_args["config_file"],
               include_energy_sectors = parsed_args["include_energy_sectors"],
               continue_if_error = parsed_args["continue_if_error"])
 ```
+For example, if the configuration file as the the default filename, `LEAPMacro_params.yml`, then a call to the `runleapmacro.jl` script could look something like this:
+```
+D:\path\to\model> julia runleapmacro.jl -ve
+```
+In this case, LEAP-Macro would report verbose errors in the log file, and would include energy sectors.
+
 !!! tip "Speeding up LEAPMacro with a pre-compiled system image"
-    If Macro will be run multiple times from the command line, execution can be speeded up by pre-compiling the LEAPMacro plugin. In the [sample files](assets/Macro.zip), there is a Windows batch file, `make_LEAPMacro_sysimage.bat`. Running this batch file (from the command line or by double-clicking) will generate a "system image" called `LEAPMacro-sysimage.so`. After running the batch file, put the system image in the folder where you want to run Macro and call Julia with an additional `sysimage` argument -- `julia --sysimage=LEAPMacro-sysimage.so ...` -- where `...` is the name of your script followed by any command-line arguments.
+    If Macro will be run multiple times from the command line, execution can be speeded up by pre-compiling the LEAPMacro plugin. In the [sample files](assets/Macro.zip), there is a Windows batch file, `make_LEAPMacro_sysimage.bat`. Running this batch file (from the command line or by double-clicking) will generate a "system image" called `LEAPMacro-sysimage.so`. After running the batch file, put the system image in the folder where you want to run Macro and call Julia with an additional `sysimage` argument -- `julia --sysimage=LEAPMacro-sysimage.so ...` -- where `...` is the name of your script followed by any command-line arguments. E.g., the call to `runleapmacro.jl` in the example above would become
+    ```
+    D:\path\to\model> julia --sysimage=LEAPMacro-sysimage.so runleapmacro.jl -ve
+    ```
 
 ## [Running Macro from LEAP](@id running-macro-from-LEAP)
 The [Freedonia sample model](assets/Macro.zip) includes a Visual Basic script for running Macro from LEAP. Located in the `scripts` folder, and called `LEAPMacro_MacroModelCalc.vbs`, it can be placed in a LEAP Area folder and called from LEAP using LEAP's scripting feature. See the [quick start guide](@ref quick-start) for more information.

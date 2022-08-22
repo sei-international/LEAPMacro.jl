@@ -19,7 +19,7 @@ The next two columns provide the initial income elasticities of demand[^1] for e
 
 The final two columns are bracketed because they are optional. They specify how imports and exports respond to relative changes between domestic and world prices. If the columns are not present, these elasticities are set to zero by default, meaning no price sensitivity.
 
-For more information on how Macro uses the elasticities, see the detailed explanation of [export demand and final demand](@ref dynamics-demand-fcns) and [imports](@ref dynamics-imports).
+For more information on how Macro uses the elasticities, see the detailed explanation of [export demand](@ref dynamics-export-demand), [final domestic demand](@ref dynamics-final-dom-demand) and [imports](@ref dynamics-imports).
 
 Elasticities can be estimated from historical data, although that requires knowledge of statistical methods. Otherwise, they can be drawn from published studies or from already existing economic models.
 
@@ -86,7 +86,7 @@ Here is the example from the Freedonia sample model:
 ![Freedonia time_series file](assets/images/time_series.png)
 
 ## [Optional input files](@id params-optional-input-files)
-In the [configuration file general settings](@ref config-optional-input-files), it is possible to specify any or all of four optional input files for: investment demand; potential output; maximum capacity utilization; and real prices for tradeables. For the corresponding variables, see the table of [optional exogenous parameters](@ref optional-exog-param-vars).
+External inputs for investment, potential output, and prices can be supplied from LEAP. Investment expenditure is collected automatically, while potential output and prices can be specified in the [configuration file](@ref config-pass-vals-LEAP-to-Macro). Additionally, for non-energy sectors, it is possible to specify any or all of four [optional input files](@ref config-optional-input-files) for: investment demand; potential output; maximum capacity utilization; and real prices for tradeables.
 
 ### [Investment demand](@id params-optional-exog-investment)
 The Macro model calculates investment for non-energy sectors based on expected demand and profitability: see the explanation of [potential output](@ref dynamics-potential-output) in the Technical Details. However, for public infrastructure investment -- which is driven by policy goals, rather than private profitability, and where the capital stock is not associated with a particular sector -- investment must be specified exogenously. (When externally specified investment *is* associated with a particular sector, it is better to specify potential output: see below.)
@@ -101,7 +101,7 @@ The investment demand parameter file has the following structure:
 
 Note that not all years need to be included. For example, if there is investment expenditure in 2025, but not in 2026, then the year 2026 does not have to be included in the file. The values are in "real" monetary terms, and are used directly by Macro, so the units should be the same as those for the supply and use tables.
 
-### Potential output
+### [Potential output](@id params-optional-pot-output)
 In the Macro model, potential output is determined by investment: see [potential output](@ref dynamics-potential-output) in the Technical Details. In some cases, it is best to override this behavior. For example, output from agriculture might be determined by an external crop model, or the output from the mining sector might be constrained by the availability of the ore. In other cases, the production level might be set as a policy target or through a sector-specific planning document. In these cases, potential output can be specified for specific sectors, and Macro will calculate investment.
 
 The potential output parameter file has the following structure:
@@ -128,7 +128,7 @@ The maximum capacity utilization file has the following structure:
 |    ... |         ... |         ... | ... |
 |  y_*N* | umax_s1y*N* | umax_s2y*N* | ... |
 
-In the file, all years must be listed. However, values do not have to specified for all years. As indicated in the table for sector 2 and year 2 (cell `y_2`,`sec_2`), if capacity utilization is unconstrained in some year, the maximum level can be omitted, and Macro will set it equal to 1.0.
+In the file, all years must be listed. However, values do not have to specified for all years. If capacity utilization is unconstrained in some year, the maximum level can be omitted, and Macro will set it equal to 1.0. An example of this is shown in cell (`y_2`,`sec_2`) in the table above. 
 
 ### [World real price trends for selected tradeables](@id params-optional-price-trend)
 In the Macro model, "world" prices for goods and services are specified exogenously, while domestic prices are calculated as a markup on costs. By default, world prices for all tradeables grow at a uniform, user-specified world inflation rate. However, optionally, real world price indices for all or some tradeables can be specified. The real price trend is then adjusted for inflation at the world inflation rate.

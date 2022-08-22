@@ -45,7 +45,7 @@ This value should be small: 2.52%.
 ```
 Whether the estimated parameter is sufficiently small or not depends on the purposes of the analysis. For the Freedonia sample model, it suggests that excluding the demand by the energy sector of non-energy goods and services could lead to a 2.52% discrepancy.
 
-An additional set of files with names such as `model_0_2010.txt` provide an export of the [linear goal program](@ref lgp) prepared by the Macro model. Examining these files can sometimes be helpful when the log file indicates an error in JuMP (the Julia mathematical programming library). The file offers an explicit formulation of the model, with the estimated parameters:
+An additional set of files with names such as `model_0_2010.txt` provide an export of the [linear goal program](@ref lgp) prepared by the Macro model. Examining these files can sometimes be helpful when the log file indicates an error in JuMP (the Julia mathematical programming library). The file offers an explicit formulation of the model, with the calculated parameters:
 ```
 Min 1.7333333333333334 ugap[1] + 0.5333333333333333 ugap[2] + 0.6000000000000001 ugap[3] + ...
 Subject to
@@ -63,7 +63,7 @@ Some of the files provide "sanity checks" on the input data.
   * `profit_margins.csv`: These should be greater than 1 but (usually) less than 2
   * `supply_fractions.csv`: These should sum to one along columns (unless the product is not produced domestically, in which case the sum will be zero)
 
-Other files report figures that should be close to, although not necessarily identical to, the corresponding values in the supply-use table. The differences should be explained by Macro compensating for territorial adjustments or stock changes:
+Other files report figures that should be close to, although not necessarily identical to, the corresponding values in the supply-use table. The differences arise because Macro compensates for territorial adjustments or stock changes:
   * `domestic_production.csv`
   * `exports.csv`
   * `final_demand.csv`

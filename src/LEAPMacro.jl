@@ -14,14 +14,28 @@ module LEAPMacro
 
 using Logging, Dates, YAML
 
-include("./MacroModel.jl")
-using .MacroModel
+include("./Macro.jl")
+using .Macro
 
 "Run LEAP-Macro by calling `leapmacro`"
-function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stack::Bool = false, include_energy_sectors::Bool = false, continue_if_error::Bool = false)
+function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stack::Bool = false, include_energy_sectors::Bool = false, load_leap_first::Bool = false, continue_if_error::Bool = false)
 	# Ensure needed folders exist
 	if !isdir("inputs")
 		throw(ErrorException("The \"inputs\" folder is needed, but does not exist"))
+	end
+
+	# First check that the configuration file loads correctly
+	try
+		YAML.load_file(config_file)
+	catch err
+		exit_status = 1
+		if Sys.iswindows()
+			eol_length = 2 # YAML mis-counts lines on Windows
+		else
+			eol_length = 1
+		end
+		println("Configuration file '" * config_file * "' did not load properly: " * err.problem * " on line " * string(err.problem_mark.line ÷ eol_length))
+		return(exit_status)
 	end
 
 	params = YAML.load_file(config_file)
@@ -39,7 +53,7 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stac
 	@info "Configuration file: '$config_file'"
 	exit_status = 0
 	try
-		MacroModel.leapmacro(config_file, logfile, include_energy_sectors, continue_if_error)
+		Macro.leapmacro(config_file, logfile, include_energy_sectors, load_leap_first, continue_if_error)
 	catch err
 		exit_status = 1
 		println(string("Macro exited with an error: Please check the log file '", logfilename,"'"))

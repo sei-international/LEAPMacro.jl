@@ -38,7 +38,7 @@ model:
     # Maximum number of iterations before stopping (ignored if run_leap = false)
     max_runs: 7
     # Tolerance in percentage difference between values for indices between runs
-    max_tolerance: 1 # percent
+    max_tolerance: 1.0 # percent
 
 #---------------------------------------------------------------------------
 # Optional input files for exogenous time series (CSV files)
@@ -125,7 +125,7 @@ wage-fcn:
     # Inflation pass-through (wage indexing coefficient)
     infl_passthrough: 1.00
     # Labor supply constraint coefficient
-    lab_constr_coeff: 0.5
+    lab_constr_coeff: 0.50
 
 #---------------------------------------------------------------------------
 # Parameter for rate of change in technical parameters
@@ -169,19 +169,19 @@ objective-fcn:
 #---------------------------------------------------------------------------
 # NOTE: Both supply and use tables must have sectors labeling columns and products labeling rows
 excluded_sectors:
-    energy: [coal, petr, util]
+    energy: [petr, util]
     territorial_adjustment: []
     others: []
 
 excluded_products:
-    energy: [coal, petr, util]
+    energy: [petr, util]
     territorial_adjustment: []
     others: []
     
 non_tradeable_products: [constr, comm]
 
 # Domestic production as a % share of the total of imports and domestic production must exceed this value
-domestic_production_share_threshold: 1 # percent
+domestic_production_share_threshold: 1.0 # percent
     
 SUT_ranges:
     # Matrices arranged product (rows) x sector (columns)
@@ -281,3 +281,22 @@ LEAP-sectors:
         }
     ]
    }
+
+LEAP-potential-output:
+ - {
+    branches: [
+        {
+         branch: Resources\Primary\Coal Bituminous,
+         variable: Indigenous Production
+        }
+    ],
+    code: coal
+   }
+
+LEAP-prices:
+ - {
+    branch: Resources\Primary\Coal Bituminous,
+    variable: Indigenous Cost,
+    codes: [coal]
+   }
+
