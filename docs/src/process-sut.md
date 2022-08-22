@@ -4,23 +4,26 @@ CurrentModule = LEAPMacro
 
 # [Processing the supply-use table](@id process-sut)
 
-The starting point for the analysis is a supply table of the form
+## The supply and use tables
+
+Information about [supply and use tables](@ref sut) (SUT) is provided elsewhere in this documentation. This page explains how the SUT is processed internally by Macro. The supply and use tables have the following structure:
+
+### Supply table
 
 |          | Total (purchase price) |    Margins     |   Taxes, etc.    |          Total (basic price)           |     Sectors      | Total (domestic production) |    Imports     |
 |:---------|:----------------------:|:--------------:|:----------------:|:--------------------------------------:|:----------------:|:---------------------------:|:--------------:|
 | Products |     ``\mathbf{q}``     | ``\mathbf{m}`` | ``\mathbf{T}^d`` | ``\left(\mathbf{q}-\mathbf{m}\right)`` | ``\mathbf{V}^T`` |      ``\mathbf{q}^s``       | ``\mathbf{M}`` |
 | Total    |                        |                |                  |                                        | ``\mathbf{g}^T`` |                             |                |
 
-and a use table of the form
 
-|          | Total (purchase price) |      Sectors       | Total (industrial demand) |    Exports     |          Final domestic demand           |  Inventory changes   |  [Tax correction]   |
-|:---------|:----------------------:|:------------------:|:-------------------------:|:--------------:|:----------------------------------------:|:--------------------:|:-------------------:|
-| Products |     ``\mathbf{q}``     |   ``\mathbf{U}``   |     ``\mathbf{q}^d``      | ``\mathbf{X}`` | ``\left(\mathbf{F} + \mathbf{I}\right)`` | ``\Delta\mathbf{B}`` | ``[-\mathbf{T}^d]`` |
-| Wages    |                        |  ``\mathbf{W}^T``  |                           |                |                                          |                      |                     |
-| Profits  |                        | ``\mathbf{\Pi}^T`` |                           |                |                                          |                      |                     |
-| Total    |                        |  ``\mathbf{g}^T``  |                           |                |                                          |                      |                     |
+### Use table
 
-Note that the "tax correction" does not actually appear in the supply-use tables. It is needed in this system so that taxes, which are a leakage in the supply table, have a corresponding injection to ensure that the accounts balance.
+|          | Total (purchase price) |      Sectors       | Total (industrial demand) |    Exports     |          Final domestic demand           |  Inventory changes   |
+|:---------|:----------------------:|:------------------:|:-------------------------:|:--------------:|:----------------------------------------:|:--------------------:|
+| Products |     ``\mathbf{q}``     |   ``\mathbf{U}``   |     ``\mathbf{q}^d``      | ``\mathbf{X}`` | ``\left(\mathbf{F} + \mathbf{I}\right)`` | ``\Delta\mathbf{B}`` |
+| Wages    |                        |  ``\mathbf{W}^T``  |                           |                |                                          |                      |
+| Profits  |                        | ``\mathbf{\Pi}^T`` |                           |                |                                          |                      |
+| Total    |                        |  ``\mathbf{g}^T``  |                           |                |                                          |                      |
 
 For the remainder of this section, the notation from the [Variables](@ref variables) page is used, where an underline indicates an [exogenous parameter](@ref exog-param-vars), while an overline is a [dynamic parameter](@ref dynamic-param-vars).
 
@@ -43,7 +46,7 @@ and supply shares are calculated as
 ```
 
 ## Adjusting for stock changes and taxes
-Stock changes and the tax correction are distributed over categories of demand by defining
+Stock changes and a tax correction are distributed over categories of demand by defining
 ```math
 c_k \equiv \frac{\Delta B_k - T^d_k}{F_k + X_k + I_k},
 ```
