@@ -38,7 +38,7 @@ years:
 ```
 
 ### [Required input files](@id config-required-input-files)
-The next block specifies the required input files. Other, optional input files are described below. In many cases, the input files will be the same across a set of scenarios. However, it is possible that they might differ. For example, the supply-use table, given by the `SUT` parameter, could be drawn from different years for calibration purposes, and different `time_series` might distinguish different scenarios.
+The next block specifies the required [external parameter files](@ref params). Other, optional input files are described below. In many cases, the input files will be the same across a set of scenarios. However, it is possible that they might differ. For example, the [supply-use table](@ref sut), given by the `SUT` parameter, could be drawn from different years for calibration purposes, and different `time_series` might distinguish different scenarios.
 
 This block also contains a flag saying whether the exchange rate time series, in the `time_series` file, is for the nominal or real exchange rate. This line can be omitted, in which case the default is for a nominal exchange rate. To specify a real exchange rate, set this equal to `true`.
 ```yaml
@@ -55,7 +55,7 @@ files:
 ```
 
 ### [Output folders](@id config-output-folders)
-The following block says how to manage the output folders.
+The following block says how to manage the [output folders](@ref model-outputs).
 
 Ordinarily it is useful to clear the folders with each run, since files will in any case be overwritten. But sometimes during model development it is useful to set `clear-folders` to `false` temporarily -- for example, if only a few files need to be compared between one run to the next. To compare results from different runs, make a copy of output files of interest and set `clear-folders` to `false`, or copy the entire output file folder.
 
