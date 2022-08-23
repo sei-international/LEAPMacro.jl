@@ -218,7 +218,7 @@ For most products, the normal level of export demand grows with global GDP (or g
 ```math
 \overline{X}^\text{norm}_{k,+1} = \left(1 + \underline{\gamma}^\text{world}\right)^{\underline{\eta}^\text{exp}_k} \left(\frac{1 + \underline{\pi}_{w,k}}{1 + \pi_{d,k}}\right)^{\underline{\phi}^\text{exp}_k} \overline{X}^\text{norm}_k.
 ```
-When potential output is exogenously specified, normal export demand is assumed to be supply-inelastic -- that is, it more or less keeps pace with the change in potential output -- but still responds to relative prices and fluctuations in global GDP. Fluctuations in global GDP are calculated relative to a smoothed trend,
+When potential output is exogenously specified, normal export demand is assumed to be supply-elastic -- that is, it more or less keeps pace with the change in potential output -- but still responds to relative prices and fluctuations in global GDP. Fluctuations in global GDP are calculated relative to a smoothed trend,
 ```math
 \gamma^\text{world}_\text{smooth} = \gamma^\text{world}_{\text{smooth},-1} + \underline{\xi}\left(\underline{\gamma}^\text{world} - \gamma^\text{world}_{\text{smooth},-1}\right)
 ```
