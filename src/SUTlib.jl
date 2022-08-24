@@ -119,10 +119,12 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
    
     # Unless energy sectors & products are included in the calculation, get the lists of excluded energy sectors & products
     if !include_energy_sectors
+        # Energy sectors
         if !LMlib.haskeyvalue(global_params["excluded_sectors"], "energy")
             global_params["excluded_sectors"]["energy"] = []
         end
         excluded_sectors = vcat(excluded_sectors, global_params["excluded_sectors"]["energy"])
+        # Energy products
         if !LMlib.haskeyvalue(global_params["excluded_products"], "energy")
             global_params["excluded_products"]["energy"] = []
         end
@@ -140,13 +142,13 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
 
     if !include_energy_sectors
         user_defined_energy_sector_ndxs = findall(in(global_params["excluded_sectors"]["energy"]).(sector_codes))
-        user_defined_energy_product_ndxs = findall(in(global_params["excluded_products"]["energy"]).(sector_codes))
+        user_defined_energy_product_ndxs = findall(in(global_params["excluded_products"]["energy"]).(product_codes))
         global_params["energy-sector-indexes"] = sort(setdiff(user_defined_energy_sector_ndxs, zero_domprod_ndxs))
         global_params["energy-product-indexes"] = sort(setdiff(user_defined_energy_product_ndxs, zero_prod_ndxs))
     end
 
 	global_params["terr-adj-sector-indexes"] = findall(in(global_params["excluded_sectors"]["territorial_adjustment"]).(sector_codes))
-	global_params["terr-adj-product-indexes"] = findall(in(global_params["excluded_products"]["territorial_adjustment"]).(sector_codes))
+	global_params["terr-adj-product-indexes"] = findall(in(global_params["excluded_products"]["territorial_adjustment"]).(product_codes))
 
 	global_params["included_sector_names"] = all_sectors[:name][global_params["sector-indexes"]]
 	global_params["included_sector_codes"] = all_sectors[:code][global_params["sector-indexes"]]
