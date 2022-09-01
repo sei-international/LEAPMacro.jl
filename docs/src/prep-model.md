@@ -28,7 +28,7 @@ With that in mind, here are some proposed steps. It is best to start with an exi
       * Extend far enough in the future to ensure the parameter set does not create instabilities.
 
 !!! tip "Carry out sanity checks"
-    When calibrating, note the "sanity checks" listed in the page on [output files](@ref model-outputs).
+    When calibrating, note the "sanity checks" listed in the page on [output files](@ref model-outputs). Note that a failed sanity check could be because of how the LEAP-Macro files are set up, such as the [configuration file](@ref config), [supply-use table](@ref sut), or [output files](@ref model-outputs). For example, the configuration file might point to the wrong rows and columns in the supply-use table. But it could also be because there is a problem with the data. For example, an incorrectly prepared supply-use table can generate strange results.
 
 To link to LEAP:
   1. Set the list of [excluded `energy` sectors](@ref config-sut) to ones relevant to the analysis;
