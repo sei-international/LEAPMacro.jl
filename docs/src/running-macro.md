@@ -66,6 +66,9 @@ function parse_commandline()
         "--include-energy-sectors", "-e"
             help = "include energy sectors in the model simulation"
             action = :store_true
+        "--load-leap-first", "-l"
+            help = "load results from LEAP before running Macro"
+            action = :store_true
         "--continue-if-error", "-c"
             help = "try to continue if the linear goal program returns an error"
             action = :store_true
@@ -78,6 +81,7 @@ parsed_args = parse_commandline()
 LEAPMacro.run(parsed_args["config_file"],
               dump_err_stack = parsed_args["verbose_errors"],
               include_energy_sectors = parsed_args["include_energy_sectors"],
+              load_leap_first = parsed_args["load_leap_first"],
               continue_if_error = parsed_args["continue_if_error"])
 ```
 For example, if the configuration file as the the default filename, `LEAPMacro_params.yml`, then a call to the `runleapmacro.jl` script could look something like this:
