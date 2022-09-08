@@ -196,7 +196,7 @@ function calculate_leap(scen_name::AbstractString)
 end # calculate_leap
 
 "Obtain energy investment data from the LEAP model."
-function get_results_from_leap(params::Dict, run::Integer)
+function get_results_from_leap(params::Dict, run_number::Integer)
     sim_years = params["years"]["start"]:params["years"]["end"]
 
     # connects program to LEAP
@@ -235,7 +235,7 @@ function get_results_from_leap(params::Dict, run::Integer)
             end
         end
 
-        LMlib.write_vector_to_csv(joinpath(params["results_path"],string("I_en_",run,".csv")), leapvals.I_en, "energy investment", Vector(sim_years))
+        LMlib.write_vector_to_csv(joinpath(params["results_path"],string("I_en_",run_number,".csv")), leapvals.I_en, "energy investment", Vector(sim_years))
 
         #--------------------------------
         # Potential output

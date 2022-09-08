@@ -154,14 +154,14 @@ function clean_folders(params::Dict)
 end
 
 "Implement the Macro model. This is the main function for LEAP-Macro"
-function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, continue_if_error::Bool)
+function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Integer, continue_if_error::Bool)
 
     #------------status
     @info "Loading data..."
     #------------status
 
 	# Clean up folders if requested
-	if run == 0
+	if run_number == 0
 		clean_folders(params)
 	end
 
@@ -420,7 +420,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
     # Calibration run
     #------------------------------------------
 	if params["report-diagnostics"]
-		open(joinpath(params["diagnostics_path"], string("model_", run, "_calib_1", ".txt")), "w") do f
+		open(joinpath(params["diagnostics_path"], string("model_", run_number, "_calib_1", ".txt")), "w") do f
 			print(f, mdl)
 		end
 	end
@@ -434,20 +434,20 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
     @info "Calibrating for " * string(years[1]) * ": $status"
 
 	# Sector variables
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("sector_output_",run,".csv")), value.(u) .* z, "sector output", params["included_sector_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("wage_share_",run,".csv")), ω, "wage share", params["included_sector_codes"])
-	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capital_output_ratio_",run,".csv")), capital_output_ratio, "capital-output ratio", params["included_sector_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run_number,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("sector_output_",run_number,".csv")), value.(u) .* z, "sector output", params["included_sector_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("wage_share_",run_number,".csv")), ω, "wage share", params["included_sector_codes"])
+	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capital_output_ratio_",run_number,".csv")), capital_output_ratio, "capital-output ratio", params["included_sector_codes"])
     
 	# Product variables
-	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("exports_",run,".csv")), value.(X), "exports", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("final_demand_",run,".csv")), value.(F), "final demand", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("imports_",run,".csv")), value.(M), "imports", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("domestic_production_",run,".csv")), value.(qs), "domestic production", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("tot_intermediate_supply_non-energy_sectors_",run,".csv")), value.(qd), "intermediate supply from non-energy sectors", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("basic_prices_",run,".csv")), param_pb, "basic prices", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_neg_",run,".csv")), value.(margins_neg), "negative margins", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_pos_",run,".csv")), value.(margins_pos), "positive margins", params["included_product_codes"])
+	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("exports_",run_number,".csv")), value.(X), "exports", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("final_demand_",run_number,".csv")), value.(F), "final demand", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("imports_",run_number,".csv")), value.(M), "imports", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("domestic_production_",run_number,".csv")), value.(qs), "domestic production", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("tot_intermediate_supply_non-energy_sectors_",run_number,".csv")), value.(qd), "intermediate supply from non-energy sectors", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("basic_prices_",run_number,".csv")), param_pb, "basic prices", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_neg_",run_number,".csv")), value.(margins_neg), "negative margins", params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_pos_",run_number,".csv")), value.(margins_pos), "positive margins", params["included_product_codes"])
 
     # First run is calibration -- now set Xnorm and Fnorm based on solution and run again
     Xnorm = max.(Xnorm, value.(X))
@@ -459,7 +459,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 		set_normalized_coefficient(eq_F[i], fshare[i], -param_Fnorm[i])
 	end
 	if params["report-diagnostics"]
-		open(joinpath(params["diagnostics_path"], string("model_", run, "_calib_2", ".txt")), "w") do f
+		open(joinpath(params["diagnostics_path"], string("model_", run_number, "_calib_2", ".txt")), "w") do f
 			print(f, mdl)
 		end
 	end
@@ -531,25 +531,25 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 	LMlib.stringvec_to_quotedstringvec!(product_names)
 
 	# Create files for sector variables
-	LMlib.write_header_to_csv(params, sector_names, "sector_output", run)
-	LMlib.write_header_to_csv(params, sector_names, "potential_sector_output", run)
-	LMlib.write_header_to_csv(params, sector_names, "capacity_utilization", run)
-	LMlib.write_header_to_csv(params, sector_names, "real_value_added", run)
-	LMlib.write_header_to_csv(params, sector_names, "profit_rate", run)
-	LMlib.write_header_to_csv(params, sector_names, "autonomous_investment_rate", run)
+	LMlib.write_header_to_csv(params, sector_names, "sector_output", run_number)
+	LMlib.write_header_to_csv(params, sector_names, "potential_sector_output", run_number)
+	LMlib.write_header_to_csv(params, sector_names, "capacity_utilization", run_number)
+	LMlib.write_header_to_csv(params, sector_names, "real_value_added", run_number)
+	LMlib.write_header_to_csv(params, sector_names, "profit_rate", run_number)
+	LMlib.write_header_to_csv(params, sector_names, "autonomous_investment_rate", run_number)
 	# Create files for product variables
-	LMlib.write_header_to_csv(params, product_names, "final_demand", run)
-	LMlib.write_header_to_csv(params, product_names, "imports", run)
-	LMlib.write_header_to_csv(params, product_names, "exports", run)
-	LMlib.write_header_to_csv(params, product_names, "basic_prices", run)
-	LMlib.write_header_to_csv(params, product_names, "domestic_prices", run)
+	LMlib.write_header_to_csv(params, product_names, "final_demand", run_number)
+	LMlib.write_header_to_csv(params, product_names, "imports", run_number)
+	LMlib.write_header_to_csv(params, product_names, "exports", run_number)
+	LMlib.write_header_to_csv(params, product_names, "basic_prices", run_number)
+	LMlib.write_header_to_csv(params, product_names, "domestic_prices", run_number)
 	# Create a file to hold scalar variables
 	scalar_var_list = ["GDP gr", "curr acct surplus to GDP ratio", "curr acct surplus", "real GDP",
 					   "GDP deflator", "labor productivity gr", "labor force gr", "wage rate gr",
 					   "wage per effective worker gr", "real investment", "central bank rate",
 					   "terms of trade index", "real xr index", "nominal xr index"]
 	LMlib.stringvec_to_quotedstringvec!(scalar_var_list)
-	LMlib.write_header_to_csv(params, scalar_var_list, "collected_variables", run)
+	LMlib.write_header_to_csv(params, scalar_var_list, "collected_variables", run_number)
 
 	#############################################################################
 	#
@@ -805,23 +805,23 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 		prices.pb = exog.xr[t] * sut.m_frac .* prices.pw + (1 .- sut.m_frac) .* prices.pd
 		
 		# Sector variables
-		LMlib.append_row_to_csv(params, g, "sector_output", run, years[t])
-		LMlib.append_row_to_csv(params, z, "potential_sector_output", run, years[t])
-		LMlib.append_row_to_csv(params, u_report, "capacity_utilization", run, years[t])
-		LMlib.append_row_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run, years[t])
-		LMlib.append_row_to_csv(params, profit_rate, "profit_rate", run, years[t])
-		LMlib.append_row_to_csv(params, γ_0, "autonomous_investment_rate", run, years[t])
+		LMlib.append_row_to_csv(params, g, "sector_output", run_number, years[t])
+		LMlib.append_row_to_csv(params, z, "potential_sector_output", run_number, years[t])
+		LMlib.append_row_to_csv(params, u_report, "capacity_utilization", run_number, years[t])
+		LMlib.append_row_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run_number, years[t])
+		LMlib.append_row_to_csv(params, profit_rate, "profit_rate", run_number, years[t])
+		LMlib.append_row_to_csv(params, γ_0, "autonomous_investment_rate", run_number, years[t])
 	    # Product variables
-		LMlib.append_row_to_csv(params, F_report, "final_demand", run, years[t])
-		LMlib.append_row_to_csv(params, M_report, "imports", run, years[t])
-		LMlib.append_row_to_csv(params, X_report, "exports", run, years[t])
-		LMlib.append_row_to_csv(params, param_pb, "basic_prices", run, years[t])
-		LMlib.append_row_to_csv(params, param_pd, "domestic_prices", run, years[t])
+		LMlib.append_row_to_csv(params, F_report, "final_demand", run_number, years[t])
+		LMlib.append_row_to_csv(params, M_report, "imports", run_number, years[t])
+		LMlib.append_row_to_csv(params, X_report, "exports", run_number, years[t])
+		LMlib.append_row_to_csv(params, param_pb, "basic_prices", run_number, years[t])
+		LMlib.append_row_to_csv(params, param_pd, "domestic_prices", run_number, years[t])
 		# Scalar variables
 		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
 							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
 							prices.RER, prices.XR]
-		LMlib.append_row_to_csv(params, scalar_var_vals, "collected_variables", run, years[t])
+		LMlib.append_row_to_csv(params, scalar_var_vals, "collected_variables", run_number, years[t])
 
 		if t == length(years)
 			break
@@ -877,7 +877,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 		fix(I_tot, param_I_tot)
 
 		if params["report-diagnostics"]
-			open(joinpath(params["diagnostics_path"], string("model_", run, "_", years[t], ".txt")), "w") do f
+			open(joinpath(params["diagnostics_path"], string("model_", run_number, "_", years[t], ".txt")), "w") do f
 				print(f, mdl)
 			end
 		end
@@ -905,7 +905,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
     for t in eachindex(years)
         indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
     end
-    open(joinpath(params["results_path"], string("indices_",run,".csv")), "w") do io
+    open(joinpath(params["results_path"], string("indices_",run_number,".csv")), "w") do io
                writedlm(io, reshape(labels, 1, :), ',')
                writedlm(io, indices, ',')
            end;
@@ -917,10 +917,10 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run::Integer, c
 end # macro_main
 
 "Compare the GDP, employment, and value added indices generated from different runs and calculate the maximum difference."
-function compare_results(params::Dict, run::Integer)
+function compare_results(params::Dict, run_number::Integer)
     # Obtains data from indices files for current run and previous run
-    file1 = joinpath(params["results_path"], string("indices_",run,".csv"))
-    file2 = joinpath(params["results_path"], string("indices_",run-1,".csv"))
+    file1 = joinpath(params["results_path"], string("indices_",run_number,".csv"))
+    file2 = joinpath(params["results_path"], string("indices_",run_number-1,".csv"))
 
     file1_dat = CSV.read(file1, header=1, missingstring=["0"], DataFrame)
     file2_dat = CSV.read(file2, header=1, missingstring=["0"], DataFrame)
@@ -974,26 +974,26 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 		energy_sect_string = ""
 	end
 	println("With configuration file '$param_file'" * energy_sect_string * ":")
-    for run = 0:max_runs
+    for run_number = 0:max_runs
         ## Run Macro model
         #------------status
-		print("Macro model run ($run)...")
-        @info "Macro model run ($run)..."
+		print("Macro model run ($run_number)...")
+        @info "Macro model run ($run_number)..."
         #------------status
-        indices = macro_main(params, leapvals, run, continue_if_error)
+        indices = macro_main(params, leapvals, run_number, continue_if_error)
 		#------------status
 		println("completed")
         #------------status
 
         ## Compare run results
-        if run >= 1
-            tolerance = compare_results(params, run)
+        if run_number >= 1
+            tolerance = compare_results(params, run_number)
             if tolerance <= max_tolerance
-                @info @sprintf("Convergence in run number %d at %.2f%% ≤ %.2f%% target...", run, tolerance, max_tolerance)
+                @info @sprintf("Convergence in run number %d at %.2f%% ≤ %.2f%% target...", run_number, tolerance, max_tolerance)
                 return
             else
                 @info @sprintf("Results did not converge: %.2f%% > %.2f%% target...", tolerance, max_tolerance)
-                if run == max_runs
+                if run_number == max_runs
                     return
                 end
             end
@@ -1025,7 +1025,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 				@info "Obtaining LEAP results..."
 				flush(logfile)
 				#------------status
-				leapvals = LEAPlib.get_results_from_leap(params, run)
+				leapvals = LEAPlib.get_results_from_leap(params, run_number)
 			finally
 				if params["model"]["hide_leap"]
 					#------------status
