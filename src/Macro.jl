@@ -956,6 +956,11 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
             return
         end
 		if load_leap_first
+			## Obtain LEAP results
+			#------------status
+			@info "Obtaining LEAP results..."
+			flush(logfile)
+			#------------status
 			leapvals = LEAPlib.get_results_from_leap(params, 0)
 		end
     else
