@@ -18,7 +18,11 @@ include("./Macro.jl")
 using .Macro
 
 "Run LEAP-Macro by calling `leapmacro`"
-function run(config_file::AbstractString = "LEAPMacro_params.yml"; dump_err_stack::Bool = false, include_energy_sectors::Bool = false, load_leap_first::Bool = false, continue_if_error::Bool = false)
+function run(config_file::AbstractString = "LEAPMacro_params.yml";
+			 dump_err_stack::Bool = false,
+			 include_energy_sectors::Bool = false,
+			 load_leap_first::Bool = false,
+			 continue_if_error::Bool = false)
 	# Ensure needed folders exist
 	if !isdir("inputs")
 		throw(ErrorException("The \"inputs\" folder is needed, but does not exist"))
