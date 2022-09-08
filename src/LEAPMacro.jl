@@ -51,7 +51,11 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml";
 	else
 		logfilename = string("LEAPMacro_log_", params["output_folder"], ".txt")
 	end
-	logfile = open(logfilename, "w+")
+	if run_number_start == 0
+		logfile = open(logfilename, "w")
+	else
+		logfile = open(logfilename, "a")
+	end
 	logger = ConsoleLogger(logfile)
 	global_logger(logger)
 	@info now()
