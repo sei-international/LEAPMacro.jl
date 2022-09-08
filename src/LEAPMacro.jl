@@ -22,6 +22,7 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml";
 			 dump_err_stack::Bool = false,
 			 include_energy_sectors::Bool = false,
 			 load_leap_first::Bool = false,
+			 run_number_start::Integer = 0,
 			 continue_if_error::Bool = false)
 	# Ensure needed folders exist
 	if !isdir("inputs")
@@ -57,7 +58,7 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml";
 	@info "Configuration file: '$config_file'"
 	exit_status = 0
 	try
-		Macro.leapmacro(config_file, logfile, include_energy_sectors, load_leap_first, continue_if_error)
+		Macro.leapmacro(config_file, logfile, include_energy_sectors, load_leap_first, run_number_start, continue_if_error)
 	catch err
 		exit_status = 1
 		println(string("Macro exited with an error: Please check the log file '", logfilename,"'"))

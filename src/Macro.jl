@@ -126,6 +126,7 @@ end # calc_intermed_techchange
 
 "Clean up folders if specified in params"
 function clean_folders(params::Dict)
+	println(params["results_path"])
 	if params["clear-folders"]["results"] && isdir(params["results_path"])
 		for f in readdir(params["results_path"])
 			rm(joinpath(params["results_path"], f))
@@ -159,11 +160,6 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     #------------status
     @info "Loading data..."
     #------------status
-
-	# Clean up folders if requested
-	if run_number == 0
-		clean_folders(params)
-	end
 
 	sut, np, ns = SUTlib.process_sut(params)
 	prices = SUTlib.initialize_prices(np, sut)
@@ -940,16 +936,24 @@ function compare_results(params::Dict, run_number::Integer)
 end # compare_results
 
 "Iteratively run the Macro model and LEAP until convergence. This is the primary entry point for LEAP-Macro."
-function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy_sectors::Bool = false, load_leap_first::Bool = false, continue_if_error::Bool = false)
+function leapmacro(param_file::AbstractString,
+				   logfile::IOStream,
+				   include_energy_sectors::Bool = false,
+				   load_leap_first::Bool = false,
+				   run_number_start::Integer = 0,
+				   continue_if_error::Bool = false)
 
     # Read in global parameters
     params = SUTlib.parse_param_file(param_file, include_energy_sectors = include_energy_sectors)
-	
+
+	# Clean up folders if requested
+	clean_folders(params)
+
 	# set model run parameters and initial values
     leapvals = LEAPlib.initialize_leapresults(params)
     run_leap = params["model"]["run_leap"]
     if run_leap
-        max_runs = params["model"]["max_runs"]
+        max_runs = run_number_start + params["model"]["max_runs"]
         ## checks that user has LEAP installed
         if ismissing(LEAPlib.connect_to_leap())
             @error "Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file."
@@ -961,10 +965,10 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 			@info "Obtaining LEAP results..."
 			flush(logfile)
 			#------------status
-			leapvals = LEAPlib.get_results_from_leap(params, 0)
+			leapvals = LEAPlib.get_results_from_leap(params, run_number_start)
 		end
     else
-        max_runs = 0
+        max_runs = run_number_start
     end
     max_tolerance = params["model"]["max_tolerance"]
 
@@ -974,7 +978,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
 		energy_sect_string = ""
 	end
 	println("With configuration file '$param_file'" * energy_sect_string * ":")
-    for run_number = 0:max_runs
+    for run_number = run_number_start:max_runs
         ## Run Macro model
         #------------status
 		print("Macro model run ($run_number)...")
@@ -986,7 +990,7 @@ function leapmacro(param_file::AbstractString, logfile::IOStream, include_energy
         #------------status
 
         ## Compare run results
-        if run_number >= 1
+        if run_number >= run_number_start + 1
             tolerance = compare_results(params, run_number)
             if tolerance <= max_tolerance
                 @info @sprintf("Convergence in run number %d at %.2f%% ≤ %.2f%% target...", run_number, tolerance, max_tolerance)
