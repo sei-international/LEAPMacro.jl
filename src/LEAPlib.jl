@@ -13,6 +13,44 @@ mutable struct LEAPresults
     price::Array{Any,2} # Real prices from LEAP (converted to index) np x year
 end
 
+# A list of all LEAP branch types
+@enum LEAPBranch begin
+	DemandCategoryBranchType = 1
+	TransformationModuleBranchType = 2
+	TransformationProcessBranchType = 3
+	DemandTechnologyBranchType = 4
+	TransformationProcessCategoryType = 5
+	TransformationOutputCategoryType = 6
+	TransformationOutputBranchType = 7
+	KeyAssumptionCategoryType = 9
+	KeyAssumptionBranchType = 10
+	ResourceRootType = 11
+	PrimaryBranchCategoryType = 12
+	SecondaryBranchCategoryType = 13
+	ResourceBranchType = 15
+	ResourceDisagType = 16
+	StatDiffRootType = 18
+	StockChangeRootType = 19
+	StatDiffPrimaryCategoryType = 20
+	StatDiffSecondaryCategoryType = 21
+	StockChangePrimaryCategoryType = 22
+	StockChangeSecondaryCategoryType = 23
+	StatDiffBranchType = 24
+	StockChangeBranchType = 25
+	NonEnergyCategoryType = 26
+	NonEnergyBranchType = 27
+	AuxCategoryType = 30
+	AuxBranchType = 31
+	FeedstockCategoryType = 32
+	FeedstockBranchType = 33
+	DMDPollutionBranchType = 34
+	TransformationPollutionBranchType = 35
+	DemandFuelBranchType = 36
+	IndicatorCategoryType = 37
+	IndicatorBranchType = 38
+	EmissionConstraintBranchType = 39
+end
+
 "Return an initialized LEAPresults struct"
 function initialize_leapresults(params::Dict)
     ny = params["years"]["end"] - params["years"]["start"] + 1
@@ -223,15 +261,21 @@ function get_results_from_leap(params::Dict, run_number::Integer)
 
     try
         for b in LEAP.Branches
-            if b.BranchType == 2 && b.Level == 2 && b.VariableExists("Investment Costs")
-                for t in eachindex(sim_years)
-                    if params["LEAP-info"]["inv_costs_unit"] != ""
-                        I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
-                    else
-                        I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t]) / params["LEAP-info"]["inv_costs_scale"]
-                    end
+            if b.BranchType == Int(TransformationProcessBranchType) && b.Level == 4 && b.VariableExists("Investment Costs")
+                is_excluded = false
+                for excluded_text in params["LEAP-info"]["excluded_inv_branches"]
+                    is_excluded = is_excluded || occursin(Regex(excluded_text, "i"), b.FullName)
                 end
-                leapvals.I_en += I_en_temp
+                if !is_excluded
+                    for t in eachindex(sim_years)
+                        if params["LEAP-info"]["inv_costs_unit"] != ""
+                            I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
+                        else
+                            I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t]) / params["LEAP-info"]["inv_costs_scale"]
+                        end
+                    end
+                    leapvals.I_en += I_en_temp
+                end
             end
         end
 

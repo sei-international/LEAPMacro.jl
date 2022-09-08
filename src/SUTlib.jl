@@ -228,6 +228,9 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         if !LMlib.haskeyvalue(global_params["LEAP-info"], "last_historical_year")
             global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
         end
+        if !LMlib.haskeyvalue(global_params["LEAP-info"], "excluded_inv_branches")
+            global_params["LEAP-info"]["excluded_inv_branches"] = []
+        end
     else
         global_params["LEAP-info"] = Dict()
         global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
@@ -235,6 +238,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["LEAP-info"]["result_scenario"] = ""
         global_params["LEAP-info"]["inv_costs_unit"] = ""
         global_params["LEAP-info"]["inv_costs_scale"] = 1.0
+        global_params["LEAP-info"]["excluded_inv_branches"] = []
     end
 
     return global_params
