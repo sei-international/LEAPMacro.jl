@@ -126,7 +126,6 @@ end # calc_intermed_techchange
 
 "Clean up folders if specified in params"
 function clean_folders(params::Dict)
-	println(params["results_path"])
 	if params["clear-folders"]["results"] && isdir(params["results_path"])
 		for f in readdir(params["results_path"])
 			rm(joinpath(params["results_path"], f))
