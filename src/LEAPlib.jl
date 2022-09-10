@@ -281,7 +281,7 @@ function get_results_from_leap(params::Dict, run_number::Integer)
             end
         end
 
-        LMlib.write_vector_to_csv(joinpath(params["results_path"],string("I_en_",run_number,".csv")), leapvals.I_en, "energy investment", Vector(sim_years))
+        LMlib.write_vector_to_csv(joinpath(params["results_path"],string("I_en_",run_number + 1,".csv")), leapvals.I_en, "energy investment", Vector(sim_years))
 
         #--------------------------------
         # Potential output
