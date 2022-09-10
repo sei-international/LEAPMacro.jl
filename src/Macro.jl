@@ -964,7 +964,7 @@ function leapmacro(param_file::AbstractString,
 			@info "Obtaining LEAP results..."
 			flush(logfile)
 			#------------status
-			leapvals = LEAPlib.get_results_from_leap(params, run_number_start, load_leap_first)
+			leapvals = LEAPlib.get_results_from_leap(params, run_number_start)
 		end
     else
         max_runs = run_number_start
@@ -1028,7 +1028,7 @@ function leapmacro(param_file::AbstractString,
 				@info "Obtaining LEAP results..."
 				flush(logfile)
 				#------------status
-				leapvals = LEAPlib.get_results_from_leap(params, run_number)
+				leapvals = LEAPlib.get_results_from_leap(params, run_number + 1)
 			finally
 				if params["model"]["hide_leap"]
 					#------------status
