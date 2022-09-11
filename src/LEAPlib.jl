@@ -225,6 +225,9 @@ function calculate_leap(scen_name::AbstractString)
     # connects program to LEAP
     LEAP = connect_to_leap()
     try
+        LEAP.RefreshBranches()
+        LEAP.RefreshResources()
+        LEAP.Refresh()
         LEAP.ForceCalculation()
         LEAP.Scenario(scen_name).ResultsShown = true
         LEAP.Calculate(false) # This sets RunWEAP = false
