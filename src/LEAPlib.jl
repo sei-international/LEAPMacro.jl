@@ -228,8 +228,8 @@ function calculate_leap(scen_name::AbstractString)
         LEAP.Scenario(scen_name).ResultsShown = true
         LEAP.Calculate()
         LEAP.SaveArea()
-    catch
-        error("Encountered an error when running LEAP")
+    catch e
+        error("Encountered an error when running LEAP: " * sprint(showerror, e))
     finally
 	    disconnect_from_leap(LEAP)
     end
