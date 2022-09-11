@@ -230,7 +230,6 @@ function calculate_leap(scen_name::AbstractString)
         LEAP.Refresh()
         LEAP.ForceCalculation()
         LEAP.Scenario(scen_name).ResultsShown = true
-        exit() # TODO: remove
         LEAP.Calculate(false) # This sets RunWEAP = false
         LEAP.SaveArea()
     catch e
