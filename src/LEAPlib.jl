@@ -226,7 +226,7 @@ function calculate_leap(scen_name::AbstractString)
     LEAP = connect_to_leap()
     try
         LEAP.Scenario(scen_name).ResultsShown = true
-        LEAP.Calculate()
+        LEAP.Calculate(false) # This sets RunWEAP = false
         LEAP.SaveArea()
     catch e
         error("Encountered an error when running LEAP: " * sprint(showerror, e))
