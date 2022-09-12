@@ -212,12 +212,14 @@ LEAP-info:
     scenario: Baseline
     # The region (if any -- can omit, or enter a "~", meaning no value)
     region: ~
+
+LEAP-investment:
     # Currency units for investment costs
     inv_costs_unit: U.S. Dollar
     # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
     inv_costs_scale: 1.0e+6
     # Exclude any investment branches that contain any of the text in the list (case-insensitive)
-    excluded_inv_branches: []
+    excluded_branches: []
 
 # Association between Macro's GDP result and LEAP (optional)
 GDP-branch:

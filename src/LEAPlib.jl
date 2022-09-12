@@ -269,15 +269,15 @@ function get_results_from_leap(params::Dict, run_number::Integer, )
         for b in LEAP.Branches
             if b.BranchType == Int(TransformationProcessBranchType) && b.Level == 4 && b.VariableExists("Investment Costs")
                 is_excluded = false
-                for excluded_text in params["LEAP-info"]["excluded_inv_branches"]
+                for excluded_text in params["LEAP-investment"]["excluded_branches"]
                     is_excluded = is_excluded || occursin(Regex(excluded_text, "i"), b.FullName)
                 end
                 if !is_excluded
                     for t in eachindex(sim_years)
-                        if params["LEAP-info"]["inv_costs_unit"] != ""
-                            I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-info"]["inv_costs_unit"]) / params["LEAP-info"]["inv_costs_scale"]
+                        if params["LEAP-investment"]["inv_costs_unit"] != ""
+                            I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-investment"]["inv_costs_unit"]) / params["LEAP-investment"]["inv_costs_scale"]
                         else
-                            I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t]) / params["LEAP-info"]["inv_costs_scale"]
+                            I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t]) / params["LEAP-investment"]["inv_costs_scale"]
                         end
                     end
                     leapvals.I_en += I_en_temp
