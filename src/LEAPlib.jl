@@ -225,10 +225,12 @@ function calculate_leap(scen_name::AbstractString)
     # connects program to LEAP
     LEAP = connect_to_leap()
     try
+        # The following commands should not be necessary, but they enforce refresh and calculation
         LEAP.RefreshBranches()
         LEAP.RefreshResources()
         LEAP.Refresh()
         LEAP.ForceCalculation()
+        # The following are necessary
         LEAP.Scenario(scen_name).ResultsShown = true
         LEAP.Calculate(false) # This sets RunWEAP = false
         LEAP.SaveArea()
@@ -275,10 +277,11 @@ function get_results_from_leap(params::Dict, run_number::Integer, )
                 if !is_excluded
                     for t in eachindex(sim_years)
                         if params["LEAP-investment"]["inv_costs_unit"] != ""
-                            I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-investment"]["inv_costs_unit"]) / params["LEAP-investment"]["inv_costs_scale"]
+                            I_en_tot = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-investment"]["inv_costs_unit"])
                         else
-                            I_en_temp[t] = b.Variable("Investment Costs").Value(sim_years[t]) / params["LEAP-investment"]["inv_costs_scale"]
+                            I_en_tot = b.Variable("Investment Costs").Value(sim_years[t])
                         end
+                        I_en_temp[t] = I_en_tot / params["LEAP-investment"]["inv_costs_scale"]
                     end
                     leapvals.I_en += I_en_temp
                 end

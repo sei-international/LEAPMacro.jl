@@ -217,18 +217,20 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         if !LMlib.haskeyvalue(global_params["LEAP-info"], "region")
             global_params["LEAP-info"]["region"] = ""
         end
-        # Key "inv_costs_unit" is missing, so apply the default
-        if !LMlib.haskeyvalue(global_params["LEAP-info"], "inv_costs_unit")
-            global_params["LEAP-investment"]["inv_costs_unit"] = ""
-        end
-        # Key "inv_costs_scale" is missing, so default to 1.0
-        if !LMlib.haskeyvalue(global_params["LEAP-info"], "inv_costs_scale")
-            global_params["LEAP-investment"]["inv_costs_scale"] = 1.0
-        end
+        # Key "last_historical_year" is missing, so default to start of scenario
         if !LMlib.haskeyvalue(global_params["LEAP-info"], "last_historical_year")
             global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
         end
-        if !LMlib.haskeyvalue(global_params["LEAP-info"], "excluded_inv_branches")
+        # Key "inv_costs_unit" is missing, so apply the default
+        if !LMlib.haskeyvalue(global_params["LEAP-investment"], "inv_costs_unit")
+            global_params["LEAP-investment"]["inv_costs_unit"] = ""
+        end
+        # Key "inv_costs_scale" is missing, so default to 1.0
+        if !LMlib.haskeyvalue(global_params["LEAP-investment"], "inv_costs_scale")
+            global_params["LEAP-investment"]["inv_costs_scale"] = 1.0
+        end
+        # Key "excluded_inv_branches" is missing, so default to empty list
+        if !LMlib.haskeyvalue(global_params["LEAP-investment"], "excluded_inv_branches")
             global_params["LEAP-investment"]["excluded_branches"] = []
         end
     else
