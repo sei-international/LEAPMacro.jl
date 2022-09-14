@@ -251,7 +251,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
                 global_params["LEAP-investment"]["distribute_costs_over"]["default"] = 1
             end
             # Key "by_branch" is missing, so default to empty list
-            if !LMlib.haskeyvalue(global_params["LEAP-investment"]["distribute_costs_over"], "default")
+            if !LMlib.haskeyvalue(global_params["LEAP-investment"]["distribute_costs_over"], "by_branch")
                 global_params["LEAP-investment"]["distribute_costs_over"]["by_branch"] = []
             end
         end
