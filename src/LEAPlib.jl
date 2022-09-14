@@ -157,8 +157,8 @@ function connect_to_leap()
         else
             return LEAPPyObj
         end
-	catch
-        error("Cannot connect to LEAP. Is it installed and running?")
+	catch e
+        error("Cannot connect to LEAP: " * sprint(showerror, e))
 		return missing
 	end
 end  # connect_to_leap
