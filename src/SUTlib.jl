@@ -238,8 +238,8 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         if !LMlib.haskeyvalue(global_params["LEAP-investment"], "inv_costs_scale")
             global_params["LEAP-investment"]["inv_costs_scale"] = 1.0
         end
-        # Key "excluded_inv_branches" is missing, so default to empty list
-        if !LMlib.haskeyvalue(global_params["LEAP-investment"], "excluded_inv_branches")
+        # Key "excluded_branches" is missing, so default to empty list
+        if !LMlib.haskeyvalue(global_params["LEAP-investment"], "excluded_branches")
             global_params["LEAP-investment"]["excluded_branches"] = []
         end
         # Key "distribute_costs_over" is missing, so default to 1 year
