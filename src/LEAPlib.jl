@@ -290,13 +290,17 @@ function get_results_from_leap(params::Dict, run_number::Integer, )
                             break
                         end
                     end
+                    I_en_temp .= 0.0 # Initialize to zero
                     for t in eachindex(sim_years)
                         if params["LEAP-investment"]["inv_costs_unit"] != ""
                             I_en_tot = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-investment"]["inv_costs_unit"])
                         else
                             I_en_tot = b.Variable("Investment Costs").Value(sim_years[t])
                         end
-                        I_en_temp[t] = I_en_tot / params["LEAP-investment"]["inv_costs_scale"]
+                        I_en_addition = build_pattern * I_en_tot / params["LEAP-investment"]["inv_costs_scale"]
+                        for s in 0:min(length(sim_years) - t, length(I_en_addition) - 1)
+                            I_en_temp[t + s] += I_en_addition[s + 1]
+                        end
                     end
                     leapvals.I_en += I_en_temp
                 end
