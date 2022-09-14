@@ -7,7 +7,7 @@ using DataFrames
 
 export write_matrix_to_csv, write_vector_to_csv, excel_range_to_mat, haskeyvalue, ϵ,
 	   write_header_to_csv, append_row_to_csv, stringvec_to_quotedstringvec!,
-	   get_nonmissing_values
+	   get_nonmissing_values, float_to_int
 
 # Declared type unions
 NumOrVector = Union{Nothing,Number,Vector}
@@ -38,6 +38,11 @@ function write_vector_to_csv(filename::AbstractString, vector::Vector, varname::
         end
 	end
 end # write_vector_to_csv
+
+"Convert a float to nearest int using 'round'"
+function float_to_int(x::Number)
+	return(trunc(Int, round(x)))
+end
 
 "Convert strings in Dataframe to floats and fill in missing values with 0."
 function string_to_float(str::Union{Missing,AbstractString})

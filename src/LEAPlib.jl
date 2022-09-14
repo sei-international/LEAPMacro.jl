@@ -267,6 +267,9 @@ function get_results_from_leap(params::Dict, run_number::Integer, )
     #--------------------------------
     I_en_temp = Array{Float64}(undef, length(sim_years))
 
+    # Force to an integer
+    default_build_time = LMlib.float_to_int(params["LEAP-investment"]["distribute_costs_over"]["default"])
+    default_pattern = ones(default_build_time)/default_build_time
     try
         for b in LEAP.Branches
             if b.BranchType == Int(TransformationProcessBranchType) && b.Level == 4 && b.VariableExists("Investment Costs")
@@ -275,6 +278,18 @@ function get_results_from_leap(params::Dict, run_number::Integer, )
                     is_excluded = is_excluded || occursin(Regex(excluded_text, "i"), b.FullName)
                 end
                 if !is_excluded
+                    build_pattern = default_pattern
+                    for build_branch in params["LEAP-investment"]["distribute_costs_over"]["by_branch"]
+                        if lowercase(build_branch["path"]) == lowercase(b.FullName)
+                            if isa(build_branch["value"], Number)
+                                build_time = LMlib.float_to_int(build_branch["value"])
+                                build_pattern = ones(build_time)/build_time
+                            else
+                                build_pattern = build_branch["value"]/sum(build_branch["value"])
+                            end
+                            break
+                        end
+                    end
                     for t in eachindex(sim_years)
                         if params["LEAP-investment"]["inv_costs_unit"] != ""
                             I_en_tot = b.Variable("Investment Costs").Value(sim_years[t], params["LEAP-investment"]["inv_costs_unit"])

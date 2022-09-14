@@ -221,6 +221,15 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         if !LMlib.haskeyvalue(global_params["LEAP-info"], "last_historical_year")
             global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
         end
+    else
+        global_params["LEAP-info"] = Dict()
+        global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
+        global_params["LEAP-info"]["input_scenario"] = ""
+        global_params["LEAP-info"]["result_scenario"] = ""
+    end
+
+    # Check that LEAP-investment keys are reported
+    if LMlib.haskeyvalue(global_params, "LEAP-investment")
         # Key "inv_costs_unit" is missing, so apply the default
         if !LMlib.haskeyvalue(global_params["LEAP-investment"], "inv_costs_unit")
             global_params["LEAP-investment"]["inv_costs_unit"] = ""
@@ -233,15 +242,26 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         if !LMlib.haskeyvalue(global_params["LEAP-investment"], "excluded_inv_branches")
             global_params["LEAP-investment"]["excluded_branches"] = []
         end
+        # Key "distribute_costs_over" is missing, so default to 1 year
+        if !LMlib.haskeyvalue(global_params["LEAP-investment"], "distribute_costs_over")
+            global_params["LEAP-investment"]["distribute_costs_over"] = Dict("default" => 1, "by_branch" => [])
+        else
+            # Key "default" is missing, so default to 1 year
+            if !LMlib.haskeyvalue(global_params["LEAP-investment"]["distribute_costs_over"], "default")
+                global_params["LEAP-investment"]["distribute_costs_over"]["default"] = 1
+            end
+            # Key "by_branch" is missing, so default to empty list
+            if !LMlib.haskeyvalue(global_params["LEAP-investment"]["distribute_costs_over"], "default")
+                global_params["LEAP-investment"]["distribute_costs_over"]["by_branch"] = []
+            end
+        end
     else
-        global_params["LEAP-info"] = Dict()
-        global_params["LEAP-info"]["last_historical_year"] = global_params["years"]["start"]
-        global_params["LEAP-info"]["input_scenario"] = ""
-        global_params["LEAP-info"]["result_scenario"] = ""
         global_params["LEAP-investment"]["inv_costs_unit"] = ""
         global_params["LEAP-investment"]["inv_costs_scale"] = 1.0
         global_params["LEAP-investment"]["excluded_branches"] = []
+        global_params["LEAP-investment"]["distribute_costs_over"] = Dict("default" => 1, "by_branch" => [])
     end
+
 
     return global_params
 end # parse_param_file

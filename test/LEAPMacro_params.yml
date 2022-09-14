@@ -220,6 +220,17 @@ LEAP-investment:
     inv_costs_scale: 1.0e+6
     # Exclude any investment branches that contain any of the text in the list (case-insensitive)
     excluded_branches: []
+    distribute_costs_over:
+        default: 5 # years: This will be rounded to an integer
+        by_branch:
+            - {
+                path: Transformation\Electricity Generation\Processes\Existing Hydro,
+                value: 10 # years: This will be rounded to an integer
+            }
+            - {
+                path: Transformation\Electricity Generation\Processes\New Oil Combustion Turbine,
+                value: [10, 20, 20, 20, 10, 10, 5, 5] # percent by years: This will be re-scaled so it sums to 1.0
+            }
 
 # Association between Macro's GDP result and LEAP (optional)
 GDP-branch:
