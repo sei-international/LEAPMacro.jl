@@ -939,6 +939,7 @@ function leapmacro(param_file::AbstractString,
 				   logfile::IOStream,
 				   include_energy_sectors::Bool = false,
 				   load_leap_first::Bool = false,
+				   only_push_leap_results::Bool = false,
 				   run_number_start::Integer = 0,
 				   continue_if_error::Bool = false)
 
@@ -1016,27 +1017,29 @@ function leapmacro(param_file::AbstractString,
             #------------status
             LEAPlib.send_results_to_leap(params, indices)
             ## Run LEAP model
-			try
-				#------------status
-				@info "Running LEAP model..."
-				flush(logfile)
-				#------------status
-				LEAPlib.calculate_leap(params["LEAP-info"]["result_scenario"])
+			if !only_push_leap_results
+				try
+					#------------status
+					@info "Running LEAP model..."
+					flush(logfile)
+					#------------status
+					LEAPlib.calculate_leap(params["LEAP-info"]["result_scenario"])
 
-				## Obtain LEAP results
-				#------------status
-				@info "Obtaining LEAP results..."
-				flush(logfile)
-				#------------status
-				leapvals = LEAPlib.get_results_from_leap(params, run_number + 1)
-			finally
-				if params["model"]["hide_leap"]
+					## Obtain LEAP results
 					#------------status
-					@info "Restoring LEAP..."
+					@info "Obtaining LEAP results..."
+					flush(logfile)
 					#------------status
-					LEAPlib.hide_leap(false)
+					leapvals = LEAPlib.get_results_from_leap(params, run_number + 1)
+				finally
+					if params["model"]["hide_leap"]
+						#------------status
+						@info "Restoring LEAP..."
+						#------------status
+						LEAPlib.hide_leap(false)
+					end
+					flush(logfile)
 				end
-				flush(logfile)
 			end
         end
 
