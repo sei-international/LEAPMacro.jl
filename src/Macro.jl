@@ -939,6 +939,7 @@ function leapmacro(param_file::AbstractString,
 				   logfile::IOStream,
 				   include_energy_sectors::Bool = false,
 				   load_leap_first::Bool = false,
+				   get_results_from_leap_version::Union{Nothing,Integer} = nothing,
 				   only_push_leap_results::Bool = false,
 				   run_number_start::Integer = 0,
 				   continue_if_error::Bool = false)
@@ -965,7 +966,7 @@ function leapmacro(param_file::AbstractString,
 			@info "Obtaining LEAP results..."
 			flush(logfile)
 			#------------status
-			leapvals = LEAPlib.get_results_from_leap(params, run_number_start)
+			leapvals = LEAPlib.get_results_from_leap(params, run_number_start, get_results_from_leap_version)
 		end
     else
         max_runs = run_number_start

@@ -236,11 +236,17 @@ function calculate_leap(scen_name::AbstractString)
 end # calculate_leap
 
 "Obtain energy investment data from the LEAP model."
-function get_results_from_leap(params::Dict, run_number::Integer, )
+function get_results_from_leap(params::Dict, run_number::Integer, get_results_from_leap_version::Union{Nothing,Integer} = nothing)
     sim_years = params["years"]["start"]:params["years"]["end"]
 
     # connects program to LEAP
     LEAP = connect_to_leap()
+
+    if !isnothing(get_results_from_leap_version)
+        LEAP.SaveArea
+        LEAP.SaveVersion("LEAP-Macro working version", false)
+        LEAP.Versions(get_results_from_leap_version).Revert
+    end
 
     # Set ActiveView and, if specified, ActiveScenario and ActiveRegion
     LEAP.ActiveView = "Results"
@@ -338,6 +344,9 @@ function get_results_from_leap(params::Dict, run_number::Integer, )
         end
 
     finally
+        if !isnothing(get_results_from_leap_version)
+            LEAP.Versions(LEAP.Versions.Count).Revert
+        end
         disconnect_from_leap(LEAP)
     end
 
