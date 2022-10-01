@@ -954,7 +954,11 @@ function leapmacro(param_file::AbstractString,
     leapvals = LEAPlib.initialize_leapresults(params)
     run_leap = params["model"]["run_leap"]
     if run_leap
-        max_runs = run_number_start + params["model"]["max_runs"]
+		if !only_push_leap_results
+	        max_runs = run_number_start + params["model"]["max_runs"]
+		else
+			max_runs = run_number_start
+		end
         ## checks that user has LEAP installed
         if ismissing(LEAPlib.connect_to_leap())
             @error "Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file."
