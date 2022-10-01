@@ -245,7 +245,7 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
     if !isnothing(get_results_from_leap_version)
         LEAP.SaveArea
         LEAP.SaveVersion("LEAP-Macro working version", false)
-        LEAP.Versions(get_results_from_leap_version).Revert
+        LEAP.Versions(get_results_from_leap_version).Revert()
     end
 
     # Set ActiveView and, if specified, ActiveScenario and ActiveRegion
@@ -344,8 +344,10 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
         end
 
     finally
+        LEAP.ActiveView = "Analysis"
         if !isnothing(get_results_from_leap_version)
-            LEAP.Versions(LEAP.Versions.Count).Revert
+            # Return to the saved (but not calculated) version reflecting state of the application
+            LEAP.Versions(LEAP.Versions.Count).Revert()
         end
         disconnect_from_leap(LEAP)
     end
