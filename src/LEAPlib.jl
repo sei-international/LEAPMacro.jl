@@ -1,7 +1,7 @@
 module LEAPlib
 using PyCall, DataFrames, CSV
 
-export hide_leap, send_results_to_leap, calculate_leap, get_results_from_leap, LEAPresults
+export hide_leap, send_results_to_leap, calculate_leap, get_version_info, get_results_from_leap, LEAPresults
 
 include("./LEAPMacrolib.jl")
 using .LMlib
@@ -235,8 +235,16 @@ function calculate_leap(scen_name::AbstractString)
     end
 end # calculate_leap
 
+"Get LEAP version information by either name or ID"
+function get_version_info(version::Union{Nothing,Integer,AbstractString})
+    LEAP = connect_to_leap()
+    version_info = LEAP.Versions(version).Name
+    disconnect_from_leap(LEAP)
+    return version_info
+end
+
 "Obtain energy investment data from the LEAP model."
-function get_results_from_leap(params::Dict, run_number::Integer, get_results_from_leap_version::Union{Nothing,Integer} = nothing)
+function get_results_from_leap(params::Dict, run_number::Integer, get_results_from_leap_version::Union{Nothing,Integer,AbstractString} = nothing)
     sim_years = params["years"]["start"]:params["years"]["end"]
 
     # connects program to LEAP
@@ -346,8 +354,8 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
     finally
         LEAP.ActiveView = "Analysis"
         if !isnothing(get_results_from_leap_version)
-            # Return to the saved (but not calculated) version reflecting state of the application
-            LEAP.Versions(LEAP.Versions.Count).Revert()
+            # Return to the saved (but not calculated) version reflecting state of the application -- will go to most recent
+            LEAP.Versions("LEAP-Macro working version").Revert()
         end
         disconnect_from_leap(LEAP)
     end
