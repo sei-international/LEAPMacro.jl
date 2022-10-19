@@ -356,7 +356,8 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
     finally
         LEAP.ActiveView = "Analysis"
         if !isnothing(get_results_from_leap_version)
-            @assert !isnothing(temp_version) # Should be defined if this is true
+            # From the program logic, there should always be a temp_version != nothing if get_results_from_leap_version != nothing, so assert:
+            @assert !isnothing(temp_version) "Getting results from a LEAP version, but no temporary version to revert to"
             # Return to the saved (but not calculated) version reflecting state of the application -- will go to most recent
             LEAP.Versions(temp_version).Revert()
             # No longer needed: delete
