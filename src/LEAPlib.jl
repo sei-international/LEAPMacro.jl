@@ -1,5 +1,5 @@
 module LEAPlib
-using PyCall, DataFrames, CSV
+using PyCall, DataFrames, CSV, UUIDs
 
 export hide_leap, send_results_to_leap, calculate_leap, get_version_info, get_results_from_leap, LEAPresults
 
@@ -250,9 +250,11 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
     # connects program to LEAP
     LEAP = connect_to_leap()
 
+    temp_version = nothing
     if !isnothing(get_results_from_leap_version)
         LEAP.SaveArea
-        LEAP.SaveVersion("LEAP-Macro working version", false)
+        temp_version = "LEAPMacro" * string(uuid4())
+        LEAP.SaveVersion(temp_version, false)
         LEAP.Versions(get_results_from_leap_version).Revert()
     end
 
@@ -354,8 +356,11 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
     finally
         LEAP.ActiveView = "Analysis"
         if !isnothing(get_results_from_leap_version)
+            @assert !isnothing(temp_version) # Should be defined if this is true
             # Return to the saved (but not calculated) version reflecting state of the application -- will go to most recent
-            LEAP.Versions("LEAP-Macro working version").Revert()
+            LEAP.Versions(temp_version).Revert()
+            # No longer needed: delete
+            LEAP.Versions.Delete(temp_version)
         end
         disconnect_from_leap(LEAP)
     end
