@@ -369,11 +369,9 @@ SUT_ranges:
 The next, and final, block specifies how LEAP and Macro are linked. Each of these entries is optional.
 
 ### Core LEAP model information
-The first section in this block says which LEAP scenario to send and retrieve results to and from, for which region, the currency unit for investment costs, and a scaling factor. It also identifies the first historical year, if that is different from the start year. (The `last_historical_year` is the year just before LEAP's `First Scenario Year`.)
+The first section in this block says which LEAP scenario to send and retrieve results to and from, and for which region. It also identifies the first historical year, if that is different from the start year. (The `last_historical_year` is the year just before LEAP's `First Scenario Year`.)
 
-As an example for setting the scaling factor, if entries in the Macro model input files are in millions of US dollars, and investment costs in LEAP are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).
-
-If this section is omitted, then results are sent to and retrieved from the scenario currently active in LEAP, and for the currently active region (if any regions are specified). The `last_historical_year` is set to the start year, `inv_costs_units` is set to a blank (so LEAP applies the default currency unit), and `inv_costs_scale` is set to 1.0.
+If this section is omitted, then results are sent to and retrieved from the scenario currently active in LEAP, and for the currently active region (if any regions are specified). The `last_historical_year` is set to the start year.
 ```yaml
 #---------------------------------------------------------------------------
 # Parameters for running LEAP with the Macro model (LEAP-Macro)
@@ -386,10 +384,6 @@ LEAP-info:
     scenario: Baseline
     # The region (if any -- can omit, or enter a "~", meaning no value)
     region: ~
-    # Currency units for investment costs
-    inv_costs_unit: U.S. Dollar
-    # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
-    inv_costs_scale: 1.0e+6
 ```
 Alternatively, separate scenarios can be specified if LEAP receives inputs from Macro for one scenario (`input_scenario`), but sends results back to Macro from another scenario (`result_scenario`). In this case, `scenario` should be omitted, or set to `~` (meaning "no value"). For example,
 ```yaml
@@ -404,6 +398,37 @@ LEAP-info:
     input_scenario: Baseline
     result_scenario: Capital Plan
     ...
+```
+
+### Pulling investment information from LEAP into Macro
+The next section specifies information regarding investment. By default, any investment reported in LEAP in a given year is totaled and passed to Macro with no adjustment: `inv_costs_units` is set to a blank (so LEAP applies the default currency unit) and `inv_costs_scale` is set to 1.0. However, some investment branches can be omitted, investment can be spread over several years, the currency unit can be set to a different value, and the scaling factor can be specified.
+
+As an example for setting the scaling factor, if entries in the Macro model input files are in millions of US dollars, and investment costs in LEAP are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).
+
+The `excluded_branches` entry is set to an empty list `[]` in the Freedonia example below. This entry is particularly useful if NEMO is run with a backstop technology. Any "investment" in the backstop technology is actually needed supply expansion that was not achieved, so the value should be ignored.
+
+The Freedonia configuration file below shows three different ways to specify how costs are spread over multiple years. If this entry is blank, then the default is that all expenditure occurs in one year. Otherwise, a default value can be set that is applied to all branches -- in the example, it is set to 5 years, but it could also be specified as a pattern of expenditure over time. Additionally, a value or pattern can be set for specific branches. An example of each is shown below.
+
+If expenditure is set as a pattern, then it is specified as a list of values in brackets `[]`. The values in the configuration file will be rescaled so that they sum to one. The example below sums to 100, so 10% of expenditure is in the first year, 20% in the second, and so on.
+```yaml
+LEAP-investment:
+    # Currency units for investment costs
+    inv_costs_unit: U.S. Dollar
+    # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
+    inv_costs_scale: 1.0e+6
+    # Exclude any investment branches that contain any of the text in the list (case-insensitive)
+    excluded_branches: []
+    distribute_costs_over:
+        default: 5 # years: This will be rounded to an integer
+        by_branch:
+            - {
+                path: Transformation\Electricity Generation\Processes\Existing Hydro,
+                value: 10 # years: This will be rounded to an integer
+            }
+            - {
+                path: Transformation\Electricity Generation\Processes\New Oil Combustion Turbine,
+                value: [10, 20, 20, 20, 10, 10, 5, 5] # percent by years: This will be re-scaled so it sums to 1.0
+            }
 ```
 
 ### Passing values from Macro to LEAP
@@ -457,7 +482,7 @@ LEAP-sectors:
 ```
 [^3]: Production is arguably a better measure of sector activity than is value added. Value added subtracts from the value of production the cost of intermediate goods and services, to avoid double-counting when calculating gross domestic product (GDP).
 
-### [Passing values from LEAP to Macro](@id config-pass-vals-LEAP-to-Macro)
+### [Passing potential output and prices from LEAP to Macro](@id config-pass-vals-LEAP-to-Macro)
 The final sections say how to pass results for potential output and prices from LEAP to Macro. These are in addition to investment expenditure, which is automatically collected from LEAP and passed to Macro. Any values for potential output and prices drawn from LEAP override those specified in external [input files](@ref params-optional-input-files), if any. (Investment expenditure from LEAP is added to investment specified in external input files.)
 
 The Freedonia configuration file does not specify potential output and prices from LEAP, so the entries are set equal to empty lists. Alternatively, they can be completely ommitted or set to the YAML "no value" symbol, `~`.
