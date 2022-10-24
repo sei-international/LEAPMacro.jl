@@ -15,13 +15,20 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml";
              dump_err_stack::Bool = false,
              include_energy_sectors::Bool = false,
              load_leap_first::Bool = false,
+             get_results_from_leap_version::Union{Nothing,Integer,AbstractString} = nothing,
+             only_push_leap_results::Bool = false,
+             run_number_start::Integer = 0,
              continue_if_error::Bool = false)
 ```
+
 The options are:
   * `config_file`: The name of the [configuration file](@ref config), if it is not `LEAPMacro_params.yml`;
   * `dump_err_stack`: Report detailed information about an error in the [log file](@ref model-outputs) (useful when debugging the Macro code, but not much use when debugging a model);
   * `include_energy_sectors`: Run the model with the [energy sectors](@ref config-sut) included (only useful in standalone mode, without LEAP, particularly when calibrating);
   * `load_leap_first`: Pull results from LEAP before running Macro (useful when LEAP has already been run and results are available);
+  * `get_results_from_leap_version`: Specify the LEAP version, either by comment or number, from which to pull initial results (ignored if `load_leap_first = false`);
+  * `only_push_leap_results`: Run Macro and push results to LEAP, but do not run LEAP;
+  * `run_number_start`: Specify the first run number to use (default is 0);
   * `continue_if_error`: Try to continue if the linear goal program returns an error.
 
 !!! info "When to use `continue_if_error`"
@@ -63,11 +70,20 @@ function parse_commandline()
         "--verbose-errors", "-v"
             help = "send detailed error message to log file"
             action = :store_true
-        "--include-energy-sectors", "-e"
-            help = "include energy sectors in the model simulation"
-            action = :store_true
         "--load-leap-first", "-l"
             help = "load results from LEAP before running Macro"
+            action = :store_true
+        "--use-leap-version", "-u"
+            help = "If load-leap-first is set, pull results from this version"
+        "--only-push-leap-results", "-p"
+            help = "only push results to LEAP and do not run LEAP from Macro"
+            action = :store_true
+        "--init-run-number", "-r"
+            help = "initial run number"
+            arg_type = Int64
+            default = 0
+        "--include-energy-sectors", "-e"
+            help = "include energy sectors in the model simulation"
             action = :store_true
         "--continue-if-error", "-c"
             help = "try to continue if the linear goal program returns an error"
@@ -78,10 +94,14 @@ function parse_commandline()
 end
 
 parsed_args = parse_commandline()
+
 LEAPMacro.run(parsed_args["config_file"],
               dump_err_stack = parsed_args["verbose_errors"],
-              include_energy_sectors = parsed_args["include_energy_sectors"],
               load_leap_first = parsed_args["load_leap_first"],
+              get_results_from_leap_version = parsed_args["use_leap_version"], 
+              only_push_leap_results = parsed_args["only_push_leap_results"],
+              run_number_start = parsed_args["init_run_number"],
+              include_energy_sectors = parsed_args["include_energy_sectors"],
               continue_if_error = parsed_args["continue_if_error"])
 ```
 For example, if the configuration file as the the default filename, `LEAPMacro_params.yml`, then a call to the `runleapmacro.jl` script could look something like this:
