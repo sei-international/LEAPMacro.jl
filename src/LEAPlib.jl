@@ -277,9 +277,13 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
     #--------------------------------
     I_en_temp = Array{Float64}(undef, length(sim_years))
 
-    # Force to an integer
-    default_build_time = LMlib.float_to_int(params["LEAP-investment"]["distribute_costs_over"]["default"])
-    default_pattern = ones(default_build_time)/default_build_time
+    if isa(params["LEAP-investment"]["distribute_costs_over"]["default"], Number)
+        # Force to an integer
+        default_build_time = LMlib.float_to_int(params["LEAP-investment"]["distribute_costs_over"]["default"])
+        default_pattern = ones(default_build_time)/default_build_time
+    else
+        default_pattern = params["LEAP-investment"]["distribute_costs_over"]["default"]/sum(params["LEAP-investment"]["distribute_costs_over"]["default"])
+    end
     try
         for b in LEAP.Branches
             if b.BranchType == Int(TransformationProcessBranchType) && b.Level == 4 && b.VariableExists("Investment Costs")
