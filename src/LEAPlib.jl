@@ -63,12 +63,118 @@ function initialize_leapresults(params::Dict)
     )
 end # initialize_leapresults
 
+"Get LEAP version information by either name or ID"
+function get_version_info(version::Union{Nothing,Integer,AbstractString})
+    LEAP = connect_to_leap()
+    version_info = LEAP.Versions(version).Name
+    disconnect_from_leap(LEAP)
+    return version_info
+end
+
+"Create LEAP Interp expression from an array of values."
+function build_interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
+    # Creates start of expression. Includes historical data if available
+    if lasthistoricalyear > 0
+        newexpression = string("If(year <= ", lasthistoricalyear, ", ScenarioValue(Current Accounts), Value(", base_year,") * Interp(")
+        diff = lasthistoricalyear - base_year + 2
+        year = lasthistoricalyear + 1
+    else
+        newexpression = string("(Value(", base_year,") * Interp(")
+        diff = 2
+        year = base_year + 1
+    end
+
+    # Incorporates Macro results into the rest of the expression
+    for i = diff:size(newdata,1)
+        if isnan(newdata[i]) == false
+            newexpression = string(newexpression, year, ", ", newdata[i], ", ")
+        end
+        if i == size(newdata,1)
+            newexpression = newexpression[1:(lastindex(newexpression)-2)]
+            newexpression = string(newexpression, "))")
+        end
+        year = year + 1
+    end
+    return newexpression
+end # build_interp_expression
+
+"""
+Set a LEAP branch-variable expression.
+
+The region and scenario arguments can be omitted by leaving them as empty strings.
+Note that performance is best if neither region nor scenario is specified.
+"""
+function set_branchvar_expression(leapapplication::PyObject, branch::AbstractString, variable::AbstractString, newexpression::AbstractString; region::AbstractString = "", scenario::AbstractString = "")
+    # Set ActiveRegion and ActiveScenario as Julia doesn't allow a function call (ExpressionRS) to be set to a value
+    if region != ""
+        leapapplication.ActiveRegion = region
+    end
+
+    if scenario != ""
+        leapapplication.ActiveScenario = scenario
+    end
+
+    # Set expression
+    leapapplication.Branch(branch).Variable(variable).Expression = newexpression
+
+    # Refresh LEAP display
+    leapapplication.Refresh()
+end  # set_branchvar_expression
+
 "Hide or show LEAP by setting visibility."
 function hide_leap(state::Bool)
 	LEAP = connect_to_leap()
 	LEAP.Visible = !state
 	disconnect_from_leap(LEAP)
 end # hide_leap
+
+"""
+Connect to the currently running instance of LEAP, if one exists; otherwise starts an instance of LEAP.
+
+Return a `PyObject` corresponding to the instance.
+If LEAP cannot be started, return `missing`
+"""
+function connect_to_leap()
+	try
+		LEAPPyObj = pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
+        max_loops = 5
+        while !LEAPPyObj.ProgramStarted && max_loops > 0
+            sleep(5)
+            max_loops -= 1
+        end
+        if !LEAPPyObj.ProgramStarted
+            error("LEAP is not responding.")
+            return missing
+        else
+            return LEAPPyObj
+        end
+	catch e
+        error("Cannot connect to LEAP: " * sprint(showerror, e))
+		return missing
+	end
+end  # connect_to_leap
+
+"Repeatedly call PyCall's `pydecref(obj)` until null"
+function disconnect_from_leap(LEAPPyObj)
+    while !ispynull(LEAPPyObj)
+    	pydecref(LEAPPyObj)
+    end
+end # disconnect_from_leap
+
+"Calculate the LEAP model, returning results for the specified scenario."
+function calculate_leap(scen_name::AbstractString)
+    # connects program to LEAP
+    LEAP = connect_to_leap()
+    try
+        LEAP.Scenario(scen_name).ResultsShown = true
+        LEAP.Calculate(false) # This sets RunWEAP = false
+        LEAP.SaveArea()
+    catch e
+        error("Encountered an error when running LEAP: " * sprint(showerror, e))
+    finally
+	    disconnect_from_leap(LEAP)
+    end
+end # calculate_leap
 
 "First obtain LEAP branch info from `params` and then send Macro model results to LEAP."
 function send_results_to_leap(params::Dict, indices::Array)
@@ -136,112 +242,6 @@ function send_results_to_leap(params::Dict, indices::Array)
 	    disconnect_from_leap(LEAP)
     end
 end # send_results_to_leap
-
-"""
-Connect to the currently running instance of LEAP, if one exists; otherwise starts an instance of LEAP.
-
-Return a `PyObject` corresponding to the instance.
-If LEAP cannot be started, return `missing`
-"""
-function connect_to_leap()
-	try
-		LEAPPyObj = pyimport("win32com.client").Dispatch("Leap.LEAPApplication")
-        max_loops = 5
-        while !LEAPPyObj.ProgramStarted && max_loops > 0
-            sleep(5)
-            max_loops -= 1
-        end
-        if !LEAPPyObj.ProgramStarted
-            error("LEAP is not responding.")
-            return missing
-        else
-            return LEAPPyObj
-        end
-	catch e
-        error("Cannot connect to LEAP: " * sprint(showerror, e))
-		return missing
-	end
-end  # connect_to_leap
-
-"Repeatedly call PyCall's `pydecref(obj)` until null"
-function disconnect_from_leap(LEAPPyObj)
-    while !ispynull(LEAPPyObj)
-    	pydecref(LEAPPyObj)
-    end
-end # disconnect_from_leap
-
-"Create LEAP Interp expression from an array of values."
-function build_interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
-    # Creates start of expression. Includes historical data if available
-    if lasthistoricalyear > 0
-        newexpression = string("If(year <= ", lasthistoricalyear, ", ScenarioValue(Current Accounts), Value(", base_year,") * Interp(")
-        diff = lasthistoricalyear - base_year + 2
-        year = lasthistoricalyear + 1
-    else
-        newexpression = string("(Value(", base_year,") * Interp(")
-        diff = 2
-        year = base_year + 1
-    end
-
-    # Incorporates Macro results into the rest of the expression
-    for i = diff:size(newdata,1)
-        if isnan(newdata[i]) == false
-            newexpression = string(newexpression, year, ", ", newdata[i], ", ")
-        end
-        if i == size(newdata,1)
-            newexpression = newexpression[1:(lastindex(newexpression)-2)]
-            newexpression = string(newexpression, "))")
-        end
-        year = year + 1
-    end
-    return newexpression
-end # build_interp_expression
-
-"""
-Set a LEAP branch-variable expression.
-
-The region and scenario arguments can be omitted by leaving them as empty strings.
-Note that performance is best if neither region nor scenario is specified.
-"""
-function set_branchvar_expression(leapapplication::PyObject, branch::AbstractString, variable::AbstractString, newexpression::AbstractString; region::AbstractString = "", scenario::AbstractString = "")
-    # Set ActiveRegion and ActiveScenario as Julia doesn't allow a function call (ExpressionRS) to be set to a value
-    if region != ""
-        leapapplication.ActiveRegion = region
-    end
-
-    if scenario != ""
-        leapapplication.ActiveScenario = scenario
-    end
-
-    # Set expression
-    leapapplication.Branch(branch).Variable(variable).Expression = newexpression
-
-    # Refresh LEAP display
-    leapapplication.Refresh()
-end  # set_branchvar_expression
-
-"Calculate the LEAP model, returning results for the specified scenario."
-function calculate_leap(scen_name::AbstractString)
-    # connects program to LEAP
-    LEAP = connect_to_leap()
-    try
-        LEAP.Scenario(scen_name).ResultsShown = true
-        LEAP.Calculate(false) # This sets RunWEAP = false
-        LEAP.SaveArea()
-    catch e
-        error("Encountered an error when running LEAP: " * sprint(showerror, e))
-    finally
-	    disconnect_from_leap(LEAP)
-    end
-end # calculate_leap
-
-"Get LEAP version information by either name or ID"
-function get_version_info(version::Union{Nothing,Integer,AbstractString})
-    LEAP = connect_to_leap()
-    version_info = LEAP.Versions(version).Name
-    disconnect_from_leap(LEAP)
-    return version_info
-end
 
 "Obtain energy investment data from the LEAP model."
 function get_results_from_leap(params::Dict, run_number::Integer, get_results_from_leap_version::Union{Nothing,Integer,AbstractString} = nothing)
