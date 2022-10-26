@@ -247,6 +247,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	end
 	# Link to LEAP
 	LEAP_indices = params["LEAP_sector_indices"]
+	LEAP_drivers = params["LEAP_sector_drivers"]
 	# Initial autonomous growth rate
 	γ_0 = params["investment-fcn"]["init_neutral_growth"] * ones(ns)
 
@@ -732,7 +733,11 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
  		for i in eachindex(LEAP_indices)
 			indices[t, curr_index + i] = 0
 			for j in LEAP_indices[i]
-				indices[t, curr_index + i] += g[j]
+				if LEAP_drivers[i] == "VA"
+					indices[t, curr_index + i] += value_added_at_prev_prices[j]/prev_GDP_deflator
+				else
+					indices[t, curr_index + i] += g[j]
+				end
 			end
 		end
 

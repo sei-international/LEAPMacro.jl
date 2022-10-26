@@ -245,6 +245,11 @@ Employment-branch:
     variable: Activity Level
 
 # Association between Macro sectors and LEAP sectors (optional)
+LEAP-drivers:
+    options:
+        PROD: production
+        VA: value added
+    default: PROD
 LEAP-sectors:
  - {
     name: Iron and Steel,
@@ -279,6 +284,7 @@ LEAP-sectors:
  - {
     name: Transport,
     codes: [transp],
+    driver: VA,
     branches: [
         {
          branch: Demand\Transport\Freight,
@@ -289,6 +295,7 @@ LEAP-sectors:
  - {
     name: Commercial,
     codes: [comm, othsrv],
+    driver: VA,
     branches: [
         {
          branch: Demand\Commercial,

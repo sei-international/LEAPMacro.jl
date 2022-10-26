@@ -158,8 +158,16 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
 	# These indices are with respect to the list of included product codes, not the full list
 	global_params["non-tradeable-range"] = findall(in(global_params["non_tradeable_products"]).(global_params["included_product_codes"]))
 
-    # LEAP sectors allow for multiple Macro sector codes (production is summed) and multiple branch/variable combos (the index is applied to each combination)
+    # Default LEAP driver variable is production, but can set to "VA" for "Value added"
+    if LMlib.haskeyvalue(global_params, "LEAP-drivers") && LMlib.haskeyvalue(global_params["LEAP-drivers"], "default")
+        default_LEAP_driver = global_params["LEAP-drivers"]["default"]
+    else
+        default_LEAP_driver = "PROD"
+    end
     if LMlib.haskeyvalue(global_params, "LEAP-sectors")
+        # Optionally override the default LEAP driver
+        global_params["LEAP_sector_drivers"] = [LMlib.haskeyvalue(x, "driver") ? x["driver"] : default_LEAP_driver for x in global_params["LEAP-sectors"]]
+        # LEAP sectors allow for multiple Macro sector codes (production or value added is summed) and multiple branch/variable combos (the index is applied to each combination)
         global_params["LEAP_sector_names"] = [x["name"] for x in global_params["LEAP-sectors"]]
         LEAP_sector_codes = [x["codes"] for x in global_params["LEAP-sectors"]]
         global_params["LEAP_sector_indices"] = Array{Any}(undef,length(LEAP_sector_codes))
@@ -167,6 +175,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
             global_params["LEAP_sector_indices"][i] = findall([in(x, LEAP_sector_codes[i]) for x in global_params["included_sector_codes"]])
         end
     else
+        global_params["LEAP_sector_drivers"] = []
         global_params["LEAP_sector_names"] = []
         global_params["LEAP_sector_indices"] = []
     end
