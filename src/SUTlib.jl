@@ -164,6 +164,11 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
     else
         default_LEAP_driver = "PROD"
     end
+    if LMlib.haskeyvalue(global_params, "LEAP-drivers") && LMlib.haskeyvalue(global_params["LEAP-drivers"], "options")
+        LEAP_drivers = global_params["LEAP-drivers"]["options"]
+    else
+        LEAP_drivers = Dict("PROD" => "production", "VA" => "value added")
+    end
     if LMlib.haskeyvalue(global_params, "LEAP-sectors")
         # Optionally override the default LEAP driver
         global_params["LEAP_sector_drivers"] = [LMlib.haskeyvalue(x, "driver") ? x["driver"] : default_LEAP_driver for x in global_params["LEAP-sectors"]]
@@ -178,6 +183,12 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["LEAP_sector_drivers"] = []
         global_params["LEAP_sector_names"] = []
         global_params["LEAP_sector_indices"] = []
+    end
+    for d in global_params["LEAP_sector_drivers"]
+        if d ∉ keys(LEAP_drivers)
+            throw(DomainError(d, "LEAP driver must be one of " * "\"" * join(keys(LEAP_drivers), "\", \"") * "\""))
+            break
+        end
     end
 
     # LEAP potential output is specified for a single Macro sector code, but allows for multiple branch/variable combos (values are summed)
