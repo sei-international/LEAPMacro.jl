@@ -405,11 +405,11 @@ The next section specifies information regarding investment. By default, any inv
 
 As an example for setting the scaling factor, if entries in the Macro model input files are in millions of US dollars, and investment costs in LEAP are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).
 
-The `excluded_branches` entry is set to an empty list `[]` in the Freedonia example below. This entry is particularly useful if NEMO is run with a backstop technology. Any "investment" in the backstop technology is actually needed supply expansion that was not achieved, so the value should be ignored.
+The `excluded_branches` entry is set to an empty list `[]` in the Freedonia example below. This entry is particularly useful if NEMO is run with a backstop technology. Any "investment" in the backstop technology represents a desired supply expansion that was not achieved, so the value should be ignored.
 
-The Freedonia configuration file below shows three different ways to specify how costs are spread over multiple years. If this entry is blank, then the default is that all expenditure occurs in one year. Otherwise, a default value can be set that is applied to all branches -- in the example, it is set to 5 years, but it could also be specified as a pattern of expenditure over time. Additionally, a value or pattern can be set for specific branches. An example of each is shown below.
+The Freedonia configuration file below shows different ways to specify how costs are spread over multiple years. If this entry is blank, then the default is that all expenditure occurs in one year. Otherwise, a default value can be set that is applied to all branches. Additionally, a value or pattern can be set for specific branches.
 
-If expenditure is set as a pattern, then it is specified as a list of values in brackets `[]`. The values in the configuration file will be rescaled so that they sum to one. The example below sums to 100, so 10% of expenditure is in the first year, 20% in the second, and so on.
+The distribution of costs over years can be set in one of two ways. If it is a single number (e.g., in example below, the default is 5 years), then total investment is divided equally across all of the years. If expenditure is set as a pattern, then it is specified as a list of values in brackets `[]`. The values in the list are then rescaled by Macro so that they sum to one. The example below for `New Oil Combustion Turbine` sums to 100, so 10% of expenditure will be applied in the first year, 20% in the second, and so on.
 ```yaml
 LEAP-investment:
     # Currency units for investment costs
@@ -452,11 +452,23 @@ Employment-branch:
     variable: Activity Level
 ```
 
-Finally, the `LEAP-sectors` parameter, if present, contains a list of indices. For each of these, Macro will sum up production[^3] across all of the sector codes listed. It will then calculate an index starting in the base year, and insert the index into the specified branches. In some cases, the same index might be applied to different branches. For example, if the supply-use table has a "services" sector but no transport, while LEAP has both a services and a commercial transport sector, the same index could be used to drive both.
+Next, the association between Macro sectors and LEAP sectors is specified. These entries are also optional. They start with a specification of the economic driver for LEAP, either production (the default) or value added. Value added subtracts from the value of production the cost of intermediate goods and services, to avoid double-counting when calculating gross domestic product (GDP).
 
-If no sectoral aggregation is desired, then this entry can be excluded entirely, set to `~` (meaning no value), or set to an empty list: `LEAP-sectors: []`.
+Production is a better variable to use when the corresponding variable in LEAP is a physical quantity. For example, in the Freedonia model, the activity level for the Iron and Steel sector is given as tonnes of steel. This driver can be set explicitly as `PROD`. However, in some LEAP models the activity level is value added. In that case, the default driver can be set to `VA`. The driving variable can be set by branch, as well, as shown in the `LEAP-sectors` example below.
 ```yaml
 # Association between Macro sectors and LEAP sectors (optional)
+LEAP-drivers:
+    options:
+        PROD: production
+        VA: value added
+    default: PROD
+```
+the `LEAP-sectors` parameter, if present, contains a list of indices by sector. If no sectoral aggregation is desired, then this entry can be excluded entirely, set to `~` (meaning no value), or set to an empty list: `LEAP-sectors: []`.
+
+For each index, Macro will sum up the driver (either production or value added) across all of the sector codes listed. It will then calculate an index starting in the base year, and insert the index into the specified branches. In some cases, the same index might be applied to different branches. For example, if the supply-use table has a "services" sector but no transport, while LEAP has both a services and a commercial transport sector, the same index could be used to drive both.
+
+In the example below, note that `Iron and Steel` and `Other Industry` do not have a branch-specific driver, so they use the default, `PROD` (production). The `Commercial` entry does have a branch-specific driver, which is set to `VA` (value added).
+```yaml
 LEAP-sectors:
  - {
     name: Iron and Steel,
@@ -479,8 +491,19 @@ LEAP-sectors:
     ]
    }
    ...
+ - {
+    name: Commercial,
+    codes: [comm, othsrv],
+    driver: VA,
+    branches: [
+        {
+         branch: Demand\Commercial,
+         variable: Activity Level
+        }
+    ]
+   }
+
 ```
-[^3]: Production is arguably a better measure of sector activity than is value added. Value added subtracts from the value of production the cost of intermediate goods and services, to avoid double-counting when calculating gross domestic product (GDP).
 
 ### [Passing potential output and prices from LEAP to Macro](@id config-pass-vals-LEAP-to-Macro)
 The final sections say how to pass results for potential output and prices from LEAP to Macro. These are in addition to investment expenditure, which is automatically collected from LEAP and passed to Macro. Any values for potential output and prices drawn from LEAP override those specified in external [input files](@ref params-optional-input-files), if any. (Investment expenditure from LEAP is added to investment specified in external input files.)
