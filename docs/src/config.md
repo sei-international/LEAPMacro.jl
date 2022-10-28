@@ -401,9 +401,11 @@ LEAP-info:
 ```
 
 ### Pulling investment information from LEAP into Macro
-The next section specifies information regarding investment. By default, any investment reported in LEAP in a given year is totaled and passed to Macro with no adjustment: `inv_costs_units` is set to a blank (so LEAP applies the default currency unit) and `inv_costs_scale` is set to 1.0. However, some investment branches can be omitted, investment can be spread over several years, the currency unit can be set to a different value, and the scaling factor can be specified.
+The next section specifies information regarding investment. By default, any investment reported in LEAP in a given year is totaled and passed to Macro with no adjustment: `inv_costs_units` is set to a blank (so LEAP applies the default currency unit), `inv_costs_scale` is set to 1.0, and `inv_costs_apply_xr` is set to `false`. However, some investment branches can be omitted, investment can be spread over several years, the currency unit can be set to a different value, the scaling factor can be specified, and the exchange rate can be applied.
 
 As an example for setting the scaling factor, if entries in the Macro model input files are in millions of US dollars, and investment costs in LEAP are reported in US dollars, then the scaling factor is one million (1000000 or 1.0e+6).
+
+If `inv_costs_apply_xr` is `true`, then the nominal exchange rate will be applied to the values from LEAP after scaling. In this calculation, the exchange rate will _not_ be applied as an index: it is assumed that the value entered into the [time series](@ref params-time-series) column `exchange_rate` is the actual nominal exchange rate. If that is not the case, then the scaling factor can be adjusted to ensure the correct units.
 
 The `excluded_branches` entry is set to an empty list `[]` in the Freedonia example below. This entry is particularly useful if NEMO is run with a backstop technology. Any "investment" in the backstop technology represents a desired supply expansion that was not achieved, so the value should be ignored.
 
@@ -416,6 +418,8 @@ LEAP-investment:
     inv_costs_unit: U.S. Dollar
     # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
     inv_costs_scale: 1.0e+6
+    # Say whether to apply the nominal exchange rate to investment costs (e.g., if investment costs are in USD, but the SUT is in domestic currency)
+    inv_costs_apply_xr: false
     # Exclude any investment branches that contain any of the text in the list (case-insensitive)
     excluded_branches: []
     distribute_costs_over:
