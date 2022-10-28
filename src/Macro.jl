@@ -573,6 +573,10 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		# Price indices and deflators
 		#--------------------------------
+		# If the specified XR series is real, convert to nominal using modeled price indices
+		if params["files"]["xr-is-real"]
+			exog.xr[t] *= prices.Pg/prices.Ptrade
+		end		
         # This is used here if the previous calculation failed, but is also reported below
         va_at_prev_prices_1 = prices.Pg * g
         va_at_prev_prices_2 = sum(pb_prev[j] * sut.D[j,:] for j in 1:np) .* g
@@ -778,10 +782,6 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		# Update prices
 		#--------------------------------
-		# If the specified XR series is real, convert to nominal using modeled price indices
-		if params["files"]["xr-is-real"]
-			exog.xr[t] *= prices.Pg/prices.Ptrade
-		end
 		prices.RER = prices.XR * prices.Ptrade/prices.Pg
 		prices.Pg *= (1 + πg)
 		prices.Pm *= (1 + π_imp)
