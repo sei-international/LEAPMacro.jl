@@ -218,6 +218,8 @@ LEAP-investment:
     inv_costs_unit: U.S. Dollar
     # Scaling factor for investment costs (values are divided by this number, e.g., for thousands use 1000 or 1.0e+3)
     inv_costs_scale: 1.0e+6
+    # Say whether to apply the nominal exchange rate to investment costs (e.g., if investment costs are in USD, but the SUT is in domestic currency)
+    inv_costs_apply_xr: false
     # Exclude any investment branches that contain any of the text in the list (case-insensitive)
     excluded_branches: []
     distribute_costs_over:

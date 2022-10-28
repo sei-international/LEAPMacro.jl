@@ -248,6 +248,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	# Link to LEAP
 	LEAP_indices = params["LEAP_sector_indices"]
 	LEAP_drivers = params["LEAP_sector_drivers"]
+	LEAP_use_xr = params["LEAP-investment"]["inv_costs_apply_xr"]
 	# Initial autonomous growth rate
 	γ_0 = params["investment-fcn"]["init_neutral_growth"] * ones(ns)
 
@@ -680,7 +681,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
         I_ne_disag = z .* (γ + exog.δ) .* capital_output_ratio
         I_ne = sum(I_ne_disag)
 		# Combine with energy investment and any additional exogenous investment
-        I_total = I_ne + leapvals.I_en[t] + exog.I_addl[t]
+        I_total = I_ne + (LEAP_use_xr ? exog.xr[t] : 1) * leapvals.I_en[t] + exog.I_addl[t]
 		# Update autonomous investment term
         γ_0 = γ_0 + growth_adj * (γ - γ_0)
 
