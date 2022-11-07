@@ -1,15 +1,15 @@
 code,name,depr_rate
-agric,Agriculture and Forestry,0.04
-mining,Mining,0.04
-coal,Coal Mining,0.04
-petr,Petroleum and Natural Gas,0.04
-ironstl,Iron and Steel,0.04
-pulppr,Pulp and Paper,0.04
-foodpr,Food Processing,0.04
-hvymach,Heavy machinery,0.04
-othind,Other Industry,0.04
-util,"Electricity, Water, and Sewage",0.04
-constr,Construction,0.04
-transp,Transportation Services,0.04
-comm,Wholesale and Retail Trade,0.04
-othsrv,Other Services,0.04
+s_agric,Agriculture and Forestry,0.04
+s_mining,Mining,0.04
+s_coal,Coal Mining,0.04
+s_petr,Petroleum and Natural Gas,0.04
+s_ironstl,Iron and Steel,0.04
+s_pulppr,Pulp and Paper,0.04
+s_foodpr,Food Processing,0.04
+s_hvymach,Heavy machinery,0.04
+s_othind,Other Industry,0.04
+s_util,"Electricity, Water, and Sewage",0.04
+s_constr,Construction,0.04
+s_transp,Transportation Services,0.04
+s_comm,Wholesale and Retail Trade,0.04
+s_othsrv,Other Services,0.04

@@ -1,37 +1,37 @@
 SUPPLY,,,Margins,,Taxes and subsidies,,,,,,,,,,,,,,,,,,,,,,,,
-,,Total at purchasers prices,Commercial,Transport,Subsidies,VAT,Import tariffs,Total at basic prices,agric,mining,coal,petr,ironstl,pulppr,foodpr,hvymach,othind,util,constr,transp,comm,othsrv,Total domestic production,Imports,,,,,
-agric,Agriculture and Forestry,51213,500,300,-5500,663,250,55000,50000,,,,,,,,,,,,,,50000,5000,,,,,
-mining,Mining,6625,,50,,,75,6500,,5000,,,,,,,,,,,,,5000,1500,,,,,
-coal,Coal Mining,15516,,100,-1700,16,100,17000,,,15000,,,,,,,,,,,,15000,2000,,,,,
-petr,Petroleum and Natural Gas,23186,,250,,186,750,22000,,,,7000,,,,,,,,,,,7000,15000,,,,,
-ironstl,Iron and Steel,12262,,25,,12,225,12000,,,,,7500,,,,,,,,,,7500,4500,,,,,
-pulppr,Pulp and Paper,12716,,50,,41,125,12500,,,,,,10000,,,,,,,,,10000,2500,,,,,
-foodpr,Food Processing,14000,150,100,-1500,,250,15000,,,,,,,10000,,,,,,,,10000,5000,,,,,
-hvymach,Heavy Machinery,6895,50,,,,325,6520,,,,,,,,20,,,,,,,20,6500,,,,,
-othind,Other Industry,20393,100,25,,18,250,20000,,,,,,,,,15000,,,,,,15000,5000,,,,,
-util,"Electricity, Water, and Sewage",12634,,,,9,125,12500,,,,,,,,,,10000,,,,,10000,2500,,,,,
-constr,Construction,10006,,,,6,0,10000,,,,,,,,,,,10000,,,,10000,0,,,,,
-transp,Transportation Services,8181,,-900,,6,75,9000,,,,,,,,,,,,7500,,,7500,1500,,,,,
-comm,Wholesale and Retail Trade,14769,-800,,,44,25,15500,,,,,,,,,,,,,15000,,15000,500,,,,,
-othsrv,Other Services,21177,,,,127,50,21000,,,,,,,,,,,,,,20000,20000,1000,,,,,
+,,Total at purchasers prices,Commercial,Transport,Subsidies,VAT,Import tariffs,Total at basic prices,s_agric,s_mining,s_coal,s_petr,s_ironstl,s_pulppr,s_foodpr,s_hvymach,s_othind,s_util,s_constr,s_transp,s_comm,s_othsrv,Total domestic production,Imports,,,,,
+p_agric,Agriculture and Forestry,51213,500,300,-5500,663,250,55000,50000,,,,,,,,,,,,,,50000,5000,,,,,
+p_mining,Mining,6625,,50,,,75,6500,,5000,,,,,,,,,,,,,5000,1500,,,,,
+p_coal,Coal Mining,15516,,100,-1700,16,100,17000,,,15000,,,,,,,,,,,,15000,2000,,,,,
+p_petr,Petroleum and Natural Gas,23186,,250,,186,750,22000,,,,7000,,,,,,,,,,,7000,15000,,,,,
+p_ironstl,Iron and Steel,12262,,25,,12,225,12000,,,,,7500,,,,,,,,,,7500,4500,,,,,
+p_pulppr,Pulp and Paper,12716,,50,,41,125,12500,,,,,,10000,,,,,,,,,10000,2500,,,,,
+p_foodpr,Food Processing,14000,150,100,-1500,,250,15000,,,,,,,10000,,,,,,,,10000,5000,,,,,
+p_hvymach,Heavy Machinery,6895,50,,,,325,6520,,,,,,,,20,,,,,,,20,6500,,,,,
+p_othind,Other Industry,20393,100,25,,18,250,20000,,,,,,,,,15000,,,,,,15000,5000,,,,,
+p_util,"Electricity, Water, and Sewage",12634,,,,9,125,12500,,,,,,,,,,10000,,,,,10000,2500,,,,,
+p_constr,Construction,10006,,,,6,0,10000,,,,,,,,,,,10000,,,,10000,0,,,,,
+p_transp,Transportation Services,8181,,-900,,6,75,9000,,,,,,,,,,,,7500,,,7500,1500,,,,,
+p_comm,Wholesale and Retail Trade,14769,-800,,,44,25,15500,,,,,,,,,,,,,15000,,15000,500,,,,,
+p_othsrv,Other Services,21177,,,,127,50,21000,,,,,,,,,,,,,,20000,20000,1000,,,,,
 ,Total,229573,0,0,-8700,1128,2625,234520,50000,5000,15000,7000,7500,10000,10000,20,15000,10000,10000,7500,15000,20000,182020,52500,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 USE,,,,,,,,,,,,,,,,,,,,,,,,,Final consumption,,,,
-,,,,,,,,,agric,mining,coal,petr,ironstl,pulppr,foodpr,hvymach,othind,util,constr,transp,comm,othsrv,Total,Exports,Households,Non-profits serving households,Government,GFCF,Changes in Stocks
-agric,Agriculture and Forestry,,,,,,,,2292,,,,,1833,1833,,275,,,,,367,6600,7380,31365,1568,8887,0,-100
-mining,Mining,,,,,,,,,506,152,71,1517,,,,,,,,,,2246,3228,,,1076,0,50
-coal,Coal Mining,,,,,,,,,,680,,680,,,,,181,,,,,1541,14003,,,1556,0,20
-petr,Petroleum and Natural Gas,,,,,,,,1043,261,156,730,78,209,521,,1564,2085,1043,1564,469,626,10349,2380,4760,238,1190,3332,-30
-ironstl,Iron and Steel,,,,,,,,510,102,,,765,,,,765,102,1020,,,,3264,4381,219,11,208,3942,10
-pulppr,Pulp and Paper,,,,,,,,,,,,,507,,,760,,,,,2027,3294,1388,1574,79,6215,0,15
-foodpr,Food Processing,,,,,,,,,,,,,,917,,,,,,,,917,2867,10320,516,631,0,
-hvymach,Heavy Machinery,,,,,,,,,105,,,,,,1,315,,525,,,,946,,,,281,5343,
-othind,Other Industry,,,,,,,,5067,253,152,71,152,203,507,,4560,101,2027,760,152,203,14208,2959,592,30,118,2219,
-util,"Electricity, Water, and Sewage",,,,,,,,2527,505,303,142,1137,1011,505,1,758,1011,505,76,152,202,8835,183,696,35,139,2611,
-constr,Construction,,,,,,,,,250,,140,375,200,200,0,300,,500,75,150,200,2390,,381,19,361,6849,
-transp,Transportation Services,,,,,,,,1514,,,71,,,202,,,,,227,3027,,5041,,306,15,444,2294,
-comm,Wholesale and Retail Trade,,,,,,,,,,,70,,,100,,,,,,3013,,3183,576,5471,274,4103,1094,
-othsrv,Other Services,,,,,,,,1008,252,151,71,151,202,202,0,303,101,202,76,756,3025,6500,725,6888,344,5166,1378,
+,,,,,,,,,s_agric,s_mining,s_coal,s_petr,s_ironstl,s_pulppr,s_foodpr,s_hvymach,s_othind,s_util,s_constr,s_transp,s_comm,s_othsrv,Total,Exports,Households,Non-profits serving households,Government,GFCF,Changes in Stocks
+p_agric,Agriculture and Forestry,,,,,,,,2292,,,,,1833,1833,,275,,,,,367,6600,7380,31365,1568,8887,0,-100
+p_mining,Mining,,,,,,,,,506,152,71,1517,,,,,,,,,,2246,3228,,,1076,0,50
+p_coal,Coal Mining,,,,,,,,,,680,,680,,,,,181,,,,,1541,14003,,,1556,0,20
+p_petr,Petroleum and Natural Gas,,,,,,,,1043,261,156,730,78,209,521,,1564,2085,1043,1564,469,626,10349,2380,4760,238,1190,3332,-30
+p_ironstl,Iron and Steel,,,,,,,,510,102,,,765,,,,765,102,1020,,,,3264,4381,219,11,208,3942,10
+p_pulppr,Pulp and Paper,,,,,,,,,,,,,507,,,760,,,,,2027,3294,1388,1574,79,6215,0,15
+p_foodpr,Food Processing,,,,,,,,,,,,,,917,,,,,,,,917,2867,10320,516,631,0,
+p_hvymach,Heavy Machinery,,,,,,,,,105,,,,,,1,315,,525,,,,946,,,,281,5343,
+p_othind,Other Industry,,,,,,,,5067,253,152,71,152,203,507,,4560,101,2027,760,152,203,14208,2959,592,30,118,2219,
+p_util,"Electricity, Water, and Sewage",,,,,,,,2527,505,303,142,1137,1011,505,1,758,1011,505,76,152,202,8835,183,696,35,139,2611,
+p_constr,Construction,,,,,,,,,250,,140,375,200,200,0,300,,500,75,150,200,2390,,381,19,361,6849,
+p_transp,Transportation Services,,,,,,,,1514,,,71,,,202,,,,,227,3027,,5041,,306,15,444,2294,
+p_comm,Wholesale and Retail Trade,,,,,,,,,,,70,,,100,,,,,,3013,,3183,576,5471,274,4103,1094,
+p_othsrv,Other Services,,,,,,,,1008,252,151,71,151,202,202,0,303,101,202,76,756,3025,6500,725,6888,344,5166,1378,
 ,Total,,,,,,,,13961,2234,1594,1366,4855,4165,4987,2,9600,3581,5822,2778,7719,6650,69314,40070,62572,3129,30375,29062,
 ,VA/GDP,,,,,,,,36039,2766,13406,5634,2645,5835,5013,18,5400,6419,4178,4722,7281,13350,112706,,,,,,
 ,Salaries and Wages,,,,,,,,23435.1,689.4,6665.4,2550.6,693,3001.5,2261.7,11.7,1485,3527.1,1510.2,2562.3,3177.9,7740,59310.9,,,,,,
