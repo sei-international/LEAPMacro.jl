@@ -273,7 +273,7 @@ export_elast_demand:
 # For final demand, with respect to the wage bill
 wage_elast_demand:
     decay: 0.01
-    engel_prods: [agric, foodpr]
+    engel_prods: [p_agric, p_foodpr]
     engel_asympt_elast: 0.7
 ```
 [^2]: [Engel's Law](https://www.investopedia.com/terms/e/engels-law.asp) states that as income rises, the proportion of income spent on food declines. That means that the income elasticity of expenditure on food is less than one.
@@ -324,12 +324,12 @@ There are three categories:
 #---------------------------------------------------------------------------
 # NOTE: Both supply and use tables must have sectors labeling columns and products labeling rows
 excluded_sectors:
-    energy: [coal, petr, util]
+    energy: [s_coal, s_petr, s_util]
     territorial_adjustment: []
     others: []
 
 excluded_products:
-    energy: [coal, petr, util]
+    energy: [p_coal, p_petr, p_util]
     territorial_adjustment: []
     others: []
 ```
@@ -338,7 +338,7 @@ Following that is a list of non-tradeable products and a domestic production sha
 
 Other products may be almost entirely imported. That can sometimes cause difficulties. If the domestic share of the total of imports and domestic production falls below the threshold specified in the configuration file, then the corresponding sector (but not the product) is excluded during the simulation.
 ```yaml
-non_tradeable_products: [constr, comm]
+non_tradeable_products: [p_constr, p_comm]
 
 # Domestic production as a % share of the total of imports and domestic production must exceed this value
 domestic_production_share_threshold: 1.0 # percent
@@ -476,7 +476,7 @@ In the example below, note that `Iron and Steel` and `Other Industry` do not hav
 LEAP-sectors:
  - {
     name: Iron and Steel,
-    codes: [ironstl],
+    codes: [s_ironstl],
     branches: [
         {
          branch: Demand\Industry\Iron and Steel,
@@ -486,7 +486,7 @@ LEAP-sectors:
    }
  - {
     name: Other Industry,
-    codes: [foodpr, hvymach, othind],
+    codes: [s_foodpr, s_hvymach, s_othind],
     branches: [
         {
          branch: Demand\Industry\Other Industry,
@@ -497,7 +497,7 @@ LEAP-sectors:
    ...
  - {
     name: Commercial,
-    codes: [comm, othsrv],
+    codes: [s_comm, s_othsrv],
     driver: VA,
     branches: [
         {
@@ -522,9 +522,9 @@ LEAP-prices: []
 To demonstrate how these sections might look, suppose that instead of excluding the `coal` sector as is done in the [link to the supply-use table](@ref config-sut), above, it is included in the Macro model, but potential output from the sector is provided by LEAP. That can be accomplished by setting
 ```yaml
 excluded_sectors:
-    energy: [petr, util]
+    energy: [s_petr, s_util]
 excluded_products:
-    energy: [petr, util]
+    energy: [p_petr, p_util]
 ```
 and then adding an entry like
 ```yaml
@@ -536,7 +536,7 @@ LEAP-potential-output:
          variable: Indigenous Production
         }
     ],
-    code: coal
+    code: s_coal
    }
 ```
 Potential output is associated with a single sector in the Macro model, but can include values from multiple LEAP branches. If more than one LEAP branch is listed, then the values are summed together.
@@ -547,7 +547,7 @@ LEAP-prices:
  - {
     branch: Resources\Primary\Coal Bituminous,
     variable: Indigenous Cost,
-    codes: [coal]
+    codes: [p_coal]
    }
 ```
-Prices are associated with a single LEAP branch, but can be applied to multiple sectors in Macro.
+Prices are associated with a single LEAP branch, but can be applied to multiple products in Macro.
