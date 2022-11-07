@@ -145,7 +145,7 @@ export_elast_demand:
 # For final demand, with respect to the wage bill
 wage_elast_demand:
     decay: 0.01
-    engel_prods: [agric, foodpr]
+    engel_prods: [p_agric, p_foodpr]
     engel_asympt_elast: 0.7
 
 #---------------------------------------------------------------------------
@@ -169,16 +169,16 @@ objective-fcn:
 #---------------------------------------------------------------------------
 # NOTE: Both supply and use tables must have sectors labeling columns and products labeling rows
 excluded_sectors:
-    energy: [coal, petr, util]
+    energy: [s_coal, s_petr, s_util]
     territorial_adjustment: []
     others: []
 
 excluded_products:
-    energy: [coal, petr, util]
+    energy: [p_coal, p_petr, p_util]
     territorial_adjustment: []
     others: []
     
-non_tradeable_products: [constr, comm]
+non_tradeable_products: [p_constr, p_comm]
 
 # Domestic production as a % share of the total of imports and domestic production must exceed this value
 domestic_production_share_threshold: 1.0 # percent
@@ -255,7 +255,7 @@ LEAP-drivers:
 LEAP-sectors:
  - {
     name: Iron and Steel,
-    codes: [ironstl],
+    codes: [s_ironstl],
     branches: [
         {
          branch: Demand\Industry\Iron and Steel,
@@ -265,7 +265,7 @@ LEAP-sectors:
    }
  - {
     name: Pulp and Paper,
-    codes: [pulppr],
+    codes: [s_pulppr],
     branches: [
         {
          branch: Demand\Industry\Pulp and Paper,
@@ -275,7 +275,7 @@ LEAP-sectors:
    }
  - {
     name: Other Industry,
-    codes: [foodpr, hvymach, othind],
+    codes: [s_foodpr, s_hvymach, s_othind],
     branches: [
         {
          branch: Demand\Industry\Other Industry,
@@ -285,7 +285,7 @@ LEAP-sectors:
    }
  - {
     name: Transport,
-    codes: [transp],
+    codes: [s_transp],
     driver: VA,
     branches: [
         {
@@ -296,7 +296,7 @@ LEAP-sectors:
    }
  - {
     name: Commercial,
-    codes: [comm, othsrv],
+    codes: [s_comm, s_othsrv],
     driver: VA,
     branches: [
         {
