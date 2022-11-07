@@ -129,7 +129,7 @@ export_elast_demand:
 # For final demand, with respect to the wage bill
 wage_elast_demand:
     decay: 0.01
-    engel_prods: [agric, foodpr]
+    engel_prods: [p_agric, p_foodpr]
     engel_asympt_elast: 0.7</code></pre><h3 id="config-lgp-weights"><a class="docs-heading-anchor" href="#config-lgp-weights">Linear goal program weights</a><a id="config-lgp-weights-1"></a><a class="docs-heading-anchor-permalink" href="#config-lgp-weights" title="Permalink"></a></h3><p>The Macro model solves a linear goal program for each year of the simulation. As described in the documentation for the <a href="../lgp/#lgp">linear goal program</a>, the objective function contains weights, which are specified in the next block. The default weights should be suitable for most LEAP-Macro applications.</p><p>The correspondence between the parameters and the <a href="../variables/#exog-param-vars">model variables</a> is:</p><ul><li>For category weights:<ul><li><code>utilization</code> : <span>$\underline{w}_u$</span></li><li><code>final_demand_cov</code> : <span>$\underline{w}_F$</span></li><li><code>exports_cov</code> : <span>$\underline{w}_X$</span></li><li><code>imports_cov</code> : <span>$\underline{w}_M$</span></li></ul></li><li>For product and sector weights:<ul><li><code>utilization</code> : <span>$\underline{\varphi}_u$</span></li><li><code>final_demand_cov</code> : <span>$\underline{\varphi}_F$</span></li><li><code>exports_cov</code> : <span>$\underline{\varphi}_X$</span></li></ul></li></ul><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
 # Paramters for implementing the (goal program) obective function
 #---------------------------------------------------------------------------
@@ -149,14 +149,14 @@ objective-fcn:
 #---------------------------------------------------------------------------
 # NOTE: Both supply and use tables must have sectors labeling columns and products labeling rows
 excluded_sectors:
-    energy: [coal, petr, util]
+    energy: [s_coal, s_petr, s_util]
     territorial_adjustment: []
     others: []
 
 excluded_products:
-    energy: [coal, petr, util]
+    energy: [p_coal, p_petr, p_util]
     territorial_adjustment: []
-    others: []</code></pre><p>Following that is a list of non-tradeable products and a domestic production share threshold. Imports and exports of products declared non-tradeable are set to zero within the Macro model, if they are not already zero in the supply-use table, and are maintained at zero throughout the simulation.</p><p>Other products may be almost entirely imported. That can sometimes cause difficulties. If the domestic share of the total of imports and domestic production falls below the threshold specified in the configuration file, then the corresponding sector (but not the product) is excluded during the simulation.</p><pre><code class="language-yaml hljs">non_tradeable_products: [constr, comm]
+    others: []</code></pre><p>Following that is a list of non-tradeable products and a domestic production share threshold. Imports and exports of products declared non-tradeable are set to zero within the Macro model, if they are not already zero in the supply-use table, and are maintained at zero throughout the simulation.</p><p>Other products may be almost entirely imported. That can sometimes cause difficulties. If the domestic share of the total of imports and domestic production falls below the threshold specified in the configuration file, then the corresponding sector (but not the product) is excluded during the simulation.</p><pre><code class="language-yaml hljs">non_tradeable_products: [p_constr, p_comm]
 
 # Domestic production as a % share of the total of imports and domestic production must exceed this value
 domestic_production_share_threshold: 1.0 # percent</code></pre><p>The following section specifies where to find the data needed by Macro within the supply-use table (a <code>CSV</code> file). Ranges are specified in standard spreadsheet form.</p><pre><code class="language-yaml hljs">SUT_ranges:
@@ -230,7 +230,7 @@ LEAP-drivers:
     default: PROD</code></pre><p>the <code>LEAP-sectors</code> parameter, if present, contains a list of indices by sector. If no sectoral aggregation is desired, then this entry can be excluded entirely, set to <code>~</code> (meaning no value), or set to an empty list: <code>LEAP-sectors: []</code>.</p><p>For each index, Macro will sum up the driver (either production or value added) across all of the sector codes listed. It will then calculate an index starting in the base year, and insert the index into the specified branches. In some cases, the same index might be applied to different branches. For example, if the supply-use table has a &quot;services&quot; sector but no transport, while LEAP has both a services and a commercial transport sector, the same index could be used to drive both.</p><p>In the example below, note that <code>Iron and Steel</code> and <code>Other Industry</code> do not have a branch-specific driver, so they use the default, <code>PROD</code> (production). The <code>Commercial</code> entry does have a branch-specific driver, which is set to <code>VA</code> (value added).</p><pre><code class="language-yaml hljs">LEAP-sectors:
  - {
     name: Iron and Steel,
-    codes: [ironstl],
+    codes: [s_ironstl],
     branches: [
         {
          branch: Demand\Industry\Iron and Steel,
@@ -240,7 +240,7 @@ LEAP-drivers:
    }
  - {
     name: Other Industry,
-    codes: [foodpr, hvymach, othind],
+    codes: [s_foodpr, s_hvymach, s_othind],
     branches: [
         {
          branch: Demand\Industry\Other Industry,
@@ -251,7 +251,7 @@ LEAP-drivers:
    ...
  - {
     name: Commercial,
-    codes: [comm, othsrv],
+    codes: [s_comm, s_othsrv],
     driver: VA,
     branches: [
         {
@@ -263,9 +263,9 @@ LEAP-drivers:
 </code></pre><h3 id="config-pass-vals-LEAP-to-Macro"><a class="docs-heading-anchor" href="#config-pass-vals-LEAP-to-Macro">Passing potential output and prices from LEAP to Macro</a><a id="config-pass-vals-LEAP-to-Macro-1"></a><a class="docs-heading-anchor-permalink" href="#config-pass-vals-LEAP-to-Macro" title="Permalink"></a></h3><p>The final sections say how to pass results for potential output and prices from LEAP to Macro. These are in addition to investment expenditure, which is automatically collected from LEAP and passed to Macro. Any values for potential output and prices drawn from LEAP override those specified in external <a href="../params/#params-optional-input-files">input files</a>, if any. (Investment expenditure from LEAP is added to investment specified in external input files.)</p><p>The Freedonia configuration file does not specify potential output and prices from LEAP, so the entries are set equal to empty lists. Alternatively, they can be completely ommitted or set to the YAML &quot;no value&quot; symbol, <code>~</code>.</p><pre><code class="language-yaml hljs">LEAP-potential-output: []
 
 LEAP-prices: []</code></pre><p>To demonstrate how these sections might look, suppose that instead of excluding the <code>coal</code> sector as is done in the <a href="#config-sut">link to the supply-use table</a>, above, it is included in the Macro model, but potential output from the sector is provided by LEAP. That can be accomplished by setting</p><pre><code class="language-yaml hljs">excluded_sectors:
-    energy: [petr, util]
+    energy: [s_petr, s_util]
 excluded_products:
-    energy: [petr, util]</code></pre><p>and then adding an entry like</p><pre><code class="language-yaml hljs">LEAP-potential-output:
+    energy: [p_petr, p_util]</code></pre><p>and then adding an entry like</p><pre><code class="language-yaml hljs">LEAP-potential-output:
  - {
     branches: [
         {
@@ -273,10 +273,10 @@ excluded_products:
          variable: Indigenous Production
         }
     ],
-    code: coal
+    code: s_coal
    }</code></pre><p>Potential output is associated with a single sector in the Macro model, but can include values from multiple LEAP branches. If more than one LEAP branch is listed, then the values are summed together.</p><p>If the price of coal is available from the LEAP model, then it can be brought into Macro using an entry like</p><pre><code class="language-yaml hljs">LEAP-prices:
  - {
     branch: Resources\Primary\Coal Bituminous,
     variable: Indigenous Cost,
-    codes: [coal]
-   }</code></pre><p>Prices are associated with a single LEAP branch, but can be applied to multiple sectors in Macro.</p><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>The <a href="https://www.encyclopedia.com/social-sciences/applied-and-social-sciences-magazines/verdoorns-law">Kaldor-Verdoorn law</a> states that the growth rate of labor productivity is an increasing function of the growth rate of output. In its original form it applies only to manufacturing, and the influences are weaker in services and agriculture. In the Macro model, an economy-wide labor productivity rate is calculated as an increasing function of the GDP growth rate.</li><li class="footnote" id="footnote-2"><a class="tag is-link" href="#citeref-2">2</a><a href="https://www.investopedia.com/terms/e/engels-law.asp">Engel&#39;s Law</a> states that as income rises, the proportion of income spent on food declines. That means that the income elasticity of expenditure on food is less than one.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../demand-led-growth/">« About demand-led growth</a><a class="docs-footer-nextpage" href="../sut/">Supply-use table »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Monday 7 November 2022 16:30">Monday 7 November 2022</span>. Using Julia version 1.8.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    codes: [p_coal]
+   }</code></pre><p>Prices are associated with a single LEAP branch, but can be applied to multiple products in Macro.</p><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>The <a href="https://www.encyclopedia.com/social-sciences/applied-and-social-sciences-magazines/verdoorns-law">Kaldor-Verdoorn law</a> states that the growth rate of labor productivity is an increasing function of the growth rate of output. In its original form it applies only to manufacturing, and the influences are weaker in services and agriculture. In the Macro model, an economy-wide labor productivity rate is calculated as an increasing function of the GDP growth rate.</li><li class="footnote" id="footnote-2"><a class="tag is-link" href="#citeref-2">2</a><a href="https://www.investopedia.com/terms/e/engels-law.asp">Engel&#39;s Law</a> states that as income rises, the proportion of income spent on food declines. That means that the income elasticity of expenditure on food is less than one.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../demand-led-growth/">« About demand-led growth</a><a class="docs-footer-nextpage" href="../sut/">Supply-use table »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Monday 7 November 2022 19:16">Monday 7 November 2022</span>. Using Julia version 1.8.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
