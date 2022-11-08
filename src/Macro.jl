@@ -1,5 +1,6 @@
 module Macro
 using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Printf, Suppressor
+using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Printf, Suppressor, Formatting
 
 export leapmacro
 
@@ -417,7 +418,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     # Calibration run
     #------------------------------------------
 	if params["report-diagnostics"]
-		open(joinpath(params["diagnostics_path"], string("model_", run_number, "_calib_1", ".txt")), "w") do f
+		open(joinpath(params["diagnostics_path"], format("{1}_{2}_{3}_1.txt", "model", run_number, "calibration")), "w") do f # TODO: i18n
 			print(f, mdl)
 		end
 	end
@@ -428,7 +429,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		@info optim_output
 	end
     status = primal_status(mdl)
-    @info "Calibrating for " * string(years[1]) * ": $status"
+    @info format("Calibrating for {1}: {2}", years[1], status) # TODO: i18n
 
 	# Sector variables
     LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run_number,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
@@ -456,7 +457,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		set_normalized_coefficient(eq_F[i], fshare[i], -param_Fnorm[i])
 	end
 	if params["report-diagnostics"]
-		open(joinpath(params["diagnostics_path"], string("model_", run_number, "_calib_2", ".txt")), "w") do f
+		open(joinpath(params["diagnostics_path"], format("{1}_{2}_{3}_2.txt", "model", run_number, "calibration")), "w") do f # TODO: i18n
 			print(f, mdl)
 		end
 	end
@@ -553,7 +554,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     # Run simulation
 	#
 	#############################################################################
-    @info "Running from " * string(years[2]) * " to " * string(last(years)) * ":"
+    @info format("Running from {1} to {2}:", years[2], last(years)) # TODO: i18n
 
     previous_failed = false
     for t in eachindex(years)
@@ -878,7 +879,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		fix(I_tot, param_I_tot)
 
 		if params["report-diagnostics"]
-			open(joinpath(params["diagnostics_path"], string("model_", run_number, "_", years[t], ".txt")), "w") do f
+			open(joinpath(params["diagnostics_path"], format("{1}_{2}_{3}.txt", "model", run_number, years[t])), "w") do f # TODO: i18n
 				print(f, mdl)
 			end
 		end
@@ -890,13 +891,13 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		end
         status = primal_status(mdl)
 		# Add one to year to report the year currently being calculated
-        @info "Simulating for " * string(years[t + 1]) * ": $status"
+        @info format("Simulating for {1}: {2}", years[t + 1], status) # TODO: i18n
         previous_failed = status != MOI.FEASIBLE_POINT
         if previous_failed
 			finndx = length(LEAP_indices) + 2 # Adds column for year and for GDP
             indices[t,2:finndx] = fill(NaN, (finndx - 2) + 1)
 			if !continue_if_error
-				throw(ErrorException("Linear goal program failed to solve: $status"))
+				throw(ErrorException(format("Linear goal program failed to solve: {1}", status))) # TODO: i18n
 			end
         end
     end
@@ -906,7 +907,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     for t in eachindex(years)
         indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
     end
-    open(joinpath(params["results_path"], string("indices_",run_number,".csv")), "w") do io
+    open(joinpath(params["results_path"], format("indices_{1}.csv", run_number)), "w") do io # TODO: i18n
                writedlm(io, reshape(labels, 1, :), ',')
                writedlm(io, indices, ',')
            end;
@@ -973,7 +974,7 @@ function leapmacro(param_file::AbstractString,
 		if load_leap_first
 			## Obtain LEAP results
 			if !isnothing(get_results_from_leap_version)
-				status_string = "Obtaining LEAP results from version '" * LEAPlib.get_version_info(get_results_from_leap_version) * "'..."
+				status_string = format("Obtaining LEAP results from version '{1}'...", LEAPlib.get_version_info(get_results_from_leap_version)) # TODO: i18n
 			else
 				status_string = "Obtaining LEAP results..."
 			end
@@ -989,17 +990,16 @@ function leapmacro(param_file::AbstractString,
     max_tolerance = params["model"]["max_tolerance"]
 
 	if include_energy_sectors
-		energy_sect_string = " (including energy sectors)"
+		println(format("With configuration file '{1}' (including energy sectors):", param_file)) # TODO: i18n
 	else
-		energy_sect_string = ""
+		println(format("With configuration file '{1}':", param_file)) # TODO: i18n
 	end
-	println("With configuration file '$param_file'" * energy_sect_string * ":")
     for run_number = run_number_start:max_runs
         ## Run Macro model
         #------------status
-		print("Macro model run ($run_number)...")
-        @info "Macro model run ($run_number)..."
-        #------------status
+		run_string = format("Macro model run ({1})...", run_number) # TODO: i18n
+		print(run_string)
+        @info run_string
         indices = macro_main(params, leapvals, run_number, continue_if_error)
 		#------------status
 		println("completed")
@@ -1009,10 +1009,10 @@ function leapmacro(param_file::AbstractString,
         if run_number >= run_number_start + 1
             tolerance = compare_results(params, run_number)
             if tolerance <= max_tolerance
-                @info @sprintf("Convergence in run number %d at %.2f%% ≤ %.2f%% target...", run_number, tolerance, max_tolerance)
+                @info format("Convergence in run number {1} at {2:.2f}% ≤ {3:.2f}% target...", run_number, tolerance, max_tolerance) # TODO: i18n
                 return
             else
-                @info @sprintf("Results did not converge: %.2f%% > %.2f%% target...", tolerance, max_tolerance)
+                @info format("Results did not converge: {1:.2f}% > {2:.2f}% target...", tolerance, max_tolerance) # TODO: i18n
                 if run_number == max_runs
                     return
                 end
