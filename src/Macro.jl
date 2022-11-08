@@ -893,8 +893,9 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
         @info format("Simulating for {1}: {2}", years[t + 1], status) # TODO: i18n
         previous_failed = status != MOI.FEASIBLE_POINT
         if previous_failed
-			finndx = length(LEAP_indices) + 2 # Adds column for year and for GDP
-            indices[t,2:finndx] = fill(NaN, (finndx - 2) + 1)
+			nndx_extra = 1 + (LMlib.haskeyvalue(params, "GDP-branch") ? 1 : 0) + (LMlib.haskeyvalue(params, "Employment-branch") ? 1 : 0)
+			finndx = nndx_extra + length(LEAP_indices) # Adds columns for year and, if present, GDP, employment
+            indices[t,nndx_extra:finndx] = fill(NaN, (finndx - nndx_extra) + 1)
 			if !continue_if_error
 				throw(ErrorException(format("Linear goal program failed to solve: {1}", status))) # TODO: i18n
 			end
