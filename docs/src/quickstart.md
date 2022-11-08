@@ -4,7 +4,7 @@ CurrentModule = LEAPMacro
 
 # [Quick start](@id quick-start)
 
-This documentation explains how to quickly run Macro without linking it to LEAP. To learn how to run Macro with LEAP, see the LEAP exercise for the LEAP-Macro plugin available to registered users on the [LEAP](https://leap.sei.org/) website.
+This documentation explains how to quickly run Macro without linking it to LEAP. To learn how to run Macro with LEAP, see the [LEAP exercise](@ref leap-exercise), but it is a good idea to follow this Quick Start first.
 
 The quickest way to get started with Macro is by running the "Freedonia" sample model:
 1. Download the [demonstration files](assets/Macro.zip) as a zip file and save it to the folder of your choice
