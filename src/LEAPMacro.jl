@@ -12,10 +12,11 @@ Copyright ©2019-2022 Stockholm Environment Institute
 
 module LEAPMacro
 
-using Logging, Dates, YAML
+using Logging, Dates, YAML, Formatting
 
 include("./Macro.jl")
-using .Macro
+include("./LEAPMacrolib.jl")
+using .Macro, .LMlib
 
 "Run LEAP-Macro by calling `leapmacro`"
 function run(config_file::AbstractString = "LEAPMacro_params.yml";
@@ -26,9 +27,10 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml";
 			 only_push_leap_results::Bool = false,
 			 run_number_start::Integer = 0,
 			 continue_if_error::Bool = false)
+
 	# Ensure needed folders exist
 	if !isdir("inputs")
-		throw(ErrorException("The \"inputs\" folder is needed, but does not exist"))
+		throw(ErrorException(LMlib.gettext("The \"inputs\" folder is needed, but does not exist")))
 	end
 
 	# First check that the configuration file loads correctly
@@ -41,7 +43,7 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml";
 		else
 			eol_length = 1
 		end
-		println("Configuration file '" * config_file * "' did not load properly: " * err.problem * " on line " * string(err.problem_mark.line ÷ eol_length))
+		println(format(LMlib.gettext("Configuration file '{1}' did not load properly: {2} on line {3:d}"), config_file, err.problem, err.problem_mark.line ÷ eol_length))
 		return(exit_status)
 	end
 
@@ -49,9 +51,9 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml";
 
 	# Enable logging
 	if include_energy_sectors
-		logfilename = string("LEAPMacro_log_", params["output_folder"], "_full.txt")
+		logfilename = format("LEAPMacro_log_{1}_full.txt", params["output_folder"])
 	else
-		logfilename = string("LEAPMacro_log_", params["output_folder"], ".txt")
+		logfilename = format("LEAPMacro_log_{1}.txt", params["output_folder"])
 	end
 	if run_number_start == 0
 		logfile = open(logfilename, "w")
@@ -61,13 +63,13 @@ function run(config_file::AbstractString = "LEAPMacro_params.yml";
 	logger = ConsoleLogger(logfile)
 	global_logger(logger)
 	@info now()
-	@info "Configuration file: '$config_file'"
+	@info format(LMlib.gettext("Configuration file: '{1}'"), config_file)
 	exit_status = 0
 	try
 		Macro.leapmacro(config_file, logfile, include_energy_sectors, load_leap_first, get_results_from_leap_version, only_push_leap_results, run_number_start, continue_if_error)
 	catch err
 		exit_status = 1
-		println(string("Macro exited with an error: Please check the log file '", logfilename,"'"))
+		println(format(LMlib.gettext("Macro exited with an error: Please check the log file '{1}'"), logfilename))
 		@error err
 		if dump_err_stack
 			@error stacktrace(catch_backtrace())

@@ -3,11 +3,11 @@ LMlib is a collection of common functions and constants for LEAP-Macro
 =#
 module LMlib
 
-using DataFrames
+using DataFrames, Formatting, PyCall
 
 export write_matrix_to_csv, write_vector_to_csv, excel_range_to_mat, haskeyvalue, ϵ,
 	   write_header_to_csv, append_row_to_csv, stringvec_to_quotedstringvec!,
-	   get_nonmissing_values, float_to_int
+	   get_nonmissing_values, float_to_int, gettext
 
 # Declared type unions
 NumOrVector = Union{Nothing,Number,Vector}
@@ -15,6 +15,14 @@ NumOrArray = Union{Nothing,Number,Array}
 
 "Small number for avoiding divide-by-zero problems"
 const ϵ = 1.0e-11
+
+"Translate string using gettext"
+function gettext(s::AbstractString)
+	gt = pyimport("gettext")
+	gt.bindtextdomain("LEAPMacro", joinpath(@__DIR__, "locale"))
+	gt.textdomain("LEAPMacro")
+	return(gt.gettext(s))
+end
 
 "Write a matrix to a CSV file."
 function write_matrix_to_csv(filename::AbstractString, array::Array, rownames::Vector, colnames::Vector)
@@ -67,7 +75,7 @@ end # char_index_to_int
 function excel_ref_to_rowcol(str::AbstractString)
 	m = match(r"([A-Za-z]+)([0-9]+)", strip(str)) # Be tolerant of leading and trailing spaces
 	if m === nothing
-		error("Cell reference '$str' is not in the correct format (e.g., 'AB3')")
+		error(format(gettext("Cell reference '{1}' is not in the correct format (e.g., 'AB3')"), str))
 		return nothing
 	else
 		c = m.captures
@@ -85,7 +93,7 @@ end # excel_cell_to_float
 function excel_range_to_rowcol_pair(str::AbstractString)
 	range_ends = split(str,":")
 	if length(range_ends) != 2
-		error("Cell range '$str' is not in the correct format (e.g., 'AB3:BG10')")
+		error(format(gettext("Cell range '{1}' is not in the correct format (e.g., 'AB3:BG10')"), str))
 		return nothing
 	else
 		return excel_ref_to_rowcol.(range_ends)

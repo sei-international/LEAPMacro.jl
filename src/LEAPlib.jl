@@ -1,7 +1,7 @@
 module LEAPlib
 using PyCall, DataFrames, CSV, UUIDs
 
-export hide_leap, send_results_to_leap, calculate_leap, get_version_info, get_results_from_leap, LEAPresults
+export hide_leap, send_results_to_leap, calculate_leap, get_version_info, get_results_from_leap, LEAPresults, Formatting
 
 include("./LEAPMacrolib.jl")
 using .LMlib
@@ -143,13 +143,13 @@ function connect_to_leap()
             max_loops -= 1
         end
         if !LEAPPyObj.ProgramStarted
-            error("LEAP is not responding.")
+            error(LMlib.gettext("LEAP is not responding"))
             return missing
         else
             return LEAPPyObj
         end
 	catch e
-        error("Cannot connect to LEAP: " * sprint(showerror, e))
+        error(format(LMlib.gettext("Cannot connect to LEAP: {1}"), sprint(showerror, e)))
 		return missing
 	end
 end  # connect_to_leap
@@ -170,7 +170,7 @@ function calculate_leap(scen_name::AbstractString)
         LEAP.Calculate(false) # This sets RunWEAP = false
         LEAP.SaveArea()
     catch e
-        error("Encountered an error when running LEAP: " * sprint(showerror, e))
+        error(format(LMlib.gettext("Encountered an error when running LEAP: {1}"), sprint(showerror, e)))
     finally
 	    disconnect_from_leap(LEAP)
     end
@@ -185,7 +185,7 @@ function send_results_to_leap(params::Dict, indices::Array)
     LEAP = connect_to_leap()
 
     # Set ActiveView
-    LEAP.ActiveView = "Analysis"
+    LEAP.ActiveView = LMlib.gettext("Analysis")
 
 	branch_data = Dict(:branch => String[], :variable => String[], :last_historical_year => Int64[], :col => Int64[])
 	col = 0
@@ -259,7 +259,7 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
     end
 
     # Set ActiveView and, if specified, ActiveScenario and ActiveRegion
-    LEAP.ActiveView = "Results"
+    LEAP.ActiveView = LMlib.gettext("Results")
 
     if params["LEAP-info"]["result_scenario"] != ""
         LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
@@ -321,7 +321,7 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
             end
         end
 
-        LMlib.write_vector_to_csv(joinpath(params["results_path"],string("I_en_",run_number,".csv")), leapvals.I_en, "energy investment", Vector(sim_years))
+        LMlib.write_vector_to_csv(joinpath(params["results_path"],string("I_en_",run_number,".csv")), leapvals.I_en, LMlib.gettext("energy investment"), Vector(sim_years))
 
         #--------------------------------
         # Potential output
@@ -358,10 +358,10 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
         end
 
     finally
-        LEAP.ActiveView = "Analysis"
+        LEAP.ActiveView = LMlib.gettext("Analysis")
         if !isnothing(get_results_from_leap_version)
             # From the program logic, there should always be a temp_version != nothing if get_results_from_leap_version != nothing, so assert:
-            @assert !isnothing(temp_version) "Getting results from a LEAP version, but no temporary version to revert to"
+            @assert !isnothing(temp_version) LMlib.gettext("Getting results from a LEAP version, but no temporary version to revert to")
             # Return to the saved (but not calculated) version reflecting state of the application -- will go to most recent
             LEAP.Versions(temp_version).Revert()
             # No longer needed: delete

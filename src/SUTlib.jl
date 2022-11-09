@@ -1,5 +1,5 @@
 module SUTlib
-using CSV, DataFrames, LinearAlgebra, YAML, Printf, Logging
+using CSV, DataFrames, LinearAlgebra, YAML, Logging, Formatting
 
 export process_sut, initialize_prices, parse_param_file,
        SUTdata, PriceData, ExogParams
@@ -186,7 +186,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
     end
     for d in global_params["LEAP_sector_drivers"]
         if d ∉ keys(LEAP_drivers)
-            throw(DomainError(d, "LEAP driver must be one of " * "\"" * join(keys(LEAP_drivers), "\", \"") * "\""))
+            throw(DomainError(d, format(LMlib.gettext("LEAP driver must be one of \"{1}\""), join(keys(LEAP_drivers), "\", \""))))
             break
         end
     end
@@ -200,7 +200,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
             if LEAP_potout_codes[i] in global_params["included_sector_codes"]
                 global_params["LEAP_potout_indices"][i] = findall(x -> x == LEAP_potout_codes[i], global_params["included_sector_codes"])[1]
             else
-                @warn "Sector code '" * LEAP_potout_codes[i] * "' is listed in 'LEAP-potential-output' but is not included in the Macro model calculations."
+                @warn format(LMlib.gettext("Sector code '{1}' is listed in 'LEAP-potential-output' but is not included in the Macro model calculations"), LEAP_potout_codes[i])
             end
         end
     else
@@ -432,13 +432,13 @@ function get_var_params(params::Dict)
             if !ismissing(working_age_grs_temp[year_ndx])
                 push!(retval.working_age_grs, working_age_grs_temp[year_ndx])
             else
-                error_string = "Value for working age growth rate missing in year " * string(year) * ", with no default"
+                error_string = format(LMlib.gettext("Value for working age growth rate missing in year {1:d}, with no default"), year)
                 throw(MissingException(error_string))
             end
             if !ismissing(xr_temp[year_ndx])
                 push!(retval.xr, xr_temp[year_ndx])
             else
-                error_string = "Value for exchange rate missing in year " * string(year) * ", with no default"
+                error_string = format(LMlib.gettext("Value for exchange rate missing in year {1:d}, with no default"), year)
                 throw(MissingException(error_string))
             end
             # These have defaults
@@ -463,7 +463,7 @@ function get_var_params(params::Dict)
                 push!(retval.βKV, βKV_default)
             end
         else
-			error_string = "Year " * string(year) * " is not in time series range " * string(data_start_year) * ":" * string(data_end_year)
+			error_string = format(LMlib.gettext("Year {1:d} is not in time series range {2:d}:{3:d}"), year, data_start_year, data_end_year)
             throw(DomainError(year, error_string))
         end
 
@@ -503,11 +503,11 @@ function get_var_params(params::Dict)
         if !isnothing(findfirst(isnothing.(data_sec_ndxs)))
             invalid_sec_codes = data_sec_codes[findall(x -> isnothing(x), data_sec_ndxs)]
             if length(invalid_sec_codes) > 1
-                invalid_sec_codes_str = "Sector codes '" * join(invalid_sec_codes, "', '") * "'"
+                invalid_sec_codes_str = format(LMlib.gettext("Sector codes '{1}' in input file '{2}' not valid"), join(invalid_sec_codes, "', '"), params["exog-files"]["pot_output"])
             else
-                invalid_sec_codes_str = "Sector code '" * invalid_sec_codes[1] * "'"
+                invalid_sec_codes_str = format(LMlib.gettext("Sector code '{1}' in input file '{2}' not valid"), invalid_sec_codes[1], params["exog-files"]["pot_output"])
             end
-            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["pot_output"] * "' not valid"))
+            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str))
         end
         for row in eachrow(pot_output_df)
             data_year = floor(Int64, row[:year])
@@ -525,11 +525,11 @@ function get_var_params(params::Dict)
         if !isnothing(findfirst(isnothing.(data_sec_ndxs)))
             invalid_sec_codes = data_sec_codes[findall(x -> isnothing(x), data_sec_ndxs)]
             if length(invalid_sec_codes) > 1
-                invalid_sec_codes_str = "Sector codes '" * join(invalid_sec_codes, "', '") * "'"
+                invalid_sec_codes_str = format(LMlib.gettext("Sector codes '{1}' in input file '{2}' not valid"), join(invalid_sec_codes, "', '"), params["exog-files"]["max_utilization"])
             else
-                invalid_sec_codes_str = "Sector code '" * invalid_sec_codes[1] * "'"
+                invalid_sec_codes_str = format(LMlib.gettext("Sector code '{1}' in input file '{2}' not valid"), invalid_sec_codes[1], params["exog-files"]["max_utilization"])
             end
-            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str * " in input file '" * params["exog-files"]["max_utilization"] * "' not valid"))
+            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str))
         end
         for row in eachrow(max_util_df)
             data_year = floor(Int64, row[:year])
@@ -547,11 +547,11 @@ function get_var_params(params::Dict)
         if !isnothing(findfirst(isnothing.(data_prod_ndxs)))
             invalid_prod_codes = data_prod_codes[findall(x -> isnothing(x), data_prod_ndxs)]
             if length(invalid_prod_codes) > 1
-                invalid_prod_codes_str = "Product codes '" * join(invalid_prod_codes, "', '") * "'"
+                invalid_prod_codes_str = format(LMlib.gettext("Product codes '{1}' in input file '{2}' not valid"), join(invalid_prod_codes, "', '"), params["exog-files"]["real_price"])
             else
-                invalid_prod_codes_str = "Product code '" * invalid_prod_codes[1] * "'"
+                invalid_prod_codes_str = format(LMlib.gettext("Sector code '{1}' in input file '{2}' not valid"), invalid_prod_codes[1], params["exog-files"]["real_price"])
             end
-            throw(DomainError(invalid_prod_codes, invalid_prod_codes_str * " in input file '" * params["exog-files"]["real_price"] * "' not valid"))
+            throw(DomainError(invalid_prod_codes, invalid_prod_codes_str))
         end
         for row in eachrow(real_price_df)
             data_year = floor(Int64, row[:year])
@@ -783,8 +783,8 @@ function process_sut(params::Dict)
 		# Write out nonenergy-energy link metric
         open(joinpath(params["diagnostics_path"],"nonenergy_energy_link_measure.txt"), "w") do fhndl
 			R = 100 .* energy_nonenergy_link_measure(params)
-			A_NE_metric_string = @sprintf("This value should be small: %.2f%%.", R)
-			println(fhndl, "Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:")
+			A_NE_metric_string = format(LMlib.gettext("This value should be small: {1:.2f}%."), R)
+			println(fhndl, LMlib.gettext("Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:"))
 		    println(fhndl, A_NE_metric_string)
 		end
     end

@@ -1,5 +1,5 @@
 module Macro
-using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Printf, Suppressor, Formatting
+using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Suppressor, Formatting
 
 export leapmacro
 
@@ -155,9 +155,8 @@ end
 
 "Implement the Macro model. This is the main function for LEAP-Macro"
 function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Integer, continue_if_error::Bool)
-
     #------------status
-    @info "Loading data..."
+    @info LMlib.gettext("Loading data...")
     #------------status
 
 	sut, np, ns = SUTlib.process_sut(params)
@@ -315,7 +314,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	#############################################################################
 
     #------------status
-    @info "Preparing model..."
+    @info LMlib.gettext("Preparing model...")
     #------------status
 
     # model
@@ -417,7 +416,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     # Calibration run
     #------------------------------------------
 	if params["report-diagnostics"]
-		open(joinpath(params["diagnostics_path"], format("{1}_{2}_{3}_1.txt", "model", run_number, "calibration")), "w") do f # TODO: i18n
+		open(joinpath(params["diagnostics_path"], format("{1}_{2}_{3}_1.txt", LMlib.gettext("model"), run_number, LMlib.gettext("calibration"))), "w") do f
 			print(f, mdl)
 		end
 	end
@@ -428,23 +427,23 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		@info optim_output
 	end
     status = primal_status(mdl)
-    @info format("Calibrating for {1}: {2}", years[1], status) # TODO: i18n
+    @info format(LMlib.gettext("Calibrating for {1}: {2}"), years[1], status)
 
 	# Sector variables
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run_number,".csv")), value.(u), "capacity utilization", params["included_sector_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("sector_output_",run_number,".csv")), value.(u) .* z, "sector output", params["included_sector_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("wage_share_",run_number,".csv")), ω, "wage share", params["included_sector_codes"])
-	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capital_output_ratio_",run_number,".csv")), capital_output_ratio, "capital-output ratio", params["included_sector_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capacity_utilization_",run_number,".csv")), value.(u), LMlib.gettext("capacity utilization"), params["included_sector_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("sector_output_",run_number,".csv")), value.(u) .* z, LMlib.gettext("sector output"), params["included_sector_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("wage_share_",run_number,".csv")), ω, LMlib.gettext("wage share"), params["included_sector_codes"])
+	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("capital_output_ratio_",run_number,".csv")), capital_output_ratio, LMlib.gettext("capital-output ratio"), params["included_sector_codes"])
     
 	# Product variables
-	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("exports_",run_number,".csv")), value.(X), "exports", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("final_demand_",run_number,".csv")), value.(F), "final demand", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("imports_",run_number,".csv")), value.(M), "imports", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("domestic_production_",run_number,".csv")), value.(qs), "domestic production", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("tot_intermediate_supply_non-energy_sectors_",run_number,".csv")), value.(qd), "intermediate supply from non-energy sectors", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("basic_prices_",run_number,".csv")), param_pb, "basic prices", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_neg_",run_number,".csv")), value.(margins_neg), "negative margins", params["included_product_codes"])
-    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_pos_",run_number,".csv")), value.(margins_pos), "positive margins", params["included_product_codes"])
+	LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("exports_",run_number,".csv")), value.(X), LMlib.gettext("exports"), params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("final_demand_",run_number,".csv")), value.(F), LMlib.gettext("final demand"), params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("imports_",run_number,".csv")), value.(M), LMlib.gettext("imports"), params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("domestic_production_",run_number,".csv")), value.(qs), LMlib.gettext("domestic production"), params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("tot_intermediate_supply_non-energy_sectors_",run_number,".csv")), value.(qd), LMlib.gettext("intermediate supply from non-energy sectors"), params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("basic_prices_",run_number,".csv")), param_pb, LMlib.gettext("basic prices"), params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_neg_",run_number,".csv")), value.(margins_neg), LMlib.gettext("negative margins"), params["included_product_codes"])
+    LMlib.write_vector_to_csv(joinpath(params["calibration_path"], string("margins_pos_",run_number,".csv")), value.(margins_pos), LMlib.gettext("positive margins"), params["included_product_codes"])
 
     # First run is calibration -- now set Xnorm and Fnorm based on solution and run again
     Xnorm = max.(Xnorm, value.(X))
@@ -456,7 +455,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		set_normalized_coefficient(eq_F[i], fshare[i], -param_Fnorm[i])
 	end
 	if params["report-diagnostics"]
-		open(joinpath(params["diagnostics_path"], format("{1}_{2}_{3}_2.txt", "model", run_number, "calibration")), "w") do f # TODO: i18n
+		open(joinpath(params["diagnostics_path"], format("{1}_{2}_{3}_2.txt", LMlib.gettext("model"), run_number, LMlib.gettext("calibration"))), "w") do f
 			print(f, mdl)
 		end
 	end
@@ -505,7 +504,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	#--------------------------------
 	# Initialize array of indices to pass to LEAP
 	#--------------------------------
-	labels = ["Year"]
+	labels = [LMlib.gettext("Year")]
 	if LMlib.haskeyvalue(params, "GDP-branch")
 		labels = vcat(labels, params["GDP-branch"]["name"])
 	end
@@ -541,10 +540,10 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	LMlib.write_header_to_csv(params, product_names, "basic_prices", run_number)
 	LMlib.write_header_to_csv(params, product_names, "domestic_prices", run_number)
 	# Create a file to hold scalar variables
-	scalar_var_list = ["GDP gr", "curr acct surplus to GDP ratio", "curr acct surplus", "real GDP",
-					   "GDP deflator", "labor productivity gr", "labor force gr", "wage rate gr",
-					   "wage per effective worker gr", "real investment", "central bank rate",
-					   "terms of trade index", "real xr index", "nominal xr index"]
+	scalar_var_list = [LMlib.gettext("GDP gr"), LMlib.gettext("curr acct surplus to GDP ratio"), LMlib.gettext("curr acct surplus"), LMlib.gettext("real GDP"),
+					   LMlib.gettext("GDP deflator"), LMlib.gettext("labor productivity gr"), LMlib.gettext("labor force gr"), LMlib.gettext("wage rate gr"),
+					   LMlib.gettext("wage per effective worker gr"), LMlib.gettext("real investment"), LMlib.gettext("central bank rate"),
+					   LMlib.gettext("terms of trade index"), LMlib.gettext("real xr index"), LMlib.gettext("nominal xr index")]
 	LMlib.stringvec_to_quotedstringvec!(scalar_var_list)
 	LMlib.write_header_to_csv(params, scalar_var_list, "collected_variables", run_number)
 
@@ -553,7 +552,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     # Run simulation
 	#
 	#############################################################################
-    @info format("Running from {1} to {2}:", years[2], last(years)) # TODO: i18n
+    @info format(LMlib.gettext("Running from {1} to {2}:"), years[2], last(years))
 
     previous_failed = false
     for t in eachindex(years)
@@ -878,7 +877,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		fix(I_tot, param_I_tot)
 
 		if params["report-diagnostics"]
-			open(joinpath(params["diagnostics_path"], format("{1}_{2}_{3}.txt", "model", run_number, years[t])), "w") do f # TODO: i18n
+			open(joinpath(params["diagnostics_path"], format("{1}_{2}_{3}.txt", LMlib.gettext("model"), run_number, years[t])), "w") do f
 				print(f, mdl)
 			end
 		end
@@ -890,14 +889,14 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		end
         status = primal_status(mdl)
 		# Add one to year to report the year currently being calculated
-        @info format("Simulating for {1}: {2}", years[t + 1], status) # TODO: i18n
+        @info format(LMlib.gettext("Simulating for {1}: {2}"), years[t + 1], status)
         previous_failed = status != MOI.FEASIBLE_POINT
         if previous_failed
 			nndx_extra = 1 + (LMlib.haskeyvalue(params, "GDP-branch") ? 1 : 0) + (LMlib.haskeyvalue(params, "Employment-branch") ? 1 : 0)
 			finndx = nndx_extra + length(LEAP_indices) # Adds columns for year and, if present, GDP, employment
             indices[t,nndx_extra:finndx] = fill(NaN, (finndx - nndx_extra) + 1)
 			if !continue_if_error
-				throw(ErrorException(format("Linear goal program failed to solve: {1}", status))) # TODO: i18n
+				throw(ErrorException(format(LMlib.gettext("Linear goal program failed to solve: {1}"), status)))
 			end
         end
     end
@@ -907,7 +906,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     for t in eachindex(years)
         indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
     end
-    open(joinpath(params["results_path"], format("indices_{1}.csv", run_number)), "w") do io # TODO: i18n
+    open(joinpath(params["results_path"], format("indices_{1}.csv", run_number)), "w") do io
                writedlm(io, reshape(labels, 1, :), ',')
                writedlm(io, indices, ',')
            end;
@@ -968,15 +967,15 @@ function leapmacro(param_file::AbstractString,
 		end
         ## checks that user has LEAP installed
         if ismissing(LEAPlib.connect_to_leap())
-            @error "Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file."
+            @error LMlib.gettext("Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file.")
             return
         end
 		if load_leap_first
 			## Obtain LEAP results
 			if !isnothing(get_results_from_leap_version)
-				status_string = format("Obtaining LEAP results from version '{1}'...", LEAPlib.get_version_info(get_results_from_leap_version)) # TODO: i18n
+				status_string = format(LMlib.gettext("Obtaining LEAP results from version '{1}'..."), LEAPlib.get_version_info(get_results_from_leap_version))
 			else
-				status_string = "Obtaining LEAP results..."
+				status_string = LMlib.gettext("Obtaining LEAP results...")
 			end
 			#------------status
 			@info status_string
@@ -990,29 +989,29 @@ function leapmacro(param_file::AbstractString,
     max_tolerance = params["model"]["max_tolerance"]
 
 	if include_energy_sectors
-		println(format("With configuration file '{1}' (including energy sectors):", param_file)) # TODO: i18n
+		println(format(LMlib.gettext("With configuration file '{1}' (including energy sectors):"), param_file))
 	else
-		println(format("With configuration file '{1}':", param_file)) # TODO: i18n
+		println(format(LMlib.gettext("With configuration file '{1}':"), param_file))
 	end
     for run_number = run_number_start:max_runs
         ## Run Macro model
         #------------status
-		run_string = format("Macro model run ({1})...", run_number) # TODO: i18n
+		run_string = format(LMlib.gettext("Macro model run ({1})..."), run_number)
 		print(run_string)
         @info run_string
         indices = macro_main(params, leapvals, run_number, continue_if_error)
 		#------------status
-		println("completed")
+		println(LMlib.gettext("completed"))
         #------------status
 
         ## Compare run results
         if run_number >= run_number_start + 1
             tolerance = compare_results(params, run_number)
             if tolerance <= max_tolerance
-                @info format("Convergence in run number {1} at {2:.2f}% ≤ {3:.2f}% target...", run_number, tolerance, max_tolerance) # TODO: i18n
+                @info format(LMlib.gettext("Convergence in run number {1} at {2:.2f}% ≤ {3:.2f}% target..."), run_number, tolerance, max_tolerance)
                 return
             else
-                @info format("Results did not converge: {1:.2f}% > {2:.2f}% target...", tolerance, max_tolerance) # TODO: i18n
+                @info format(LMlib.gettext("Results did not converge: {1:.2f}% > {2:.2f}% target..."), tolerance, max_tolerance)
                 if run_number == max_runs
                     return
                 end
@@ -1023,34 +1022,34 @@ function leapmacro(param_file::AbstractString,
         if run_leap
 			if params["model"]["hide_leap"]
 				#------------status
-				@info "Hiding LEAP to improve performance..."
+				@info LMlib.gettext("Hiding LEAP to improve performance...")
 				#------------status
 				LEAPlib.hide_leap(true)
 			end
 
             #------------status
-            @info "Sending Macro output to LEAP..."
+            @info LMlib.gettext("Sending Macro output to LEAP...")
             #------------status
             LEAPlib.send_results_to_leap(params, indices)
             ## Run LEAP model
 			if !only_push_leap_results
 				try
 					#------------status
-					@info "Running LEAP model..."
+					@info LMlib.gettext("Running LEAP model...")
 					flush(logfile)
 					#------------status
 					LEAPlib.calculate_leap(params["LEAP-info"]["result_scenario"])
 
 					## Obtain LEAP results
 					#------------status
-					@info "Obtaining LEAP results..."
+					@info LMlib.gettext("Obtaining LEAP results...")
 					flush(logfile)
 					#------------status
 					leapvals = LEAPlib.get_results_from_leap(params, run_number + 1)
 				finally
 					if params["model"]["hide_leap"]
 						#------------status
-						@info "Restoring LEAP..."
+						@info LMlib.gettext("Restoring LEAP...")
 						#------------status
 						LEAPlib.hide_leap(false)
 					end
