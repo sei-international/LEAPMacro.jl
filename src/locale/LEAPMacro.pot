@@ -1,0 +1,276 @@
+
+#: Macro.jl:899
+msgid "Linear goal program failed to solve: {1}"
+msgstr ""
+
+#: Macro.jl:430
+msgid "Calibrating for {1}: {2}"
+msgstr ""
+
+#: Macro.jl:444
+msgid "basic prices"
+msgstr ""
+
+#: Macro.jl:507
+msgid "Year"
+msgstr ""
+
+#: Macro.jl:1014
+msgid "Results did not converge: {1:.2f}% > {2:.2f}% target..."
+msgstr ""
+
+#: Macro.jl:999
+msgid "Macro model run ({1})..."
+msgstr ""
+
+#: Macro.jl:440
+msgid "final demand"
+msgstr ""
+
+#: LEAPMacro.jl:66
+msgid "Configuration file: '{1}'"
+msgstr ""
+
+#: SUTlib.jl:466
+msgid "Year {1:d} is not in time series range {2:d}:{3:d}"
+msgstr ""
+
+#: LEAPlib.jl:262
+msgid "Results"
+msgstr ""
+
+#: Macro.jl:543
+msgid "GDP gr"
+msgstr ""
+
+#: Macro.jl:543
+msgid "curr acct surplus"
+msgstr ""
+
+#: Macro.jl:443
+msgid "intermediate supply from non-energy sectors"
+msgstr ""
+
+#: Macro.jl:439
+msgid "exports"
+msgstr ""
+
+#: Macro.jl:1031
+msgid "Sending Macro output to LEAP..."
+msgstr ""
+
+#: LEAPlib.jl:188; LEAPlib.jl:361
+msgid "Analysis"
+msgstr ""
+
+#: Macro.jl:435
+msgid "wage share"
+msgstr ""
+
+#: Macro.jl:446
+msgid "positive margins"
+msgstr ""
+
+#: LEAPlib.jl:324
+msgid "energy investment"
+msgstr ""
+
+#: Macro.jl:970
+msgid "Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file."
+msgstr ""
+
+#: Macro.jl:441
+msgid "imports"
+msgstr ""
+
+#: LEAPMacrolib.jl:96
+msgid "Cell range '{1}' is not in the correct format (e.g., 'AB3:BG10')"
+msgstr ""
+
+#: Macro.jl:546
+msgid "nominal xr index"
+msgstr ""
+
+#: Macro.jl:419; Macro.jl:458
+msgid "calibration"
+msgstr ""
+
+#: Macro.jl:1038
+msgid "Running LEAP model..."
+msgstr ""
+
+#: SUTlib.jl:441
+msgid "Value for exchange rate missing in year {1:d}, with no default"
+msgstr ""
+
+#: Macro.jl:434
+msgid "sector output"
+msgstr ""
+
+#: SUTlib.jl:787
+msgid "Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:"
+msgstr ""
+
+#: LEAPMacro.jl:72
+msgid "Macro exited with an error: Please check the log file '{1}'"
+msgstr ""
+
+#: Macro.jl:544
+msgid "labor productivity gr"
+msgstr ""
+
+#: Macro.jl:442
+msgid "domestic production"
+msgstr ""
+
+#: Macro.jl:545
+msgid "real investment"
+msgstr ""
+
+#: Macro.jl:1004
+msgid "completed"
+msgstr ""
+
+#: Macro.jl:544
+msgid "wage rate gr"
+msgstr ""
+
+#: Macro.jl:546
+msgid "terms of trade index"
+msgstr ""
+
+#: LEAPMacrolib.jl:78
+msgid "Cell reference '{1}' is not in the correct format (e.g., 'AB3')"
+msgstr ""
+
+#: SUTlib.jl:550
+msgid "Product codes '{1}' in input file '{2}' not valid"
+msgstr ""
+
+#: LEAPlib.jl:146
+msgid "LEAP is not responding"
+msgstr ""
+
+#: Macro.jl:555
+msgid "Running from {1} to {2}:"
+msgstr ""
+
+#: Macro.jl:545
+msgid "central bank rate"
+msgstr ""
+
+#: SUTlib.jl:203
+msgid "Sector code '{1}' is listed in 'LEAP-potential-output' but is not included in the Macro model calculations"
+msgstr ""
+
+#: Macro.jl:978; Macro.jl:1045
+msgid "Obtaining LEAP results..."
+msgstr ""
+
+#: Macro.jl:545
+msgid "wage per effective worker gr"
+msgstr ""
+
+#: Macro.jl:419; Macro.jl:458; Macro.jl:880
+msgid "model"
+msgstr ""
+
+#: Macro.jl:992
+msgid "With configuration file '{1}' (including energy sectors):"
+msgstr ""
+
+#: SUTlib.jl:528
+msgid "Sector codes '{1}' in input file '{2}' not valid"
+msgstr ""
+
+#: Macro.jl:892
+msgid "Simulating for {1}: {2}"
+msgstr ""
+
+#: SUTlib.jl:786
+msgid "This value should be small: {1:.2f}%."
+msgstr ""
+
+#: Macro.jl:1011
+msgid "Convergence in run number {1} at {2:.2f}% ≤ {3:.2f}% target..."
+msgstr ""
+
+#: LEAPlib.jl:173
+msgid "Encountered an error when running LEAP: {1}"
+msgstr ""
+
+#: Macro.jl:1025
+msgid "Hiding LEAP to improve performance..."
+msgstr ""
+
+#: Macro.jl:317
+msgid "Preparing model..."
+msgstr ""
+
+#: Macro.jl:543
+msgid "real GDP"
+msgstr ""
+
+#: SUTlib.jl:435
+msgid "Value for working age growth rate missing in year {1:d}, with no default"
+msgstr ""
+
+#: Macro.jl:445
+msgid "negative margins"
+msgstr ""
+
+#: Macro.jl:544
+msgid "GDP deflator"
+msgstr ""
+
+#: LEAPlib.jl:364
+msgid "Getting results from a LEAP version, but no temporary version to revert to"
+msgstr ""
+
+#: Macro.jl:159
+msgid "Loading data..."
+msgstr ""
+
+#: LEAPlib.jl:152
+msgid "Cannot connect to LEAP: {1}"
+msgstr ""
+
+#: Macro.jl:543
+msgid "curr acct surplus to GDP ratio"
+msgstr ""
+
+#: Macro.jl:1052
+msgid "Restoring LEAP..."
+msgstr ""
+
+#: LEAPMacro.jl:46
+msgid "Configuration file '{1}' did not load properly: {2} on line {3:d}"
+msgstr ""
+
+#: Macro.jl:544
+msgid "labor force gr"
+msgstr ""
+
+#: Macro.jl:994
+msgid "With configuration file '{1}':"
+msgstr ""
+
+#: Macro.jl:546
+msgid "real xr index"
+msgstr ""
+
+#: Macro.jl:976
+msgid "Obtaining LEAP results from version '{1}'..."
+msgstr ""
+
+#: Macro.jl:436
+msgid "capital-output ratio"
+msgstr ""
+
+#: SUTlib.jl:530; SUTlib.jl:552
+msgid "Sector code '{1}' in input file '{2}' not valid"
+msgstr ""
+
+#: Macro.jl:433
+msgid "capacity utilization"
+msgstr ""
