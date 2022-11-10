@@ -51,6 +51,16 @@ end
 	EmissionConstraintBranchType = 39
 end
 
+@enum LEAPView begin
+    AnalysisView = 1
+    ResultsView = 2
+    EnergyBalanceView = 3
+    SummariesView = 4
+    OverviewsView = 5
+    TechnologyDatabaseView = 6
+    NotesView = 7
+end
+
 "Return an initialized LEAPresults struct"
 function initialize_leapresults(params::Dict)
     ny = params["years"]["end"] - params["years"]["start"] + 1
@@ -185,7 +195,7 @@ function send_results_to_leap(params::Dict, indices::Array)
     LEAP = connect_to_leap()
 
     # Set ActiveView
-    LEAP.ActiveView = LMlib.gettext("Analysis")
+    LEAP.ActiveView = Int(AnalysisView)
 
 	branch_data = Dict(:branch => String[], :variable => String[], :last_historical_year => Int64[], :col => Int64[])
 	col = 0
@@ -259,7 +269,7 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
     end
 
     # Set ActiveView and, if specified, ActiveScenario and ActiveRegion
-    LEAP.ActiveView = LMlib.gettext("Results")
+    LEAP.ActiveView = Int(ResultsView)
 
     if params["LEAP-info"]["result_scenario"] != ""
         LEAP.ActiveScenario = params["LEAP-info"]["result_scenario"]
@@ -358,7 +368,7 @@ function get_results_from_leap(params::Dict, run_number::Integer, get_results_fr
         end
 
     finally
-        LEAP.ActiveView = LMlib.gettext("Analysis")
+        LEAP.ActiveView = Int(AnalysisView)
         if !isnothing(get_results_from_leap_version)
             # From the program logic, there should always be a temp_version != nothing if get_results_from_leap_version != nothing, so assert:
             @assert !isnothing(temp_version) LMlib.gettext("Getting results from a LEAP version, but no temporary version to revert to")

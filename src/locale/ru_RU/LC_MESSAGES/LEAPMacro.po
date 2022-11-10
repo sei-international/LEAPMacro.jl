@@ -49,10 +49,6 @@ msgstr "С файлом конфигурации '{1}':"
 msgid "Year {1:d} is not in time series range {2:d}:{3:d}"
 msgstr "Год {1:d} не входит в диапазон временных рядов {2:d}:{3:d}"
 
-#: LEAPlib.jl:262
-msgid "Results"
-msgstr ""
-
 #: Macro.jl:543
 msgid "GDP gr"
 msgstr "ВВП (темпы роста)"
@@ -72,10 +68,6 @@ msgstr "экспорт"
 #: Macro.jl:1031
 msgid "Sending Macro output to LEAP..."
 msgstr "Отправка результатов макроса в LEAP..."
-
-#: LEAPlib.jl:188; LEAPlib.jl:361
-msgid "Analysis"
-msgstr ""
 
 #: Macro.jl:435
 msgid "wage share"
