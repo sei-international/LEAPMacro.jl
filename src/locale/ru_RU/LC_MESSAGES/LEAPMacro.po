@@ -45,7 +45,7 @@ msgstr "конечный спрос"
 msgid "Configuration file: '{1}'"
 msgstr "С файлом конфигурации '{1}':"
 
-#: SUTlib.jl:466
+#: SUTlib.jl:482
 msgid "Year {1:d} is not in time series range {2:d}:{3:d}"
 msgstr "Год {1:d} не входит в диапазон временных рядов {2:d}:{3:d}"
 
@@ -56,6 +56,14 @@ msgstr "ВВП (темпы роста)"
 #: Macro.jl:543
 msgid "curr acct surplus"
 msgstr "текущий профицит"
+
+#: SUTlib.jl:354
+msgid ""
+"Exogenous maximum capacity utilization file '{1}' does not exist in the "
+"'inputs' folder"
+msgstr ""
+"Файл экзогенного максимального использования мощности '{1}' не существует в "
+"папке 'inputs'"
 
 #: Macro.jl:443
 msgid "intermediate supply from non-energy sectors"
@@ -69,6 +77,12 @@ msgstr "экспорт"
 msgid "Sending Macro output to LEAP..."
 msgstr "Отправка результатов макроса в LEAP..."
 
+#: SUTlib.jl:347
+msgid ""
+"Exogenous potential output file '{1}' does not exist in the 'inputs' folder"
+msgstr ""
+"Выходной файл экзогенного потенциала '{1}' не существует в папке 'inputs'"
+
 #: Macro.jl:435
 msgid "wage share"
 msgstr "доля заработной платы"
@@ -77,7 +91,7 @@ msgstr "доля заработной платы"
 msgid "positive margins"
 msgstr "положительная маржа"
 
-#: LEAPlib.jl:324
+#: LEAPlib.jl:334
 msgid "energy investment"
 msgstr "инвестиции в энергетику"
 
@@ -109,7 +123,7 @@ msgstr "калибровка"
 msgid "Running LEAP model..."
 msgstr "Запуск модели LEAP..."
 
-#: SUTlib.jl:441
+#: SUTlib.jl:457
 msgid "Value for exchange rate missing in year {1:d}, with no default"
 msgstr ""
 "Значение для обменного курса, отсутствующего в году {1:d}, без значения по "
@@ -119,7 +133,7 @@ msgstr ""
 msgid "sector output"
 msgstr "продукция сектора"
 
-#: SUTlib.jl:787
+#: SUTlib.jl:803
 msgid ""
 "Measure of the significance to the economy of the supply of non-energy goods "
 "and services to the energy sector:"
@@ -159,17 +173,21 @@ msgstr "индекс условий торговли"
 msgid "Cell reference '{1}' is not in the correct format (e.g., 'AB3')"
 msgstr "Ссылка на ячейку '{1}' имеет неправильный формат (например, 'AB3')"
 
-#: SUTlib.jl:550
+#: SUTlib.jl:566
 msgid "Product codes '{1}' in input file '{2}' not valid"
 msgstr "Коды продуктов '{1}' во входном файле '{2}' недопустимы"
 
-#: LEAPlib.jl:146
+#: LEAPlib.jl:156
 msgid "LEAP is not responding"
 msgstr "LEAP не отвечает"
 
 #: Macro.jl:555
 msgid "Running from {1} to {2}:"
 msgstr "Выполняется от {1} до {2}:"
+
+#: SUTlib.jl:361
+msgid "Exogenous real price file '{1}' does not exist in the 'inputs' folder"
+msgstr "Файл экзогенной реальной цены '{1}' не существует в папке 'inputs'"
 
 #: Macro.jl:545
 msgid "central bank rate"
@@ -199,7 +217,7 @@ msgstr "модель"
 msgid "With configuration file '{1}' (including energy sectors):"
 msgstr "С файлом конфигурации '{1}' (включая энергетические сектора):"
 
-#: SUTlib.jl:528
+#: SUTlib.jl:522; SUTlib.jl:544
 msgid "Sector codes '{1}' in input file '{2}' not valid"
 msgstr "Коды секторов '{1}' во входном файле '{2}' недопустимы"
 
@@ -207,7 +225,7 @@ msgstr "Коды секторов '{1}' во входном файле '{2}' н�
 msgid "Simulating for {1}: {2}"
 msgstr "Моделирование для {1}: {2}"
 
-#: SUTlib.jl:786
+#: SUTlib.jl:802
 msgid "This value should be small: {1:.2f}%."
 msgstr "Это значение должно быть небольшим: {1:.2f}%."
 
@@ -215,7 +233,7 @@ msgstr "Это значение должно быть небольшим: {1:.2f
 msgid "Convergence in run number {1} at {2:.2f}% ≤ {3:.2f}% target..."
 msgstr "Конвергенция в прогоне номер {1} при {2:.2f}% ≤ {3:.2f}% цели..."
 
-#: LEAPlib.jl:173
+#: LEAPlib.jl:183
 msgid "Encountered an error when running LEAP: {1}"
 msgstr "При запуске LEAP возникла ошибка: {1}"
 
@@ -231,7 +249,7 @@ msgstr "Подготовка модели..."
 msgid "real GDP"
 msgstr "реальный ВВП"
 
-#: SUTlib.jl:435
+#: SUTlib.jl:451
 msgid ""
 "Value for working age growth rate missing in year {1:d}, with no default"
 msgstr ""
@@ -246,18 +264,22 @@ msgstr "отрицательная маржа"
 msgid "GDP deflator"
 msgstr "Дефлятор ВВП"
 
-#: LEAPlib.jl:364
+#: LEAPlib.jl:374
 msgid ""
 "Getting results from a LEAP version, but no temporary version to revert to"
 msgstr ""
 "Получение результатов от версии LEAP, но нет временной версии для возврата к "
 "ней"
 
+#: SUTlib.jl:340
+msgid "Exogenous investment file '{1}' does not exist in the 'inputs' folder"
+msgstr "Файл экзогенных инвестиций '{1}' не существует в папке 'inputs'"
+
 #: Macro.jl:159
 msgid "Loading data..."
 msgstr "Загрузка данных..."
 
-#: LEAPlib.jl:152
+#: LEAPlib.jl:162
 msgid "Cannot connect to LEAP: {1}"
 msgstr "Невозможно подключиться к LEAP: {1}"
 
@@ -294,7 +316,7 @@ msgstr "Получение результатов LEAP из версии '{1}'..
 msgid "capital-output ratio"
 msgstr "соотношение капитал-выпуск"
 
-#: SUTlib.jl:530; SUTlib.jl:552
+#: SUTlib.jl:524; SUTlib.jl:546; SUTlib.jl:568
 msgid "Sector code '{1}' in input file '{2}' not valid"
 msgstr "Код сектора '{1}' во входном файле '{2}' недопустим"
 

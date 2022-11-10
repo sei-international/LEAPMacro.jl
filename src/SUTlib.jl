@@ -333,17 +333,33 @@ function get_var_params(params::Dict)
     real_price_df = nothing
     if LMlib.haskeyvalue(params, "exog-files")
         file_list = params["exog-files"]
-        if LMlib.haskeyvalue(file_list, "investment") && isfile(joinpath("inputs",file_list["investment"]))
-            investment_df = CSV.read(joinpath("inputs",file_list["investment"]), DataFrame)
+        if LMlib.haskeyvalue(file_list, "investment")
+            if isfile(joinpath("inputs",file_list["investment"]))
+                investment_df = CSV.read(joinpath("inputs",file_list["investment"]), DataFrame)
+            else
+                @warn format(LMlib.gettext("Exogenous investment file '{1}' does not exist in the 'inputs' folder"), file_list["investment"])
+            end
         end
-        if LMlib.haskeyvalue(file_list, "pot_output") && isfile(joinpath("inputs",file_list["pot_output"]))
-            pot_output_df = CSV.read(joinpath("inputs",file_list["pot_output"]), DataFrame)
+        if LMlib.haskeyvalue(file_list, "pot_output")
+            if isfile(joinpath("inputs",file_list["pot_output"]))
+                pot_output_df = CSV.read(joinpath("inputs",file_list["pot_output"]), DataFrame)
+            else
+                @warn format(LMlib.gettext("Exogenous potential output file '{1}' does not exist in the 'inputs' folder"), file_list["pot_output"])
+            end
         end
-        if LMlib.haskeyvalue(file_list, "max_utilization") && isfile(joinpath("inputs",file_list["max_utilization"]))
-            max_util_df = CSV.read(joinpath("inputs",file_list["max_utilization"]), DataFrame)
+        if LMlib.haskeyvalue(file_list, "max_utilization")
+            if isfile(joinpath("inputs",file_list["max_utilization"]))
+                max_util_df = CSV.read(joinpath("inputs",file_list["max_utilization"]), DataFrame)
+            else
+                @warn format(LMlib.gettext("Exogenous maximum capacity utilization file '{1}' does not exist in the 'inputs' folder"), file_list["max_utilization"])
+            end
         end
-        if LMlib.haskeyvalue(file_list, "real_price") && isfile(joinpath("inputs",file_list["real_price"]))
-            real_price_df = CSV.read(joinpath("inputs",file_list["real_price"]), DataFrame)
+        if LMlib.haskeyvalue(file_list, "real_price")
+            if isfile(joinpath("inputs",file_list["real_price"]))
+                real_price_df = CSV.read(joinpath("inputs",file_list["real_price"]), DataFrame)
+            else
+                @warn format(LMlib.gettext("Exogenous real price file '{1}' does not exist in the 'inputs' folder"), file_list["real_price"])
+            end
         end
     end
     

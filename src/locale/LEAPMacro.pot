@@ -31,7 +31,7 @@ msgstr ""
 msgid "Configuration file: '{1}'"
 msgstr ""
 
-#: SUTlib.jl:466
+#: SUTlib.jl:482
 msgid "Year {1:d} is not in time series range {2:d}:{3:d}"
 msgstr ""
 
@@ -41,6 +41,10 @@ msgstr ""
 
 #: Macro.jl:543
 msgid "curr acct surplus"
+msgstr ""
+
+#: SUTlib.jl:354
+msgid "Exogenous maximum capacity utilization file '{1}' does not exist in the 'inputs' folder"
 msgstr ""
 
 #: Macro.jl:443
@@ -55,6 +59,10 @@ msgstr ""
 msgid "Sending Macro output to LEAP..."
 msgstr ""
 
+#: SUTlib.jl:347
+msgid "Exogenous potential output file '{1}' does not exist in the 'inputs' folder"
+msgstr ""
+
 #: Macro.jl:435
 msgid "wage share"
 msgstr ""
@@ -63,7 +71,7 @@ msgstr ""
 msgid "positive margins"
 msgstr ""
 
-#: LEAPlib.jl:324
+#: LEAPlib.jl:334
 msgid "energy investment"
 msgstr ""
 
@@ -91,7 +99,7 @@ msgstr ""
 msgid "Running LEAP model..."
 msgstr ""
 
-#: SUTlib.jl:441
+#: SUTlib.jl:457
 msgid "Value for exchange rate missing in year {1:d}, with no default"
 msgstr ""
 
@@ -99,7 +107,7 @@ msgstr ""
 msgid "sector output"
 msgstr ""
 
-#: SUTlib.jl:787
+#: SUTlib.jl:803
 msgid "Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:"
 msgstr ""
 
@@ -135,16 +143,20 @@ msgstr ""
 msgid "Cell reference '{1}' is not in the correct format (e.g., 'AB3')"
 msgstr ""
 
-#: SUTlib.jl:550
+#: SUTlib.jl:566
 msgid "Product codes '{1}' in input file '{2}' not valid"
 msgstr ""
 
-#: LEAPlib.jl:146
+#: LEAPlib.jl:156
 msgid "LEAP is not responding"
 msgstr ""
 
 #: Macro.jl:555
 msgid "Running from {1} to {2}:"
+msgstr ""
+
+#: SUTlib.jl:361
+msgid "Exogenous real price file '{1}' does not exist in the 'inputs' folder"
 msgstr ""
 
 #: Macro.jl:545
@@ -171,7 +183,7 @@ msgstr ""
 msgid "With configuration file '{1}' (including energy sectors):"
 msgstr ""
 
-#: SUTlib.jl:528
+#: SUTlib.jl:522; SUTlib.jl:544
 msgid "Sector codes '{1}' in input file '{2}' not valid"
 msgstr ""
 
@@ -179,7 +191,7 @@ msgstr ""
 msgid "Simulating for {1}: {2}"
 msgstr ""
 
-#: SUTlib.jl:786
+#: SUTlib.jl:802
 msgid "This value should be small: {1:.2f}%."
 msgstr ""
 
@@ -187,7 +199,7 @@ msgstr ""
 msgid "Convergence in run number {1} at {2:.2f}% ≤ {3:.2f}% target..."
 msgstr ""
 
-#: LEAPlib.jl:173
+#: LEAPlib.jl:183
 msgid "Encountered an error when running LEAP: {1}"
 msgstr ""
 
@@ -203,7 +215,7 @@ msgstr ""
 msgid "real GDP"
 msgstr ""
 
-#: SUTlib.jl:435
+#: SUTlib.jl:451
 msgid "Value for working age growth rate missing in year {1:d}, with no default"
 msgstr ""
 
@@ -215,15 +227,19 @@ msgstr ""
 msgid "GDP deflator"
 msgstr ""
 
-#: LEAPlib.jl:364
+#: LEAPlib.jl:374
 msgid "Getting results from a LEAP version, but no temporary version to revert to"
+msgstr ""
+
+#: SUTlib.jl:340
+msgid "Exogenous investment file '{1}' does not exist in the 'inputs' folder"
 msgstr ""
 
 #: Macro.jl:159
 msgid "Loading data..."
 msgstr ""
 
-#: LEAPlib.jl:152
+#: LEAPlib.jl:162
 msgid "Cannot connect to LEAP: {1}"
 msgstr ""
 
@@ -259,7 +275,7 @@ msgstr ""
 msgid "capital-output ratio"
 msgstr ""
 
-#: SUTlib.jl:530; SUTlib.jl:552
+#: SUTlib.jl:524; SUTlib.jl:546; SUTlib.jl:568
 msgid "Sector code '{1}' in input file '{2}' not valid"
 msgstr ""
 
