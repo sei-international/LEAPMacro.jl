@@ -5,7 +5,10 @@ CurrentModule = LEAPMacro
 # [Preparing a model](@id prep-model)
 Preparing a macroeconomic model is always complicated. The Macro model was built to reduce the complexities to some extent, but they cannot be entirely eliminated.
 
-With that in mind, here are some proposed steps. It is best to start with an existing [configuration file](@ref config), for example the one from the [Freedonia sample model](@ref quick-start):
+!!! tip "Use the PEST parameter estimation tool"
+    The task of calibrating a Macro model can be made easier by [calibrating with PEST](@ref pest-calib), a parameter estimation tool. However, calibration cannot start until the some preliminary steps are carried out. It is a good idea to read this page in its entirety before considering PEST as an option.
+
+Here are some proposed steps. It is best to start with an existing [configuration file](@ref config), for example the one from the [Freedonia sample model](@ref quick-start):
   1. Prepare the [supply-use table](@ref sut);
   1. Estimate or assume [external parameters](@ref params);
   1. Set the `report-diagnostics` value to `true` in the [configuration file](@ref config-output-folders);

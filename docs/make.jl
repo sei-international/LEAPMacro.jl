@@ -42,6 +42,7 @@ makedocs(
             "Running the Macro model" => "running-macro.md"
             "Output files" => "model-outputs.md"
             "Preparing a model" => "prep-model.md"
+            "Calibrating with PEST" => "pest-calib.md"
          ]
         "Technical details" => [
             "Variables" => "variables.md"
