@@ -1,0 +1,89 @@
+pest:
+  program_path: C:\pest17
+  delimiter: "|"
+  precision: single # Can be "single" or "double"
+  allow_restart: true
+  max_iterations: 30 # Per parameter estimation run -- there can be many runs (see p. 78 for 0, -1, -2)
+  # Assign names to parameters and give values as [minimum, initial, maximum]
+  # NOTE: The initial value cannot be zero
+  parameters:
+    gamma_0: [0.040, 0.055, 0.100]
+    i_xr_sens: [-2.0, 0.5, 2.0]
+    util_sens: [0.01, 0.05, 1.00]
+    profit_sens: [0.01, 0.10, 1.25]
+    intrate_sens: [0.01, 0.10, 1.25]
+    growth_adj: [0.01, 0.10, 1.25]
+    infl_pass: [0.6, 0.8, 1.0]
+    lab_ccoeff: [0.3, 0.6, 0.8]
+    pot_out_adj: [-0.10, 0.05, 0.10]
+    tech_par_adj: [0.02, 0.50, 1.00]
+  calibration:
+    years: [2010, 2040]
+    # For files, it is assumed that column 1 is the year
+    # Record observations as year: [value, weight]
+    # To omit an observation, set the weight to zero
+    results:
+      GDPgr:
+          filename: collected_variables_0.csv
+          column: 2
+          observations:
+            2012: [0.074, 1]
+            2013: [0.050, 1]
+            2014: [0.050, 1]
+            2015: [0.049, 1]
+            2016: [0.059, 1]
+            2017: [0.065, 1]
+            2018: [0.031, 1]
+            2019: [0.058, 1]
+            2020: [-0.02, 0.1]
+            2021: [0.02, 0.1]
+            2035: [0.030, 3]
+      LABgr:
+          filename: collected_variables_0.csv
+          column: 7
+          observations:
+            2015: [0.018, 1]
+            2016: [0.023, 1]
+            2017: [0.026, 1]
+            2018: [0.012, 1]
+            2019: [0.027, 1]
+            2020: [-0.017, 0.1]
+
+LEAP-macro:
+  output_folder: Calibration
+  julia:
+    # Note that script must accept thse flags:
+    # usage: pest_run_leapmacro.jl [-c] [-s SLEEP] [-d DATA_FILES [DATA_FILES...]] [-v] [-e] [-r] [-h] [config_file]
+    # positional arguments:
+    #   config_file                                 name of config file (default: "LEAPMacro_params.yml")
+    # optional arguments:
+    #   -c, --calibrate                             flag to do a calibration run
+    #   -s, --sleep SLEEP                           delay between iterations by this many seconds (default: 5)
+    #   -d, --data-files DATA_FILES [DATA_FILES...] name(s) of the data file(s) in the results folder
+    #   -v, --verbose-errors                        send detailed error message to log file
+    #   -e, --include-energy-sectors                include energy sectors in the model simulation
+    #   -r, --resume-if-error                       try to continue if the linear goal program returns an error
+    #   -h, --help                                  show the help message and exit
+    command: julia --sysimage=LEAPMacro-sysimage.so
+    script: pest_run_leapmacro.jl
+    resume_if_error: false
+    verbose_errors: true
+    sleep: 1 # seconds, to avoid collisions with opening & closing files 
+  config:
+    calib:
+      pot_output_adj_factor: pot_out_adj
+    taylor-fcn:
+      neutral_growth_band: [0.02, gamma_0]
+      target_intrate:
+        xr_sens: i_xr_sens
+    investment-fcn:
+          init_neutral_growth: gamma_0
+          util_sens:  util_sens
+          profit_sens: profit_sens
+          intrate_sens: intrate_sens
+          growth_adj: growth_adj
+    wage-fcn:
+        infl_passthrough: infl_pass
+        lab_constr_coeff: lab_ccoeff
+    tech-param-change:
+        rate_constant: tech_par_adj
