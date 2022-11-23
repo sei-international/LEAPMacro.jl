@@ -3,8 +3,9 @@ pest:
   delimiter: "|"
   precision: single # Can be "single" or "double"
   allow_restart: true
-  max_iterations: 30 # Per parameter estimation run -- there can be many runs (see p. 78 for 0, -1, -2)
-  # Assign names to parameters and give values as [minimum, initial, maximum]
+  max_iterations: 30 # Per parameter estimation run -- there can be many runs (see p. 78 in the PEST User Manual Part I for 0, -1, -2)
+  # Assign names to parameters (12 characters maximum)
+  # Give values as [minimum, initial, maximum]
   # NOTE: The initial value cannot be zero
   parameters:
     gamma_0: [0.040, 0.055, 0.100]
@@ -49,7 +50,7 @@ pest:
             2019: [0.027, 1]
             2020: [-0.017, 0.1]
 
-LEAP-macro:
+LEAP-Macro:
   output_folder: Calibration
   julia:
     # Note that script must accept thse flags:
@@ -67,7 +68,7 @@ LEAP-macro:
     command: julia --sysimage=LEAPMacro-sysimage.so
     script: pest_run_leapmacro.jl
     resume_if_error: false
-    verbose_errors: true
+    verbose_errors: false
     sleep: 1 # seconds, to avoid collisions with opening & closing files 
   config:
     calib:
