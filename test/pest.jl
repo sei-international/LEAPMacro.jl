@@ -33,8 +33,8 @@ function delim_param(param_name, params, delimiter, width)
     if !haskey(params, param_name)
         throw(ErrorException("Parameter name '" * param_name * "' is not in the list of parameters [" * join(keys(params),", ") * "]"))
     end
-    if length(param_name) > width
-        throw(ErrorException("Parameter name '" * param_name * "' exceeds maximum of " * string(width) * " characters"))
+    if length(param_name) > 12 # This is PEST's maximum length for a parameter name
+        throw(ErrorException("Parameter name '" * param_name * "' exceeds maximum of 12 characters"))
     end
     return(delimiter * param_name * repeat(" ", width - length(param_name)) * delimiter)
 end
