@@ -3,7 +3,7 @@ CurrentModule = LEAPMacro
 ```
 
 # [Calibrating with PEST](@id pest-calib)
-Calibrating the Macro model can sometimes require very many iterations of _running_ -- _changing parameters_ -- _rerunning_ -- _comparing results_. When this is the case, it is best to take a systematic approach, but that adds the burden of keeping track of prior changes and results. Automated calibration can make the process much easier.
+Calibrating a Macro model can sometimes require very many iterations of _running_ -- _changing parameters_ -- _rerunning_ -- _comparing results_. When this is the case, it is best to take a systematic approach, but that adds the burden of keeping track of prior changes and results. Automated calibration can make the process much easier.
 
 Starting with version 2.2.5, the LEAP-Macro [demonstration files](assets/Macro.zip) come with a Julia script called `pest.jl` that will run the freely-available third-party parameter estimation tool [PEST](https://pesthomepage.org/). Together with its associated files `pest_run_leapmacro.jl` and `pest_config.yml`, the script first builds the input files needed by PEST and then, if PEST installed (see the [PEST download page](https://pesthomepage.org/programs)), it runs the PEST program.
 
@@ -22,7 +22,7 @@ As the description claims, PEST can work with an enormous variety of models by a
 The practical consequence of PEST's flexibility is that its input files can be challenging to build, update, and modify for use in later projects. The `pest.jl` script makes the process much easier for LEAP-Macro applications. The configuration file for the `pest.jl` script, `pest_config.yml`, includes options specific to LEAP-Macro while offering a subset of the PEST options.
 
 !!! tip "Editing the PEST input files"
-    The `pest.jl` script does not prevent you from using the full range of PEST's capabilities. The script pre-fills many PEST parameters with reasonable values. Once the PEST input files are created, you are free to edit the PEST input files and assign different values to the pre-filled parameters. You can then run PEST by hand.
+    The `pest.jl` script pre-fills many PEST parameters with reasonable values. Once the PEST input files are created, you are free to edit the PEST input files and assign different values to the pre-filled parameters. You can then run PEST by hand.
 
 The `pest.jl` program has several command-line options. Each option has a default. The options and their defaults are:
 ```
