@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Calibrating with PEST · LEAP-Macro</title><!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VFCCCS3YR4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-VFCCCS3YR4');
+</script><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">LEAP-Macro</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><span class="tocitem">Getting started</span><ul><li><a class="tocitem" href="../installation/">Installation</a></li><li><a class="tocitem" href="../quickstart/">Quick start</a></li><li><a class="tocitem" href="../leap-exercise/">LEAP exercise</a></li></ul></li><li><span class="tocitem">Model overview</span><ul><li><a class="tocitem" href="../leap-macro-link/">LEAP-Macro link</a></li><li><a class="tocitem" href="../demand-led-growth/">About demand-led growth</a></li></ul></li><li><span class="tocitem">Using LEAP-Macro</span><ul><li><a class="tocitem" href="../config/">Configuration file</a></li><li><a class="tocitem" href="../sut/">Supply-use table</a></li><li><a class="tocitem" href="../params/">External parameter files</a></li><li><a class="tocitem" href="../running-macro/">Running the Macro model</a></li><li><a class="tocitem" href="../model-outputs/">Output files</a></li><li><a class="tocitem" href="../prep-model/">Preparing a model</a></li><li class="is-active"><a class="tocitem" href>Calibrating with PEST</a><ul class="internal"><li><a class="tocitem" href="#About-PEST"><span>About PEST</span></a></li><li><a class="tocitem" href="#About-LEAP-Macro&#39;s-PEST-script"><span>About LEAP-Macro&#39;s PEST script</span></a></li><li><a class="tocitem" href="#The-pest_config.yml-file"><span>The <code>pest_config.yml</code> file</span></a></li><li><a class="tocitem" href="#Final-comments"><span>Final comments</span></a></li></ul></li></ul></li><li><span class="tocitem">Technical details</span><ul><li><a class="tocitem" href="../variables/">Variables</a></li><li><a class="tocitem" href="../lgp/">Linear goal program</a></li><li><a class="tocitem" href="../dynamics/">Dynamics</a></li><li><a class="tocitem" href="../isolate-energy/">Isolating the energy sector</a></li><li><a class="tocitem" href="../process-sut/">Processing the supply-use table</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Using LEAP-Macro</a></li><li class="is-active"><a href>Calibrating with PEST</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Calibrating with PEST</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/sei-international/LEAPMacro.jl/blob/main/docs/src/pest-calib.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="pest-calib"><a class="docs-heading-anchor" href="#pest-calib">Calibrating with PEST</a><a id="pest-calib-1"></a><a class="docs-heading-anchor-permalink" href="#pest-calib" title="Permalink"></a></h1><p>Calibrating a Macro model can sometimes require very many iterations of <em>running</em> – <em>changing parameters</em> – <em>rerunning</em> – <em>comparing results</em>. When this is the case, it is best to take a systematic approach, but that adds the burden of keeping track of prior changes and results. Automated calibration can make the process much easier.</p><p>Starting with version 2.2.5, the LEAP-Macro <a href="../assets/Macro.zip">demonstration files</a> come with a Julia script called <code>pest.jl</code> that will run the freely-available third-party parameter estimation tool <a href="https://pesthomepage.org/">PEST</a>. Together with its associated files <code>pest_run_leapmacro.jl</code> and <code>pest_config.yml</code>, the script first builds the input files needed by PEST and then, if PEST installed (see the <a href="https://pesthomepage.org/programs">PEST download page</a>), it runs the PEST program.</p><h2 id="About-PEST"><a class="docs-heading-anchor" href="#About-PEST">About PEST</a><a id="About-PEST-1"></a><a class="docs-heading-anchor-permalink" href="#About-PEST" title="Permalink"></a></h2><p>PEST was first written in 1994. Since then, it has been under continual development. It is widely used in environmental applications. From the <a href="https://pesthomepage.org/">PEST homepage</a>,</p><blockquote><p>“PEST” refers to a software package and to a suite of utility programs which supports it. Collectively, these are essential tools in decision-support environmental modelling.</p><p>PEST, the software package, automates calibration, and calibration-constrained uncertainty analysis of any numerical model. It interacts with a model through the model’s own input and output files. While estimating or adjusting its parameters, it runs a model many times. These model runs can be conducted either in serial or in parallel. PEST records what it does in easily-understood output files.</p></blockquote><p>The software suite supports and extends the core PEST functionality. The full PEST suite is quite powerful, but LEAP-Macro&#39;s <code>pest.jl</code> script uses only one tool in the suite, <code>pestchek.exe</code>, to check that the PEST input files are correctly prepared. It then runs the main program <code>pest.exe</code> in serial mode.</p><p>As the description claims, PEST can work with an enormous variety of models by accommodating a wide range of input and output files. The only requirement is that they are text files. Beyond that, PEST can work with nearly any file format. Moreover, PEST has numerous options to overcome problems in specific models, or to take advantage of their features.</p><h2 id="About-LEAP-Macro&#39;s-PEST-script"><a class="docs-heading-anchor" href="#About-LEAP-Macro&#39;s-PEST-script">About LEAP-Macro&#39;s PEST script</a><a id="About-LEAP-Macro&#39;s-PEST-script-1"></a><a class="docs-heading-anchor-permalink" href="#About-LEAP-Macro&#39;s-PEST-script" title="Permalink"></a></h2><p>The practical consequence of PEST&#39;s flexibility is that its input files can be challenging to build, update, and modify for use in later projects. The <code>pest.jl</code> script makes the process much easier for LEAP-Macro applications. The configuration file for the <code>pest.jl</code> script, <code>pest_config.yml</code>, includes options specific to LEAP-Macro while offering a subset of the PEST options.</p><div class="admonition is-success"><header class="admonition-header">Editing the PEST input files</header><div class="admonition-body"><p>The <code>pest.jl</code> script pre-fills many PEST parameters with reasonable values. Once the PEST input files are created, you are free to edit the PEST input files and assign different values to the pre-filled parameters. You can then run PEST by hand.</p></div></div><p>The <code>pest.jl</code> program has several command-line options. Each option has a default. The options and their defaults are:</p><pre><code class="nohighlight hljs">usage: pest.jl [-p PEST_CONFIG_FILE] [-c CONTROL_FILE] [-h] [config_file]
+
+positional arguments:
+  config_file                               name of LEAP-Macro config file (default: &quot;LEAPMacro_params.yml&quot;)
+
+optional arguments:
+  -p, --pest-config-file PEST_CONFIG_FILE   name of PEST config file (default: &quot;pest_config.yml&quot;)
+  -c, --control-file CONTROL_FILE           name to assign the control file (default: &quot;LEAPMacro_control.pst&quot;)
+  -h, --help                                show this help message and exit</code></pre><p>Below is part of the output from running the <code>pest.jl</code> script included in the LEAP-Macro demonstration files. The model is called 94 times, which would have taken a great deal of time if done by hand, and the optimum values for the parameters are chosen in a systematic way. Some points to note:</p><ul><li>The PEST program must be downloaded from the <a href="https://pesthomepage.org/programs">PEST website</a> and installed before the script can be run, and the script will issue an error and halt if <code>pest.exe</code> cannot be found;</li><li>The script builds three kinds of files: a template file (ending in <code>.tpl</code>), instruction files (ending in <code>.ins</code>), and a control file (ending in <code>.pst</code>);</li><li>As recorded in the <code>Model command line:</code> the PEST control file calls the script <code>pest_run_leapmacro.jl</code>, which runs the Macro model;</li><li>The model is run with a sysimage <code>LEAPMacro-sysimage.so</code>, which dramatically reduces the time it takes to load LEAP-Macro (see the Tip on &quot;Speeding up LEAPMacro with a pre-compiled system image&quot; in the page on <a href="../running-macro/#running-macro">running the Macro model</a>);</li><li>The <code>pestchek.exe</code> program issues a warning, but that is not a problem: both PEST and the script allow output files to be used multiple times;</li><li>Information on the calibration is provided in files ending in <code>.rec</code>, <code>.sen</code>, <code>.res</code>, and <code>.svd</code>. (PEST produces a large number of other files as well.)</li></ul><pre><code class="nohighlight hljs">C:\path\to\model&gt; julia .\pest.jl
+Generating PEST template file...
+Generating PEST instruction file(s)...
+Generating PEST control file...
+Checking files...
+
+PESTCHEK Version 17.3. Watermark Numerical Computing.
+
+Errors -----&gt;
+No errors encountered.
+
+Warnings -----&gt;
+Model output file collected_variables_0.csv read using more than one
+  instruction file.
+Running PEST...
+
+PEST Version 17.3. Watermark Numerical Computing.
+
+PEST is running in parameter estimation mode.
+
+PEST run record: case leapmacro_control
+(See file leapmacro_control.rec for full details.)
+
+Model command line:
+julia --sysimage=LEAPMacro-sysimage.so pest_run_leapmacro.jl LEAPMacro_params_calib.yml -c -e -v -s 1 -d collected_variables_0.csv
+
+Running model .....
+
+   Running model 1 time....Running LEAP-Macro...
+With configuration file &#39;LEAPMacro_params_calib.yml&#39; (including energy sectors):
+Macro model run (0)...completed
+
+   Sum of squared weighted residuals (ie phi)               =  3.68308E-03
+   Contribution to phi from observation group &quot;labgr&quot;       =  5.18225E-04
+   Contribution to phi from observation group &quot;gdpgr&quot;       =  3.16486E-03</code></pre><p>...<em>over 400 lines omitted</em>...</p><pre><code class="nohighlight hljs">   No more lambdas: relative phi reduction between lambdas less than 0.0300
+   Lowest phi this iteration:  2.67007E-03
+   Maximum relative change:  2.426     [&quot;util_sens&quot;]
+                          phi was achieved.
+                          phi was achieved.
+   Total model calls:     94
+Running model one last time with best parameters.....Running LEAP-Macro...      
+With configuration file &#39;LEAPMacro_params_calib.yml&#39; (including energy sectors):
+
+Macro model run (0)...completed
+
+
+Recording run statistics .....
+
+See file leapmacro_control.rec for full run details.
+See file leapmacro_control.sen for parameter sensitivities.
+See file leapmacro_control.seo for observation sensitivities.
+See file leapmacro_control.res for residuals.
+See file leapmacro_control.svd for history of SVD process.</code></pre><h2 id="The-pest_config.yml-file"><a class="docs-heading-anchor" href="#The-pest_config.yml-file">The <code>pest_config.yml</code> file</a><a id="The-pest_config.yml-file-1"></a><a class="docs-heading-anchor-permalink" href="#The-pest_config.yml-file" title="Permalink"></a></h2><p>All of the operation of the <code>pest.jl</code> script is controled from a configuration file. By default, it is called <code>pest_config.yml</code>. The configuration file has two main blocks, <code>pest:</code> and <code>LEAP-Macro</code>:</p><pre><code class="language-yaml hljs">pest:
+  program_path: \path\to\pest\program
+  ...
+LEAP-Macro:
+  output_folder: Calibration
+  ...</code></pre><p>The structure of each of the blocks can be illustrated using the example from the <a href="../assets/Macro.zip">demonstration files</a>. If PEST is installed, this script can be run from the command line using the Macro model distributed in the demonstration files.</p><h3 id="The-pest:-block"><a class="docs-heading-anchor" href="#The-pest:-block">The <code>pest:</code> block</a><a id="The-pest:-block-1"></a><a class="docs-heading-anchor-permalink" href="#The-pest:-block" title="Permalink"></a></h3><p>The <code>pest:</code> block starts with some basic settings. The <code>program_path:</code> should point to the folder where you have installed the <a href="https://pesthomepage.org/programs">PEST programs</a>. The other settings can be changed if desired, but they are suitable for calibration runs.</p><pre><code class="language-yaml hljs">pest:
+  program_path: C:\pest17
+  delimiter: &quot;|&quot;
+  precision: single # Can be &quot;single&quot; or &quot;double&quot;
+  allow_restart: true
+  max_iterations: 30 # Per parameter estimation run -- there can be many runs (see p. 78 in the PEST User Manual Part I for 0, -1, -2)</code></pre><p>The next sub-block, <code>parameters:</code> provides names, initial values, and ranges for the parameters that will be adjusted between runs of the model. Any name will do, as long as it consists of letters, digits, and underscores, and does not exceed 12 characters in length.</p><p>Values are entered as <code>[minimum, initial, maximum]</code>. Given the assumptions made by the <code>pest.jl</code> script, the initial value cannot be zero. It should also not be too small in comparison to the maximum value. If the initial value must be zero or very small, then the PEST control file generate by the <code>pest.jl</code> script (which will have a <code>.pst</code> extension) can be edited by hand.</p><pre><code class="language-yaml hljs">  # Assign names to parameters (12 characters maximum)
+  # Give values as [minimum, initial, maximum]
+  # NOTE: The initial value cannot be zero
+  parameters:
+    gamma_0: [0.040, 0.055, 0.100]
+    i_xr_sens: [-2.0, 0.5, 2.0]
+    util_sens: [0.01, 0.05, 1.00]
+    profit_sens: [0.01, 0.10, 1.25]
+    intrate_sens: [0.01, 0.10, 1.25]
+    growth_adj: [0.01, 0.10, 1.25]
+    infl_pass: [0.6, 0.8, 1.0]
+    lab_ccoeff: [0.3, 0.6, 0.8]
+    pot_out_adj: [-0.10, 0.05, 0.10]
+    tech_par_adj: [0.02, 0.50, 1.00]</code></pre><p>The next sub-block, <code>calibration:</code>, specifies the years for the calibration run and observations to compare to the results. Some points to note:</p><ul><li>The range given by <code>calibration: =&gt; years:</code> may exceed the years of observations, but all observations must lie within that range (e.g., in the sample configuration file, the initial year is 2010, while the first year of data is 2012);</li><li>Results are assigned a name (e.g., <code>GDPgr</code>), which is case-insensitive: <code>GDPgr</code> is treated the same as <code>gdpgr</code>;</li><li>Each result variable is taken from a single column in one of Macro&#39;s output files from <a href="../model-outputs/#model-outputs-results">the <code>results</code> folder</a>.</li></ul><p>Values are provided as <code>[value, weight]</code>. Weights can often be set to one, but there are exceptions:</p><ul><li>In the example below, the years 2020 and 2021 are outliers (because of COVID-19), so observations are given a low weight;</li><li>In the example below, it is presumed that there is a long-run growth target of 3.0%/year around 2035, so this value is entered and given a weight of 3;</li><li>While the values in the example are growth rates, and hence around the same magnitude in any year, values that are growing over time can be down-weighted by an average growth index (not shown in the example).</li></ul><pre><code class="language-yaml hljs">  calibration:
+    years: [2010, 2040]
+    # For files, it is assumed that column 1 is the year
+    # Record observations as year: [value, weight]
+    # To omit an observation, set the weight to zero
+    results:
+      GDPgr:
+          filename: collected_variables_0.csv
+          column: 2
+          observations:
+            2012: [0.074, 1]
+            2013: [0.050, 1]
+            ...
+            2019: [0.058, 1]
+            2020: [-0.02, 0.1]
+            2021: [0.02, 0.1]
+            2035: [0.030, 3]
+      LABgr:
+          filename: collected_variables_0.csv
+          column: 7
+          observations:
+            2015: [0.018, 1]
+            2016: [0.023, 1]
+            ...
+            2019: [0.027, 1]
+            2020: [-0.017, 0.1]</code></pre><h3 id="The-LEAP-Macro:-block"><a class="docs-heading-anchor" href="#The-LEAP-Macro:-block">The <code>LEAP-Macro:</code> block</a><a id="The-LEAP-Macro:-block-1"></a><a class="docs-heading-anchor-permalink" href="#The-LEAP-Macro:-block" title="Permalink"></a></h3><p>The <code>LEAP-Macro:</code> block contains information for running the Macro model. It starts with some general information, including the name for the output folder and commands for running Julia. Note that the entry for <code>julia: =&gt; command:</code>, which is the command for running the Julia program, has two important features. First, it assumes that Julia is on the Windows path, as specified by the PATH environment variable – if not, then the full path to the Julia executable should be provided. Second, it calls a sysimage. This is highly recommended, because it saves a great deal of running time: see the Tip on &quot;Speeding up LEAPMacro with a pre-compiled system image&quot; in the page on <a href="../running-macro/#running-macro">running the Macro model</a>.</p><p>The <code>julia: =&gt; resume_if_error:</code> entry should be set to <code>true</code> if the calibration halts due to errors when running PEST. The control file generated by the <code>pest.jl</code> script stipulates that PEST should attempt to restart the calculation with different starting parameter values in case Macro encounters an error (through the <code>lamforgive</code> and  <code>derforgive</code> settings). However, if that is insufficient, setting <code>resume_if_error:</code> to <code>true</code> tells Macro to attempt to recover in case of an error. This is less satisfactory, because some output files will be incomplete, but may be more robust.</p><p>The <code>julia: =&gt; verbose_errors:</code> entry can be set to <code>true</code> to show where in the LEAP-Macro Julia code an error originated. It is useful for developers modifying the LEAP-Macro code, but less useful for standard LEAP-Macro applications.</p><p>The <code>julia: =&gt; sleep:</code> entry needs to be changed only if time lags from writing and reading files leads to collisions. These will sometimes show up as error messages about accessing files. If such messages appear, then the sleep time can be increased.</p><pre><code class="language-yaml hljs">LEAP-Macro:
+  output_folder: Calibration
+  julia:
+    # Note that script must accept thse flags:
+    # usage: pest_run_leapmacro.jl [-c] [-s SLEEP] [-d DATA_FILES [DATA_FILES...]] [-v] [-e] [-r] [-h] [config_file]
+    # positional arguments:
+    #   config_file                                 name of config file (default: &quot;LEAPMacro_params.yml&quot;)
+    # optional arguments:
+    #   -c, --calibrate                             flag to do a calibration run
+    #   -s, --sleep SLEEP                           delay between iterations by this many seconds (default: 5)
+    #   -d, --data-files DATA_FILES [DATA_FILES...] name(s) of the data file(s) in the results folder
+    #   -v, --verbose-errors                        send detailed error message to log file
+    #   -e, --include-energy-sectors                include energy sectors in the model simulation
+    #   -r, --resume-if-error                       try to continue if the linear goal program returns an error
+    #   -h, --help                                  show the help message and exit
+    command: julia --sysimage=LEAPMacro-sysimage.so
+    script: pest_run_leapmacro.jl
+    resume_if_error: false
+    verbose_errors: false
+    sleep: 1 # seconds, to avoid collisions with opening &amp; closing files </code></pre><p>The next (and final) sub-block is called <code>config:</code>. Entries in the sub-block follow the structure of a LEAP-Macro configuration file. The <code>pest.jl</code> script takes a full LEAP-Macro configuration file as a starting point, appends <code>_calibration</code> to the name of the file and gives it a PEST template extension (<code>.tpl</code>). By default the starting configuration file is called <code>LEAPMacro_params.yml</code>, but it can be assigned a different file when running the <code>pest.jl</code> program by calling, e.g., <code>\path\to\model&gt;julia pest.jl MyConfigFile.yml</code>.</p><p>The PEST template file is exactly like the starting LEAP-Macro configuration file, with these changes:</p><ul><li>It starts with a line reading <code>ptf |</code>, where &quot;|&quot; is the delimiter specified near the start of the <code>pest:</code> block;</li><li>The start and end years are given by the values specified in the <code>pest: =&gt; calibration:</code> block;</li><li>Any numerical values specified in the <code>config:</code> block, below, replace the values in the starting configuration file;</li><li>Any text labels, e.g., <code>label_name</code>, in the <code>config:</code> block, below, appear in the template as <code>| label_name  |</code>.</li></ul><p>Where values are replaced, the original values are shown in a comment.</p><p>The text labels correspond to the names in the <code>pest: =&gt; parameters:</code> block described above. The <code>pest.jl</code> script generates an error if a label in the <code>config:</code> block has no corresponding entry in the <code>pest: =&gt; parameters:</code> block. The PEST program generates an error if an entry in the <code>pest: =&gt; parameters:</code> block does not appear in the template file.</p><pre><code class="language-yaml hljs">  config:
+    calib:
+      pot_output_adj_factor: pot_out_adj
+    taylor-fcn:
+      neutral_growth_band: [0.02, gamma_0]
+      target_intrate:
+        xr_sens: i_xr_sens
+    investment-fcn:
+          init_neutral_growth: gamma_0
+          util_sens:  util_sens
+          profit_sens: profit_sens
+          intrate_sens: intrate_sens
+          growth_adj: growth_adj
+    wage-fcn:
+        infl_passthrough: infl_pass
+        lab_constr_coeff: lab_ccoeff
+    tech-param-change:
+        rate_constant: tech_par_adj</code></pre><h3 id="The-LEAP-Macro-configuration-file-generated-by-PEST"><a class="docs-heading-anchor" href="#The-LEAP-Macro-configuration-file-generated-by-PEST">The LEAP-Macro configuration file generated by PEST</a><a id="The-LEAP-Macro-configuration-file-generated-by-PEST-1"></a><a class="docs-heading-anchor-permalink" href="#The-LEAP-Macro-configuration-file-generated-by-PEST" title="Permalink"></a></h3><p>The PEST calibration procedure results in a calibrated LEAP-Macro configuration file. It will be named <code>[starting_config_file]_calib.yml</code>, where <code>[starting_config_file].yml</code> is the starting configuration file – by default, this will be <code>LEAPMacro_params.yml</code>. The final calibrated values will be assigned to parameters, with the original values from the starting configuration file stored in comments. Here is a selection from the file generated by the LEAP-Macro <a href="../assets/Macro.zip">demonstration files</a>: </p><pre><code class="language-yaml hljs">#---------------------------------------------------------------------------
+# Parameters for the investment function
+#---------------------------------------------------------------------------
+investment-fcn:
+    # Starting point for the autonomous investment growth rate: also the initial target GDP growth rate for the Taylor rule
+    init_neutral_growth:   4.9005046E-02 # 0.060
+    # Change in induced investment with a change in utilization
+    util_sens:   4.1015054E-01 # 0.07
+    # Change in induced investment with a change in the profit rate
+    profit_sens:   9.8640964E-01 # 0.05
+    # Change in induced investment with a change in the central bank lending rate
+    intrate_sens:   1.1000000E-01 # 0.20
+    # Rate of adjustment of the autonomous investment rate towards the actual investment rate
+    growth_adj:   4.7916096E-02 # 0.10</code></pre><h2 id="Final-comments"><a class="docs-heading-anchor" href="#Final-comments">Final comments</a><a id="Final-comments-1"></a><a class="docs-heading-anchor-permalink" href="#Final-comments" title="Permalink"></a></h2><p>Automated calibration can substantially speed up the calibration process. However, it is not a substitute for understanding the model. It is important to start calibrating by hand, to gain some intuition in how the Macro model responds to parameter changes.</p><p>Even when running the <code>pest.jl</code> script, it may be necessary to make make multiple changes to the <code>pest_config.yml</code> file. If parameter estimates appear precisely at the minimum or maximum values specified in the configuration file, and if the minimum or maximum are not &quot;hard&quot; values determined by fundamentals, then the range should likely be expanded in order to find the optimumum.</p><p>In short, model calibration is challenging, even with a tool as powerful as PEST. But it can substantially shorten the process.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../prep-model/">« Preparing a model</a><a class="docs-footer-nextpage" href="../variables/">Variables »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Wednesday 23 November 2022 19:29">Wednesday 23 November 2022</span>. Using Julia version 1.8.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
