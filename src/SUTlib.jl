@@ -203,7 +203,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["labor-prod-fcn"]["labor_prod_gr_default"] = 0.0
     end
     if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_coeff_default")
-        global_params["labor-prod-fcn"]["KV_coeff_default"] = 0.0
+        global_params["labor-prod-fcn"]["KV_coeff_default"] = 0.5
     end
     if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_intercept_default")
         global_params["labor-prod-fcn"]["KV_intercept_default"] = 0.0
