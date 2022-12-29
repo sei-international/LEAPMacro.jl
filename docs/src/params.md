@@ -5,7 +5,7 @@ CurrentModule = LEAPMacro
 # [External parameter files](@id params)
 External parameters that are specified for all products, all sectors, or over time, are supplied in three comma-separated variable (CSV) files in the `inputs` folder. The files provided with the Freedonia sample model have the names `product_parameters.csv`, `sector_parameters.csv`, and `time_series.csv`. However, the names are set in the configuration file's [general settings](@ref config-required-input-files). That means that different external parameter files can be used for different scenarios.
 
-The other files in the Freedonia sample model `input` folder include the [supply-use table](@ref sut) and some [optional input files](@ref params-optional-input-files), which are described below.
+The other files in the Freedonia sample model `input` folder include the [supply-use table](@ref sut), which is described on a separate page, and some [optional input files](@ref params-optional-input-files), which are described below.
 
 !!! info "Comma-separated variable (CSV) files"
     CSV-formatted files are plain text files that can be viewed in a text editor. They can also be opened and modified in Excel, Google Sheets, or other spreadsheet program, which is a convenient way to edit them. 
@@ -45,20 +45,25 @@ The structure of the sector parameters file is shown below. There are as many ro
 
 In addition to the sector codes and names, this file contains only a single parameter for each sector, the depreciation rate. Where available, this can be calculated from national statistics. Otherwise, the `delta` parameter reported for the whole economy in the [Penn World Table](https://www.rug.nl/ggdc/productivity/pwt/) can be applied to each sector.
 
-| `code`      | `name`       | `depr_rate` |
-|:------------|:-------------|------------:|
-| CODE1       | Name 1       |        dr_1 |
-| CODE2       | Name 2       |        dr_2 |
-| ...         | ...          |         ... |
+| `code`      | `name`       | `depr_rate` | `[KV_coeff]` | `[KV_intercept]` |  `[labor_prod_gr`] |   `[empl0]` |
+|:------------|:-------------|------------:|-------------:|-----------------:|-------------------:|------------:|
+| CODE1       | Name 1       |        dr_1 |    \[kvc_1\] |        \[kvi_1\] |         \[lpgr_1\] | \[empl0_1\] |
+| CODE2       | Name 2       |        dr_2 |    \[kvc_2\] |        \[kvi_2\] |         \[lpgr_2\] | \[empl0_2\] |
+| ...         | ...          |         ... |          ... |              ... |                ... |         ... |
 
 The corresponding [variable](@ref exog-param-vars) is:
   * `depr_rate` : ``\underline{\delta}_i`` for sector ``i``
+  * `KV_coeff` : ``\underline{\alpha}^\text{KV}``
+  * `KV_intercept` : ``\underline{\beta}^\text{KV}``
+  * `empl0` : ``L_{i0}``
+  * `labor_prod_gr` : ``\lambda_i``
+
 
 Here is the example from the Freedonia sample model:
 ![Freedonia sector_parameters file](assets/images/sector_parameters.png)
 
 ## [Time series](@id params-time-series)
-The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-wages-labor-prod). The final two columns are optional, so they are bracketed. If they are missing, then the default values from the [configuration file](@ref config-empl-labprod-wage) are used for all years.
+The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-labor-prod). The final two columns are optional, so they are bracketed. If they are missing, then the default values from the [configuration file](@ref config-empl-labprod-wage) are used for all years.
 
 !!! info "Exchange rates and supply-use tables"
     Supply-use tables have entries that are all in the same currency, usually but not always the national (domestic) currency. Exchange rates express the domestic currency in terms of a foreign currency, such as the US dollar, the Euro, the Yen, or a mixture of currencies (a currency "basket"). In Macro, exchange rates are converted into an index to ensure consistent currency units.
@@ -67,20 +72,20 @@ Scenarios for the world economic growth rate can be drawn from other studies, su
 
 Other parameters have less well-established sources of estimates. The labor productivity parameters (the Kaldor-Verdoorn parameters `KV_coeff` and `KV_intercept`) might well be assumed constant, possibly estimated from historical data or drawn from studies such as [Estimating Kaldor-Verdoorn’s law across countries in different stages of development](https://www.anpec.org.br/encontro/2014/submissao/files_I/i9-0ed7d252394aed6039f6af0e4ed51fc6.pdf) by Guilherme Magacho. Assumptions regarding the world inflation rate and the exchange rate can be based on historical patterns, other modeling studies, or consultation with experts.
 
-| `year` | `world_gr` | `world_infl_rate` | `working_age_gr` | `exchange_rate` | `[KV_coeff]` | `[KV_intercept]` |
-|-------:|-----------:|------------------:|-----------------:|----------------:|-------------:|-----------------:|
-|    y_1 |      wgr_1 |             wir_1 |           wagr_1 |            xr_1 |    \[kvc_1\] |        \[kvi_1\] |
-|    y_2 |      wgr_2 |             wir_2 |           wagr_2 |            xr_2 |    \[kvc_2\] |        \[kvi_2\] |
-|    ... |        ... |               ... |              ... |             ... |          ... |              ... |
-|  y_*N* |    wgr_*N* |           wir_*N* |         wagr_*N* |          xr_*N* |  \[kvc_*N*\] |      \[kvi_*N*\] |
+| `year` | `world_gr` | `world_infl_rate` | `working_age_gr` | `exchange_rate` | `[KV_coeff]` | `[KV_intercept]` |  `[labor_prod_gr`] |
+|-------:|-----------:|------------------:|-----------------:|----------------:|-------------:|-----------------:|-------------------:|
+|    y_1 |      wgr_1 |             wir_1 |           wagr_1 |            xr_1 |    \[kvc_1\] |        \[kvi_1\] |         \[lpgr_1\] |
+|    y_2 |      wgr_2 |             wir_2 |           wagr_2 |            xr_2 |    \[kvc_2\] |        \[kvi_2\] |         \[lpgr_2\] |
+|    ... |        ... |               ... |              ... |             ... |          ... |              ... |                ... |
+|  y_*N* |    wgr_*N* |           wir_*N* |         wagr_*N* |          xr_*N* |  \[kvc_*N*\] |      \[kvi_*N*\] |       \[lpgr_*N*\] |
 
 The corresponding [variables](@ref exog-param-vars) are:
   * `world_gr` : ``\underline{\gamma}^\text{world}``
   * `world_infl_rate` : ``\underline{\pi}_{w,k}`` (applied uniformly to all products ``k``, but modified by an optional file specifying [world real price trends for selected tradeables](@ref params-optional-price-trend))
   * `working_age_gr` : ``\underline{\hat{N}}``
   * `exchange_rate` : ``\underline{e}``
-  * `KV_coeff` : ``\underline{\alpha}_\text{KV}``
-  * `KV_intercept` : ``\underline{\beta}_\text{KV}``
+  * `KV_coeff` : ``\underline{\alpha}^\text{KV}``
+  * `KV_intercept` : ``\underline{\beta}^\text{KV}``
 
 Here is the example from the Freedonia sample model:
 ![Freedonia time_series file](assets/images/time_series.png)

@@ -211,14 +211,14 @@ investment-fcn:
 ```
 
 ### [Employment, labor productivity, and wages](@id config-empl-labprod-wage)
-The next block contains default parameters for the labor productivity function (following the Kaldor-Verdoorn law[^1]) and for the function that determines the growth rate of the wage. See the page on [model dynamics](@ref dynamics-wages-labor-prod) for details.
+The next block contains default parameters for the labor productivity function (following the Kaldor-Verdoorn law[^1]) and for the function that determines the growth rate of the wage. See the page on [model dynamics](@ref dynamics-labor-prod) for details.
 
 For labor productivity, the default parameters are used if they are not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series).
 
 The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
   * For labor productivity:
-    - `KV_coeff_default` : ``\underline{\alpha}_\text{KV}``
-    - `KV_intercept_default` : ``\underline{\beta}_\text{KV}``
+    - `KV_coeff_default` : ``\underline{\alpha}^\text{KV}``
+    - `KV_intercept_default` : ``\underline{\beta}^\text{KV}``
   * For the wage:
     - `infl_passthrough` : ``\underline{h}``
     - `lab_constr_coeff` : ``\underline{k}``
