@@ -81,7 +81,37 @@ The multiple of two is somewhat arbitrary, because this simply sets a scale.
 
 [^1]: Armington elasticities play an important role in trade models, but estimates very widely, and are mainly available for high-income countries. As a general rule, long-run elasticities (e.g., annual) are larger than short-run elasticities (e.g., monthly), and estimates tend to increase with the level of disaggregation of the data. Different statistical models can give very different results (e.g., estimates from systems of supply-demand equations tend to be about twice as large as estimates based on demand alone). If possible, find estimates for the country where Macro is being applied and at a similar level of disaggregation.
 
-## [Wages and labor productivity](@id dynamics-wages-labor-prod)
+## [Labor productivity](@id dynamics-labor-prod)
+The Macro model offers two ways to specify labor productivity growth: by 1) setting a labor productivity growth rate; or 2) allowing labor productivity to respond positively to economic growth, following the Kaldor-Verdoorn law[^2]. In either specification, parameters can be specified either by sector or for the whole economy. Sectoral labor productivity is written with a subscript, ``\lambda_i``, while economy-wide labor productivity is written with no subscript, ``\lambda.``
+
+When Kaldor-Verdoorn parameters are specified by sector, the Macro model calculates
+```math
+\hat{\lambda}_i = \underline{\alpha}^\text{KV}_i \hat{g}_i + \underline{\beta}^\text{KV}_i.
+```
+When specified at the level of the whole economy, economy-wide labor productivity growth responds to growth in GDP,
+```math
+\hat{\lambda} = \underline{\alpha}^\text{KV} \hat{Y} + \underline{\beta}^\text{KV}.
+```
+If labor productivity is specified as a constant value, either by sector or for the whole economy, Macro still applies the Kaldor-Verdoorn formula, but with ``\underline{\alpha}^\text{KV}_i = 0`` and ``\underline{\beta}^\text{KV}_i`` equal to the specified labor productivity growth rate.
+
+When productivity growth is specified for the economy as a whole, productivity growth in each sector is set to the economy-wide value, ``\hat{\lambda}_i = \hat{\lambda}``.
+
+!!! info "Formulations of the Kaldor-Verdoorn law"
+    The Kaldor-Verdoorn law has been expressed in multiple ways. The formulation used in the Macro model is one of the most common. Another is to write the equation in terms of employment growth ``\hat{L} = \hat{Y} - \hat{\lambda}``, in which case the coefficient on the growth rate is ``1 - \underline{\alpha}^\text{KV}``.
+
+When parameters are specified by sector, employment, ``L``, is the sum of sector employment ``L_i``. For this reason, initial values for sectoral employment ``\underline{L}_{i0}`` must be specified for sectoral labor productivity growth. Employment growth in sector ``i`` is calculated as
+```math
+\hat{L}_i = \frac{1 + \hat{g}_i}{1 + \hat{\lambda}_i} - 1.
+```
+From this it can be seen that if the Kaldor-Verdoorn law is applied, then output growth contributes both positively (through the numerator) and negatively (through the denominator) to sectoral employment growth. The closer the Kaldor-Verdoorn coefficient ``\underline{\alpha}^\text{KV}_i`` is to one, the less rapidly employment will grow when a sector expands. That is, a high value for the Kaldor-Verdoorn coefficient means that a sector is productivity-enhancing, but might not be labor-absorbing.
+
+For the sectoral labor productivity model, the growth rate of total employment, ``L``, can be calculated from ``L = \sum_i L_i`` at two adjacent time steps. When labor productivity is specified at the level of the whole economy, total employment growth is calculated as
+```math
+\hat{L} = (1 + \hat{Y})/(1 + \hat{\lambda}) - 1.
+```
+[^2]: The [Kaldor-Verdoorn law](https://www.encyclopedia.com/social-sciences/applied-and-social-sciences-magazines/verdoorns-law) states that the growth rate of labor productivity is an increasing function of the growth rate of output. The coefficient relating output growth to labor productivity growth is often taken as a measure of increasing returns. If it is positive, then there are both static and dynamic increasing returns to growth. In the context of the Macro model, these take the form of learning-by-doing, where productivity increases with use of existing technology; and embodied technological change, where productivity increases with the introduction of improved technology.
+
+## [Wages](@id dynamics-wages)
 The wage share ``\omega_i`` in sector ``i`` is given by
 ```math
 \omega_i = \frac{W_i}{g_i}.
@@ -90,25 +120,18 @@ The wage bill ``W_i`` is by definition equal to the wage rate ``w_i`` multiplied
 ```math
 \omega_i = \frac{w_i L_i}{\overline{P}_g\lambda_i L_i} = \frac{1}{\overline{P}_g}\frac{w_i}{\lambda_i}.
 ```
-In the Macro model, labor productivity is assumed to rise with economic growth, following the Kaldor-Verdoorn law[^2]. While Kaldor-Verdoorn coefficients are observed to differ between sectors -- for example, with a higher responsiveness in industry than services -- data are limited. For that reason, the Macro model calculates the growth rate of economy-wide average labor productivity, ``\hat{\lambda}``, which is applied to labor productivity in each sector,
-```math
-\hat{\lambda}_i = \hat{\lambda} = \underline{\alpha}_\text{KV} \hat{Y} + \underline{\beta}_\text{KV}.
-```
-The growth rate of total employment, ``L``, is then given (using a standard approximation) by the difference in growth rates of output and productivity,
-```math
-\hat{L} = \hat{Y} - \hat{\lambda} = \left(1 - \underline{\alpha}_\text{KV}\right)\hat{Y} - \underline{\beta}_\text{KV}.
-```
+Sectoral and economy-wide productivity growth ``\hat{\lambda}_i`` and ``\hat{\lambda}`` are discussed in [the previous section](@ref dynamics-labor-prod), together with the growth in the labor force ``\hat{L}``. This section focuses on the determination of the wage.
 
-Wages are observed to rise in a tight labor market and fall otherwise. That behavior is captured in the model through a "conflict" mechanism, which views nominal wage changes as a consequence of bargaining between parties with unequal and shifting bargaining power -- employers and employees. The real wage is assumed to rise faster than labor productivity when employment growth is higher than working-age population growth ``\hat{\underline{N}}`` (an exogenous [time series](@ref params-time-series) parameter), with a proportionality factor ``\underline{k}``, and fall otherwise. The nominal wage is then equal to the real wage adjustment plus an inflation pass-through (or wage indexation) parameter ``\underline{h}`` multiplied by the final domestic demand inflation rate. As with labor productivity, a common growth rate ``\hat{w}`` is applied in each sector,
+Wages are observed to rise in a tight labor market and fall otherwise. That behavior is captured in the model through a "conflict" mechanism, which views nominal wage changes as a consequence of bargaining between parties with unequal and shifting bargaining power -- employers and employees. The real wage is assumed to rise faster than labor productivity when employment growth is higher than working-age population growth ``\hat{\underline{N}}`` (an exogenous [time series](@ref params-time-series) parameter), with a proportionality factor ``\underline{k}``, and fall otherwise. The nominal wage is then equal to the real wage adjustment plus an inflation pass-through (or wage indexation) parameter ``\underline{h}`` multiplied by the final domestic demand inflation rate,
 ```math
-\hat{w}_i = \hat{w} = \underline{h}\pi_F + \hat{\lambda}\left[1 + \underline{k}\left(\hat{L} - \hat{\underline{N}}\right)\right].
+\hat{w}_i = \underline{h}\pi_F + \hat{\lambda}_i\left[1 + \underline{k}\left(\hat{L} - \hat{\underline{N}}\right)\right].
 ```
+Note that ``\underline{h}`` and ``\underline{k}`` are assumed to be the same in each sector. In fact, inflation pass-through and response to labor market conditions are likely to differ between sectors. However, the data required to calibrate these parameters at sector level are scarce, so for simplicity the same value is assigned to each sector.
 
 With the above expressions, the growth rate of the wage share can be calculated,
 ```math
-\hat{\omega}_i = \hat{w} - \hat{\lambda} - \pi_g.
+\hat{\omega}_i = \frac{1 + \hat{w}_i}{(1 + \hat{\lambda}_i)(1 + \pi_g)} - 1.
 ```
-[^2]: The [Kaldor-Verdoorn law](https://www.encyclopedia.com/social-sciences/applied-and-social-sciences-magazines/verdoorns-law) states that the growth rate of labor productivity is an increasing function of the growth rate of output. In its original form it applies only to manufacturing, and the influences are weaker in services and agriculture. In the Macro model, an economy-wide labor productivity rate is specified as an increasing function of the GDP growth rate.
 
 ## [Intermediate demand coefficients](@id dynamics-intermed-dmd-coeff)
 By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^3]. The growth rates of the coefficients are calculated as

@@ -97,8 +97,9 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\underline{e}``                    | Exchange rate                                                                                                                       |
 | ``\underline{\pi}_{w,k}``            | Inflation rate for the world price of product ``k``                                                                                 |
 | ``\underline{\mu}_i``                | Profit margin in sector ``i``                                                                                                       |
-| ``\underline{\alpha}_\text{KV}``     | Kaldor-Verdoorn law coefficient                                                                                                     |
-| ``\underline{\beta}_\text{KV}``      | Kaldor-Verdoorn law intercept                                                                                                       |
+| ``\underline{\alpha}^\text{KV}``, ``\underline{\alpha}^\text{KV}_i``      | Kaldor-Verdoorn law coefficient, for the whole economy or by sector ``i`` |
+| ``\underline{\beta}^\text{KV}``, ``\underline{\beta}^\text{KV}_i``      | Kaldor-Verdoorn law intercept, for the whole economy or by sector ``i`` |
+| ``\underline{L}_{i0}``               | Initial employment level for sector ``i``, if labor productivity is specified by sector |
 | ``\underline{h}``                    | Inflation pass-through to the nominal wage (wage indexation parameter)                                                              |
 | ``\underline{k}``                    | Response of the real wage to labor supply constraints                                                                               |
 | ``\underline{\hat{N}}``              | Growth rate of the working-age population                                                                                           |
