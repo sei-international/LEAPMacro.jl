@@ -44,8 +44,9 @@ mutable struct ExogParams
     πw_base::Array{Float64,1} # World inflation rate x year
     world_grs::Array{Float64,1} # Real world GDP growth rate x year
 	working_age_grs::Array{Float64,1} # Growth rate of the working age population x year
-	αKV::Array{Float64,1} # Kaldor-Verdoorn coefficient x year
-	βKV::Array{Float64,1} # Kaldor-Verdoorn intercept x year
+	αKV::Array{Float64,1} # Kaldor-Verdoorn coefficient x (year or sector)
+	βKV::Array{Float64,1} # Kaldor-Verdoorn intercept x (year or sector)
+    ℓ0::Array{Float64,1} # Initial employment (if applicable) x sector
 	xr::Array{Float64,1} # Nominal exchange rate x year
     δ::Array{Float64,1} # ns
     I_addl::Array{Any,1} # Additional investment x year
@@ -115,7 +116,7 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["excluded_products"]["others"] = []
     end
     excluded_products = vcat(global_params["excluded_products"]["territorial_adjustment"],
-                            global_params["excluded_products"]["others"])
+                             global_params["excluded_products"]["others"])
    
     # Unless energy sectors & products are included in the calculation, get the lists of excluded energy sectors & products
     if !include_energy_sectors
@@ -189,6 +190,53 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
             throw(DomainError(d, format(LMlib.gettext("LEAP driver must be one of \"{1}\""), join(keys(LEAP_drivers), "\", \""))))
             break
         end
+    end
+
+    # Labor productivity growth parameters
+    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "use_KV_model")
+        global_params["labor-prod-fcn"]["use_KV_model"] = true
+    end
+    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "use_sector_params_if_available")
+        global_params["labor-prod-fcn"]["use_sector_params_if_available"] = true
+    end
+    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "labor_prod_gr_default")
+        global_params["labor-prod-fcn"]["labor_prod_gr_default"] = 0.0
+    end
+    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_coeff_default")
+        global_params["labor-prod-fcn"]["KV_coeff_default"] = 0.0
+    end
+    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_intercept_default")
+        global_params["labor-prod-fcn"]["KV_intercept_default"] = 0.0
+    end
+
+    # Introduce a new key, "use_sector_params", set to true only if use_sector_params_if_available = true and they are available
+    global_params["labor-prod-fcn"]["use_sector_params"] = false
+    if global_params["labor-prod-fcn"]["use_sector_params_if_available"]
+        # Check whether sectoral values are specified
+        sector_info_df = CSV.read(joinpath("inputs", global_params["files"]["sector_info"]), DataFrame)
+        if !hasproperty(sector_info_df, :empl0)
+            @warn format(LMlib.gettext("There is no employment column 'empl0' in file '{1}': Not using sector parameters"), global_params["files"]["sector_info"])
+        elseif sum(ismissing.(sector_info_df.empl0)) > 0
+            @warn format(LMlib.gettext("There are missing values in column 'empl0' in file '{1}': Not using sector parameters"), global_params["files"]["sector_info"])
+        elseif global_params["labor-prod-fcn"]["use_KV_model"]
+            if hasproperty(sector_info_df, :KV_coeff) && hasproperty(sector_info_df, :KV_intercept)
+                global_params["labor-prod-fcn"]["use_sector_params"] = true
+            else
+                @warn format(LMlib.gettext("Kaldor-Verdoorn parameters 'KV_coeff' and 'KV_intercept' are not both present in file '{1}': Not using sector parameters"), global_params["files"]["sector_info"])
+            end
+        elseif hasproperty(sector_info_df, :labor_prod_gr)
+            global_params["labor-prod-fcn"]["use_sector_params"] = true
+        else
+            @warn format(LMlib.gettext("Labor productivity growth parameter 'labor_prod_gr' is not present in file '{1}': Not using sector parameters"), global_params["files"]["sector_info"])
+        end
+    end
+
+    # Wage function defaults
+    if !LMlib.haskeyvalue(global_params["wage-fcn"], "infl_passthrough")
+        global_params["wage-fcn"]["infl_passthrough"] = 1.0
+    end
+    if !LMlib.haskeyvalue(global_params["wage-fcn"], "lab_constr_coeff")
+        global_params["wage-fcn"]["lab_constr_coeff"] = 0.0
     end
 
     # LEAP potential output is specified for a single Macro sector code, but allows for multiple branch/variable combos (values are summed)
@@ -298,8 +346,9 @@ function get_var_params(params::Dict)
                     Array{Float64}(undef, 0), # πw_base
                     Array{Float64}(undef, 0), # world_grs
 					Array{Float64}(undef, 0), # working_age_grs
-					Array{Float64}(undef, 0), # αKV
-					Array{Float64}(undef, 0), # βKV
+					Array{Float64}(undef, 0), # αKV -- either over time or by sector
+					Array{Float64}(undef, 0), # βKV -- either over time or by sector
+					Array{Float64}(undef, 0), # ℓ0
 					Array{Float64}(undef, 0), # xr
                     Array{Float64}(undef, 0), # δ
                     Array{Any}(undef, 0), # I_addl
@@ -423,19 +472,50 @@ function get_var_params(params::Dict)
 	# Exchange rate (No default -- must provide all values for specified time period)
     xr_temp = time_series[!,:exchange_rate]
 
-    # Kaldor-Verdoorn parameters
-    αKV_default = params["labor-prod-fcn"]["KV_coeff_default"]
-    if hasproperty(time_series, :KV_coeff)
-        αKV_temp = time_series[!,:KV_coeff]
+    # Labor productivity parameters
+    if params["labor-prod-fcn"]["use_KV_model"]
+        # Kaldor-Verdoorn parameters
+        αKV_default = params["labor-prod-fcn"]["KV_coeff_default"]
+        βKV_default = params["labor-prod-fcn"]["KV_intercept_default"]
     else
-        αKV_temp = fill(αKV_default, length(time_series[!,:year]))
+        # If there is no growth response, then αKV = 0 and βKV is equal to the labor productivity growth rate
+        αKV_default = 0.0
+        βKV_default = params["labor-prod-fcn"]["labor_prod_gr_default"]
     end
-
-    βKV_default = params["labor-prod-fcn"]["KV_intercept_default"]
-    if hasproperty(time_series, :KV_intercept)
-        βKV_temp = time_series[!,:KV_intercept]
+    if params["labor-prod-fcn"]["use_sector_params"]
+        # The presence of these columns has already been confirmed
+        if params["labor-prod-fcn"]["use_KV_model"]
+            retval.αKV = sector_info[sec_ndxs,:KV_coeff]
+            replace!(retval.αKV, missing => αKV_default)
+            retval.βKV = sector_info[sec_ndxs,:KV_intercept]
+            replace!(retval.βKV, missing => βKV_default)
+        else
+            retval.αKV = fill(0.0, length(sector_info[sec_ndxs,:labor_prod_gr]))
+            retval.βKV = sector_info[sec_ndxs,:labor_prod_gr]
+            replace!(retval.βKV, missing => βKV_default)
+        end
+        # It is already confirmed that there are no missing values in this column
+        retval.ℓ0 = sector_info[sec_ndxs,:empl0]
     else
-        βKV_temp = fill(βKV_default, length(time_series[!,:year]))
+        if params["labor-prod-fcn"]["use_KV_model"]
+            if hasproperty(time_series, :KV_coeff)
+                αKV_temp = time_series[!,:KV_coeff]
+            else
+                αKV_temp = fill(αKV_default, length(time_series[!,:year]))
+            end
+            if hasproperty(time_series, :KV_intercept)
+                βKV_temp = time_series[!,:KV_intercept]
+            else
+                βKV_temp = fill(βKV_default, length(time_series[!,:year]))
+            end
+        else
+            αKV_temp = fill(0.0, length(time_series[!,:year]))
+            if hasproperty(time_series, :labor_prod_gr)
+                βKV_temp = time_series[!,:labor_prod_gr]
+            else
+                βKV_temp = fill(βKV_default, length(time_series[!,:year]))
+            end
+        end
     end
 
     #--------------------------------------------------------------------------------------
@@ -468,15 +548,17 @@ function get_var_params(params::Dict)
             else
                 push!(retval.world_grs, world_grs_default)
             end
-            if !ismissing(αKV_temp[year_ndx])
-                push!(retval.αKV, αKV_temp[year_ndx])
-            else
-                push!(retval.αKV, αKV_default)
-            end
-            if !ismissing(βKV_temp[year_ndx])
-                push!(retval.βKV, βKV_temp[year_ndx])
-            else
-                push!(retval.βKV, βKV_default)
+            if !params["labor-prod-fcn"]["use_sector_params"]
+                if !ismissing(αKV_temp[year_ndx])
+                    push!(retval.αKV, αKV_temp[year_ndx])
+                else
+                    push!(retval.αKV, αKV_default)
+                end
+                if !ismissing(βKV_temp[year_ndx])
+                    push!(retval.βKV, βKV_temp[year_ndx])
+                else
+                    push!(retval.βKV, βKV_default)
+                end
             end
         else
 			error_string = format(LMlib.gettext("Year {1:d} is not in time series range {2:d}:{3:d}"), year, data_start_year, data_end_year)

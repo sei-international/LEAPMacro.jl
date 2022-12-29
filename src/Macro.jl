@@ -278,6 +278,12 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	i_bank = tf.i_targ
 
 	#----------------------------------
+    # Employment
+    #----------------------------------
+	# If not defined, then this will be an empty vector
+	ℓ = exog.ℓ0
+
+	#----------------------------------
     # Wages
     #----------------------------------
     W = sut.W
@@ -480,6 +486,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     prev_GDP = sum(param_pb[i] * (value.(qs) - value.(qd))[i] for i in 1:np)/(1 + params["investment-fcn"]["init_neutral_growth"])
 	prev_g = value.(u) .* z
 	prev_g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
+	prev_g_gr = ones(ns) * params["investment-fcn"]["init_neutral_growth"]
 
 	smoothed_world_gr = params["global-params"]["gr_default"]
 
@@ -533,6 +540,9 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	LMlib.write_header_to_csv(params, sector_names, "real_value_added", run_number)
 	LMlib.write_header_to_csv(params, sector_names, "profit_rate", run_number)
 	LMlib.write_header_to_csv(params, sector_names, "autonomous_investment_rate", run_number)
+	if params["labor-prod-fcn"]["use_sector_params"]
+		LMlib.write_header_to_csv(params, sector_names, "sector_employment", run_number)
+	end
 	# Create files for product variables
 	LMlib.write_header_to_csv(params, product_names, "final_demand", run_number)
 	LMlib.write_header_to_csv(params, product_names, "imports", run_number)
@@ -541,9 +551,8 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	LMlib.write_header_to_csv(params, product_names, "domestic_prices", run_number)
 	# Create a file to hold scalar variables
 	scalar_var_list = [LMlib.gettext("GDP gr"), LMlib.gettext("curr acct surplus to GDP ratio"), LMlib.gettext("curr acct surplus"), LMlib.gettext("real GDP"),
-					   LMlib.gettext("GDP deflator"), LMlib.gettext("labor productivity gr"), LMlib.gettext("labor force gr"), LMlib.gettext("wage rate gr"),
-					   LMlib.gettext("wage per effective worker gr"), LMlib.gettext("real investment"), LMlib.gettext("central bank rate"),
-					   LMlib.gettext("terms of trade index"), LMlib.gettext("real xr index"), LMlib.gettext("nominal xr index")]
+					   LMlib.gettext("GDP deflator"), LMlib.gettext("labor productivity gr"), LMlib.gettext("labor force gr"), LMlib.gettext("real investment"),
+					   LMlib.gettext("central bank rate"), LMlib.gettext("terms of trade index"), LMlib.gettext("real xr index"), LMlib.gettext("nominal xr index")]
 	LMlib.stringvec_to_quotedstringvec!(scalar_var_list)
 	LMlib.write_header_to_csv(params, scalar_var_list, "collected_variables", run_number)
 
@@ -561,11 +570,13 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		if !previous_failed
 			g = value.(u) .* z
+			g_gr = g ./ prev_g .- 1.0
 			g_share = pd_prev .* value.(qs)/sum(pd_prev .* value.(qs))
 			prev_g = g
 			prev_g_share = g_share
 		else
 			g = prev_g
+			g_gr = prev_g_gr
 			g_share = prev_g_share
 		end
 
@@ -626,14 +637,25 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		# Wages and the labor force
 		#--------------------------------
-		λ_gr = exog.αKV[t] * GDP_gr + exog.βKV[t] # Kaldor-Verdoorn equation for labor productivity
-		L_gr = GDP_gr - λ_gr # Labor force growth rate
-
+		# Apply the Kaldor-Verdoorn equation for labor productivity (if not used, then αKV = 0 and βKV = fixed labor productivity growth rate)
+		if !params["labor-prod-fcn"]["use_sector_params"]
+			λ_gr_scalar = exog.αKV[t] * GDP_gr + exog.βKV[t]
+			L_gr = GDP_gr - λ_gr_scalar # Labor force growth rate
+			λ_gr = ones(ns) * λ_gr_scalar # Sectoral labor productivity growth rate
+		else
+			λ_gr = exog.αKV .* g_gr + exog.βKV # Sectoral labor productivity growth rate
+			ℓ_gr = g_gr - λ_gr
+			L_prev = sum(ℓ)
+			ℓ = (1.0 .+ ℓ_gr) .* ℓ
+			L_gr = sum(ℓ)/L_prev - 1.0 # Labor force growth rate
+			λ_gr_scalar = GDP_gr - L_gr
+		end
+	
 		lab_force_index *= 1 + L_gr
 
-		w_gr = wage_fn.h * πF + λ_gr * (1.0 + wage_fn.k * (L_gr - exog.working_age_grs[t]))
-		ω_gr = w_gr - λ_gr - πg
-		ω = (1.0 + ω_gr) * ω
+		w_gr = wage_fn.h * πF .+ λ_gr * (1.0 + wage_fn.k * (L_gr - exog.working_age_grs[t]))
+		ω_gr = w_gr - λ_gr .- πg
+		ω = (1.0 .+ ω_gr) .* ω
 
 		#--------------------------------
 		# Update use matrix
@@ -716,7 +738,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		# Wage ratio drives increase in quantity, so use real wage increase, deflate by Pg
 		W_curr = sum(W)
-        W = ((1 + w_gr)/(1 + λ_gr)) * W .* (1 .+ γ)
+        W = ((1 .+ w_gr)./(1 .+ λ_gr)) .* W .* (1 .+ γ)
         wage_ratio = (1/(1 + πF)) * sum(W)/W_curr
         Fnorm = Fnorm .* max.(LMlib.ϵ,wage_ratio).^exog.wage_elast_demand[t]
 
@@ -811,16 +833,18 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		LMlib.append_row_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run_number, years[t])
 		LMlib.append_row_to_csv(params, profit_rate, "profit_rate", run_number, years[t])
 		LMlib.append_row_to_csv(params, γ_0, "autonomous_investment_rate", run_number, years[t])
-	    # Product variables
+		if params["labor-prod-fcn"]["use_sector_params"]
+			LMlib.append_row_to_csv(params, ℓ, "sector_employment", run_number, years[t])
+		end
+		# Product variables
 		LMlib.append_row_to_csv(params, F_report, "final_demand", run_number, years[t])
 		LMlib.append_row_to_csv(params, M_report, "imports", run_number, years[t])
 		LMlib.append_row_to_csv(params, X_report, "exports", run_number, years[t])
 		LMlib.append_row_to_csv(params, param_pb, "basic_prices", run_number, years[t])
 		LMlib.append_row_to_csv(params, param_pd, "domestic_prices", run_number, years[t])
 		# Scalar variables
-		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr, L_gr,
-							w_gr, ω_gr, param_I_tot, i_bank, prices.Px/prices.Pm,
-							prices.RER, prices.XR]
+		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr_scalar, L_gr,
+							param_I_tot, i_bank, prices.Px/prices.Pm, prices.RER, prices.XR]
 		LMlib.append_row_to_csv(params, scalar_var_vals, "collected_variables", run_number, years[t])
 
 		if t == length(years)
