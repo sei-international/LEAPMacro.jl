@@ -640,21 +640,21 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		# Apply the Kaldor-Verdoorn equation for labor productivity (if not used, then αKV = 0 and βKV = fixed labor productivity growth rate)
 		if !params["labor-prod-fcn"]["use_sector_params"]
 			λ_gr_scalar = exog.αKV[t] * GDP_gr + exog.βKV[t]
-			L_gr = GDP_gr - λ_gr_scalar # Labor force growth rate
+			L_gr = (1.0 + GDP_gr)/(1.0 + λ_gr_scalar) - 1.0 # Labor force growth rate
 			λ_gr = ones(ns) * λ_gr_scalar # Sectoral labor productivity growth rate
 		else
 			λ_gr = exog.αKV .* g_gr + exog.βKV # Sectoral labor productivity growth rate
-			ℓ_gr = g_gr - λ_gr
+			ℓ_gr = (1.0 .+ g_gr)./(1.0 .+ λ_gr) .- 1.0
 			L_prev = sum(ℓ)
 			ℓ = (1.0 .+ ℓ_gr) .* ℓ
 			L_gr = sum(ℓ)/L_prev - 1.0 # Labor force growth rate
-			λ_gr_scalar = GDP_gr - L_gr
+			λ_gr_scalar = (1.0 + GDP_gr)/(1.0 + L_gr) - 1.0
 		end
 	
-		lab_force_index *= 1 + L_gr
+		lab_force_index *= 1.0 + L_gr
 
 		w_gr = wage_fn.h * πF .+ λ_gr * (1.0 + wage_fn.k * (L_gr - exog.working_age_grs[t]))
-		ω_gr = w_gr - λ_gr .- πg
+		ω_gr = ((1.0 .+ w_gr)./(1.0 .+ λ_gr))/(1.0 + πg) .- 1.0
 		ω = (1.0 .+ ω_gr) .* ω
 
 		#--------------------------------
