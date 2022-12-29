@@ -214,20 +214,12 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
     if global_params["labor-prod-fcn"]["use_sector_params_if_available"]
         # Check whether sectoral values are specified
         sector_info_df = CSV.read(joinpath("inputs", global_params["files"]["sector_info"]), DataFrame)
-        if !hasproperty(sector_info_df, :empl0)
-            @warn format(LMlib.gettext("There is no employment column 'empl0' in file '{1}': Not using sector parameters"), global_params["files"]["sector_info"])
-        elseif sum(ismissing.(sector_info_df.empl0)) > 0
-            @warn format(LMlib.gettext("There are missing values in column 'empl0' in file '{1}': Not using sector parameters"), global_params["files"]["sector_info"])
-        elseif global_params["labor-prod-fcn"]["use_KV_model"]
-            if hasproperty(sector_info_df, :KV_coeff) && hasproperty(sector_info_df, :KV_intercept)
-                global_params["labor-prod-fcn"]["use_sector_params"] = true
+        if hasproperty(sector_info_df, :empl0) && sum(ismissing.(sector_info_df.empl0)) == 0 # Check that full employment data are present (no defaults)
+            if global_params["labor-prod-fcn"]["use_KV_model"]
+                global_params["labor-prod-fcn"]["use_sector_params"] = hasproperty(sector_info_df, :KV_coeff) && hasproperty(sector_info_df, :KV_intercept)
             else
-                @warn format(LMlib.gettext("Kaldor-Verdoorn parameters 'KV_coeff' and 'KV_intercept' are not both present in file '{1}': Not using sector parameters"), global_params["files"]["sector_info"])
+                global_params["labor-prod-fcn"]["use_sector_params"] = hasproperty(sector_info_df, :labor_prod_gr)
             end
-        elseif hasproperty(sector_info_df, :labor_prod_gr)
-            global_params["labor-prod-fcn"]["use_sector_params"] = true
-        else
-            @warn format(LMlib.gettext("Labor productivity growth parameter 'labor_prod_gr' is not present in file '{1}': Not using sector parameters"), global_params["files"]["sector_info"])
         end
     end
 
