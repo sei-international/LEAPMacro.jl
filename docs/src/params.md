@@ -43,7 +43,11 @@ Here is the example from the Freedonia sample model:
 ## [Sector parameters](@id params-sectors)
 The structure of the sector parameters file is shown below. There are as many rows in the table as there are sectors.
 
-In addition to the sector codes and names, this file contains only a single parameter for each sector, the depreciation rate. Where available, this can be calculated from national statistics. Otherwise, the `delta` parameter reported for the whole economy in the [Penn World Table](https://www.rug.nl/ggdc/productivity/pwt/) can be applied to each sector.
+The first two columns are the sector codes and sector names. These should be in the same order as the sectors in the [supply-use tables](@ref sut).
+
+In addition to the sector codes and names, this file contains a single required parameter for each sector, the depreciation rate. Where available, this can be calculated from national statistics. Otherwise, the `delta` parameter reported for the whole economy in the [Penn World Table](https://www.rug.nl/ggdc/productivity/pwt/) can be applied to each sector.
+
+The file also includes several optional parameters, shown in brackets, which determine [labor productivity growth](@ref dynamics-labor-prod) at sector level. The labor productivity parameters might be assumed constant, estimated from historical data, or drawn from published studies.
 
 | `code`      | `name`       | `depr_rate` | `[KV_coeff]` | `[KV_intercept]` |  `[labor_prod_gr`] |   `[empl0]` |
 |:------------|:-------------|------------:|-------------:|-----------------:|-------------------:|------------:|
@@ -51,26 +55,25 @@ In addition to the sector codes and names, this file contains only a single para
 | CODE2       | Name 2       |        dr_2 |    \[kvc_2\] |        \[kvi_2\] |         \[lpgr_2\] | \[empl0_2\] |
 | ...         | ...          |         ... |          ... |              ... |                ... |         ... |
 
-The corresponding [variable](@ref exog-param-vars) is:
-  * `depr_rate` : ``\underline{\delta}_i`` for sector ``i``
-  * `KV_coeff` : ``\underline{\alpha}^\text{KV}``
-  * `KV_intercept` : ``\underline{\beta}^\text{KV}``
-  * `empl0` : ``L_{i0}``
-  * `labor_prod_gr` : ``\lambda_i``
-
+The corresponding [variables](@ref exog-param-vars) for sector ``i`` are:
+  * `depr_rate` : ``\underline{\delta}_i``
+  * `KV_coeff` : ``\underline{\alpha}^\text{KV}_i``
+  * `KV_intercept` : ``\underline{\beta}^\text{KV}_i``
+  * `empl0` : ``\underline{L}_{i0}``
+  * `labor_prod_gr` : ``\underline{\beta}^\text{KV}_i`` (with ``\underline{\alpha}^\text{KV}_i = 0``)
 
 Here is the example from the Freedonia sample model:
 ![Freedonia sector_parameters file](assets/images/sector_parameters.png)
 
 ## [Time series](@id params-time-series)
-The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-labor-prod). The final two columns are optional, so they are bracketed. If they are missing, then the default values from the [configuration file](@ref config-empl-labprod-wage) are used for all years.
+The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-labor-prod). The final three columns are optional, so they are bracketed. If they are missing, then the default values from the [configuration file](@ref config-empl-labprod-wage) are used for all years.
 
 !!! info "Exchange rates and supply-use tables"
     Supply-use tables have entries that are all in the same currency, usually but not always the national (domestic) currency. Exchange rates express the domestic currency in terms of a foreign currency, such as the US dollar, the Euro, the Yen, or a mixture of currencies (a currency "basket"). In Macro, exchange rates are converted into an index to ensure consistent currency units.
 
 Scenarios for the world economic growth rate can be drawn from other studies, such as the [Shared Socioeconomic Pathways (SSP) database](https://tntcat.iiasa.ac.at/SspDb/dsd?Action=htmlpage&page=about). The working age growth rate can be calculated from national projections or the [UN Population Prospects database](https://population.un.org/wpp/Download/Standard/Population/).
 
-Other parameters have less well-established sources of estimates. The labor productivity parameters (the Kaldor-Verdoorn parameters `KV_coeff` and `KV_intercept`) might well be assumed constant, possibly estimated from historical data or drawn from studies such as [Estimating Kaldor-Verdoorn’s law across countries in different stages of development](https://www.anpec.org.br/encontro/2014/submissao/files_I/i9-0ed7d252394aed6039f6af0e4ed51fc6.pdf) by Guilherme Magacho. Assumptions regarding the world inflation rate and the exchange rate can be based on historical patterns, other modeling studies, or consultation with experts.
+Other parameters have less well-established sources of estimates. The labor productivity parameters (the Kaldor-Verdoorn parameters `KV_coeff` and `KV_intercept` or the labor productivity growth rate `labor_prod_gr`) might be assumed constant, estimated from historical data, or drawn from published studies. If they are constant, then they can be omitted from this table and specified as default values in the [configuration file](@ref config-empl-labprod-wage). Assumptions regarding the world inflation rate and the exchange rate can be based on historical patterns, other modeling studies, or consultation with experts.
 
 | `year` | `world_gr` | `world_infl_rate` | `working_age_gr` | `exchange_rate` | `[KV_coeff]` | `[KV_intercept]` |  `[labor_prod_gr`] |
 |-------:|-----------:|------------------:|-----------------:|----------------:|-------------:|-----------------:|-------------------:|
@@ -86,6 +89,7 @@ The corresponding [variables](@ref exog-param-vars) are:
   * `exchange_rate` : ``\underline{e}``
   * `KV_coeff` : ``\underline{\alpha}^\text{KV}``
   * `KV_intercept` : ``\underline{\beta}^\text{KV}``
+  * `labor_prod_gr` : ``\underline{\beta}^\text{KV}`` (with ``\underline{\alpha}^\text{KV} = 0``)
 
 Here is the example from the Freedonia sample model:
 ![Freedonia time_series file](assets/images/time_series.png)
