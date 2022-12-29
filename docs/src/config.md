@@ -211,14 +211,22 @@ investment-fcn:
 ```
 
 ### [Employment, labor productivity, and wages](@id config-empl-labprod-wage)
-The next block contains default parameters for the labor productivity function (following the Kaldor-Verdoorn law[^1]) and for the function that determines the growth rate of the wage. See the page on [model dynamics](@ref dynamics-labor-prod) for details.
+The next block contains default parameters for labor productivity (either a constant growth rate or in the form of the Kaldor-Verdoorn law) and for the function that determines the growth rate of the wage. See the technical documentation on [labor productivity growth](@ref dynamics-labor-prod) and [wage determination](@ref dynamics-wages) for details.
 
-For labor productivity, the default parameters are used if they are not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series).
+All paramters are optional. Their definitions are as follows:
+  * `use_KV_model` (default = `true`) : A flag to say whether to use the Kaldor-Verdoorn model rather than constant labor productivity growth rates;
+  * `use_sector_params_if_available` (default = `true`) : A flag to say whether to use sector-specific parameters if they are available (useful mainly to compare different specifications, otherwise it can be omitted);
+  * `labor_prod_gr_default` (default = 0.0) : Default economy-wide labor productivity growth if not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series);
+  * `KV_coeff_default` (default = 0.5) : Default economy-wide labor productivity growth if not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series);
+  * `KV_intercept_default` (default = 0.0) : Default economy-wide labor productivity growth if not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series);
+  * `infl_passthrough` (default = 1.0) : Degree of inflation pass-through (the default is full pass-through);
+  * `lab_constr_coeff` (default = 0.0) : Response of the wage level to labor constraints (the default is no response).
 
 The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
   * For labor productivity:
     - `KV_coeff_default` : ``\underline{\alpha}^\text{KV}``
     - `KV_intercept_default` : ``\underline{\beta}^\text{KV}``
+    - `labor_prod_gr_default` : ``\underline{\beta}^\text{KV}`` (with ``\underline{\alpha}^\text{KV} = 0.0``)
   * For the wage:
     - `infl_passthrough` : ``\underline{h}``
     - `lab_constr_coeff` : ``\underline{k}``
@@ -227,17 +235,22 @@ The correspondence between the parameters and the [model variables](@ref exog-pa
 # Parameters for labor productivity, labor force, and wages
 #---------------------------------------------------------------------------
 labor-prod-fcn:
+    # Flag for whether to apply Kaldor-Verdoorn model
+    use_KV_model: true
+    # Flag for whether to use sector parameters
+    use_sector_params_if_available: true
+    # Default labor productivity growth
+    labor_prod_gr_default: 0.025
     # Default Kaldor-Verdoorn coefficient
-    KV_coeff_default: 0.50
+    KV_coeff_default: 0.500
     # Default Kaldor-Verdoorn intercept
-    KV_intercept_default: 0.00
+    KV_intercept_default: 0.005
 wage-fcn:
     # Inflation pass-through (wage indexing coefficient)
     infl_passthrough: 1.00
     # Labor supply constraint coefficient
     lab_constr_coeff: 0.50
 ```
-[^1]: The [Kaldor-Verdoorn law](https://www.encyclopedia.com/social-sciences/applied-and-social-sciences-magazines/verdoorns-law) states that the growth rate of labor productivity is an increasing function of the growth rate of output. In its original form it applies only to manufacturing, and the influences are weaker in services and agriculture. In the Macro model, an economy-wide labor productivity rate is calculated as an increasing function of the GDP growth rate.
 
 ### [Endogenous change in intermediate demand coefficients](@id config-intermed-dmd-change)
 The next block is optional. If it is present, it sets a rate constant for endogenously determining [intermediate demand coefficients](@ref dynamics-intermed-dmd-coeff).
@@ -256,7 +269,7 @@ tech-param-change:
 ### [Long-run demand elasticities](@id config-longrun-demand-elast)
 Initial values for demand elasticities for products with respect to domestic vs. world prices, global GDP (for exports), and the wage bill (for domestic final demand excluding investment) are specified in the [external product parameters file](@ref params-products). The way that the elasticities enter into the model is described in the page on [model dynamics](@ref dynamics-export-demand).
 
-For products that are not labeled as "Engel products"[^2] (given by the parameter `engel-prods`):
+For products that are not labeled as "Engel products"[^1] (given by the parameter `engel-prods`):
   * If the initial wage elasticity is less than one, then it remains at its starting level;
   * If the initial wage elasticity is greater than one, it asymptotically approaches a value of one over time;
 For products labeled as Engel products:
@@ -276,7 +289,7 @@ wage_elast_demand:
     engel_prods: [p_agric, p_foodpr]
     engel_asympt_elast: 0.7
 ```
-[^2]: [Engel's Law](https://www.investopedia.com/terms/e/engels-law.asp) states that as income rises, the proportion of income spent on food declines. That means that the income elasticity of expenditure on food is less than one.
+[^1]: [Engel's Law](https://www.investopedia.com/terms/e/engels-law.asp) states that as income rises, the proportion of income spent on food declines. That means that the income elasticity of expenditure on food is less than one.
 
 ### [Linear goal program weights](@id config-lgp-weights)
 The Macro model solves a linear goal program for each year of the simulation. As described in the documentation for the [linear goal program](@ref lgp), the objective function contains weights, which are specified in the next block. The default weights should be suitable for most LEAP-Macro applications.
