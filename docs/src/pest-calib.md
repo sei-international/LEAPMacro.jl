@@ -37,7 +37,7 @@ optional arguments:
   -h, --help                                show this help message and exit
 ```
 
-Below is part of the output from running the `pest.jl` script included in the LEAP-Macro demonstration files. The model is called 94 times, which would have taken a great deal of time if done by hand, and the optimum values for the parameters are chosen in a systematic way. Some points to note:
+Below is part of the output from running the `pest.jl` script included in the LEAP-Macro demonstration files. The model is called 161 times, which would have taken a great deal of time if done by hand, and the optimum values for the parameters are chosen in a systematic way. Some points to note:
   * The PEST program must be downloaded from the [PEST website](https://pesthomepage.org/programs) and installed before the script can be run, and the script will issue an error and halt if `pest.exe` cannot be found;
   * The script builds three kinds of files: a template file (ending in `.tpl`), instruction files (ending in `.ins`), and a control file (ending in `.pst`);
   * As recorded in the `Model command line:` the PEST control file calls the script `pest_run_leapmacro.jl`, which runs the Macro model;
@@ -77,21 +77,22 @@ Running model .....
 With configuration file 'LEAPMacro_params_calib.yml' (including energy sectors):
 Macro model run (0)...completed
 
-   Sum of squared weighted residuals (ie phi)               =  3.68308E-03
-   Contribution to phi from observation group "labgr"       =  5.18225E-04
-   Contribution to phi from observation group "gdpgr"       =  3.16486E-03
+   Sum of squared weighted residuals (ie phi)               =  5.32221E-03
+   Contribution to phi from observation group "labgr"       =  1.31664E-03
+   Contribution to phi from observation group "gdpgr"       =  4.00556E-03
 ```
-..._over 400 lines omitted_...
+..._several hundred lines omitted_...
 ```
    No more lambdas: relative phi reduction between lambdas less than 0.0300
-   Lowest phi this iteration:  2.67007E-03
-   Maximum relative change:  2.426     ["util_sens"]
-                          phi was achieved.
-                          phi was achieved.
-   Total model calls:     94
-Running model one last time with best parameters.....Running LEAP-Macro...      
-With configuration file 'LEAPMacro_params_calib.yml' (including energy sectors):
+   Lowest phi this iteration:  2.47742E-03
+   Maximum relative change: 0.6270     ["intrate_sens"]
 
+   Optimisation complete:   3 optimisation iterations have elapsed since lowest
+                          phi was achieved.
+   Total model calls:    161
+
+Running model one last time with best parameters.....Running LEAP-Macro...
+With configuration file 'LEAPMacro_params_calib.yml' (including energy sectors):
 Macro model run (0)...completed
 
 
@@ -143,7 +144,7 @@ Values are entered as `[minimum, initial, maximum]`. Given the assumptions made 
     growth_adj: [0.01, 0.10, 1.25]
     infl_pass: [0.6, 0.8, 1.0]
     lab_ccoeff: [0.3, 0.6, 0.8]
-    pot_out_adj: [-0.10, 0.05, 0.10]
+    pot_out_adj: [-0.05, 0.02, 0.05]
     tech_par_adj: [0.02, 0.50, 1.00]
 ```
 The next sub-block, `calibration:`, specifies the years for the calibration run and observations to compare to the results. Some points to note:
@@ -252,15 +253,15 @@ The PEST calibration procedure results in a calibrated LEAP-Macro configuration 
 #---------------------------------------------------------------------------
 investment-fcn:
     # Starting point for the autonomous investment growth rate: also the initial target GDP growth rate for the Taylor rule
-    init_neutral_growth:   4.9005046E-02 # 0.060
+    init_neutral_growth:   6.3485615E-02 # 0.060
     # Change in induced investment with a change in utilization
-    util_sens:   4.1015054E-01 # 0.07
+    util_sens:   5.9571348E-02 # 0.07
     # Change in induced investment with a change in the profit rate
-    profit_sens:   9.8640964E-01 # 0.05
+    profit_sens:   1.0000000E-02 # 0.05
     # Change in induced investment with a change in the central bank lending rate
-    intrate_sens:   1.1000000E-01 # 0.20
+    intrate_sens:   3.8500000E-01 # 0.20
     # Rate of adjustment of the autonomous investment rate towards the actual investment rate
-    growth_adj:   4.7916096E-02 # 0.10
+    growth_adj:   1.2278759E+00 # 0.10
 ```
 
 ## Final comments

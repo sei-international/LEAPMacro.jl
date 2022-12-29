@@ -16,7 +16,7 @@ pest:
     growth_adj: [0.01, 0.10, 1.25]
     infl_pass: [0.6, 0.8, 1.0]
     lab_ccoeff: [0.3, 0.6, 0.8]
-    pot_out_adj: [-0.10, 0.05, 0.10]
+    pot_out_adj: [-0.05, 0.02, 0.05]
     tech_par_adj: [0.02, 0.50, 1.00]
   calibration:
     years: [2010, 2040]
