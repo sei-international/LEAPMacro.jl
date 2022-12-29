@@ -81,7 +81,7 @@ Macro model run (0)...completed
    Contribution to phi from observation group "labgr"       =  1.31664E-03
    Contribution to phi from observation group "gdpgr"       =  4.00556E-03
 ```
-..._several hundred lines omitted_...
+..._a few hundred lines omitted_...
 ```
    No more lambdas: relative phi reduction between lambdas less than 0.0300
    Lowest phi this iteration:  2.47742E-03
