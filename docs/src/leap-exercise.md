@@ -194,7 +194,7 @@ To see the effect of changed urbanization assumption, in the **Results View**, s
 Higher electricity demand leads to higher investment. Going to the _Transformation\Electricity Generation\Processes_ branch, selecting the **Investment Costs** variable, and showing “Cumulative Values” shows how energy-related investment expenditure is higher over the Urbanization scenario than in the Baseline scenario.
 ![Investment costs: Urbanization vs. Baseline](assets/images/leap_exercise/results_inv_costs.png)
 
-Investment is a source of economic demand, and in this [demand-led model](@ref demand-led-growth), higher investment expenditure translates into higher GDP by the end of the scenario. That is not guaranteed -- if the economy is operating at full potential, additional investment can “crowd out” other economic activity. But in this case, the investment has a stimulating effect.
+Investment is a source of economic demand, and in this [demand-led model](@ref theoretical-background), higher investment expenditure translates into higher GDP by the end of the scenario. That is not guaranteed -- if the economy is operating at full potential, additional investment can “crowd out” other economic activity. But in this case, the investment has a stimulating effect.
 
 That said, the differences are not large. Setting the denominator on the graph to “GDP” shows that the differences are generally less than a tenth of a percent of GDP.
 ![Difference between GDP in the Urbanization and Baseline scenarios as a fraction of GDP](assets/images/leap_exercise/results_gdp_diff.png)

@@ -2,7 +2,7 @@
 CurrentModule = LEAPMacro
 ```
 
-# [About demand-led growth](@id demand-led-growth)
+# [Theoretical background](@id theoretical-background)
 Macro is a demand-led growth model[^1] built along structuralist lines[^2]. In such models, the growth rate of the economy is _endogenous_. That is, it is determined by the model's own dynamics. Firms are assumed to invest in new productive capacity because they anticipate future demand. They base their assessment on past growth, profitability, and the utilization rate of their current capacity. Once they decide to buy new machinery, equipment, and buildings -- that is, new capital -- those purchases add to total demand.
 
 In demand-led growth models, capacity utilization is a key adjusting variable. If firms' expectations are not met, then their capacity utilization will be either below or above what they anticipated. If demand is high and they are already producing at capacity, then they will be unable to satisfy all of the demand, and imports may rise.
@@ -17,7 +17,7 @@ Prices for goods and services may be treated with greater or lesser sophisticati
 !!! warning "Macro does not include financial assets"
     An important component in many structuralist models, as well as demand-led Stock-Flow Consistent (SFC) models, is the impact on the non-financial economy of changing wealth allocation and valuations of financial assets. The Macro model does not keep track of financial assets, which limits the policies that it can simulate.
 
-[^1]: E.g., see: [_The Economics of Demand-Led Growth_](https://www.e-elgar.com/shop/usd/the-economics-of-demand-led-growth-9781840641776.html) by Mark Setterfield and [_Post-Keynesian Economics: New Foundations_](https://www.e-elgar.com/shop/usd/post-keynesian-economics-9781783475285.html) by Marc Lavoie.
+[^1]: E.g., see: [_The Economics of Demand-Led Growth_](https://www.e-elgar.com/shop/usd/the-economics-of-theoretical-background-9781840641776.html) by Mark Setterfield and [_Post-Keynesian Economics: New Foundations_](https://www.e-elgar.com/shop/usd/post-keynesian-economics-9781783475285.html) by Marc Lavoie.
 [^2]: See: [_Reconstructing Macroeconomics: Structuralist Proposals and Critiques of the Mainstream_](https://www.hup.harvard.edu/catalog.php?isbn=9780674010734) by Lance Taylor; [_Growth and Policy in Developing Countries: A Structuralist Approach_](https://cup.columbia.edu/book/growth-and-policy-in-developing-countries/9780231150149) by Jose Ocampo, Codrina Rada, and Lance Taylor.
 
 ## Demand in the Macro model
@@ -35,7 +35,7 @@ Income elasticities of demand have been observed to change as incomes rise; for 
 
 Intermediate demand is determined through the [supply-use table](@ref sut), and is calculated through the Macro model's [linear goal program](@ref lgp). Intermediate demand coefficients can optionally depend on changing relative prices, as explained in the [Technical Details](@ref dynamics-intermed-dmd-coeff).
 
-## [Prices in the macro model](@id demand-led-growth-prices)
+## [Prices in the macro model](@id theoretical-background-prices)
 Five prices appear in the Macro model:
   1. World prices for traded goods and services
   2. The exchange rate

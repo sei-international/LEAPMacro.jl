@@ -33,7 +33,7 @@ makedocs(
         ]
         "Model overview" => [
             "LEAP-Macro link" => "leap-macro-link.md"
-            "About demand-led growth" => "demand-led-growth.md"
+            "Theoretical background" => "theoretical-background.md"
         ]
         "Using LEAP-Macro" => [
             "Configuration file" => "config.md"

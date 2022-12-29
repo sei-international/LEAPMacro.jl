@@ -108,7 +108,7 @@ Two of the results files (with the run number indicated by `#`) contain multiple
   * `indices_#.csv`: The indices that are passed to LEAP, as specified in the [configuration file](@ref config-link-LEAP)
   * `collected_variables_#.csv`: A set of key variables, such as the current accounts balance, GDP, and so on
 
-Macro is a [demand-driven model](@ref demand-led-growth), so economic growth is driven by final demand, exports net of imports, and investment. Total investment expenditure is reported in `collected_variables_#.csv`. Final demand, exports, and imports are reported by product:
+Macro is a [demand-driven model](@ref theoretical-background), so economic growth is driven by final demand, exports net of imports, and investment. Total investment expenditure is reported in `collected_variables_#.csv`. Final demand, exports, and imports are reported by product:
   * `final_demand_#.csv`
   * `exports_#.csv` and `imports_#.csv`
 
