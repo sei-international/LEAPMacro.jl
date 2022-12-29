@@ -117,10 +117,16 @@ investment-fcn:
 # Parameters for labor productivity, labor force, and wages
 #---------------------------------------------------------------------------
 labor-prod-fcn:
+    # Flag for whether to apply Kaldor-Verdoorn model
+    use_KV_model: true
+    # Flag for whether to use sector parameters
+    use_sector_params_if_available: true
+    # Default labor productivity growth
+    labor_prod_gr_default: 0.025
     # Default Kaldor-Verdoorn coefficient
-    KV_coeff_default: 0.50
+    KV_coeff_default: 0.500
     # Default Kaldor-Verdoorn intercept
-    KV_intercept_default: 0.00
+    KV_intercept_default: 0.005
 wage-fcn:
     # Inflation pass-through (wage indexing coefficient)
     infl_passthrough: 1.00
