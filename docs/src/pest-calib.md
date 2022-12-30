@@ -43,7 +43,8 @@ Below is part of the output from running the `pest.jl` script included in the LE
   * As recorded in the `Model command line:` the PEST control file calls the script `pest_run_leapmacro.jl`, which runs the Macro model;
   * The model is run with a sysimage `LEAPMacro-sysimage.so`, which dramatically reduces the time it takes to load LEAP-Macro (see the Tip on "Speeding up LEAPMacro with a pre-compiled system image" in the page on [running the Macro model](@ref running-macro));
   * The `pestchek.exe` program issues a warning, but that is not a problem: both PEST and the script allow output files to be used multiple times;
-  * Information on the calibration is provided in files ending in `.rec`, `.sen`, `.res`, and `.svd`. (PEST produces a large number of other files as well.)
+  * Information on the calibration is provided in files ending in `.rec`, `.sen`, `.res`, and `.svd`;
+  * PEST generates an error file `###error.par.1`, but it recovers and tries other parameter values; if too many errors accumulate, PEST will halt and report the problem. In that case, looking at the `###error.par.N` files can help pinpoint problematic combinations of parameter values.
 ```
 C:\path\to\model> julia .\pest.jl
 Generating PEST template file...
