@@ -9,7 +9,6 @@ pest:
   # NOTE: The initial value cannot be zero
   parameters:
     gamma_0: [0.040, 0.055, 0.100]
-    i_xr_sens: [-2.0, 0.5, 2.0]
     util_sens: [0.01, 0.05, 1.00]
     profit_sens: [0.01, 0.10, 1.25]
     intrate_sens: [0.01, 0.10, 1.25]
@@ -75,8 +74,6 @@ LEAP-Macro:
       pot_output_adj_factor: pot_out_adj
     taylor-fcn:
       neutral_growth_band: [0.02, gamma_0]
-      target_intrate:
-        xr_sens: i_xr_sens
     investment-fcn:
           init_neutral_growth: gamma_0
           util_sens:  util_sens

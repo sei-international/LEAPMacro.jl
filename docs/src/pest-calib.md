@@ -37,7 +37,7 @@ optional arguments:
   -h, --help                                show this help message and exit
 ```
 
-Below is part of the output from running the `pest.jl` script included in the LEAP-Macro demonstration files. The model is called 161 times, which would have taken a great deal of time if done by hand, and the optimum values for the parameters are chosen in a systematic way. Some points to note:
+Below is part of the output from running the `pest.jl` script included in the LEAP-Macro demonstration files. The model is called 147 times, which would have taken a great deal of time if done by hand, and the optimum values for the parameters are chosen in a systematic way. Some points to note:
   * The PEST program must be downloaded from the [PEST website](https://pesthomepage.org/programs) and installed before the script can be run, and the script will issue an error and halt if `pest.exe` cannot be found;
   * The script builds three kinds of files: a template file (ending in `.tpl`), instruction files (ending in `.ins`), and a control file (ending in `.pst`);
   * As recorded in the `Model command line:` the PEST control file calls the script `pest_run_leapmacro.jl`, which runs the Macro model;
@@ -89,7 +89,7 @@ Macro model run (0)...completed
 
    Optimisation complete:   3 optimisation iterations have elapsed since lowest
                           phi was achieved.
-   Total model calls:    161
+   Total model calls:    147
 
 Running model one last time with best parameters.....Running LEAP-Macro...
 With configuration file 'LEAPMacro_params_calib.yml' (including energy sectors):
@@ -137,7 +137,6 @@ Values are entered as `[minimum, initial, maximum]`. Given the assumptions made 
   # NOTE: The initial value cannot be zero
   parameters:
     gamma_0: [0.040, 0.055, 0.100]
-    i_xr_sens: [-2.0, 0.5, 2.0]
     util_sens: [0.01, 0.05, 1.00]
     profit_sens: [0.01, 0.10, 1.25]
     intrate_sens: [0.01, 0.10, 1.25]
@@ -230,8 +229,6 @@ The text labels correspond to the names in the `pest: => parameters:` block desc
       pot_output_adj_factor: pot_out_adj
     taylor-fcn:
       neutral_growth_band: [0.02, gamma_0]
-      target_intrate:
-        xr_sens: i_xr_sens
     investment-fcn:
           init_neutral_growth: gamma_0
           util_sens:  util_sens
