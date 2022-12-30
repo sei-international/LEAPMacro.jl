@@ -214,7 +214,7 @@ investment-fcn:
 The next block contains default parameters for labor productivity (either a constant growth rate or in the form of the Kaldor-Verdoorn law) and for the function that determines the growth rate of the wage. See the technical documentation on [labor productivity growth](@ref dynamics-labor-prod) and [wage determination](@ref dynamics-wages) for details.
 
 All paramters are optional. Their definitions are as follows:
-  * `use_KV_model` (default = `true`) : A flag to say whether to use the Kaldor-Verdoorn model rather than constant labor productivity growth rates;
+  * `use_KV_model` (default = `true` if `KV_coeff_default` _or_ `KV_intercept_default` is defined, otherwise `false`) : A flag to say whether to use the Kaldor-Verdoorn model rather than constant labor productivity growth rates;
   * `use_sector_params_if_available` (default = `true`) : A flag to say whether to use sector-specific parameters if they are available (useful mainly to compare different specifications, otherwise it can be omitted);
   * `labor_prod_gr_default` (default = 0.0) : Default economy-wide labor productivity growth if not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series);
   * `KV_coeff_default` (default = 0.5) : Default economy-wide labor productivity growth if not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series);
@@ -251,6 +251,18 @@ wage-fcn:
     # Labor supply constraint coefficient
     lab_constr_coeff: 0.50
 ```
+To simply use a fixed labor productivity growth rate, the following block will suffice:
+```yaml
+#---------------------------------------------------------------------------
+# Parameters for labor productivity, labor force, and wages
+#---------------------------------------------------------------------------
+labor-prod-fcn:
+    # Default labor productivity growth
+    labor_prod_gr_default: 0.025
+wage-fcn:
+    ...
+```
+Sector values will be used if they are specified, otherwise the time series values will be used. If time series values are not specified, then the default value will be applied.
 
 ### [Endogenous change in intermediate demand coefficients](@id config-intermed-dmd-change)
 The next block is optional. If it is present, it sets a rate constant for endogenously determining [intermediate demand coefficients](@ref dynamics-intermed-dmd-coeff).

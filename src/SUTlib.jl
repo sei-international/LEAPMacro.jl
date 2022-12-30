@@ -202,7 +202,9 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["labor-prod-fcn"]["KV_intercept_default"] = 0.0
     else
         if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "use_KV_model")
-            global_params["labor-prod-fcn"]["use_KV_model"] = true
+            # If this key is missing and there are no defaults for the KV parameters, presume that a specified labor productivity is intended
+            global_params["labor-prod-fcn"]["use_KV_model"] = LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_coeff_default") ||
+                                                              LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_intercept_default")
         end
         if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "use_sector_params_if_available")
             global_params["labor-prod-fcn"]["use_sector_params_if_available"] = true
