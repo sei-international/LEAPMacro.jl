@@ -193,20 +193,29 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
     end
 
     # Labor productivity growth parameters
-    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "use_KV_model")
+    if !LMlib.haskeyvalue(global_params, "labor-prod-fcn")
+        global_params["labor-prod-fcn"] = Dict()
         global_params["labor-prod-fcn"]["use_KV_model"] = true
-    end
-    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "use_sector_params_if_available")
         global_params["labor-prod-fcn"]["use_sector_params_if_available"] = true
-    end
-    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "labor_prod_gr_default")
         global_params["labor-prod-fcn"]["labor_prod_gr_default"] = 0.0
-    end
-    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_coeff_default")
         global_params["labor-prod-fcn"]["KV_coeff_default"] = 0.5
-    end
-    if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_intercept_default")
         global_params["labor-prod-fcn"]["KV_intercept_default"] = 0.0
+    else
+        if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "use_KV_model")
+            global_params["labor-prod-fcn"]["use_KV_model"] = true
+        end
+        if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "use_sector_params_if_available")
+            global_params["labor-prod-fcn"]["use_sector_params_if_available"] = true
+        end
+        if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "labor_prod_gr_default")
+            global_params["labor-prod-fcn"]["labor_prod_gr_default"] = 0.0
+        end
+        if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_coeff_default")
+            global_params["labor-prod-fcn"]["KV_coeff_default"] = 0.5
+        end
+        if !LMlib.haskeyvalue(global_params["labor-prod-fcn"], "KV_intercept_default")
+            global_params["labor-prod-fcn"]["KV_intercept_default"] = 0.0
+        end
     end
 
     # Introduce a new key, "use_sector_params", set to true only if use_sector_params_if_available = true and they are available
@@ -224,11 +233,17 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
     end
 
     # Wage function defaults
-    if !LMlib.haskeyvalue(global_params["wage-fcn"], "infl_passthrough")
+    if !LMlib.haskeyvalue(global_params, "wage-fcn")
+        global_params["wage-fcn"] = Dict()
         global_params["wage-fcn"]["infl_passthrough"] = 1.0
-    end
-    if !LMlib.haskeyvalue(global_params["wage-fcn"], "lab_constr_coeff")
         global_params["wage-fcn"]["lab_constr_coeff"] = 0.0
+    else
+        if !LMlib.haskeyvalue(global_params["wage-fcn"], "infl_passthrough")
+            global_params["wage-fcn"]["infl_passthrough"] = 1.0
+        end
+        if !LMlib.haskeyvalue(global_params["wage-fcn"], "lab_constr_coeff")
+            global_params["wage-fcn"]["lab_constr_coeff"] = 0.0
+        end
     end
 
     # LEAP potential output is specified for a single Macro sector code, but allows for multiple branch/variable combos (values are summed)
