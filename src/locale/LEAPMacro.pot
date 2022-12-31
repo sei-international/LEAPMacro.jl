@@ -1,284 +1,276 @@
 
-#: Macro.jl:899
+#: Macro.jl:924
 msgid "Linear goal program failed to solve: {1}"
 msgstr ""
 
-#: Macro.jl:430
+#: Macro.jl:437
 msgid "Calibrating for {1}: {2}"
 msgstr ""
 
-#: Macro.jl:444
+#: Macro.jl:451
 msgid "basic prices"
 msgstr ""
 
-#: Macro.jl:507
+#: Macro.jl:515
 msgid "Year"
 msgstr ""
 
-#: Macro.jl:1014
+#: Macro.jl:1039
 msgid "Results did not converge: {1:.2f}% > {2:.2f}% target..."
 msgstr ""
 
-#: Macro.jl:999
+#: Macro.jl:1024
 msgid "Macro model run ({1})..."
 msgstr ""
 
-#: Macro.jl:440
+#: Macro.jl:447
 msgid "final demand"
 msgstr ""
 
-#: LEAPMacro.jl:66
+#: LEAPMacro.jl:69
 msgid "Configuration file: '{1}'"
 msgstr ""
 
-#: SUTlib.jl:482
+#: SUTlib.jl:574
 msgid "Year {1:d} is not in time series range {2:d}:{3:d}"
 msgstr ""
 
-#: Macro.jl:543
+#: Macro.jl:554
 msgid "GDP gr"
 msgstr ""
 
-#: Macro.jl:543
+#: Macro.jl:554
 msgid "curr acct surplus"
 msgstr ""
 
-#: SUTlib.jl:354
+#: SUTlib.jl:413
 msgid "Exogenous maximum capacity utilization file '{1}' does not exist in the 'inputs' folder"
 msgstr ""
 
-#: Macro.jl:443
+#: Macro.jl:450
 msgid "intermediate supply from non-energy sectors"
 msgstr ""
 
-#: Macro.jl:439
+#: Macro.jl:446
 msgid "exports"
 msgstr ""
 
-#: Macro.jl:1031
+#: Macro.jl:1056
 msgid "Sending Macro output to LEAP..."
 msgstr ""
 
-#: SUTlib.jl:347
+#: SUTlib.jl:406
 msgid "Exogenous potential output file '{1}' does not exist in the 'inputs' folder"
 msgstr ""
 
-#: Macro.jl:435
+#: Macro.jl:442
 msgid "wage share"
 msgstr ""
 
-#: Macro.jl:446
+#: Macro.jl:453
 msgid "positive margins"
 msgstr ""
 
-#: LEAPlib.jl:334
+#: LEAPlib.jl:336
 msgid "energy investment"
 msgstr ""
 
-#: Macro.jl:970
+#: Macro.jl:995
 msgid "Cannot connect to LEAP. Please check that LEAP is installed, or set 'run_leap: false' in the configuration file."
 msgstr ""
 
-#: Macro.jl:441
+#: Macro.jl:448
 msgid "imports"
 msgstr ""
 
-#: LEAPMacrolib.jl:96
+#: LEAPMacrolib.jl:94
 msgid "Cell range '{1}' is not in the correct format (e.g., 'AB3:BG10')"
 msgstr ""
 
-#: Macro.jl:546
+#: Macro.jl:556
 msgid "nominal xr index"
 msgstr ""
 
-#: Macro.jl:419; Macro.jl:458
+#: Macro.jl:426; Macro.jl:465
 msgid "calibration"
 msgstr ""
 
-#: Macro.jl:1038
+#: Macro.jl:1063
 msgid "Running LEAP model..."
 msgstr ""
 
-#: SUTlib.jl:457
+#: SUTlib.jl:547
 msgid "Value for exchange rate missing in year {1:d}, with no default"
 msgstr ""
 
-#: Macro.jl:434
+#: Macro.jl:441
 msgid "sector output"
 msgstr ""
 
-#: SUTlib.jl:803
+#: SUTlib.jl:895
 msgid "Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:"
 msgstr ""
 
-#: LEAPMacro.jl:72
+#: LEAPMacro.jl:75
 msgid "Macro exited with an error: Please check the log file '{1}'"
 msgstr ""
 
-#: Macro.jl:544
+#: Macro.jl:555
 msgid "labor productivity gr"
 msgstr ""
 
-#: Macro.jl:442
+#: Macro.jl:449
 msgid "domestic production"
 msgstr ""
 
-#: Macro.jl:545
+#: Macro.jl:555
 msgid "real investment"
 msgstr ""
 
-#: Macro.jl:1004
+#: Macro.jl:1029
 msgid "completed"
 msgstr ""
 
-#: Macro.jl:544
-msgid "wage rate gr"
-msgstr ""
-
-#: Macro.jl:546
+#: Macro.jl:556
 msgid "terms of trade index"
 msgstr ""
 
-#: LEAPMacrolib.jl:78
+#: LEAPMacrolib.jl:76
 msgid "Cell reference '{1}' is not in the correct format (e.g., 'AB3')"
 msgstr ""
 
-#: SUTlib.jl:566
+#: SUTlib.jl:658
 msgid "Product codes '{1}' in input file '{2}' not valid"
 msgstr ""
 
-#: LEAPlib.jl:156
+#: LEAPlib.jl:158
 msgid "LEAP is not responding"
 msgstr ""
 
-#: Macro.jl:555
+#: Macro.jl:565
 msgid "Running from {1} to {2}:"
 msgstr ""
 
-#: SUTlib.jl:361
+#: SUTlib.jl:420
 msgid "Exogenous real price file '{1}' does not exist in the 'inputs' folder"
 msgstr ""
 
-#: Macro.jl:545
+#: Macro.jl:556
 msgid "central bank rate"
 msgstr ""
 
-#: SUTlib.jl:203
+#: SUTlib.jl:261
 msgid "Sector code '{1}' is listed in 'LEAP-potential-output' but is not included in the Macro model calculations"
 msgstr ""
 
-#: Macro.jl:978; Macro.jl:1045
+#: Macro.jl:1003; Macro.jl:1070
 msgid "Obtaining LEAP results..."
 msgstr ""
 
-#: Macro.jl:545
-msgid "wage per effective worker gr"
-msgstr ""
-
-#: Macro.jl:419; Macro.jl:458; Macro.jl:880
+#: Macro.jl:426; Macro.jl:465; Macro.jl:905
 msgid "model"
 msgstr ""
 
-#: Macro.jl:992
+#: Macro.jl:1017
 msgid "With configuration file '{1}' (including energy sectors):"
 msgstr ""
 
-#: SUTlib.jl:522; SUTlib.jl:544
+#: SUTlib.jl:614; SUTlib.jl:636
 msgid "Sector codes '{1}' in input file '{2}' not valid"
 msgstr ""
 
-#: Macro.jl:892
+#: Macro.jl:917
 msgid "Simulating for {1}: {2}"
 msgstr ""
 
-#: SUTlib.jl:802
+#: SUTlib.jl:894
 msgid "This value should be small: {1:.2f}%."
 msgstr ""
 
-#: Macro.jl:1011
+#: Macro.jl:1036
 msgid "Convergence in run number {1} at {2:.2f}% ≤ {3:.2f}% target..."
 msgstr ""
 
-#: LEAPlib.jl:183
+#: LEAPlib.jl:185
 msgid "Encountered an error when running LEAP: {1}"
 msgstr ""
 
-#: Macro.jl:1025
+#: Macro.jl:1050
 msgid "Hiding LEAP to improve performance..."
 msgstr ""
 
-#: Macro.jl:317
+#: Macro.jl:324
 msgid "Preparing model..."
 msgstr ""
 
-#: Macro.jl:543
+#: Macro.jl:554
 msgid "real GDP"
 msgstr ""
 
-#: SUTlib.jl:451
+#: SUTlib.jl:541
 msgid "Value for working age growth rate missing in year {1:d}, with no default"
 msgstr ""
 
-#: Macro.jl:445
+#: Macro.jl:452
 msgid "negative margins"
 msgstr ""
 
-#: Macro.jl:544
+#: Macro.jl:555
 msgid "GDP deflator"
 msgstr ""
 
-#: LEAPlib.jl:374
+#: LEAPlib.jl:376
 msgid "Getting results from a LEAP version, but no temporary version to revert to"
 msgstr ""
 
-#: SUTlib.jl:340
+#: SUTlib.jl:399
 msgid "Exogenous investment file '{1}' does not exist in the 'inputs' folder"
 msgstr ""
 
-#: Macro.jl:159
+#: Macro.jl:160
 msgid "Loading data..."
 msgstr ""
 
-#: LEAPlib.jl:162
+#: LEAPlib.jl:164
 msgid "Cannot connect to LEAP: {1}"
 msgstr ""
 
-#: Macro.jl:543
+#: Macro.jl:554
 msgid "curr acct surplus to GDP ratio"
 msgstr ""
 
-#: Macro.jl:1052
+#: Macro.jl:1077
 msgid "Restoring LEAP..."
 msgstr ""
 
-#: LEAPMacro.jl:46
+#: LEAPMacro.jl:49
 msgid "Configuration file '{1}' did not load properly: {2} on line {3:d}"
 msgstr ""
 
-#: Macro.jl:544
+#: Macro.jl:555
 msgid "labor force gr"
 msgstr ""
 
-#: Macro.jl:994
+#: Macro.jl:1019
 msgid "With configuration file '{1}':"
 msgstr ""
 
-#: Macro.jl:546
+#: Macro.jl:556
 msgid "real xr index"
 msgstr ""
 
-#: Macro.jl:976
+#: Macro.jl:1001
 msgid "Obtaining LEAP results from version '{1}'..."
 msgstr ""
 
-#: Macro.jl:436
+#: Macro.jl:443
 msgid "capital-output ratio"
 msgstr ""
 
-#: SUTlib.jl:524; SUTlib.jl:546; SUTlib.jl:568
+#: SUTlib.jl:616; SUTlib.jl:638; SUTlib.jl:660
 msgid "Sector code '{1}' in input file '{2}' not valid"
 msgstr ""
 
-#: Macro.jl:433
+#: Macro.jl:440
 msgid "capacity utilization"
 msgstr ""
