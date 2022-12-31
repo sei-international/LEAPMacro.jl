@@ -1,0 +1,340 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.2.2\n"
+
+#: Macro.jl:899
+msgid "Linear goal program failed to solve: {1}"
+msgstr "Échec de la résolution du programme linéaire : {1}"
+
+#: Macro.jl:430
+msgid "Calibrating for {1}: {2}"
+msgstr "Calibrage pour {1} : {2}"
+
+#: Macro.jl:444
+msgid "basic prices"
+msgstr "prix de base"
+
+#: Macro.jl:507
+msgid "Year"
+msgstr "Année"
+
+#: Macro.jl:1014
+msgid "Results did not converge: {1:.2f}% > {2:.2f}% target..."
+msgstr "Les résultats n'ont pas convergé : {1:.2f}% > {2:.2f}% target..."
+
+#: Macro.jl:999
+msgid "Macro model run ({1})..."
+msgstr "Exécution du modèle macro ({1})..."
+
+#: Macro.jl:440
+msgid "final demand"
+msgstr "consommation finale"
+
+#: LEAPMacro.jl:66
+msgid "Configuration file: '{1}'"
+msgstr "Fichier de configuration : '{1}'"
+
+#: SUTlib.jl:482
+msgid "Year {1:d} is not in time series range {2:d}:{3:d}"
+msgstr ""
+"L'année {1:d} n'est pas dans la plage de séries chronologiques {2:d} :{3:d}"
+
+#: Macro.jl:543
+msgid "GDP gr"
+msgstr "PIB (taux de croissance)"
+
+#: Macro.jl:543
+msgid "curr acct surplus"
+msgstr "excédent du compte courant"
+
+#: SUTlib.jl:354
+msgid ""
+"Exogenous maximum capacity utilization file '{1}' does not exist in the "
+"'inputs' folder"
+msgstr ""
+"Le fichier d'utilisation de la capacité maximale exogène '{1}' n'existe pas "
+"dans le dossier 'inputs'"
+
+#: Macro.jl:443
+msgid "intermediate supply from non-energy sectors"
+msgstr "l'offre intermédiaire des secteurs non énergétiques"
+
+#: Macro.jl:439
+msgid "exports"
+msgstr "exportations"
+
+#: Macro.jl:1031
+msgid "Sending Macro output to LEAP..."
+msgstr "Envoi de la sortie Macro à LEAP..."
+
+#: SUTlib.jl:347
+msgid ""
+"Exogenous potential output file '{1}' does not exist in the 'inputs' folder"
+msgstr ""
+"Le fichier de la production potentielle exogène '{1}' n'existe pas dans le "
+"dossier 'inputs'"
+
+#: Macro.jl:435
+msgid "wage share"
+msgstr "part des salaires"
+
+#: Macro.jl:446
+msgid "positive margins"
+msgstr "marges positives"
+
+#: LEAPlib.jl:334
+msgid "energy investment"
+msgstr "investissement énergétique"
+
+#: Macro.jl:970
+msgid ""
+"Cannot connect to LEAP. Please check that LEAP is installed, or set "
+"'run_leap: false' in the configuration file."
+msgstr ""
+"Impossible de se connecter à LEAP. Veuillez vérifier que LEAP est installé, "
+"ou définissez 'run_leap : false' dans le fichier de configuration."
+
+#: Macro.jl:441
+msgid "imports"
+msgstr "importations"
+
+#: LEAPMacrolib.jl:96
+msgid "Cell range '{1}' is not in the correct format (e.g., 'AB3:BG10')"
+msgstr ""
+"La plage de cellules \"{1}\" n'a pas le bon format (par exemple, \"AB3:"
+"BG10\")"
+
+#: Macro.jl:546
+msgid "nominal xr index"
+msgstr "indice du taux de change nominal"
+
+#: Macro.jl:419; Macro.jl:458
+msgid "calibration"
+msgstr "calibrage"
+
+#: Macro.jl:1038
+msgid "Running LEAP model..."
+msgstr "Exécution du modèle LEAP..."
+
+#: SUTlib.jl:457
+msgid "Value for exchange rate missing in year {1:d}, with no default"
+msgstr "Valeur pour le taux de change manquant dans l'année {1:d}, sans défaut"
+
+#: Macro.jl:434
+msgid "sector output"
+msgstr "production du secteur"
+
+#: SUTlib.jl:803
+msgid ""
+"Measure of the significance to the economy of the supply of non-energy goods "
+"and services to the energy sector:"
+msgstr ""
+"Mesure de l'importance pour l'économie de la fourniture de biens et services "
+"non énergétiques au secteur de l'énergie :"
+
+#: LEAPMacro.jl:72
+msgid "Macro exited with an error: Please check the log file '{1}'"
+msgstr ""
+"La macro s'est arrêtée avec une erreur : Veuillez vérifier le fichier "
+"journal '{1}'"
+
+#: Macro.jl:544
+msgid "labor productivity gr"
+msgstr "productivité du travail (taux de croissance)"
+
+#: Macro.jl:442
+msgid "domestic production"
+msgstr "production nationale"
+
+#: Macro.jl:545
+msgid "real investment"
+msgstr "investissement réel"
+
+#: Macro.jl:1004
+msgid "completed"
+msgstr "terminé"
+
+#: Macro.jl:544
+msgid "wage rate gr"
+msgstr "taux de salaire (taux de croissance)"
+
+#: Macro.jl:546
+msgid "terms of trade index"
+msgstr "indice des termes de l'échange"
+
+#: LEAPMacrolib.jl:78
+msgid "Cell reference '{1}' is not in the correct format (e.g., 'AB3')"
+msgstr ""
+"La référence de cellule \"{1}\" n'a pas le bon format (par exemple, \"AB3\")"
+
+#: SUTlib.jl:566
+msgid "Product codes '{1}' in input file '{2}' not valid"
+msgstr ""
+"Les codes produits '{1}' dans le fichier d'entrée '{2}' ne sont pas valides"
+
+#: LEAPlib.jl:156
+msgid "LEAP is not responding"
+msgstr "Le LEAP ne répond pas"
+
+#: Macro.jl:555
+msgid "Running from {1} to {2}:"
+msgstr "Exécution de {1} à {2} :"
+
+#: SUTlib.jl:361
+msgid "Exogenous real price file '{1}' does not exist in the 'inputs' folder"
+msgstr ""
+"Le fichier des prix réels exogènes '{1}' n'existe pas dans le dossier "
+"'inputs'"
+
+#: Macro.jl:545
+msgid "central bank rate"
+msgstr "taux de la banque centrale"
+
+#: SUTlib.jl:203
+msgid ""
+"Sector code '{1}' is listed in 'LEAP-potential-output' but is not included "
+"in the Macro model calculations"
+msgstr ""
+"Le code du secteur \"{1}\" figure dans \"LEAP-potential-output\" mais n'est "
+"pas inclus dans les calculs du modèle Macro"
+
+#: Macro.jl:978; Macro.jl:1045
+msgid "Obtaining LEAP results..."
+msgstr "Obtention des résultats du LEAP..."
+
+#: Macro.jl:545
+msgid "wage per effective worker gr"
+msgstr "salaire par travailleur effectif (taux de croissance)"
+
+#: Macro.jl:419; Macro.jl:458; Macro.jl:880
+msgid "model"
+msgstr "modèle"
+
+#: Macro.jl:992
+msgid "With configuration file '{1}' (including energy sectors):"
+msgstr ""
+"Avec le fichier de configuration '{1}' (y compris les secteurs "
+"énergétiques) :"
+
+#: SUTlib.jl:522; SUTlib.jl:544
+msgid "Sector codes '{1}' in input file '{2}' not valid"
+msgstr ""
+"Les codes de secteur '{1}' dans le fichier d'entrée '{2}' ne sont pas valides"
+
+#: Macro.jl:892
+msgid "Simulating for {1}: {2}"
+msgstr "Simulation pour {1} : {2}"
+
+#: SUTlib.jl:802
+msgid "This value should be small: {1:.2f}%."
+msgstr "Cette valeur doit être faible : {1:.2f}%."
+
+#: Macro.jl:1011
+msgid "Convergence in run number {1} at {2:.2f}% ≤ {3:.2f}% target..."
+msgstr ""
+"Convergence dans le numéro d'exécution {1} à {2:.2f}% ≤ {3:.2f}% target..."
+
+#: LEAPlib.jl:183
+msgid "Encountered an error when running LEAP: {1}"
+msgstr "Une erreur s'est produite lors de l'exécution de LEAP : {1}"
+
+#: Macro.jl:1025
+msgid "Hiding LEAP to improve performance..."
+msgstr "Cacher LEAP pour améliorer les performances..."
+
+#: Macro.jl:317
+msgid "Preparing model..."
+msgstr "Préparation du modèle..."
+
+#: Macro.jl:543
+msgid "real GDP"
+msgstr "PIB réel"
+
+#: SUTlib.jl:451
+msgid ""
+"Value for working age growth rate missing in year {1:d}, with no default"
+msgstr ""
+"Valeur du taux de croissance de l'âge actif manquante pour l'année {1:d}, "
+"sans valeur par défaut"
+
+#: Macro.jl:445
+msgid "negative margins"
+msgstr "marges négatives"
+
+#: Macro.jl:544
+msgid "GDP deflator"
+msgstr "déflateur du PIB"
+
+#: LEAPlib.jl:374
+msgid ""
+"Getting results from a LEAP version, but no temporary version to revert to"
+msgstr ""
+"Récupération des résultats d'une version LEAP, mais pas de version "
+"temporaire à laquelle revenir"
+
+#: SUTlib.jl:340
+msgid "Exogenous investment file '{1}' does not exist in the 'inputs' folder"
+msgstr ""
+"Le fichier d'investissement exogène '{1}' n'existe pas dans le dossier "
+"'inputs'"
+
+#: Macro.jl:159
+msgid "Loading data..."
+msgstr "Chargement des données..."
+
+#: LEAPlib.jl:162
+msgid "Cannot connect to LEAP: {1}"
+msgstr "Impossible de se connecter à LEAP : {1}"
+
+#: Macro.jl:543
+msgid "curr acct surplus to GDP ratio"
+msgstr "rapport entre l'excédent des comptes courants et le PIB"
+
+#: Macro.jl:1052
+msgid "Restoring LEAP..."
+msgstr "Restauration de LEAP..."
+
+#: LEAPMacro.jl:46
+msgid "Configuration file '{1}' did not load properly: {2} on line {3:d}"
+msgstr ""
+"Le fichier de configuration '{1}' n'a pas été chargé correctement : {2} sur "
+"la ligne {3:d}"
+
+#: Macro.jl:544
+msgid "labor force gr"
+msgstr "force de travail (taux de croissance)"
+
+#: Macro.jl:994
+msgid "With configuration file '{1}':"
+msgstr "Avec le fichier de configuration '{1}' :"
+
+#: Macro.jl:546
+msgid "real xr index"
+msgstr "indice du taux de change réel"
+
+#: Macro.jl:976
+msgid "Obtaining LEAP results from version '{1}'..."
+msgstr "Obtention des résultats LEAP de la version '{1}'..."
+
+#: Macro.jl:436
+msgid "capital-output ratio"
+msgstr "ratio capital-production"
+
+#: SUTlib.jl:524; SUTlib.jl:546; SUTlib.jl:568
+msgid "Sector code '{1}' in input file '{2}' not valid"
+msgstr ""
+"Le code de secteur '{1}' dans le fichier d'entrée '{2}' n'est pas valide"
+
+#: Macro.jl:433
+msgid "capacity utilization"
+msgstr "utilisation de la capacité"
