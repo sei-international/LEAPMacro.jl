@@ -1,5 +1,5 @@
 #=
-Macro: A macroeconomic model for LEAP
+LEAPMacro: A macroeconomic model for LEAP
 
 Authors:
   Eric Kemp-Benedict
@@ -10,6 +10,7 @@ Authors:
 Copyright ©2019-2022 Stockholm Environment Institute
 =#
 
+"Main module for `LEAPMacro.jl` -- a macroeconomic model for LEAP"
 module LEAPMacro
 
 using Logging, Dates, YAML, Formatting
@@ -18,7 +19,9 @@ include("./Macro.jl")
 include("./LEAPMacrolib.jl")
 using .Macro, .LMlib
 
-"Run LEAP-Macro by calling `leapmacro`"
+export run
+
+"Run a Macro model as specified in `config_file`. If running from LEAP, set `include_energy_sectors` to `false` (the default)."
 function run(config_file::AbstractString = "LEAPMacro_params.yml";
 			 dump_err_stack::Bool = false,
 			 include_energy_sectors::Bool = false,

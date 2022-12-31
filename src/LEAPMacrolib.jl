@@ -1,6 +1,4 @@
-#=
-LMlib is a collection of common functions and constants for LEAP-Macro
-=#
+"Module `LMlib` is a collection of common functions and constants for `LEAPMacro.jl`"
 module LMlib
 
 using DataFrames, Formatting, PyCall
@@ -47,12 +45,12 @@ function write_vector_to_csv(filename::AbstractString, vector::Vector, varname::
 	end
 end # write_vector_to_csv
 
-"Convert a float to nearest int using 'round'"
+"Convert a float to nearest int using `round()`"
 function float_to_int(x::Number)
 	return(trunc(Int, round(x)))
 end
 
-"Convert strings in Dataframe to floats and fill in missing values with 0."
+"Convert a string (e.g., from a Dataframe) to a float; supply 0.0 for missing values."
 function string_to_float(str::Union{Missing,AbstractString})
     try return(parse(Float64, str)) catch
         return(0.0) # Missing values set to zero
@@ -144,8 +142,8 @@ end
 
 """
 Convert a vector of strings by wrapping each string in quotes (for putting into CSV files).
-This function converts `svec` in-place, so should only be run once. Double quotation marks
-are removed to avoid that problem.
+This function converts `svec` in place, so only needs to be run once. In case it is run
+multiple times, double quotation marks are replaced with single quotation marks.
 """
 function stringvec_to_quotedstringvec!(svec::Vector)
 	for i in eachindex(svec)

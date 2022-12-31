@@ -1,3 +1,4 @@
+"Module `LEAPlib` exports functions for linking Macro to LEAP in `LEAPMacro.jl`"
 module LEAPlib
 using PyCall, DataFrames, CSV, UUIDs
 
@@ -13,7 +14,7 @@ mutable struct LEAPresults
     price::Array{Any,2} # Real prices from LEAP (converted to index) np x year
 end
 
-# A list of all LEAP branch types
+"A list of all LEAP branch types, with their codes"
 @enum LEAPBranch begin
 	DemandCategoryBranchType = 1
 	TransformationModuleBranchType = 2
@@ -51,6 +52,7 @@ end
 	EmissionConstraintBranchType = 39
 end
 
+"A list of all LEAP views, with their codes"
 @enum LEAPView begin
     AnalysisView = 1
     ResultsView = 2
@@ -81,7 +83,7 @@ function get_version_info(version::Union{Nothing,Integer,AbstractString})
     return version_info
 end
 
-"Create LEAP Interp expression from an array of values."
+"Create LEAP `Interp()` expression from an array of values."
 function build_interp_expression(base_year::Integer, newdata::Array; lasthistoricalyear::Integer=0)
     # Creates start of expression. Includes historical data if available
     if lasthistoricalyear > 0
@@ -253,7 +255,7 @@ function send_results_to_leap(params::Dict, indices::Array)
     end
 end # send_results_to_leap
 
-"Obtain energy investment data from the LEAP model."
+"Obtain results (energy investment expenditure, potential output, and prices) from the LEAP model."
 function get_results_from_leap(params::Dict, run_number::Integer, get_results_from_leap_version::Union{Nothing,Integer,AbstractString} = nothing)
     sim_years = params["years"]["start"]:params["years"]["end"]
 

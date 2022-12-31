@@ -1,3 +1,4 @@
+"Module `SUTlib` exports functions for parsing the configuration file, supply-use table, and paramter files for `LEAPMacro.jl`"
 module SUTlib
 using CSV, DataFrames, LinearAlgebra, YAML, Logging, Formatting
 
@@ -59,7 +60,7 @@ mutable struct ExogParams
     import_price_elast::Array{Any,1} # np
 end
 
-"Read in YAML input file and convert ranges if necessary."
+"Read LEAP-Macro model configuration file (in YAML syntax). Add or modify entries as needed."
 function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Bool = false)
     global_params = YAML.load_file(YAML_file)
 
@@ -901,7 +902,7 @@ function process_sut(params::Dict)
 end # process_sut
 
 "Initialize price structure."
-# All domestic prices are initialized to one
+# All domestic price indices are initialized to one
 function initialize_prices(np::Integer, io::SUTdata)
     return PriceData(ones(np), #pb
                      ones(np), #pd

@@ -1,3 +1,4 @@
+"Module `Macro`: Implements the macroeconomic model in `LEAPMacro.jl`"
 module Macro
 using JuMP, GLPK, DelimitedFiles, LinearAlgebra, DataFrames, CSV, Logging, Suppressor, Formatting
 
@@ -57,9 +58,9 @@ end
 
 """
 Calculate the Sraffa matrix, which is used to calculate domestic prices
-	# np: number of products
-	# ns: number of sectors
-	# sut: SUTdata data structure
+  - np: number of products
+  - ns: number of sectors
+  - sut: SUTdata data structure
 """
 function calc_sraffa_matrix(np::Integer, ns::Integer, sut::SUTdata)
 	sraffa_matrix = Array{Float64}(undef, np, np)
@@ -74,11 +75,11 @@ end # calc_sraffa_matrix
 
 """
 Evaluate the Sraffa system to get domestic prices
-	# t: time index (for exchange rate)
-	# np: number of products
-	# ns: number of sectors
-	# ω: wage share by sector
-	# sut: SUTdata data structure
+  - t: time index (for exchange rate)
+  - np: number of products
+  - ns: number of sectors
+  - ω: wage share by sector
+  - sut: SUTdata data structure
 """
 function calc_dom_prices(t::Integer, np::Integer, ns::Integer, ω::Array{Float64,1}, prices::PriceData, sut::SUTdata, exog::ExogParams)
 	sraffa_matrix = calc_sraffa_matrix(np, ns, sut)
@@ -95,11 +96,11 @@ end # calc_dom_prices
 
 """
 Calculate growth rate of intermediate demand coefficients (that is, sut.D entries), or the intercepts (for initialization)	
-	σ(np,ns) = matrix of cost shares
-	k = single value or a vector (ns) of rate coefficients
-	θ = single value or vector (ns) of exponents
-	c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
-	b(np,ns) = matrix of weights (if b = nothing it is set to one)
+  - σ(np,ns) = matrix of cost shares
+  - k = single value or a vector (ns) of rate coefficients
+  - θ = single value or vector (ns) of exponents
+  - c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
+  - b(np,ns) = matrix of weights (if b = nothing it is set to one)
 """
 function calc_intermed_techchange(σ::Array{Float64,2}, k::LMlib.NumOrVector, θ::LMlib.NumOrVector = 2.0, c::LMlib.NumOrVector = nothing, b::LMlib.NumOrVector = nothing)
 	# Initialize values
