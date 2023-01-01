@@ -470,7 +470,7 @@ LEAP-investment:
             }
 ```
 
-### Passing values from Macro to LEAP
+### [Passing values from Macro to LEAP](@id config-indices-for-LEAP-Macro-link)
 The next sections specify where in LEAP to put indices as calculated by Macro. For each index, LEAP should contain at least one historical value, while the index supplied by Macro is applied to the last historical value in the specified `result_scenario`. Indices appear as columns in an `indices_#.csv` file in the [`results` output folder](@ref model-outputs-results), where `#` is the run number.
 
 The first index is for GDP. It can be omitted, but if it is present, the entry in the configuration file gives the name for the index, the LEAP branch and variable where the index should be inserted and, to cover cases where the last historical year is after the base year, the last historical year.

@@ -927,14 +927,16 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     end
 
     # Make indices into indices
-    indices_0 = indices[1,:]
-    for t in eachindex(years)
-        indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
-    end
-    open(joinpath(params["results_path"], format("indices_{1}.csv", run_number)), "w") do io
-               writedlm(io, reshape(labels, 1, :), ',')
-               writedlm(io, indices, ',')
-           end;
+	if size(indices)[2] > 1
+		indices_0 = indices[1,:]
+		for t in eachindex(years)
+			indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
+		end
+		open(joinpath(params["results_path"], format("indices_{1}.csv", run_number)), "w") do io
+				writedlm(io, reshape(labels, 1, :), ',')
+				writedlm(io, indices, ',')
+		end
+	end
 
 	# Release the model
 	mdl = nothing
