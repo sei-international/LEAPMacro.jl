@@ -140,7 +140,7 @@ calib:
     pot_output_adj_factor: 0.05
 ```
 
-### Default values for the global economy
+### [Default values for the global economy](@id config-global-econ)
 The second block of model parameters provides default values for the global inflation rate and growth rate of global GDP (or gross world product, GWP). These are applied if they are not specified for some year in the [external time-series file](@ref params-time-series). Also, the default global inflation rate is applied to price indices when initializing the model.
 
 The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
@@ -223,7 +223,7 @@ investment-fcn:
 ### [Employment, labor productivity, and wages](@id config-empl-labprod-wage)
 The next block contains default parameters for labor productivity (either a constant growth rate or in the form of the Kaldor-Verdoorn law) and for the function that determines the growth rate of the wage. See the technical documentation on [labor productivity growth](@ref dynamics-labor-prod) and [wage determination](@ref dynamics-wages) for details.
 
-All paramters are optional. Their definitions are as follows:
+All parameters are optional. Their definitions are as follows:
   * `use_KV_model` (default = `true` if `KV_coeff_default` _or_ `KV_intercept_default` is defined, otherwise `false`) : A flag to say whether to use the Kaldor-Verdoorn model rather than constant labor productivity growth rates;
   * `use_sector_params_if_available` (default = `true`) : A flag to say whether to use sector-specific parameters if they are available (useful mainly to compare different specifications, otherwise it can be omitted);
   * `labor_prod_gr_default` (default = 0.0) : Default economy-wide labor productivity growth if not specified for some year (or if the column is omitted) in the [external time-series file](@ref params-time-series);

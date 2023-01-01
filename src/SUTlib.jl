@@ -517,12 +517,20 @@ function get_var_params(params::Dict)
     data_end_year = data_start_year + length(time_series[!,:year]) - 1
 
     # World inflation rate (apply to world prices only, others induced)
-    world_infl_temp = time_series[!,:world_infl_rate]
     world_infl_default = params["global-params"]["infl_default"]
+    if hasproperty(time_series, :world_infl_rate)
+        world_infl_temp = time_series[!,:world_infl_rate]
+    else
+        world_infl_temp = world_infl_default * ones(data_end_year - data_start_year + 1)
+    end
 
     # World GDP growth rate (including historical, for calibration)
-    world_grs_temp = time_series[!,:world_gr]
     world_grs_default = params["global-params"]["gr_default"]
+    if hasproperty(time_series, :world_gr)
+        world_grs_temp = time_series[!,:world_gr]
+    else
+        world_grs_temp = world_grs_default * ones(data_end_year - data_start_year + 1)
+    end
 
 	# Working age growth rate (No default -- must provide all values for specified time period)
     working_age_grs_temp = time_series[!,:working_age_gr]

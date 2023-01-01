@@ -66,7 +66,12 @@ Here is the example from the Freedonia sample model:
 ![Freedonia sector_parameters file](assets/images/sector_parameters.png)
 
 ## [Time series](@id params-time-series)
-The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-labor-prod). The final four columns are optional, so they are bracketed. If the `exchange_rate` column is missing, then it defaults to a constant exchange rate. If the final three columns are missing, then the default values from the [configuration file](@ref config-empl-labprod-wage) are applied for all years.
+The structure of the time series file is shown below. It contains several parameters: the world growth rate, the world inflation rate, the growth rate of the working-age population, the exchange rate, and parameters for the [labor productivity calculation](@ref dynamics-labor-prod).
+
+Only the `working_age_gr` column is required -- each of the others is optional, so they are bracketed.
+  * If either the `world_gr` or `world_infl_rate` columns are missing, then the corresponding default value from the [configuration file](@ref config-global-econ) is applied for all years;
+  * If the `exchange_rate` column is missing, then it defaults to a constant exchange rate;
+  * If any of the `KV_coeff`, `KV_intercept`, or `labor_prod_gr` columns is missing, then the corresponding default value from the [configuration file](@ref config-empl-labprod-wage) is applied for all years.
 
 !!! info "Exchange rates and supply-use tables"
     Supply-use tables have entries that are all in the same currency, usually but not always the national (domestic) currency. Exchange rates express the domestic currency in terms of a foreign currency, such as the US dollar, the Euro, the Yen, or a mixture of currencies (a currency "basket"). In Macro, exchange rates are converted into an index to ensure consistent currency units.
@@ -75,12 +80,12 @@ Scenarios for the world economic growth rate can be drawn from other studies, su
 
 Other parameters have less well-established sources of estimates. The labor productivity parameters (the Kaldor-Verdoorn parameters `KV_coeff` and `KV_intercept` or the labor productivity growth rate `labor_prod_gr`) might be assumed constant, estimated from historical data, or drawn from published studies. If they are constant, then they can be omitted from this table and specified as default values in the [configuration file](@ref config-empl-labprod-wage). Assumptions regarding the world inflation rate and the exchange rate can be based on historical patterns, other modeling studies, or consultation with experts.
 
-| `year` | `world_gr` | `world_infl_rate` | `working_age_gr` |   `[exchange_rate]` | `[KV_coeff]` | `[KV_intercept]` |  `[labor_prod_gr`] |
-|-------:|-----------:|------------------:|-----------------:|--------------------:|-------------:|-----------------:|-------------------:|
-|    y_1 |      wgr_1 |             wir_1 |           wagr_1 |            \[xr_1\] |    \[kvc_1\] |        \[kvi_1\] |         \[lpgr_1\] |
-|    y_2 |      wgr_2 |             wir_2 |           wagr_2 |            \[xr_2\] |    \[kvc_2\] |        \[kvi_2\] |         \[lpgr_2\] |
-|    ... |        ... |               ... |              ... |                 ... |          ... |              ... |                ... |
-|  y_*N* |    wgr_*N* |           wir_*N* |         wagr_*N* |          \[xr_*N*\] |  \[kvc_*N*\] |      \[kvi_*N*\] |       \[lpgr_*N*\] |
+| `year` |   `[world_gr]` |   `[world_infl_rate]` | `working_age_gr` |   `[exchange_rate]` | `[KV_coeff]` | `[KV_intercept]` |  `[labor_prod_gr`] |
+|-------:|---------------:|----------------------:|-----------------:|--------------------:|-------------:|-----------------:|-------------------:|
+|    y_1 |      \[wgr_1\] |             \[wir_1\] |           wagr_1 |            \[xr_1\] |    \[kvc_1\] |        \[kvi_1\] |         \[lpgr_1\] |
+|    y_2 |      \[wgr_2\] |             \[wir_2\] |           wagr_2 |            \[xr_2\] |    \[kvc_2\] |        \[kvi_2\] |         \[lpgr_2\] |
+|    ... |            ... |                   ... |              ... |                 ... |          ... |              ... |                ... |
+|  y_*N* |    \[wgr_*N*\] |           \[wir_*N*\] |         wagr_*N* |          \[xr_*N*\] |  \[kvc_*N*\] |      \[kvi_*N*\] |       \[lpgr_*N*\] |
 
 The corresponding [variables](@ref exog-param-vars) are:
   * `world_gr` : ``\underline{\gamma}^\text{world}``
