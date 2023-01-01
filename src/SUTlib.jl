@@ -386,13 +386,13 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
             end
         end
     else
+        global_params["LEAP-investment"] = Dict()
         global_params["LEAP-investment"]["inv_costs_unit"] = ""
         global_params["LEAP-investment"]["inv_costs_scale"] = 1.0
         global_params["LEAP-investment"]["inv_costs_apply_xr"] = false
         global_params["LEAP-investment"]["excluded_branches"] = []
         global_params["LEAP-investment"]["distribute_costs_over"] = Dict("default" => 1, "by_branch" => [])
     end
-
 
     return global_params
 end # parse_param_file
