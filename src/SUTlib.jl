@@ -249,6 +249,28 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         end
     end
 
+    # Provide defaults for the initial value adjustment (calibration) block
+    if LMlib.haskeyvalue(global_params, "calib")
+        if !LMlib.haskeyvalue(global_params["calib"], "nextper_inv_adj_factor")
+            global_params["calib"]["nextper_inv_adj_factor"] = 0.0
+        end
+        if !LMlib.haskeyvalue(global_params["calib"], "max_export_adj_factor")
+            global_params["calib"]["max_export_adj_factor"] = 0.0
+        end
+        if !LMlib.haskeyvalue(global_params["calib"], "max_hh_dmd_adj_factor")
+            global_params["calib"]["max_hh_dmd_adj_factor"] = 0.0
+        end
+        if !LMlib.haskeyvalue(global_params["calib"], "pot_output_adj_factor")
+            global_params["calib"]["pot_output_adj_factor"] = 0.0
+        end
+    else
+        global_params["calib"] = Dict()
+        global_params["calib"]["nextper_inv_adj_factor"] = 0.0
+        global_params["calib"]["max_export_adj_factor"] = 0.0
+        global_params["calib"]["max_hh_dmd_adj_factor"] = 0.0
+        global_params["calib"]["pot_output_adj_factor"] = 0.0
+    end
+
     #------------------------------------------------
     # LEAP-related parameters
     #------------------------------------------------

@@ -121,7 +121,9 @@ exog-files:
 The next several blocks contain some of the [exogenous parameters](@ref exog-param-vars) for the Macro model that are not specified in the files identified in earlier blocks.
 
 ### [Initial value adjustments](@id config-init-val-adj)
-The first block of model parameters specifies adjustments to initial values. They can be used to make a correction if, for example, the economy was recovering from a recession in the first year of the simulation. These parameters should normally be set to zero when starting a calibration.
+The first block of model parameters is optional. It specifies adjustments to initial values. Each parameter defaults to 0.0.
+
+These parameters can be used to make a correction if, for example, the economy was recovering from a recession in the first year of the simulation. These parameters should normally be set to zero when starting a calibration (the default value).
 ```yaml
 #---------------------------------------------------------------------------
 # Adjustment parameters for initializing variables
