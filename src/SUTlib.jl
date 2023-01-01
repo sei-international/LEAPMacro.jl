@@ -479,8 +479,14 @@ function get_var_params(params::Dict)
 	# Working age growth rate (No default -- must provide all values for specified time period)
     working_age_grs_temp = time_series[!,:working_age_gr]
 
-	# Exchange rate (No default -- must provide all values for specified time period)
-    xr_temp = time_series[!,:exchange_rate]
+	# Exchange rate
+    #   If present, then no default -- must provide all values for specified time period
+    #   If absent, then default to one
+    if hasproperty(time_series, :exchange_rate)
+        xr_temp = time_series[!,:exchange_rate]
+    else
+        xr_temp = ones(data_end_year - data_start_year + 1)
+    end
 
     # Labor productivity parameters
     if params["labor-prod-fcn"]["use_KV_model"]
