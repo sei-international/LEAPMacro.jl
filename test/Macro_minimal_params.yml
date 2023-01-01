@@ -1,0 +1,143 @@
+#---------------------------------------------------------------------------
+# Folder inside the "outputs" folder to store calibration, results, and diagnostics
+#---------------------------------------------------------------------------
+output_folder: Minimal
+
+#---------------------------------------------------------------------------
+# Start and end years for the simulation
+#   Note: the supply-use table above must be appropriate for the start year
+#---------------------------------------------------------------------------
+years:
+    start:  2010
+    end:    2040
+
+#---------------------------------------------------------------------------
+# Supply-use table and supplementary tables as CSV files
+#---------------------------------------------------------------------------
+# Macro model data files
+files:
+    SUT: Freedonia_SUT.csv
+    sector_info: minimal_sector_parameters.csv
+    product_info: minimal_product_parameters.csv
+    time_series: minimal_time_series.csv
+
+# Say whether to clear the contents of the results, calibration, and diagnostic folders before the run
+clear-folders:
+    results: true
+    calibration: true
+    diagnostics: true
+# Set to "true" to send results to the diagnostics folder, including dumps of the linear goal program
+report-diagnostics: true
+    
+#---------------------------------------------------------------------------
+# Global economy parameters
+#---------------------------------------------------------------------------
+global-params:
+    # Default world inflation rate
+    infl_default: 0.02
+    # Default world growth rate
+    gr_default: 0.015
+
+#---------------------------------------------------------------------------
+# Parameters for setting the central bank lending rate (Taylor rule)
+#---------------------------------------------------------------------------
+taylor-fcn:
+    # Allowable range for neutral growth
+    neutral_growth_band: [0.02, 0.06]
+    # Target interest rate (as a fraction, e.g., 2%/year = 0.02)
+    target_intrate:
+        init: 0.04
+        band: [0.01, 0.10]
+        xr_sens: 1
+        adj_time: 2 # years
+    # Target inflation rate (if missing or if value set to "~", will use global inflation rate)
+    target_infl: 0.02
+    # Initial inflation rate for domestic prices (if missing, or if value set to "~", will use target inflation rate)
+    init_infl: 0.04
+    # Response of the central bank rate to a change in the GDP growth rate
+    gr_resp: 0.50
+    # Response of the central bank rate to a change in the inflation rate
+    infl_resp: 0.50
+
+#---------------------------------------------------------------------------
+# Parameters for the investment function
+#---------------------------------------------------------------------------
+investment-fcn:
+    # Starting point for the autonomous investment growth rate: also the initial target GDP growth rate for the Taylor rule
+    init_neutral_growth: 0.060
+    # Change in induced investment with a change in utilization
+    util_sens:  0.07
+    # Change in induced investment with a change in the profit rate
+    profit_sens: 0.05
+    # Change in induced investment with a change in the central bank lending rate
+    intrate_sens: 0.20
+    # Rate of adjustment of the autonomous investment rate towards the actual investment rate
+    growth_adj: 0.10
+
+#---------------------------------------------------------------------------
+# Parameters for labor productivity, labor force, and wages
+#---------------------------------------------------------------------------
+labor-prod-fcn:
+    # Default labor productivity growth
+    labor_prod_gr_default: 0.025
+wage-fcn:
+    # Inflation pass-through (wage indexing coefficient)
+    infl_passthrough: 1.00
+    # Labor supply constraint coefficient
+    lab_constr_coeff: 0.50
+
+#---------------------------------------------------------------------------
+# Demand model parameters
+#---------------------------------------------------------------------------
+# For exports, with respect to world GDP
+export_elast_demand:
+    decay: 0.01
+    
+# For final demand, with respect to the wage bill
+wage_elast_demand:
+    decay: 0.01
+    engel_prods: [p_agric, p_foodpr]
+    engel_asympt_elast: 0.7
+
+#---------------------------------------------------------------------------
+# Paramters for implementing the (goal program) obective function
+#---------------------------------------------------------------------------
+objective-fcn:
+    # Category weights on deviations from normal levels
+    category_weights:
+        utilization: 8.00
+        final_demand_cov: 4.00
+        exports_cov: 2.00
+        imports_cov: 1.00
+    # Product & sector weights are defined by: φ * value share + (1 - φ) * 1/number of sectors or products; this is φ
+    product_sector_weight_factors:
+        utilization: 0.5
+        final_demand_cov: 0.5
+        exports_cov: 0.5
+
+#---------------------------------------------------------------------------
+# Structure of the supply-use table
+#---------------------------------------------------------------------------
+# NOTE: Both supply and use tables must have sectors labeling columns and products labeling rows
+non_tradeable_products: [p_constr, p_comm]
+
+# Domestic production as a % share of the total of imports and domestic production must exceed this value
+domestic_production_share_threshold: 1.0 # percent
+    
+SUT_ranges:
+    # Matrices arranged product (rows) x sector (columns)
+    supply_table: J3:W16
+    use_table: J21:W34
+    # Columns indexed by products -- groups of columns will be summed together
+    tot_supply: I3:I16
+    margins: D3:E16
+    taxes: F3:H16
+    imports: Y3:Y16
+    exports: Y21:Y34
+    final_demand: Z21:AB34
+    investment: AC21:AC34
+    stock_change: AD21:AD34
+    tot_intermediate_supply: X21:X34
+    # Rows indexed by sector -- groups of rows will be summed together
+    tot_intermediate_demand: J35:W35
+    wages: J37:W38
