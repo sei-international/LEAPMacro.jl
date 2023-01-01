@@ -94,6 +94,9 @@ Make sure you are in Current Accounts. Then, go to the “Transformation\Electri
 | New Coal Steam | 1000 |
 | New Oil Combustion Turbine | 400 |
 
+!!! warning "Ensuring consistent units"
+    The default units for capital costs in the Freedonia LEAP Area are US\$/MW. They must be changed to 1000 US\$/MW or to US\$/kW, or the numbers in the table above must be multiplied by 1000 before entering them into LEAP. If this is not done, then the investment values passed to LEAP-Macro will appear (incorrectly) to be negligibly small.
+
 ## Running LEAP-Macro
 LEAP-Macro can be run using a Visual Basic script that is provided with the sample files. Go into the _LEAP Areas\Freedonia\Macro_ folder and open the _LEAP Areas\Freedonia\Macro\scripts_ folder. Copy the `LEAPMacro_MacroModelCalc.vbs` file from that folder into the main Freedonia LEAP area folder.
 
