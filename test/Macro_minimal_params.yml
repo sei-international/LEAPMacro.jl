@@ -27,7 +27,7 @@ clear-folders:
     calibration: true
     diagnostics: true
 # Set to "true" to send results to the diagnostics folder, including dumps of the linear goal program
-report-diagnostics: true
+report-diagnostics: false
     
 #---------------------------------------------------------------------------
 # Global economy parameters
