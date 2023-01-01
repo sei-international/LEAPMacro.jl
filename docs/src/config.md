@@ -71,7 +71,15 @@ report-diagnostics: true
 ```
 
 ### [LEAP run settings](@id config-leap-run-settings)
-The next block has settings for running LEAP. To develop the Macro model independently of LEAP, set `run_leap` to `false`. To reduce the time spent while running LEAP and Macro together, set `hide_leap` to `true`. The `max_runs` parameter can normally be left at the default value; it is quite unusual to go that far before convergence. The `max_tolerance` is the percent difference in Macro model outputs between runs. The tolerance can be tightened (a smaller value) or loosened (a larger value) depending on the needs of the analysis.
+The next block is optional, as are each of the individual entries. It has settings for running LEAP.
+
+To develop the Macro model independently of LEAP, set `run_leap` to `false`. This is the default value, and if it is set to `false` then the other parameters are unused.
+
+To reduce the time spent while running LEAP and Macro together, set `hide_leap` to `true` (the default is `false`).
+
+The `max_runs` parameter can normally be set to 5 (the default value). In most models, convergence is reached after 2-3 iterations. However, it is better to be safe, so a higher value is used in the Freedonia model.
+
+The `max_tolerance` is the maximum allowable percentage difference in Macro model outputs between runs. The tolerance can be tightened (a smaller value) or loosened (a larger value) depending on the needs of the analysis. The default value is 5.0%. That is easily achieved in the Freedonia example, so a tighter value is entered into the Freedonia configuration file.
 ```yaml
 model:
     # Set run_leap to "false" to do a single run of the Macro model without calling LEAP

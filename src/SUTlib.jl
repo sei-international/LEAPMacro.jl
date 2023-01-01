@@ -249,6 +249,32 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         end
     end
 
+    #------------------------------------------------
+    # LEAP-related parameters
+    #------------------------------------------------
+    # Provide defaults for the LEAP model execution parameters if needed
+    if LMlib.haskeyvalue(global_params, "model")
+        if !LMlib.haskeyvalue(global_params["model"], "run_leap")
+            global_params["model"]["run_leap"] = false
+        end
+        if !LMlib.haskeyvalue(global_params["model"], "hide_leap")
+            global_params["model"]["hide_leap"] = false
+        end
+        if !LMlib.haskeyvalue(global_params["model"], "max_runs")
+            global_params["model"]["max_runs"] = 5
+        end
+        if !LMlib.haskeyvalue(global_params["model"], "max_tolerance")
+            global_params["model"]["max_tolerance"] = 5.0
+        end
+    else
+        global_params["model"] = Dict()
+        global_params["model"]["run_leap"] = false
+        # These are unused if run_leap is false, but set anyway
+        global_params["model"]["hide_leap"] = false
+        global_params["model"]["max_runs"] = 5
+        global_params["model"]["max_tolerance"] = 5.0
+    end
+
     # LEAP potential output is specified for a single Macro sector code, but allows for multiple branch/variable combos (values are summed)
     if LMlib.haskeyvalue(global_params, "LEAP-potential-output")
         LEAP_potout_codes = [x["code"] for x in global_params["LEAP-potential-output"]]
