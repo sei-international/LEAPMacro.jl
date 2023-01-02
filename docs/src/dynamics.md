@@ -136,11 +136,13 @@ With the above expressions, the growth rate of the wage share can be calculated,
 ## [Intermediate demand coefficients](@id dynamics-intermed-dmd-coeff)
 By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^3]. The growth rates of the coefficients are calculated as
 ```math
-\hat{\overline{D}}_{ki} = C_{ki} - \frac{\underline{a}\alpha_{ki}}{\sqrt{\sum_{l=1}^{n_p} \alpha^2_{li}}},
+\hat{\overline{D}}_{ki} = \underline{a}\left(\underline{D}^\text{init}_{ki} - \sqrt{\frac{\sum_{l=1}^{n_p} \underline{D}^{\text{init}2}_{li}}{\sum_{l=1}^{n_p} \alpha^2_{li}}}\alpha_{ki}\right),
 ```
-where the ``C_{ki}`` are constants, set such that ``\hat{\overline{D}}_{ki} = 0`` initially, ``\underline{a}`` is a rate constant, which is specified in the [configuration file](@ref config-intermed-dmd-change), and the ``\alpha_{ki}`` are cost shares, which are calculated consistent with the calculation of [prices](@ref dynamics-prices).
+where ``\underline{a}`` is a rate constant, which is specified in the [configuration file](@ref config-intermed-dmd-change), and the ``\alpha_{ki}`` are cost shares, which are calculated consistent with the calculation of [prices](@ref dynamics-prices).
 
-[^3]: The equation shown here is a simplified application of a more general model that is presented in [_Cost Share-induced Technological Change and Kaldor’s Stylized Facts_](https://www.sei.org/publications/cost-share-induced-technological-change-kaldors-stylized-facts/) by Eric Kemp-Benedict.
+In the first time step, ``\alpha_{ki} = \underline{D}^\text{init}_{ki}``, so the the ratio under the square root starts out equal to one, and the initial growth rates are ``\hat{\overline{D}}_{ki} = 0``.
+
+[^3]: The equation shown here is a special case of a more general model that is presented in [_A classical-evolutionary model of technological change_](https://doi.org/10.1007/s00191-022-00792-5) by Eric Kemp-Benedict.
 
 ## Profit rate
 Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of output, ``\Pi_i``, is given by the value of output per unit of output less unit costs,
