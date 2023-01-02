@@ -243,8 +243,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		params["wage-fcn"]["lab_constr_coeff"] # k
 	)
 	# Optionally update technical coefficients (the scaled Use matrix, sut.D)
-	calc_use_matrix_tech_change = LMlib.haskeyvalue(params, "tech-param-change") && LMlib.haskeyvalue(params["tech-param-change"], "rate_constant")
-	if calc_use_matrix_tech_change
+	if params["tech-param-change"]["calculate"]
 		tech_change_rate_constant = params["tech-param-change"]["rate_constant"]
 		tech_change_rate_exponent = 2.0
 		tech_change_rate_coeffs = repeat(sum(sut.D.^tech_change_rate_exponent, dims = 1), np)
@@ -509,7 +508,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     prev_GDP_gr = params["investment-fcn"]["init_neutral_growth"]
     πg = sum(prev_g_share .* πb)
 	πF = sum(πb .* value.(F))/sum(value.(F))
-	if calc_use_matrix_tech_change
+	if params["tech-param-change"]["calculate"]
 		sector_price_level = (sut.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
 		intermed_cost_shares = [pb_prev[i] * sut.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 		# Initialize intercepts so that productivity growth rates are zero with initial cost shares
@@ -674,7 +673,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		# Update use matrix
 		#--------------------------------
-		if calc_use_matrix_tech_change && !previous_failed
+		if params["tech-param-change"]["calculate"] && !previous_failed
 			sector_price_level = (sut.S * (pd_prev .* value.(qs))) ./ g
 			intermed_cost_shares = [pb_prev[i] * sut.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 			D_hat = calc_intermed_techchange(intermed_cost_shares,

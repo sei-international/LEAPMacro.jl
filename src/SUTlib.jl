@@ -249,6 +249,24 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         end
     end
 
+    # Intermediate coefficient technological change
+    if LMlib.haskeyvalue(global_params, "tech-param-change")
+        calc_set = LMlib.haskeyvalue(global_params["tech-param-change"], "calculate")
+        rate_const_set = LMlib.haskeyvalue(global_params["tech-param-change"], "rate_constant")
+        # Combinations:
+        #   calculate not defined, but there is a rate constant: calculate = true
+        #   calculate defined and true, but there is no rate constant: set default
+        if rate_const_set && !calc_set
+            global_params["tech-param-change"]["calculate"] = true
+        elseif calc_set && global_params["tech-param-change"]["calculate"] && !rate_const_set
+            global_params["tech-param-change"]["rate_constant"] = 0.0
+        end
+    else
+        global_params["tech-param-change"] = Dict()
+        global_params["tech-param-change"]["calculate"] = false
+    end
+    calc_use_matrix_tech_change = LMlib.haskeyvalue(global_params, "tech-param-change") && LMlib.haskeyvalue(global_params["tech-param-change"], "rate_constant")
+
     # Provide defaults for the initial value adjustment (calibration) block
     if LMlib.haskeyvalue(global_params, "calib")
         if !LMlib.haskeyvalue(global_params["calib"], "nextper_inv_adj_factor")
