@@ -142,7 +142,7 @@ tech-param-change:
     # Flag for whether to use sector parameters
     use_sector_params_if_available: true
     # Rate constant: Note that if this is too large then it can create instabilities
-    rate_constant_default: 0.1 # 1/year
+    rate_constant_default: 1.5 # 1/year
     # Exponent in the technical change function
     exponent_default: 2.0
 
