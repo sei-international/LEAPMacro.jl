@@ -1,15 +1,15 @@
-code,name,depr_rate,KV_coeff,KV_intercept,labor_prod_gr,empl0
-s_agric,Agriculture and Forestry,0.04,0.573,-0.0007,0.0222,11568.4
-s_mining,Mining,0.04,0.855,0.0083,0.0425,223
-s_coal,Coal Mining,0.04,0.855,0.0083,0.0425,669
-s_petr,Petroleum and Natural Gas,0.04,0.855,0.0083,0.0425,312.2
-s_ironstl,Iron and Steel,0.04,0.676,0.013,0.04,435
-s_pulppr,Pulp and Paper,0.04,0.45,0.013,0.031,1023.6
-s_foodpr,Food Processing,0.04,0.652,0.013,0.0391,1243
-s_hvymach,Heavy machinery,0.04,0.484,0.013,0.0324,0.9
-s_othind,Other Industry,0.04,0.279,0.013,0.0242,1598.8
-s_util,"Electricity, Water, and Sewage",0.04,0.8,0.0251,0.0571,235.3
-s_constr,Construction,0.04,0.217,-0.001,0.0077,588.7
-s_transp,Transportation Services,0.04,0.669,0.0155,0.0423,623.5
-s_comm,Wholesale and Retail Trade,0.04,0.888,0.0327,0.0682,1916.4
-s_othsrv,Other Services,0.04,0.274,0.0215,0.0325,1562.1
+code,name,depr_rate,KV_coeff,KV_intercept,labor_prod_gr,empl0,rate_const,exponent
+s_agric,Agriculture and Forestry,0.04,0.573,-0.0007,0.0222,11568.4,0.1,1.5
+s_mining,Mining,0.04,0.855,0.0083,0.0425,223,0.2,2
+s_coal,Coal Mining,0.04,0.855,0.0083,0.0425,669,0.2,2
+s_petr,Petroleum and Natural Gas,0.04,0.855,0.0083,0.0425,312.2,0.2,2
+s_ironstl,Iron and Steel,0.04,0.676,0.013,0.04,435,0.2,2
+s_pulppr,Pulp and Paper,0.04,0.45,0.013,0.031,1023.6,0.1,1.5
+s_foodpr,Food Processing,0.04,0.652,0.013,0.0391,1243,0.1,1.5
+s_hvymach,Heavy machinery,0.04,0.484,0.013,0.0324,0.9,0.2,2
+s_othind,Other Industry,0.04,0.279,0.013,0.0242,1598.8,0.1,1.5
+s_util,"Electricity, Water, and Sewage",0.04,0.8,0.0251,0.0571,235.3,0.2,2
+s_constr,Construction,0.04,0.217,-0.001,0.0077,588.7,0.1,1.5
+s_transp,Transportation Services,0.04,0.669,0.0155,0.0423,623.5,0.2,2
+s_comm,Wholesale and Retail Trade,0.04,0.888,0.0327,0.0682,1916.4,0.1,1.5
+s_othsrv,Other Services,0.04,0.274,0.0215,0.0325,1562.1,0.1,1.5
