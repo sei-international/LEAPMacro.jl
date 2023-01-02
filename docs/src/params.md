@@ -47,13 +47,13 @@ The first two columns are the sector codes and sector names. These should be in 
 
 In addition to the sector codes and names, this file contains a single required parameter for each sector, the depreciation rate. Where available, this can be calculated from national statistics. Otherwise, the `delta` parameter reported for the whole economy in the [Penn World Table](https://www.rug.nl/ggdc/productivity/pwt/) can be applied to each sector.
 
-The file also includes several optional parameters, shown in brackets, which determine [labor productivity growth](@ref dynamics-labor-prod) at sector level. The labor productivity parameters might be assumed constant, estimated from historical data, or drawn from published studies.
+The file also includes several optional parameters, shown in brackets, which determine [labor productivity growth](@ref dynamics-labor-prod) and changes in [intermediate demand coefficients](@ref dynamics-intermed-dmd-coeff) at sector level. The productivity parameters might be assumed to be the same across sectors, estimated from historical data, or drawn from published studies. If values are the same across sectors, then they can be specified as default values in the [configuration file](@ref config) and the corresponding columns can be omitted from this file.
 
-| `code`      | `name`       | `depr_rate` | `[KV_coeff]` | `[KV_intercept]` |  `[labor_prod_gr`] |   `[empl0]` |
-|:------------|:-------------|------------:|-------------:|-----------------:|-------------------:|------------:|
-| CODE1       | Name 1       |        dr_1 |    \[kvc_1\] |        \[kvi_1\] |         \[lpgr_1\] | \[empl0_1\] |
-| CODE2       | Name 2       |        dr_2 |    \[kvc_2\] |        \[kvi_2\] |         \[lpgr_2\] | \[empl0_2\] |
-| ...         | ...          |         ... |          ... |              ... |                ... |         ... |
+| `code`      | `name`       | `depr_rate` | `[KV_coeff]` | `[KV_intercept]` |  `[labor_prod_gr]` |   `[empl0]` | `[rate_const]` | `[exponent]` |
+|:------------|:-------------|------------:|-------------:|-----------------:|-------------------:|------------:|---------------:|-------------:|
+| CODE1       | Name 1       |        dr_1 |    \[kvc_1\] |        \[kvi_1\] |         \[lpgr_1\] | \[empl0_1\] |       \[rc_1\] |    \[exp_1\] |
+| CODE2       | Name 2       |        dr_2 |    \[kvc_2\] |        \[kvi_2\] |         \[lpgr_2\] | \[empl0_2\] |       \[rc_2\] |    \[exp_2\] |
+| ...         | ...          |         ... |          ... |              ... |                ... |         ... |            ... |          ... |
 
 The corresponding [variables](@ref exog-param-vars) for sector ``i`` are:
   * `depr_rate` : ``\underline{\delta}_i``
@@ -61,6 +61,8 @@ The corresponding [variables](@ref exog-param-vars) for sector ``i`` are:
   * `KV_intercept` : ``\underline{\beta}^\text{KV}_i``
   * `empl0` : ``\underline{L}_{i0}``
   * `labor_prod_gr` : ``\underline{\beta}^\text{KV}_i`` (with ``\underline{\alpha}^\text{KV}_i = 0``)
+  * `rate_const` : ``\underline{a}_i`` (an optional parameter)
+  * `exponent` : ``\underline{\vartheta}_i`` (an optional parameter)
 
 Here is the example from the Freedonia sample model:
 ![Freedonia sector_parameters file](assets/images/sector_parameters.png)

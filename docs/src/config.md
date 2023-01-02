@@ -275,17 +275,22 @@ wage-fcn:
 Sector values will be used if they are specified, otherwise the time series values will be used. If time series values are not specified, then the default value will be applied.
 
 ### [Endogenous change in intermediate demand coefficients](@id config-intermed-dmd-change)
-The next block is optional. If it is present, it sets a rate constant for endogenously determining [intermediate demand coefficients](@ref dynamics-intermed-dmd-coeff).
+The next block is optional. If it is present, it sets parameters for endogenously determining [intermediate demand coefficients](@ref dynamics-intermed-dmd-coeff). These parameters can optionally be set by sector in the [sector parameters file](@ref params-sectors)
 
-Note that if the `rate_constant` parameter is set too high, then it can generate unreasonably large rates of change in technical coefficients and can even create model instabilities. It is good practice to check [the `diagnostics` folder](@ref model-outputs-diagnostics) for annual files labeled `demand_coefficients_[year].csv` to see whether the values are reasonable.
+Note that the calculation can generate unreasonably large rates of change in technical coefficients and can even create model instabilities. It is good practice to check [the `diagnostics` folder](@ref model-outputs-diagnostics) for annual files labeled `demand_coefficients_[year].csv` to see whether the values are reasonable. If they are not, then adjust the parameters, either here or in the [sector parameters file](@ref params-sectors).
 ```yaml
 #---------------------------------------------------------------------------
 # Parameter for rate of change in technical parameters
 #---------------------------------------------------------------------------
-# Uncomment rate_constant line below to endogenize changes in the scaled Use matrix
 tech-param-change:
+    # Flag to say whether to calculate changing technical parameters
+    calculate: false
+    # Flag for whether to use sector parameters
+    use_sector_params_if_available: true
     # Rate constant: Note that if this is too large then it can create instabilities
-    # rate_constant: 0.1 # 1/year
+    rate_constant_default: 1.5 # 1/year
+    # Exponent in the technical change function
+    exponent_default: 2.0
 ```
 
 ### [Long-run demand elasticities](@id config-longrun-demand-elast)

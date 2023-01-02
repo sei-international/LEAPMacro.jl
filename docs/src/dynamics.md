@@ -136,11 +136,11 @@ With the above expressions, the growth rate of the wage share can be calculated,
 ## [Intermediate demand coefficients](@id dynamics-intermed-dmd-coeff)
 By default, intermediate demand coefficients are kept at their initial values: ``\overline{D}_{ki} = \underline{D}^\text{init}_{ki}``. However, optionally, they can be endogenized through a cost share-induced technological change mechanism[^3]. The growth rates of the coefficients are calculated as
 ```math
-\hat{\overline{D}}_{ki} = \underline{a}\left(\underline{D}^\text{init}_{ki} - \sqrt{\frac{\sum_{l=1}^{n_p} \underline{D}^{\text{init}2}_{li}}{\sum_{l=1}^{n_p} \alpha^2_{li}}}\alpha_{ki}\right),
+\hat{\overline{D}}_{ki} = \underline{a}_i\left[\underline{D}^{\text{init}\,\underline{\vartheta}_i - 1}_{ki} - \left(\frac{\sum_{l=1}^{n_p} \underline{D}^{\text{init}\,\underline{\vartheta}_i}_{li}}{\sum_{l=1}^{n_p} \alpha^{\underline{\vartheta}_i}_{li}}\right)^{\frac{\underline{\vartheta}_i-1}{\underline{\vartheta}_i}}\alpha_{ki}^{\underline{\vartheta}_i - 1}\right],
 ```
-where ``\underline{a}`` is a rate constant, which is specified in the [configuration file](@ref config-intermed-dmd-change), and the ``\alpha_{ki}`` are cost shares, which are calculated consistent with the calculation of [prices](@ref dynamics-prices).
+where ``\underline{a}_i`` is the rate constant for sector ``i`` and ``\underline{\vartheta}_i`` is the exponent. These are specified either in the [configuration file](@ref config-intermed-dmd-change) or in the [sector parameters file](@ref params-sectors). The ``\alpha_{ki}`` are cost shares, which are calculated consistent with the calculation of [prices](@ref dynamics-prices).
 
-In the first time step, ``\alpha_{ki} = \underline{D}^\text{init}_{ki}``, so the the ratio under the square root starts out equal to one, and the initial growth rates are ``\hat{\overline{D}}_{ki} = 0``.
+In the first time step, ``\alpha_{ki} = \underline{D}^\text{init}_{ki}``, so the the ratio in parentheses starts out equal to one, and the initial growth rates are ``\hat{\overline{D}}_{ki} = 0``.
 
 [^3]: The equation shown here is a special case of a more general model that is presented in [_A classical-evolutionary model of technological change_](https://doi.org/10.1007/s00191-022-00792-5) by Eric Kemp-Benedict.
 
