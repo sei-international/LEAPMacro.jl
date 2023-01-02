@@ -166,7 +166,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 
 	sut, np, ns = SUTlib.process_sut(params)
 	prices = SUTlib.initialize_prices(np, sut)
-	exog = SUTlib.get_var_params(params)
+	exog, techchange = SUTlib.get_var_params(params)
 
 	# Preferentially take exogenous values from LEAP, if specified, if not then from file
 	exog.pot_output = LMlib.get_nonmissing_values(leapvals.pot_output, exog.pot_output)
@@ -244,13 +244,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	)
 	# Optionally update technical coefficients (the scaled Use matrix, sut.D)
 	if params["tech-param-change"]["calculate"]
-		tech_change_rate_constant = params["tech-param-change"]["rate_constant"]
-		tech_change_rate_exponent = 2.0
-		tech_change_rate_coeffs = repeat(sum(sut.D.^tech_change_rate_exponent, dims = 1), np)
-	else
-		tech_change_rate_constant = 0.0 # Not used in this case, but assign a value
-		tech_change_rate_exponent = 2.0
-		tech_change_rate_coeffs = ones(np,ns)
+		techchange.coefficients = repeat(sum([sut.D[i,j]^techchange.exponent[j] for i = 1:np, j = 1:ns], dims = 1), np)
 	end
 	# Link to LEAP
 	LEAP_indices = params["LEAP_sector_indices"]
@@ -512,11 +506,11 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		sector_price_level = (sut.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
 		intermed_cost_shares = [pb_prev[i] * sut.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 		# Initialize intercepts so that productivity growth rates are zero with initial cost shares
-		calc_intermed_techchange_intercept = -calc_intermed_techchange(intermed_cost_shares,
-																	   tech_change_rate_constant,
-																	   tech_change_rate_exponent,
-																	   nothing,
-																	   tech_change_rate_coeffs)
+		techchange.constants = -calc_intermed_techchange(intermed_cost_shares,
+														 techchange.rate_const,
+														 techchange.exponent,
+														 nothing,
+														 techchange.coefficients)
 	end
 
 	lab_force_index = 1
@@ -677,10 +671,10 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 			sector_price_level = (sut.S * (pd_prev .* value.(qs))) ./ g
 			intermed_cost_shares = [pb_prev[i] * sut.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
 			D_hat = calc_intermed_techchange(intermed_cost_shares,
-											 tech_change_rate_constant,
-											 tech_change_rate_exponent,
-											 calc_intermed_techchange_intercept,
-											 tech_change_rate_coeffs)
+											 techchange.rate_const,
+											 techchange.exponent,
+											 techchange.constants,
+											 techchange.coefficients)
 			sut.D = sut.D .* exp.(D_hat) # This ensures that sut.D will not become negative
 			if params["report-diagnostics"]
 				LMlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(years[t]) * ".csv"), sut.D, params["included_product_codes"], params["included_sector_codes"])

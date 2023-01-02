@@ -138,8 +138,14 @@ wage-fcn:
 #---------------------------------------------------------------------------
 # Uncomment rate_constant line below to endogenize changes in the scaled Use matrix
 tech-param-change:
+    # Flag to say whether to calculate changing technical parameters
+    calculate: true
+    # Flag for whether to use sector parameters
+    use_sector_params_if_available: true
     # Rate constant: Note that if this is too large then it can create instabilities
-    rate_constant: 0.1 # 1/year
+    rate_constant_default: 0.1 # 1/year
+    # Exponent in the technical change function
+    exponent_default: 2.0
 
 #---------------------------------------------------------------------------
 # Demand model parameters

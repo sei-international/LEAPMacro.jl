@@ -3,7 +3,7 @@ module SUTlib
 using CSV, DataFrames, LinearAlgebra, YAML, Logging, Formatting
 
 export process_sut, initialize_prices, parse_param_file,
-       SUTdata, PriceData, ExogParams
+       SUTdata, PriceData, ExogParams, TechChangeParams
 
 include("./LEAPMacrolib.jl")
 using .LMlib
@@ -58,6 +58,14 @@ mutable struct ExogParams
     wage_elast_demand::Array{Any,1} # np x year
     export_price_elast::Array{Any,1} # np
     import_price_elast::Array{Any,1} # np
+end
+
+"Parameters for updating technical coefficients"
+mutable struct TechChangeParams
+    rate_const::Array{Float64,1} # ns
+    exponent::Array{Float64,1} # ns
+    constants::Array{Float64,2} # np,ns
+    coefficients::Array{Float64,2} # np,ns
 end
 
 "Read LEAP-Macro model configuration file (in YAML syntax). Add or modify entries as needed."
@@ -251,21 +259,37 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
 
     # Intermediate coefficient technological change
     if LMlib.haskeyvalue(global_params, "tech-param-change")
-        calc_set = LMlib.haskeyvalue(global_params["tech-param-change"], "calculate")
-        rate_const_set = LMlib.haskeyvalue(global_params["tech-param-change"], "rate_constant")
-        # Combinations:
-        #   calculate not defined, but there is a rate constant: calculate = true
-        #   calculate defined and true, but there is no rate constant: set default
-        if rate_const_set && !calc_set
-            global_params["tech-param-change"]["calculate"] = true
-        elseif calc_set && global_params["tech-param-change"]["calculate"] && !rate_const_set
-            global_params["tech-param-change"]["rate_constant"] = 0.0
+        # Backwards compatability: Allow either "rate_constant" or "rate_constant_default"
+        if LMlib.haskeyvalue(global_params["tech-param-change"], "rate_constant") && !LMlib.haskeyvalue(global_params["tech-param-change"], "rate_constant_default")
+            global_params["tech-param-change"]["rate_constant_default"] = global_params["tech-param-change"]["rate_constant"]
+        end
+        if LMlib.haskeyvalue(global_params["tech-param-change"], "rate_constant_default") || LMlib.haskeyvalue(global_params["tech-param-change"], "exponent_default")
+            if !LMlib.haskeyvalue(global_params["tech-param-change"], "calculate")
+                global_params["tech-param-change"]["calculate"] = true
+            end
+        else
+            # If no parameter defaults, calculate only if use_sector_params_if_available explicitly set to true
+            if !LMlib.haskeyvalue(global_params["tech-param-change"], "calculate")
+                global_params["tech-param-change"]["calculate"] = LMlib.haskeyvalue(global_params["tech-param-change"], "use_sector_params_if_available") &&
+                                                                    global_params["tech-param-change"]["use_sector_params_if_available"]
+            end
+        end
+        if !LMlib.haskeyvalue(global_params["tech-param-change"], "use_sector_params_if_available")
+            global_params["tech-param-change"]["use_sector_params_if_available"] = true
+        end
+        if !LMlib.haskeyvalue(global_params["tech-param-change"], "rate_constant_default")
+            global_params["tech-param-change"]["rate_constant_default"] = 0.0
+        end
+        if !LMlib.haskeyvalue(global_params["tech-param-change"], "exponent_default")
+            global_params["tech-param-change"]["exponent_default"] = 2.0
         end
     else
         global_params["tech-param-change"] = Dict()
-        global_params["tech-param-change"]["calculate"] = false
+        global_params["tech-param-change"]["calculate"] = false # If it is not present, default to false
+        global_params["tech-param-change"]["use_sector_params_if_available"] = true
+        global_params["tech-param-change"]["rate_constant_default"] = 0.0
+        global_params["tech-param-change"]["exponent_default"] = 2.0
     end
-    calc_use_matrix_tech_change = LMlib.haskeyvalue(global_params, "tech-param-change") && LMlib.haskeyvalue(global_params["tech-param-change"], "rate_constant")
 
     # Provide defaults for the initial value adjustment (calibration) block
     if LMlib.haskeyvalue(global_params, "calib")
@@ -418,7 +442,7 @@ end # parse_param_file
 "Pull in user-specified parameters from different CSV input files with filenames specified in the YAML configuration file."
 function get_var_params(params::Dict)
     # Return an ExogParams struct
-    retval = ExogParams(
+    retval_exog = ExogParams(
                     Array{Float64}(undef, 0), # πw_base
                     Array{Float64}(undef, 0), # world_grs
 					Array{Float64}(undef, 0), # working_age_grs
@@ -434,7 +458,13 @@ function get_var_params(params::Dict)
                     [], # export_elast_demand
                     [], # wage_elast_demand
                     Array{Float64}(undef, 0), # export_price_elast
-                    Array{Float64}(undef, 0)) # import_price_elast          
+                    Array{Float64}(undef, 0)) # import_price_elast
+    
+    retval_techchange = TechChangeParams(
+        Array{Float64}(undef, 0), # rate_const
+        Array{Float64}(undef, 0), # exponent
+        Array{Float64}(undef, 0, 0), # constants
+        Array{Float64}(undef, 0, 0)) # coefficients
 
     sim_years = params["years"]["start"]:params["years"]["end"]
     sec_ndxs = params["sector-indexes"]
@@ -492,21 +522,21 @@ function get_var_params(params::Dict)
     # Sector-specific
     #--------------------------------------------------------------------------------------
     # Use same value for each year, but it can vary by sector
-    retval.δ = sector_info[sec_ndxs,:depr_rate]
+    retval_exog.δ = sector_info[sec_ndxs,:depr_rate]
 
     #--------------------------------------------------------------------------------------
     # Product-specific
     #--------------------------------------------------------------------------------------
     #--- Demand model parameters
     if hasproperty(product_info, :import_price_elast)
-        retval.import_price_elast = product_info[prod_ndxs,:import_price_elast]
+        retval_exog.import_price_elast = product_info[prod_ndxs,:import_price_elast]
     else
-        retval.import_price_elast = zeros(length(prod_codes))
+        retval_exog.import_price_elast = zeros(length(prod_codes))
     end
     if hasproperty(product_info, :export_price_elast)
-        retval.export_price_elast = product_info[prod_ndxs,:export_price_elast]
+        retval_exog.export_price_elast = product_info[prod_ndxs,:export_price_elast]
     else
-        retval.export_price_elast = zeros(length(prod_codes))
+        retval_exog.export_price_elast = zeros(length(prod_codes))
     end
 
     # Note, export and household demand parameters are used later to make time-varying parameters
@@ -575,17 +605,17 @@ function get_var_params(params::Dict)
     if params["labor-prod-fcn"]["use_sector_params"]
         # The presence of these columns has already been confirmed
         if params["labor-prod-fcn"]["use_KV_model"]
-            retval.αKV = sector_info[sec_ndxs,:KV_coeff]
-            replace!(retval.αKV, missing => αKV_default)
-            retval.βKV = sector_info[sec_ndxs,:KV_intercept]
-            replace!(retval.βKV, missing => βKV_default)
+            retval_exog.αKV = sector_info[sec_ndxs,:KV_coeff]
+            replace!(retval_exog.αKV, missing => αKV_default)
+            retval_exog.βKV = sector_info[sec_ndxs,:KV_intercept]
+            replace!(retval_exog.βKV, missing => βKV_default)
         else
-            retval.αKV = fill(0.0, length(sector_info[sec_ndxs,:labor_prod_gr]))
-            retval.βKV = sector_info[sec_ndxs,:labor_prod_gr]
-            replace!(retval.βKV, missing => βKV_default)
+            retval_exog.αKV = fill(0.0, length(sector_info[sec_ndxs,:labor_prod_gr]))
+            retval_exog.βKV = sector_info[sec_ndxs,:labor_prod_gr]
+            replace!(retval_exog.βKV, missing => βKV_default)
         end
         # It is already confirmed that there are no missing values in this column
-        retval.ℓ0 = sector_info[sec_ndxs,:empl0]
+        retval_exog.ℓ0 = sector_info[sec_ndxs,:empl0]
     else
         if params["labor-prod-fcn"]["use_KV_model"]
             if hasproperty(time_series, :KV_coeff)
@@ -608,6 +638,28 @@ function get_var_params(params::Dict)
         end
     end
 
+    # Intermediate technical change parameters
+    # These are set in the main routine
+    retval_techchange.constants = zeros(length(prod_ndxs), length(sec_ndxs))
+    retval_techchange.coefficients = ones(length(prod_ndxs), length(sec_ndxs))
+    if params["tech-param-change"]["calculate"] && params["tech-param-change"]["use_sector_params_if_available"]
+        if hasproperty(sector_info, :rate_const)
+            retval_techchange.rate_const = sector_info[sec_ndxs,:rate_const]
+            replace!(retval_techchange.rate_const, missing => params["tech-param-change"]["rate_constant_default"])
+        else
+            retval_techchange.rate_const = params["tech-param-change"]["rate_constant_default"] * ones(length(sec_ndxs))
+        end
+        if hasproperty(sector_info, :exponent)
+            retval_techchange.exponent = sector_info[sec_ndxs,:exponent]
+            replace!(retval_techchange.exponent, missing => params["tech-param-change"]["exponent_default"])
+        else
+            retval_techchange.exponent = params["tech-param-change"]["exponent_default"] * ones(length(sec_ndxs))
+        end
+    else
+        retval_techchange.rate_const = params["tech-param-change"]["rate_constant_default"] * ones(length(sec_ndxs))
+        retval_techchange.exponent = params["tech-param-change"]["exponent_default"] * ones(length(sec_ndxs))
+    end
+
     #--------------------------------------------------------------------------------------
     # Fill in by looping over years
     #--------------------------------------------------------------------------------------
@@ -616,38 +668,38 @@ function get_var_params(params::Dict)
             year_ndx = year - data_start_year + 1
             # These have no defaults: check first
             if !ismissing(working_age_grs_temp[year_ndx])
-                push!(retval.working_age_grs, working_age_grs_temp[year_ndx])
+                push!(retval_exog.working_age_grs, working_age_grs_temp[year_ndx])
             else
                 error_string = format(LMlib.gettext("Value for working age growth rate missing in year {1:d}, with no default"), year)
                 throw(MissingException(error_string))
             end
             if !ismissing(xr_temp[year_ndx])
-                push!(retval.xr, xr_temp[year_ndx])
+                push!(retval_exog.xr, xr_temp[year_ndx])
             else
                 error_string = format(LMlib.gettext("Value for exchange rate missing in year {1:d}, with no default"), year)
                 throw(MissingException(error_string))
             end
             # These have defaults
             if !ismissing(world_infl_temp[year_ndx])
-                push!(retval.πw_base, world_infl_temp[year_ndx])
+                push!(retval_exog.πw_base, world_infl_temp[year_ndx])
             else
-                push!(retval.πw_base, world_infl_default)
+                push!(retval_exog.πw_base, world_infl_default)
             end
             if !ismissing(world_grs_temp[year_ndx])
-                push!(retval.world_grs, world_grs_temp[year_ndx])
+                push!(retval_exog.world_grs, world_grs_temp[year_ndx])
             else
-                push!(retval.world_grs, world_grs_default)
+                push!(retval_exog.world_grs, world_grs_default)
             end
             if !params["labor-prod-fcn"]["use_sector_params"]
                 if !ismissing(αKV_temp[year_ndx])
-                    push!(retval.αKV, αKV_temp[year_ndx])
+                    push!(retval_exog.αKV, αKV_temp[year_ndx])
                 else
-                    push!(retval.αKV, αKV_default)
+                    push!(retval_exog.αKV, αKV_default)
                 end
                 if !ismissing(βKV_temp[year_ndx])
-                    push!(retval.βKV, βKV_temp[year_ndx])
+                    push!(retval_exog.βKV, βKV_temp[year_ndx])
                 else
-                    push!(retval.βKV, βKV_default)
+                    push!(retval_exog.βKV, βKV_default)
                 end
             end
         else
@@ -659,26 +711,26 @@ function get_var_params(params::Dict)
 
         # Bring high values down, but don't bring low values up
         export_elast_demand_temp = export_elast_demand0 - (1 - exp(-export_elast_decay * deltat)) * (export_elast_demand0 - asympt_export_elast)
-        push!(retval.export_elast_demand, export_elast_demand_temp)
+        push!(retval_exog.export_elast_demand, export_elast_demand_temp)
 
         wage_elast_demand_temp = wage_elast_demand0 - (1 - exp(-wage_elast_decay * deltat)) * (wage_elast_demand0 - asympt_wage_elast)
-        push!(retval.wage_elast_demand, wage_elast_demand_temp)
+        push!(retval_exog.wage_elast_demand, wage_elast_demand_temp)
     end
 
     #--------------------------------------------------------------------------------------
     # Optional files
     #--------------------------------------------------------------------------------------
 
-    retval.I_addl = zeros(length(sim_years))
-    retval.pot_output = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
-    retval.max_util = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
-    retval.price = Array{Union{Missing, Float64}}(missing, length(sim_years), length(prod_ndxs))
+    retval_exog.I_addl = zeros(length(sim_years))
+    retval_exog.pot_output = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
+    retval_exog.max_util = Array{Union{Missing, Float64}}(missing, length(sim_years), length(sec_ndxs))
+    retval_exog.price = Array{Union{Missing, Float64}}(missing, length(sim_years), length(prod_ndxs))
 
     if !isnothing(investment_df)
         for row in eachrow(investment_df)
             data_year = floor(Int64, row[:year])
             if data_year in sim_years
-                retval.I_addl[data_year - sim_years[1] + 1] = row[:addl_investment]
+                retval_exog.I_addl[data_year - sim_years[1] + 1] = row[:addl_investment]
             end
        end
     end
@@ -700,7 +752,7 @@ function get_var_params(params::Dict)
         for row in eachrow(pot_output_df)
             data_year = floor(Int64, row[:year])
             if data_year in sim_years
-                retval.pot_output[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
+                retval_exog.pot_output[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
             end
        end
     end
@@ -722,7 +774,7 @@ function get_var_params(params::Dict)
         for row in eachrow(max_util_df)
             data_year = floor(Int64, row[:year])
             if data_year in sim_years
-                retval.max_util[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
+                retval_exog.max_util[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
             end
        end
     end
@@ -744,12 +796,12 @@ function get_var_params(params::Dict)
         for row in eachrow(real_price_df)
             data_year = floor(Int64, row[:year])
             if data_year in sim_years
-                retval.price[data_year - sim_years[1] + 1, data_prod_ndxs] .= Vector(row[2:end])
+                retval_exog.price[data_year - sim_years[1] + 1, data_prod_ndxs] .= Vector(row[2:end])
             end
        end
     end
 
-    return retval
+    return retval_exog, retval_techchange
 
 end # get_var_params
 
