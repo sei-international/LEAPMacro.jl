@@ -102,7 +102,7 @@ Calculate growth rate of intermediate demand coefficients (that is, sut.D entrie
   - c(np,ns) = matrix of intercepts (if c = nothing it is set to zero)
   - b(np,ns) = matrix of weights (if b = nothing it is set to one)
 """
-function calc_intermed_techchange(σ::Array{Float64,2}, k::LMlib.NumOrVector, θ::LMlib.NumOrVector = 2.0, c::LMlib.NumOrVector = nothing, b::LMlib.NumOrVector = nothing)
+function calc_intermed_techchange(σ::Array{Float64,2}, k::LMlib.NumOrVector, θ::LMlib.NumOrVector = 2.0, c::LMlib.NumOrArray = nothing, b::LMlib.NumOrArray = nothing)
 	# Initialize values
 	(np, ns) = size(σ)
 	if isa(k, Number)
@@ -113,9 +113,13 @@ function calc_intermed_techchange(σ::Array{Float64,2}, k::LMlib.NumOrVector, θ
 	end
 	if isnothing(b)
 		b = ones(np, ns)
+	elseif isa(b, Number)
+		b = b * ones(np, ns)
 	end
 	if isnothing(c)
 		c = zeros(np, ns)
+	elseif isa(c, Number)
+		c = c * ones(np, ns)
 	end
 	
 	cost_shares_exponentiated = [σ[p,s]^θ[s] for p in 1:np, s in 1:ns]
@@ -242,8 +246,12 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	calc_use_matrix_tech_change = LMlib.haskeyvalue(params, "tech-param-change") && LMlib.haskeyvalue(params["tech-param-change"], "rate_constant")
 	if calc_use_matrix_tech_change
 		tech_change_rate_constant = params["tech-param-change"]["rate_constant"]
+		tech_change_rate_exponent = 2.0
+		tech_change_rate_coeffs = repeat(sum(sut.D.^tech_change_rate_exponent, dims = 1), np)
 	else
 		tech_change_rate_constant = 0.0 # Not used in this case, but assign a value
+		tech_change_rate_exponent = 2.0
+		tech_change_rate_coeffs = ones(np,ns)
 	end
 	# Link to LEAP
 	LEAP_indices = params["LEAP_sector_indices"]
@@ -504,7 +512,12 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	if calc_use_matrix_tech_change
 		sector_price_level = (sut.S * (pd_prev .* value.(qs))) ./ (value.(u) .* z)
 		intermed_cost_shares = [pb_prev[i] * sut.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
-		calc_intermed_techchange_intercept = -calc_intermed_techchange(intermed_cost_shares, tech_change_rate_constant)
+		# Initialize intercepts so that productivity growth rates are zero with initial cost shares
+		calc_intermed_techchange_intercept = -calc_intermed_techchange(intermed_cost_shares,
+																	   tech_change_rate_constant,
+																	   tech_change_rate_exponent,
+																	   nothing,
+																	   tech_change_rate_coeffs)
 	end
 
 	lab_force_index = 1
@@ -664,7 +677,11 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		if calc_use_matrix_tech_change && !previous_failed
 			sector_price_level = (sut.S * (pd_prev .* value.(qs))) ./ g
 			intermed_cost_shares = [pb_prev[i] * sut.D[i,j] / sector_price_level[j] for i in 1:np, j in 1:ns]
-			D_hat = calc_intermed_techchange_intercept + calc_intermed_techchange(intermed_cost_shares, tech_change_rate_constant)
+			D_hat = calc_intermed_techchange(intermed_cost_shares,
+											 tech_change_rate_constant,
+											 tech_change_rate_exponent,
+											 calc_intermed_techchange_intercept,
+											 tech_change_rate_coeffs)
 			sut.D = sut.D .* exp.(D_hat) # This ensures that sut.D will not become negative
 			if params["report-diagnostics"]
 				LMlib.write_matrix_to_csv(joinpath(params["diagnostics_path"],"demand_coefficients_" * string(years[t]) * ".csv"), sut.D, params["included_product_codes"], params["included_sector_codes"])
