@@ -118,6 +118,8 @@ Output by sector is reported as actual output and potential output (that is, out
   * `capacity_utilization_#.csv`
 Real value added by sector -- that is, sector output less the cost of intermediate goods and services -- is also reported:
   * `real_value_added_#.csv`
+A further sector indicator, [domestic insertion](@ref dynamics-dom-insert), is a measure of direct and indirect demand for domestic products by sector:
+  * `domestic_insertion.csv`
 
 Investment rates are determined by the autonomous investment rate, the profit rate, capacity utilization, and the interest rate. The autonomous investment rate is an expectation of future growth, which gradually adjusts over time in response to realized growth (that is, [the model features "adaptive expectations"](@ref dynamics-potential-output)). The interest rate is reported in `collected_variables_#.csv`, while the capacity utilization file was listed above. The other relevant files are:
   * `profit_rate_#.csv`

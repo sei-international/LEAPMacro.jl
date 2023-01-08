@@ -79,6 +79,29 @@ The reference import demand, which appears as a scale factor in the [linear goal
 ```
 The multiple of two is somewhat arbitrary, because this simply sets a scale.
 
+### [_Domestic insertion_](@id dynamics-dom-insert)
+The Macro model reports an indicator called "domestic insertion". The term comes from the Caribbean structuralist tradition. That tradition notes that export-oriented firms must achieve an insertion into the international economy. However, for true development to occur, firms must also be inserted into the domestic economy to increase employment and demand for local products and services.
+
+The domestic insertion indicator is defined in terms of two input-output matrices. First there is the standard input-output matrix, with elements
+```math
+A_{ij} = \sum_{k = 1}^{n_p} S_{ik}D_{kj}.
+```
+Then there is a domestic-only input-output matrix
+```math
+A^\text{dom}_{ij} = \sum_{k = 1}^{n_p} S_{ik}(1 - f_k)D_{kj}.
+```
+This matrix captures the direct demand by domestic firms for domestic products.
+
+The total of direct and induced demand is calculated using the corresponding Leontief inverses,
+```math
+\mathbf{L} = \left(\mathbb{I} - \mathbf{A}\right)^{-1},\qquad \mathbf{L}^\text{dom} = \left(\mathbb{I} - \mathbf{A}^\text{dom}\right)^{-1}.
+```
+The domestic insertion indicator for sector ``i`` is defined in terms of these Leontief inverses as
+```math
+(\text{domestic insertion})_i \equiv \frac{\sum_{j=1}^{n_s} L^\text{dom}_{ji}}{\sum_{j=1}^{n_s} L_{ji}}.
+```
+This gives the ratio of the domestic to the total demand per unit output from sector ``i``, including both direct and induced demand.
+
 [^1]: Armington elasticities play an important role in trade models, but estimates very widely, and are mainly available for high-income countries. As a general rule, long-run elasticities (e.g., annual) are larger than short-run elasticities (e.g., monthly), and estimates tend to increase with the level of disaggregation of the data. Different statistical models can give very different results (e.g., estimates from systems of supply-demand equations tend to be about twice as large as estimates based on demand alone). If possible, find estimates for the country where Macro is being applied and at a similar level of disaggregation.
 
 ## [Labor productivity](@id dynamics-labor-prod)
