@@ -547,6 +547,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	LMlib.write_header_to_csv(params, sector_names, "real_value_added", run_number)
 	LMlib.write_header_to_csv(params, sector_names, "profit_rate", run_number)
 	LMlib.write_header_to_csv(params, sector_names, "autonomous_investment_rate", run_number)
+	LMlib.write_header_to_csv(params, sector_names, "domestic_insertion", run_number)
 	if params["labor-prod-fcn"]["use_sector_params"]
 		LMlib.write_header_to_csv(params, sector_names, "sector_employment", run_number)
 	end
@@ -837,6 +838,12 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		prices.pd = calc_dom_prices(t, np, ns, ω, prices, sut, exog)
 		prices.pb = exog.xr[t] * sut.m_frac .* prices.pw + (1 .- sut.m_frac) .* prices.pd
 		
+		# Domestic insertion statistic
+		A = sut.S * sut.D
+		#Adom = sut.S * ((1 .- sut.m_frac) .* sut.D)
+		Adom = [sum(sut.S[i,k] * (1 - sut.m_frac[k]) * sut.D[k,j] for k in 1:np) for i in 1:ns, j in 1:ns]
+		dom_insert = sum(inv(LinearAlgebra.I - Adom), dims = 1) ./ sum(inv(LinearAlgebra.I - A), dims = 1)
+
 		# Sector variables
 		LMlib.append_row_to_csv(params, g, "sector_output", run_number, years[t])
 		LMlib.append_row_to_csv(params, z, "potential_sector_output", run_number, years[t])
@@ -844,6 +851,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		LMlib.append_row_to_csv(params, value_added_at_prev_prices/prev_GDP_deflator, "real_value_added", run_number, years[t])
 		LMlib.append_row_to_csv(params, profit_rate, "profit_rate", run_number, years[t])
 		LMlib.append_row_to_csv(params, γ_0, "autonomous_investment_rate", run_number, years[t])
+		LMlib.append_row_to_csv(params, dom_insert, "domestic_insertion", run_number, years[t])
 		if params["labor-prod-fcn"]["use_sector_params"]
 			LMlib.append_row_to_csv(params, ℓ, "sector_employment", run_number, years[t])
 		end
