@@ -92,7 +92,7 @@ A^\text{dom}_{ij} = \sum_{k = 1}^{n_p} S_{ik}(1 - f_k)D_{kj}.
 ```
 This matrix captures the direct demand by domestic firms for domestic products.
 
-The total of direct and induced demand is calculated using the corresponding Leontief inverses,
+The total of direct and indirect demand is calculated using the corresponding Leontief inverses,
 ```math
 \mathbf{L} = \left(\mathbb{I} - \mathbf{A}\right)^{-1},\qquad \mathbf{L}^\text{dom} = \left(\mathbb{I} - \mathbf{A}^\text{dom}\right)^{-1}.
 ```
@@ -100,7 +100,7 @@ The domestic insertion indicator for sector ``i`` is defined in terms of these L
 ```math
 (\text{domestic insertion})_i \equiv \frac{\sum_{j=1}^{n_s} L^\text{dom}_{ji}}{\sum_{j=1}^{n_s} L_{ji}}.
 ```
-This gives the ratio of the domestic to the total demand per unit output from sector ``i``, including both direct and induced demand.
+This gives the ratio of the domestic to the total demand per unit output from sector ``i``, including both direct and indirect demand.
 
 [^1]: Armington elasticities play an important role in trade models, but estimates very widely, and are mainly available for high-income countries. As a general rule, long-run elasticities (e.g., annual) are larger than short-run elasticities (e.g., monthly), and estimates tend to increase with the level of disaggregation of the data. Different statistical models can give very different results (e.g., estimates from systems of supply-demand equations tend to be about twice as large as estimates based on demand alone). If possible, find estimates for the country where Macro is being applied and at a similar level of disaggregation.
 
