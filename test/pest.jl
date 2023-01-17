@@ -40,7 +40,11 @@ function delim_param(param_name, params, delimiter, width)
 end
 
 function val_or_delim(val, params, delimiter, width)
-    return(isa(val, String) ? delim_param(val, params, delimiter, width) : string(val))
+	if isnothing(val)
+		return "~"
+	else
+		return(isa(val, String) ? delim_param(val, params, delimiter, width) : string(val))
+	end
 end
 
 function writeline(io, args...)
@@ -108,7 +112,7 @@ function write_template_file(pest_opts, cfg_fname)
                 end
                 curr_subkey = subkey_captures[3]
                 subkey_value = subkey_captures[4]
-                if  haskeyvalue(sub_params[end], curr_subkey)
+                if  haskey(sub_params[end], curr_subkey)
                     if isa(sub_params[end][curr_subkey], Dict)
                         if level == 0
                             push!(sub_params, params[curr_subkey])
