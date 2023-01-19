@@ -39,6 +39,11 @@ function delim_param(param_name, params, delimiter, width)
     return(delimiter * param_name * repeat(" ", width - length(param_name)) * delimiter)
 end
 
+function startsnumeric(string)
+	re_numeric = r"^-?[0-9]+(\.[0-9]+)?([Ee](-|\+)?[0-9]+)?"
+	return occursin(re_numeric, strip(string))
+end
+
 function val_or_delim(val, params, delimiter, width)
 	if isnothing(val)
 		return "~"
@@ -78,8 +83,15 @@ function write_template_file(pest_opts, cfg_fname)
     #  The maximum double precision value length is 23 characters
     width = lowercase(pest_opts["pest"]["precision"]) == "single" ? 13 : 23
 
+	# A "mainkey" appears at the start of the line with a key followed by a colon, like "calib:"
     re_mainkey = r"^[A-Za-z0-9_\-]+(?=:)"
-    # Note that this will uncomment a paramter if it is commented out in the config file
+	# A "subkey" is indendent by one or more spaces and is followed by a value
+	#   subkey_captures[1] = spaces
+	#   subkey_captures[2] = hashtag (#) if present
+	#   subkey_captures[3] = keyname
+	#   subkey_captures[4] = value
+    # Note that this will retrieve the parameter even if it is commented out in the config file
+	# If a value is set for the parameter, then in it will be uncommented in the modified config file
     re_subkey = r"^(\s+)(#\s*)?([A-Za-z0-9_\-]+(?=:)):\s*(.*)"
 
     tpl_hdnl = open(tpl_fname, "w")
@@ -125,7 +137,12 @@ function write_template_file(pest_opts, cfg_fname)
                         if isa(curr_val, Vector)
                             val_string =  "[" * join([val_or_delim(e, pest_params, delim, width) for e in curr_val], ",") * "]"
                         else
-                            val_string = val_or_delim(curr_val, pest_params, delim, width)
+							# If the original value is a string, then apply the new value as a string as well
+							if isa(curr_val, String) && !startsnumeric(subkey_value)
+								val_string = strip(curr_val)
+							else
+								val_string = val_or_delim(curr_val, pest_params, delim, width)
+							end
                         end
                         # Save the current value by adding as a comment
                         line = repeat(" ", subkey_indent) * curr_subkey * ": " * val_string * " # " * strip(string(subkey_value)) * "\r\n"
