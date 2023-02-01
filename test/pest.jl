@@ -8,17 +8,86 @@ function parse_commandline()
             help = "name of LEAP-Macro config file"
             arg_type = AbstractString
             default = "LEAPMacro_params.yml"
-            required = false
         "--pest-config-file", "-p"
             help = "name of PEST config file"
             arg_type = AbstractString
             default = "pest_config.yml"
-            required = false
         "--control-file", "-c"
             help = "name to assign the control file"
             arg_type = AbstractString
             default = "LEAPMacro_control.pst"
-            required = false
+		"--RLAMBDA1"
+			help = "PEST control file parameter RLAMBDA1"
+			arg_type = Float64
+			default = 10.0
+		"--RLAMFAC"
+			help = "PEST control file parameter RLAMFAC"
+			arg_type = Float64
+			default = 2.0
+		"--PHIRATSUF"
+			help = "PEST control file parameter PHIRATSUF"
+			arg_type = Float64
+			default = 0.3
+		"--PHIREDLAM"
+			help = "PEST control file parameter PHIREDLAM"
+			arg_type = Float64
+			default = 0.03
+		"--NUMLAM"
+			help = "PEST control file parameter NUMLAM"
+			arg_type = Int64
+			default = 10
+		"--RELPARMAX"
+			help = "PEST control file parameter RELPARMAX"
+			arg_type = Float64
+			default = 10.0
+		"--FACPARMAX"
+			help = "PEST control file parameter FACPARMAX"
+			arg_type = Float64
+			default = 10.0
+		"--FACORIG"
+			help = "PEST control file parameter FACORIG"
+			arg_type = Float64
+			default = 0.001
+		"--PHIREDSWH"
+			help = "PEST control file parameter PHIREDSWH"
+			arg_type = Float64
+			default = 0.1
+		"--PHIREDSTP"
+			help = "PEST control file parameter PHIREDSTP"
+			arg_type = Float64
+			default = 0.005
+		"--NPHISTP"
+			help = "PEST control file parameter NPHISTP"
+			arg_type = Int64
+			default = 4
+		"--NPHINORED"
+			help = "PEST control file parameter NPHINORED"
+			arg_type = Int64
+			default = 3
+		"--RELPARSTP"
+			help = "PEST control file parameter RELPARSTP"
+			arg_type = Float64
+			default = 0.005
+		"--NRELPAR"
+			help = "PEST control file parameter NRELPAR"
+			arg_type = Int64
+			default = 4
+		"--EIGTHRESH"
+			help = "PEST control file parameter EIGTHRESH"
+			arg_type = Float64
+			default = 5.0e-7
+		"--DERINC"
+			help = "PEST control file parameter DERINC"
+			arg_type = Float64
+			default = 0.01
+		"--DERINCLB"
+			help = "PEST control file parameter DERINCLB"
+			arg_type = Float64
+			default = 0.0
+		"--DERINCMUL"
+			help = "PEST control file parameter DERINCMUL"
+			arg_type = Float64
+			default = 2.0
     end
 
     return parse_args(argp)
@@ -177,7 +246,7 @@ function write_instruction_files(pest_opts)
     end
 end
 
-function write_control_file(pest_opts, ctrl_fname, cfg_fname)
+function write_control_file(pest_opts, ctrl_fname, cfg_fname, args)
     ctrl_hdnl = open(ctrl_fname, "w")
     write(ctrl_hdnl, "pcf\r\n")
     #-------------------------
@@ -212,32 +281,32 @@ function write_control_file(pest_opts, ctrl_fname, cfg_fname)
     writeline(ctrl_hdnl, NTPLFLE, NINSFILE, PRECIS, DPOINT, NUMCOM, JACFILE, MESSFILE)
     # Line 5
     # RLAMBDA1 RLAMFAC PHIRATSUF PHIREDLAM NUMLAM [JACUPDATE] [LAMFORGIVE] [DERFORGIVE]
-    RLAMBDA1 = 10.0
-    RLAMFAC = 2.0
-    PHIRATSUF = 0.3
-    PHIREDLAM = 0.03
-    NUMLAM = 10
+    RLAMBDA1 = args["RLAMBDA1"]
+    RLAMFAC = args["RLAMFAC"]
+    PHIRATSUF = args["PHIRATSUF"]
+    PHIREDLAM = args["PHIREDLAM"]
+    NUMLAM = args["NUMLAM"]
     LAMFORGIVE = "lamforgive"
     DERFORGIVE = "derforgive"
     writeline(ctrl_hdnl, RLAMBDA1, RLAMFAC, PHIRATSUF, PHIREDLAM, NUMLAM, LAMFORGIVE, DERFORGIVE)
     # Line 6
     # RELPARMAX FACPARMAX FACORIG [IBOUNDSTICK UPVECBEND] [ABSPARMAX]
-    RELPARMAX = 10.0
-    FACPARMAX = 10.0
-    FACORIG = 0.001
+    RELPARMAX = args["RELPARMAX"]
+    FACPARMAX = args["FACPARMAX"]
+    FACORIG = args["FACORIG"]
     writeline(ctrl_hdnl, RELPARMAX, FACPARMAX, FACORIG)
     # Line 7
     # PHIREDSWH [NOPTSWITCH] [SPLITSWH] [DOAUI] [DOSENREUSE] [BOUNDSCALE]
-    PHIREDSWH = 0.1
+    PHIREDSWH = args["PHIREDSWH"]
     writeline(ctrl_hdnl, PHIREDSWH)
     # Line 8
     # NOPTMAX PHIREDSTP NPHISTP NPHINORED RELPARSTP NRELPAR [PHISTOPTHRESH] [LASTRUN] [PHIABANDON]
     NOPTMAX = pest_opts["pest"]["max_iterations"]
-    PHIREDSTP = 0.005
-    NPHISTP = 4
-    NPHINORED = 3
-    RELPARSTP = 0.005
-    NRELPAR = 4
+    PHIREDSTP = args["PHIREDSTP"]
+    NPHISTP = args["NPHISTP"]
+    NPHINORED = args["NPHINORED"]
+    RELPARSTP = args["RELPARSTP"]
+    NRELPAR = args["NRELPAR"]
     writeline(ctrl_hdnl, NOPTMAX, PHIREDSTP, NPHISTP, NPHINORED, RELPARSTP, NRELPAR)
     # Line 9
     # ICOV ICOR IEIG [IRES] [JCOSAVE] [VERBOSEREC] [JCOSAVEITN] [REISAVEITN] [PARSAVEITN] [PARSAVERUN]
@@ -258,7 +327,7 @@ function write_control_file(pest_opts, ctrl_fname, cfg_fname)
     # Line 2
     # MAXSING EIGTHRESH
     MAXSING = NPAR
-    EIGTHRESH = 5.0e-7
+    EIGTHRESH = args["EIGTHRESH"]
     writeline(ctrl_hdnl, MAXSING, EIGTHRESH)
     # Line 3
     # EIGWRITE
@@ -272,10 +341,10 @@ function write_control_file(pest_opts, ctrl_fname, cfg_fname)
     # Lines 2...
     # PARGPNME INCTYP DERINC DERINCLB FORCEN DERINCMUL DERMTHD
     INCTYP = "relative"
-    DERINC = 0.01
-    DERINCLB = 0.0
+    DERINC = args["DERINC"]
+    DERINCLB = args["DERINCLB"]
     FORCEN = "switch"
-    DERINCMUL = 2.0
+    DERINCMUL = args["DERINCMUL"]
     DERMTHD = "parabolic"
     param_field_width = maximum([length(p) for p in keys(pest_opts["pest"]["parameters"])]) + 1
     for p in keys(pest_opts["pest"]["parameters"])
@@ -410,7 +479,7 @@ write_template_file(pest_opts, cfg_fname)
 println("Generating PEST instruction file(s)...")
 write_instruction_files(pest_opts)
 println("Generating PEST control file...")
-write_control_file(pest_opts, ctrl_fname, cfg_fname)
+write_control_file(pest_opts, ctrl_fname, cfg_fname, args)
 println("Checking files...")
 chk = run_pestchk(pest_opts)
 if chk
