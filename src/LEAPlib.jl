@@ -1,8 +1,8 @@
 "Module `LEAPlib` exports functions for linking Macro to LEAP in `LEAPMacro.jl`"
 module LEAPlib
-using PyCall, DataFrames, CSV, UUIDs
+using PyCall, DataFrames, CSV, UUIDs, Formatting
 
-export hide_leap, send_results_to_leap, calculate_leap, get_version_info, get_results_from_leap, LEAPresults, Formatting
+export hide_leap, send_results_to_leap, calculate_leap, get_version_info, get_results_from_leap, LEAPresults
 
 include("./LEAPMacrolib.jl")
 using .LMlib
