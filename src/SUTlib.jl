@@ -974,7 +974,7 @@ function process_sut(params::Dict)
 	#--------------------------------
 	tot_int_sup = vec(sum(LMlib.excel_range_to_mat(SUT_df, params["SUT_ranges"]["tot_intermediate_supply"])[product_ndxs,:], dims=2))
     # The fraction m_frac applies to imports excluding imported investment goods
-    retval.m_frac = retval.M ./ (tot_int_sup + retval.F + retval.I)
+    retval.m_frac = retval.M ./ (tot_int_sup + retval.F + retval.I .+ LMlib.ϵ)
 	#--------------------------------
 	# Correct demands
 	#--------------------------------
