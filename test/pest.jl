@@ -191,6 +191,7 @@ function write_template_file(pest_opts, cfg_fname)
                     level -= 1
                     pop!(sub_params)
                 end
+				curr_indent = subkey_indent
                 curr_subkey = subkey_captures[3]
                 subkey_value = subkey_captures[4]
                 if  haskey(sub_params[end], curr_subkey)
