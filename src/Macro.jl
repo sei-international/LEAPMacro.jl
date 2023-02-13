@@ -687,7 +687,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		if !previous_failed
 			# First, update the Vnorm matrix
-			sut.Vnorm = Diagonal(1 ./ (g .+ LMlib.ϵ)) * sut.S * Diagonal(value.(qs))
+			sut.Vnorm = Diagonal(1 ./ (z .+ LMlib.ϵ)) * sut.S * Diagonal(value.(qs))
 			# Calculate export-weighted price
 			export_share = value.(X) ./ (value.(qs) .+ LMlib.ϵ)
 			px = exog.xr[t] * export_share .* prices.pw + (1 .- export_share) .* prices.pd
