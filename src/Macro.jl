@@ -691,8 +691,11 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 			# Calculate export-weighted price
 			export_share = value.(X) ./ (value.(qs) .+ LMlib.ϵ)
 			px = exog.xr[t] * export_share .* prices.pw + (1 .- export_share) .* prices.pd
-			# For the profit per output, use z rather than g, and correct costs for capacity utilization
-			profit_per_output = Diagonal(1 ./ (z .+ LMlib.ϵ)) * sut.S * Diagonal(value.(qs)) * px - value.(u) .* (prices.Pg .* (ω + sut.energy_share) +  transpose(sut.D) * prices.pb)
+			# First calculate profits per output at full capacity utilization, then adjust
+			profit_per_output = sut.Vnorm * px - (prices.Pg .* (ω + sut.energy_share) +  transpose(sut.D) * prices.pb)
+			if !params["investment-fcn"]["use_profits_at_full_capacity"]
+				profit_per_output = value.(u) .* profit_per_output
+			end
 			pK = dot(θ, prices.pb)
 			profit_rate = profit_per_output ./ (pK * capital_output_ratio)
 		else

@@ -201,6 +201,29 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         end
     end
 
+    # Investment function parameters
+    if !LMlib.haskeyvalue(global_params, "investment-fcn")
+        # This entry must be present
+        throw(KeyError("investment-fcn"))
+    end
+    # Default is that the profit rate is based on realized profits
+    if !LMlib.haskeyvalue(global_params["investment-fcn"], "use_profits_at_full_capacity")
+        global_params["investment-fcn"]["use_profits_at_full_capacity"] = false
+    end
+    # Set the following to zero if absent, but issue a warning
+    if !LMlib.haskeyvalue(global_params["investment-fcn"], "util_sens")
+        @warn LMlib.gettext("Parameter 'util_sens' is missing from the configuration file: setting to zero")
+        global_params["investment-fcn"]["util_sens"] = 0.0
+    end
+    if !LMlib.haskeyvalue(global_params["investment-fcn"], "profit_sens")
+        @warn LMlib.gettext("Parameter 'profit_sens' is missing from the configuration file: setting to zero")
+        global_params["investment-fcn"]["profit_sens"] = 0.0
+    end
+    if !LMlib.haskeyvalue(global_params["investment-fcn"], "intrate_sens")
+        @warn LMlib.gettext("Parameter 'intrate_sens' is missing from the configuration file: setting to zero")
+        global_params["investment-fcn"]["intrate_sens"] = 0.0
+    end
+
     # Labor productivity growth parameters
     if !LMlib.haskeyvalue(global_params, "labor-prod-fcn")
         global_params["labor-prod-fcn"] = Dict()
