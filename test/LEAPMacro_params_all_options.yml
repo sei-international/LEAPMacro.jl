@@ -108,6 +108,8 @@ investment-fcn:
     util_sens:  0.07
     # Change in induced investment with a change in the profit rate
     profit_sens: 0.05
+    # The profit rate is based on realized profits by default; leave blank or set to true for profits at full capacity utilization
+    use_profits_at_full_capacity: false
     # Change in induced investment with a change in the central bank lending rate
     intrate_sens: 0.20
     # Rate of adjustment of the autonomous investment rate towards the actual investment rate
