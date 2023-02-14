@@ -168,12 +168,14 @@ In the first time step, ``\alpha_{ki} = \underline{D}^\text{init}_{ki}``, so the
 [^3]: The equation shown here is a special case of a more general model that is presented in [_A classical-evolutionary model of technological change_](https://doi.org/10.1007/s00191-022-00792-5) by Eric Kemp-Benedict.
 
 ## Profit rate
-Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of potential output, ``\Pi_i``, is given by the value of output per unit of potential output less unit costs,
+Profitability is reflected in the sector profit rate ``r_i`` -- that is, profit divided by the replacement cost of capital. By default, profits are calculated as realized profits, taking capacity utilization into account. This is accomplished by calculating the revenue side of gross profit ``\Pi_i`` as the realized value of output based on sales divided by potential output, while costs are multiplied by capacity utilization. The default expression is:
 ```math
-\Pi_i = \frac{1}{z_i}\sum_{k=1}^{n_p} \underline{S}_{i,k} q_{s,k}p_{x,k} -
-        \left[\overline{P}_g\left(\omega_i + \varepsilon_i\right) +
+\Pi_i = \frac{1}{\overline{z}_i}\sum_{k=1}^{n_p} \underline{S}_{i,k} q_{s,k}p_{x,k} -
+        u_i \left[\overline{P}_g\left(\omega_i + \varepsilon_i\right) +
               \sum_{k = 1}^{n_p}\overline{p}_{b,k}\underline{D}_{k,i} \right].
 ```
+Optionally, the profit rate can be calculated at full capacity utilization, in which case this expression is divided by ``u_i``.
+
 Basic prices are used on the cost side of this equation, while an export-weighted price ``p_{x,k}`` is used on the revenue side, where
 ```math
 p_{x,k} = \frac{X_k}{q_{s,k}} \underline{e}p_{w,k} + \left(1 - \frac{X_k}{q_{s,k}}\right)p_{d,k}.

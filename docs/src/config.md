@@ -197,6 +197,9 @@ taylor-fcn:
 ### Investment function coefficients
 The next block contains the parameters for the investment function. As explained in the page on [model dynamics](@ref dynamics-potential-output), the investment function calculates the demand for investment goods as a function of capacity utilization, profitability, and borrowing costs.
 
+!!! info "The profit rate in the investment function"
+    Prior to version 2.2.8, the profit rate used in the investment function was calculated at full capacity utilization. However, this can lead to unexpected behavior. The default is now to use the profit rate calculated in terms of realized profits, taking capacity utilization into account. Because this change produces different results, an optional parameter, `use_profits_at_full_capacity`, can be set to `true` to revert to the prior behavior. This parameter can be omitted, and its default value is `false`.
+
 The correspondence between the parameters and the [model variables](@ref exog-param-vars) is:
   * `init_neutral_growth`: Initial value of ``\gamma_{i0}`` (with the same initial value for every sector ``i``)
   * `util_sens` : ``\underline{\alpha}_\text{util}``
@@ -214,6 +217,8 @@ investment-fcn:
     util_sens:  0.07
     # Change in induced investment with a change in the profit rate
     profit_sens: 0.05
+    # The profit rate is based on realized profits by default; leave blank or set to true for profits at full capacity utilization
+    use_profits_at_full_capacity: false
     # Change in induced investment with a change in the central bank lending rate
     intrate_sens: 0.20
     # Rate of adjustment of the autonomous investment rate towards the actual investment rate
