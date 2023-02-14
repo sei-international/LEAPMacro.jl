@@ -687,11 +687,12 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		if !previous_failed
 			# First, update the Vnorm matrix
-			sut.Vnorm = Diagonal(1 ./ (z .+ LMlib.ϵ)) * sut.S * Diagonal(value.(qs))
+			sut.Vnorm = Diagonal(1 ./ (g .+ LMlib.ϵ)) * sut.S * Diagonal(value.(qs))
 			# Calculate export-weighted price
 			export_share = value.(X) ./ (value.(qs) .+ LMlib.ϵ)
 			px = exog.xr[t] * export_share .* prices.pw + (1 .- export_share) .* prices.pd
-			profit_per_output = sut.Vnorm * px - (prices.Pg .* (ω + sut.energy_share) +  transpose(sut.D) * prices.pb)
+			# For the profit per output, use z rather than g, and correct costs for capacity utilization
+			profit_per_output = Diagonal(1 ./ (z .+ LMlib.ϵ)) * sut.S * Diagonal(value.(qs)) * px - value.(u) .* (prices.Pg .* (ω + sut.energy_share) +  transpose(sut.D) * prices.pb)
 			pK = dot(θ, prices.pb)
 			profit_rate = profit_per_output ./ (pK * capital_output_ratio)
 		else
