@@ -264,7 +264,8 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     #----------------------------------
 	Xnorm = (1.0 + params["calib"]["max_export_adj_factor"]) * sut.X
     Fnorm = (1.0 + params["calib"]["max_hh_dmd_adj_factor"]) * max.(sut.F,zeros(np))
-	z = (1.0 + params["calib"]["pot_output_adj_factor"]) * sut.g
+	z_over_g_adj = (1.0 + params["calib"]["pot_output_adj_factor"])
+	z = z_over_g_adj * sut.g
 
 	#----------------------------------
     # Investment
@@ -302,12 +303,12 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	#----------------------------------
     # Capital productivity of new investment
     #----------------------------------
-	# Intermediate variables
-	profit_per_output = sut.Vnorm * prices.pd - (prices.Pg .* (ω + sut.energy_share) +  transpose(sut.D) * prices.pb)
+	# Intermediate variables: Rescale Vnorm to use z instead of g
+	profit_per_output = (1/z_over_g_adj) * sut.Vnorm * prices.pd - (prices.Pg .* (ω + sut.energy_share) +  transpose(sut.D) * prices.pb)
 	price_of_capital = dot(θ,prices.pb)
 	I_nextper = (1 + params["investment-fcn"]["init_neutral_growth"]) * (1 + params["calib"]["nextper_inv_adj_factor"]) * I_ne
 	profit_share_rel_capprice = (1/price_of_capital) * profit_per_output
-	init_profit = sum((γ_0 + exog.δ) .* sut.g .* profit_share_rel_capprice)
+	init_profit = sum((γ_0 + exog.δ) .* z .* profit_share_rel_capprice)
     init_profit_rate = init_profit/I_nextper
 	# Capital productivity
     capital_output_ratio = profit_share_rel_capprice / init_profit_rate
