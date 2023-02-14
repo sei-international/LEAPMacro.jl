@@ -168,9 +168,9 @@ In the first time step, ``\alpha_{ki} = \underline{D}^\text{init}_{ki}``, so the
 [^3]: The equation shown here is a special case of a more general model that is presented in [_A classical-evolutionary model of technological change_](https://doi.org/10.1007/s00191-022-00792-5) by Eric Kemp-Benedict.
 
 ## Profit rate
-Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of output, ``\Pi_i``, is given by the value of output per unit of output less unit costs,
+Profitability is reflected in the sector profit rate at full utilization ``r_i``, which is defined as profit divided by the value of capital. Gross profit per unit of potential output, ``\Pi_i``, is given by the value of output per unit of potential output less unit costs,
 ```math
-\Pi_i = \frac{1}{g_i}\sum_{k=1}^{n_p} \underline{S}_{i,k} q_{s,k}p_{x,k} -
+\Pi_i = \frac{1}{z_i}\sum_{k=1}^{n_p} \underline{S}_{i,k} q_{s,k}p_{x,k} -
         \left[\overline{P}_g\left(\omega_i + \varepsilon_i\right) +
               \sum_{k = 1}^{n_p}\overline{p}_{b,k}\underline{D}_{k,i} \right].
 ```
