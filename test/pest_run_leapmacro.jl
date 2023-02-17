@@ -16,7 +16,7 @@ function parse_commandline()
 		"--sleep", "-s"
 			help = "delay between iterations by this many seconds"
             arg_type = Float64
-			default = 5.0
+			default = 0.1
 			required = false
 		"--data-files", "-d"
 			help = "name(s) of the data file(s) in the results folder"
