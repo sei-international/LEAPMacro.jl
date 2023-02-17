@@ -223,7 +223,7 @@ LEAP-Macro:
     #   config_file                                 name of config file (default: "LEAPMacro_params.yml")
     # optional arguments:
     #   -c, --calibrate                             flag to do a calibration run
-    #   -s, --sleep SLEEP                           delay between iterations by this many seconds (default: 5)
+    #   -s, --sleep SLEEP                           delay between iterations by this many seconds (default: 0.1)
     #   -d, --data-files DATA_FILES [DATA_FILES...] name(s) of the data file(s) in the results folder
     #   -v, --verbose-errors                        send detailed error message to log file
     #   -e, --include-energy-sectors                include energy sectors in the model simulation
@@ -233,7 +233,7 @@ LEAP-Macro:
     script: pest_run_leapmacro.jl
     resume_if_error: false
     verbose_errors: false
-    sleep: 1 # seconds, to avoid collisions with opening & closing files 
+    sleep: 0.1 # seconds, to avoid collisions with opening & closing files 
 ```
 The next (and final) sub-block is called `config:`. Entries in the sub-block follow the structure of a LEAP-Macro configuration file. The `pest.jl` script takes a full LEAP-Macro configuration file as a starting point, appends `_calibration` to the name of the file and gives it a PEST template extension (`.tpl`). By default the starting configuration file is called `LEAPMacro_params.yml`, but it can be assigned a different file when running the `pest.jl` program by calling, e.g., `\path\to\model>julia pest.jl MyConfigFile.yml`.
 
