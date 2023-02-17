@@ -15,8 +15,8 @@ function parse_commandline()
             required = false
 		"--sleep", "-s"
 			help = "delay between iterations by this many seconds"
-            arg_type = Int64
-			default = 5
+            arg_type = Float64
+			default = 5.0
 			required = false
 		"--data-files", "-d"
 			help = "name(s) of the data file(s) in the results folder"
@@ -44,12 +44,17 @@ params = YAML.load_file(parsed_args["config_file"])
 output_folder = joinpath("outputs", joinpath(params["output_folder"] * "_full", "results"))
 
 if parsed_args["calibrate"]
-	sleep(parsed_args["sleep"])
+	# Minimum allowed value is 0.001; ignore if less than that (e.g., if set to zero)
+	if parsed_args["sleep"] >= 0.001
+		sleep(parsed_args["sleep"])
+	end
 	println("Running LEAP-Macro...")
 	res = LEAPMacro.run(parsed_args["config_file"], dump_err_stack = parsed_args["verbose_errors"], include_energy_sectors = true, continue_if_error = true)
 	
     if res == 0
-		sleep(parsed_args["sleep"])
+		if parsed_args["sleep"] >= 0.001
+			sleep(parsed_args["sleep"])
+		end
         for datafname in parsed_args["data_files"]
             cp(joinpath(output_folder, datafname), datafname, force = true)
         end
@@ -61,7 +66,9 @@ if parsed_args["calibrate"]
             end
         end
     end
-	sleep(parsed_args["sleep"])
+	if parsed_args["sleep"] >= 0.001
+		sleep(parsed_args["sleep"])
+	end
 else
     LEAPMacro.run(parsed_args["config_file"],
                   dump_err_stack = parsed_args["verbose_errors"],
