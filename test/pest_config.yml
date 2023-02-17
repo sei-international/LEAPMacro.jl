@@ -58,7 +58,7 @@ LEAP-Macro:
     #   config_file                                 name of config file (default: "LEAPMacro_params.yml")
     # optional arguments:
     #   -c, --calibrate                             flag to do a calibration run
-    #   -s, --sleep SLEEP                           delay between iterations by this many seconds (default: 5)
+    #   -s, --sleep SLEEP                           delay between iterations by this many seconds (default: 0.1)
     #   -d, --data-files DATA_FILES [DATA_FILES...] name(s) of the data file(s) in the results folder
     #   -v, --verbose-errors                        send detailed error message to log file
     #   -e, --include-energy-sectors                include energy sectors in the model simulation
@@ -68,7 +68,7 @@ LEAP-Macro:
     script: pest_run_leapmacro.jl
     resume_if_error: false
     verbose_errors: false
-    sleep: 1 # seconds, to avoid collisions with opening & closing files 
+    sleep: 0.1 # seconds, to avoid collisions with opening & closing files 
   config:
     calib:
       pot_output_adj_factor: pot_out_adj
