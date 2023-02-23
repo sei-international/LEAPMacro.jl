@@ -730,9 +730,11 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		# Export demand
 		#--------------------------------
 		if !all(ismissing.(exog.pot_output[t,:]))
-			# Export demand is calculated differently when potential output is exogenously specified
+			# Export demand and target imports are calculated differently when potential output is exogenously specified
+			# 1) Convert from exogenously specified sector output to product output
 			pot_prod = sum(exog.pot_output[t,i] * sut.Vnorm[i,:] for i in pot_output_ndxs)
 			# -- extent of externally specified output
+			# 2) Calculate the fraction of product output that is exogenously specified via sector
 			pot_prod_spec_factor = sum(sut.Vnorm[i,:] * z[i] for i in pot_output_ndxs) ./ (sut.Vnorm' * z .+ LMlib.ϵ)
 		else
 			pot_prod = zeros(np)
@@ -882,8 +884,10 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		# Update the linear goal program
 		#--------------------------------
+		# If there is exogenously specified output, revise import parameters (uses the inverse of the export scale factor)
+		M_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* prev_pot_prod ./ (pot_prod .+ LMlib.ϵ)
 		if !previous_failed
-			param_Mref = 2 * value.(M) # Allow for some extra slack -- this just sets a scale
+			param_Mref = 2 * value.(M) .* M_scale_factor # Allow for some extra slack -- this just sets a scale
 		end
 		param_Pg = prices.Pg
 		param_Xnorm = Xnorm
@@ -896,7 +900,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		param_z = z
 		# Caluculate updated m_frac for use in goal program
 		adj_import_price_elast = max.(0, 1 .- sut.m_frac) .* exog.import_price_elast
-		param_mfrac = sut.m_frac .* ((1 .+ πd)./(1 .+ πw)).^adj_import_price_elast
+		param_mfrac = M_scale_factor .* sut.m_frac .* ((1 .+ πd)./(1 .+ πw)).^adj_import_price_elast
 		# Set maximum utilization in multiple steps
 		param_max_util = ones(ns)
 		max_util_ndxs = findall(x -> !ismissing(x), exog.max_util[t + 1,:])
