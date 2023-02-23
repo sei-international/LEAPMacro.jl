@@ -7,6 +7,25 @@ In between runs of the [linear goal program](@ref lgp), the [dynamic parameters]
 
 In the equations below, a subscript ``+1`` indicates the next-year's value, and a subscript ``-1`` the previous year's value. An underline indicates an [exogenous parameter](@ref exog-param-vars), while an overline is a [dynamic parameter](@ref dynamic-param-vars).
 
+!!! info "Potential sector output vs. potential production"
+    One of the most important variables in the Macro model is potential output for a sector ``i``, ``\overline{z}_i``. Realized output ``g_i`` is equal to potential output multiplied by capacity utilization ``u_i``.
+    
+    Ordinarily, potential output is determined by investment through an [investment function](@ref dynamics-potential-output). However, Macro allows for potential output to be specified exogenously in an [optional parameter file](@ref params-optional-pot-output). This is presumed to reflect an informed policy decision that takes demand into account, so Macro adjusts import and export targets accordingly.
+
+    One complicating factor is that potential output is for a sector, whereas demand for exports and imports are for products. The connection between sectors and products is provided by the supply matrix. Defining a matrix
+    ```math
+        \Omega_{ik} = \frac{1}{g_i}S_{ik}q_{s,k},
+    ```
+    potential production ``q_{s,k}^*`` of product ``k`` due to exogenously specified sector output is calculated as
+    ```math
+        q_{s,k}^* = \sum_{i=1}^{n_s} \underline{z}_i^\text{exog}\Omega_{ik}.
+    ```
+    Because in general there is not a one-to-one correspondence between sectors and products, some potential production may not be due to exogenously specified sector output. This is captured in the fraction ``f_k^\text{exog}`` of potential output of product ``k`` due to exogenously specified sector output, which is calculated as
+    ```math
+        f_k^\text{exog} = \frac{\sum_{i=1}^{n_s}\underline{z}_i^\text{exog}\Omega_{ik}}{\sum_{i=1}^{n_s} z_i\Omega_{ik}}.
+    ```
+    These two variables -- ``q_{s,k}^*`` and ``f_k^\text{exog}`` -- appear in expressions for [target exports](@ref dynamics-export-demand) and for [import fractions](@ref dynamics-imports).
+
 ## [Prices](@id dynamics-prices)
 For an explanation of the different prices, see the explanation in [About demand-led growth](@ref theoretical-background-prices).
 
@@ -79,8 +98,22 @@ The reference import demand, which appears as a scale factor in the [linear goal
 ```
 The multiple of two is somewhat arbitrary, because this simply sets a scale.
 
+### [_Adjustments for exogenously specified production_](@id dynamics-exog-output-imports)
+When potential output is exogenously specified, imports are assumed to change opposite to the exogenous trend. So, for example, if exogenous potential sector activity is expanding, then the normal level of imports is assumed to decline. Whether actual imports in fact decline or not depends on the results of running the [linear goal program](@ref lgp).
+
+The extended expression for the import fraction uses the variables ``q_{s,k}^*`` and ``f_k^\text{exog}`` defined in the information box ["Potential sector output vs. potential production"](@ref dynamics) at the top of this page,
+```math
+\overline{f}_k = \left[1 + f_k^\text{exog}\left(\frac{q_{s,k}^*}{q_{s,k,+1}^*} - 1\right)\right] f_k \left(\frac{1 + \pi_{d,k}}{1 + \underline{\pi}_{w,k}}\right)^{(1 - f_k)\underline{\phi}^\text{imp}_k},\quad f_k = \frac{M_k}{q_{d,k} + F_k + I_k}.
+```
+Note that despite the similar notation, the variables ``f_k^\text{exog}`` and ``f_k`` refer to different types of quantities: ``f_k^\text{exog}`` is the share of potential production due to exogenously specified sector output, whereas ``f_k`` is the import share calculated from the outputs of the linear goal program.
+
+The reference level of imports is adjusted by the same factor,
+```math
+\overline{M}^\text{ref}_k = 2 M_k \left[1 + f_k^\text{exog}\left(\frac{q_{s,k}^*}{q_{s,k,+1}^*} - 1\right)\right].
+```
+
 ### [_Domestic insertion_](@id dynamics-dom-insert)
-The Macro model reports an indicator called "domestic insertion". The term comes from the Caribbean structuralist tradition. That tradition notes that export-oriented firms must achieve an insertion into the international economy. However, for true development to occur, firms must also be inserted into the domestic economy to increase employment and demand for local products and services.
+The Macro model reports an indicator called "domestic insertion". The term comes from the Caribbean structuralist tradition. That tradition notes that export-oriented firms must achieve an insertion into the global economy. However, for true development to occur, firms must also be inserted into the domestic economy to increase employment and demand for local products and services.
 
 The domestic insertion indicator is defined in terms of two input-output matrices. First there is the standard input-output matrix, with elements
 ```math
@@ -268,27 +301,16 @@ For most products, the normal level of export demand grows with global GDP (or g
 ```math
 \overline{X}^\text{norm}_{k,+1} = \left(1 + \underline{\gamma}^\text{world}\right)^{\underline{\eta}^\text{exp}_k} \left(\frac{1 + \underline{\pi}_{w,k}}{1 + \pi_{d,k}}\right)^{\underline{\phi}^\text{exp}_k} \overline{X}^\text{norm}_k.
 ```
-When potential output is exogenously specified, normal export demand is assumed to be supply-elastic -- that is, it more or less keeps pace with the change in potential output -- but still responds to relative prices and fluctuations in global GDP. Fluctuations in global GDP are calculated relative to a smoothed trend,
+
+When potential output is exogenously specified, normal export demand is assumed to be supply-elastic -- that is, it more or less keeps pace with the change in potential output -- while still responding marginally to relative prices and fluctuations in global GDP. In this case, fluctuations in global GDP are calculated relative to a smoothed trend,
 ```math
-\gamma^\text{world}_\text{smooth} = \gamma^\text{world}_{\text{smooth},-1} + \underline{\xi}\left(\underline{\gamma}^\text{world} - \gamma^\text{world}_{\text{smooth},-1}\right)
+\gamma^\text{world}_\text{smooth} = \gamma^\text{world}_{\text{smooth},-1} + \underline{\xi}\left(\underline{\gamma}^\text{world} - \gamma^\text{world}_{\text{smooth},-1}\right).
 ```
-One complicating factor is that potential output is a characteristic of a sector, whereas export demand is for products. The connection is through the supply matrix. Defining a matrix
-```math
-    \Omega_{ik} = \frac{1}{g_i}S_{ik}q_{s,k},
-```
-potential production ``q_{s,k}^*`` of product ``k`` is given by
-```math
-    q_{s,k}^* = \sum_{i=1}^{n_s} z_i\Omega_{ik},
-```
-while the fraction ``f_k^\text{exog}`` of potential output of product ``k`` due to exogenously specified sector output is
-```math
-    f_k^\text{exog} = \frac{\sum_{i=1}^{n_s}\underline{z}_i^\text{exog}\Omega_{ik}}{\sum_{i=1}^{n_s} z_i\Omega_{ik}}.
-```
-With these defintions, an extended expression for the change in the normal level of exports is given by
+Together with the variables ``q_{s,k}^*`` and ``f_k^\text{exog}`` explained in the information box ["Potential sector output vs. potential production"](@ref dynamics) at the top of this page, an extended expression for the change in the normal level of exports is given by
 ```math
 \overline{X}^\text{norm}_{k,+1} = \left[1 + f_k^\text{exog}\left(\frac{q_{s,k,+1}^*}{q_{s,k}^*} - 1\right)\right] \left(\frac{1 + \underline{\gamma}^\text{world}}{1 + f_k^\text{exog}\gamma^\text{world}_\text{smooth}}\right)^{\underline{\eta}^\text{exp}_k} \left(\frac{1 + \underline{\pi}_{w,k}}{1 + \pi_{d,k}}\right)^{\underline{\phi}^\text{exp}_k} \overline{X}^\text{norm}_k.
 ```
-When ``f_k^\text{exog} = 0``, this reduces to the default formula.
+Note that when ``f_k^\text{exog} = 0``, this extended expression reduces to the default formula.
 
 ## [Final domestic demand](@id dynamics-final-dom-demand)
 Normal final domestic demand grows with the real wage bill to a goods-specific elasticity. The next-period nominal wage bill in sector ``i`` is calculated using variables and parameters introduced above,
