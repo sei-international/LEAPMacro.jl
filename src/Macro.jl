@@ -740,8 +740,9 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 			pot_prod = zeros(np)
 			pot_prod_spec_factor = zeros(np)
 		end
-		# -- scale factor
+		# -- scale factor for exports and imports (the growth factor for imports is the reciprocal of the factor for exports)
 		Xnorm_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* pot_prod ./ (prev_pot_prod .+ LMlib.ϵ)
+		M_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* prev_pot_prod ./ (pot_prod .+ LMlib.ϵ)
 		prev_pot_prod = pot_prod
 		# -- income factor
 		smoothed_world_gr += growth_adj * (exog.world_grs[t] - smoothed_world_gr)
@@ -846,7 +847,6 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		
 		# Domestic insertion statistic
 		A = sut.S * sut.D
-		#Adom = sut.S * ((1 .- sut.m_frac) .* sut.D)
 		Adom = [sum(sut.S[i,k] * (1 - sut.m_frac[k]) * sut.D[k,j] for k in 1:np) for i in 1:ns, j in 1:ns]
 		dom_insert = sum(inv(LinearAlgebra.I - Adom), dims = 1) ./ sum(inv(LinearAlgebra.I - A), dims = 1)
 
@@ -884,8 +884,6 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		#--------------------------------
 		# Update the linear goal program
 		#--------------------------------
-		# If there is exogenously specified output, revise import parameters (uses the inverse of the export scale factor)
-		M_scale_factor = (1 .- pot_prod_spec_factor) .+  pot_prod_spec_factor .* prev_pot_prod ./ (pot_prod .+ LMlib.ϵ)
 		if !previous_failed
 			param_Mref = 2 * value.(M) .* M_scale_factor # Allow for some extra slack -- this just sets a scale
 		end
@@ -899,7 +897,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		param_pb = prices.pb
 		param_z = z
 		# Caluculate updated m_frac for use in goal program
-		adj_import_price_elast = max.(0, 1 .- sut.m_frac) .* exog.import_price_elast
+		adj_import_price_elast = max.(0, 1 .- M_scale_factor .* sut.m_frac) .* exog.import_price_elast
 		param_mfrac = M_scale_factor .* sut.m_frac .* ((1 .+ πd)./(1 .+ πw)).^adj_import_price_elast
 		# Set maximum utilization in multiple steps
 		param_max_util = ones(ns)
