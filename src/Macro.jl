@@ -14,6 +14,7 @@ mutable struct InvestmentFunction
 	util::AbstractFloat
 	profit::AbstractFloat
 	bank::AbstractFloat
+	curracct::AbstractFloat
 end
 
 "Parameters for the Taylor function"
@@ -191,7 +192,8 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	α = InvestmentFunction(
 		params["investment-fcn"]["util_sens"], # util
 		params["investment-fcn"]["profit_sens"], # profit
-		params["investment-fcn"]["intrate_sens"] # bank
+		params["investment-fcn"]["intrate_sens"], # bank
+		params["investment-fcn"]["curr_acct"] # curracct
 	)
     growth_adj = params["investment-fcn"]["growth_adj"]
 	# Linear program objective function
@@ -706,11 +708,20 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		# Investment
 		#--------------------------------
 		if !previous_failed
+			CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
+			CA_to_GDP_ratio = CA_surplus/GDP
+		else
+			CA_surplus = NaN
+			CA_to_GDP_ratio = NaN
+		end
+
+		if !previous_failed
 			# Investment function
 			γ_u = α.util * (value.(u) .- 1)
 			γ_r = α.profit * (profit_rate .- targ_profit_rate)
-			γ_i = -α.bank * (i_bank - tf.i_targ0) * ones(ns)
-			γ = max.(γ_0 + γ_u + γ_r + γ_i, -exog.δ)
+			γ_i = -α.bank * (i_bank - tf.i_targ0)
+			γ_c = α.curracct * CA_to_GDP_ratio
+			γ = max.(γ_0 + γ_u + γ_r .+ γ_i .+ γ_c, -exog.δ)
 			# Override default behavior if production is exogenously specified
 			if t < length(years)
 				γ_spec = exog.pot_output[t + 1,:] ./ exog.pot_output[t,:] .- 1.0
@@ -790,14 +801,6 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		# Reporting
 		#--------------------------------
 		# These variables are only reported, not used
-		if !previous_failed
-			CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
-			CA_to_GDP_ratio = CA_surplus/GDP
-		else
-			CA_surplus = NaN
-			CA_to_GDP_ratio = NaN
-		end
-
 		if !previous_failed
 			u_report = value.(u)
 			F_report = value.(F)

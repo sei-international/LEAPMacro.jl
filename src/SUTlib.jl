@@ -210,6 +210,10 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
     if !LMlib.haskeyvalue(global_params["investment-fcn"], "use_profits_at_full_capacity")
         global_params["investment-fcn"]["use_profits_at_full_capacity"] = false
     end
+    # If missing, quietly set to zero (the base model)
+    if !LMlib.haskeyvalue(global_params["investment-fcn"], "curr_acct")
+        global_params["investment-fcn"]["curr_acct"] = 0.0
+    end
     # Set the following to zero if absent, but issue a warning
     if !LMlib.haskeyvalue(global_params["investment-fcn"], "util_sens")
         @warn LMlib.gettext("Parameter 'util_sens' is missing from the configuration file: setting to zero")
