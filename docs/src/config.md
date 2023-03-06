@@ -195,7 +195,7 @@ taylor-fcn:
 ```
 
 ### Investment function coefficients
-The next block contains the parameters for the investment function. As explained in the page on [model dynamics](@ref dynamics-potential-output), the investment function calculates the demand for investment goods as a function of capacity utilization, profitability, and borrowing costs.
+The next block contains the parameters for the investment function. As explained in the page on [model dynamics](@ref dynamics-potential-output), the investment function calculates the demand for investment goods as a function of capacity utilization, profitability, borrowing costs, and (optionally) the current account-to-GDP ratio.
 
 !!! info "The profit rate in the investment function"
     Prior to version 2.2.8, the profit rate used in the investment function was calculated at full capacity utilization. However, this can lead to unexpected behavior. The default is now to use the profit rate calculated in terms of realized profits, taking capacity utilization into account. Because this change produces different results, an optional parameter, `use_profits_at_full_capacity`, can be set to `true` to revert to the prior behavior. This parameter can be omitted, and its default value is `false`.
@@ -205,6 +205,7 @@ The correspondence between the parameters and the [model variables](@ref exog-pa
   * `util_sens` : ``\underline{\alpha}_\text{util}``
   * `profit_sens` : ``\underline{\alpha}_\text{profit}``
   * `intrate_sens` : ``\underline{\alpha}_\text{bank}``
+  * `curr_account` : ``\underline{\alpha}_\text{CA}``
   * `growth_adj` : ``\underline{\xi}``
 ```yaml
 #---------------------------------------------------------------------------
@@ -221,6 +222,8 @@ investment-fcn:
     use_profits_at_full_capacity: false
     # Change in induced investment with a change in the central bank lending rate
     intrate_sens: 0.20
+    # Change in induced investment with a change in the current account-to-GDP ratio
+    curr_acct: 0.00
     # Rate of adjustment of the autonomous investment rate towards the actual investment rate
     growth_adj: 0.10
 ```

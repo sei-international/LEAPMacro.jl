@@ -118,6 +118,7 @@ Variables and parameters may be labeled by sector, by product, or both:
 | ``\underline{\alpha}_\text{util}``   | Response of induced investment to capacity utilization (utilization investment sensitivity)                                      |
 | ``\underline{\alpha}_\text{profit}`` | Response of induced investment to profitability (profit rate investment sensitivity)                                      |
 | ``\underline{\alpha}_\text{bank}``   | Response of induced investment to borrowing costs (interest rate investment sensitivity)                                |
+| ``\underline{\alpha}_\text{CA}``   | Response of induced investment to the current account-to-GDP ratio (due to perceived lender's risk)                                |
 | ``\underline{r}^*``                  | Target rate of gross profit (in the investment function)                                                                            |
 | ``\underline{\delta}_i``             | Depreciation rate for sector ``i``                                                                                                  |
 | ``\underline{v}_i``                  | Capital-output ratio in sector ``i``                                                                                                |
