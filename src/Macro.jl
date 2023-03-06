@@ -14,7 +14,7 @@ mutable struct InvestmentFunction
 	util::AbstractFloat
 	profit::AbstractFloat
 	bank::AbstractFloat
-	curracct::AbstractFloat
+	CA::AbstractFloat
 end
 
 "Parameters for the Taylor function"
@@ -193,7 +193,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		params["investment-fcn"]["util_sens"], # util
 		params["investment-fcn"]["profit_sens"], # profit
 		params["investment-fcn"]["intrate_sens"], # bank
-		params["investment-fcn"]["curr_acct"] # curracct
+		params["investment-fcn"]["curr_acct"] # CA
 	)
     growth_adj = params["investment-fcn"]["growth_adj"]
 	# Linear program objective function
@@ -720,7 +720,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 			γ_u = α.util * (value.(u) .- 1)
 			γ_r = α.profit * (profit_rate .- targ_profit_rate)
 			γ_i = -α.bank * (i_bank - tf.i_targ0)
-			γ_c = α.curracct * CA_to_GDP_ratio
+			γ_c = α.CA * CA_to_GDP_ratio
 			γ = max.(γ_0 + γ_u + γ_r .+ γ_i .+ γ_c, -exog.δ)
 			# Override default behavior if production is exogenously specified
 			if t < length(years)
