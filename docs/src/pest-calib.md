@@ -286,6 +286,6 @@ investment-fcn:
 ## Final comments
 Automated calibration can substantially speed up the calibration process. However, it is not a substitute for understanding the model. It is important to start calibrating by hand, to gain some intuition in how the Macro model responds to parameter changes.
 
-Even when running the `pest.jl` script, it may be necessary to make make multiple changes to the `pest_config.yml` file. If parameter estimates appear precisely at the minimum or maximum values specified in the configuration file, and if the minimum or maximum are not "hard" values determined by fundamentals, then the range should likely be expanded in order to find the optimumum.
+Even when running the `pest.jl` script, it may be necessary to make make multiple changes to the `pest_config.yml` file. If parameter estimates appear precisely at the minimum or maximum values specified in the configuration file, and if the minimum or maximum are not "hard" values determined by fundamentals, then the range should likely be expanded in order to find the optimum.
 
 In short, model calibration is challenging, even with a tool as powerful as PEST. But it can substantially shorten the process.
