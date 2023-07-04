@@ -170,6 +170,7 @@ function write_template_file(pest_opts, cfg_fname)
     level = 0
     curr_indent = 0
     open(cfg_fname) do io
+		foundit = false
         for line in eachline(io, keep=true) # keep so the new line isn't chomped
             if occursin(re_mainkey, line)
                 curr_mainkey = match(re_mainkey, line).match
@@ -184,18 +185,22 @@ function write_template_file(pest_opts, cfg_fname)
             end
             if length(sub_params) > 0 && occursin(re_subkey, line)
                 subkey_captures = match(re_subkey, line).captures
+                curr_subkey = subkey_captures[3]
+                subkey_value = subkey_captures[4]
                 subkey_indent = length(subkey_captures[1])
                 if subkey_indent > curr_indent
                     level += 1
                 elseif subkey_indent < curr_indent
                     level -= 1
-                    pop!(sub_params)
+					if foundit
+						pop!(sub_params)
+					end
+					foundit = false
                 end
 				curr_indent = subkey_indent
-                curr_subkey = subkey_captures[3]
-                subkey_value = subkey_captures[4]
                 if  haskey(sub_params[end], curr_subkey)
                     if isa(sub_params[end][curr_subkey], Dict)
+						foundit = true
                         if level == 0
                             push!(sub_params, params[curr_subkey])
                         else
