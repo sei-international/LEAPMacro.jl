@@ -12,7 +12,7 @@ The energy system in a LEAP-Macro application is represented in [LEAP](https://l
 
 LEAP-Macro is a [demand-led growth model](@ref theoretical-background) for an open, multi-sector economy. It takes a set of [supply and use tables](@ref sut) as an input. It is a flexible model that can be adapted to specific country circumstances.
 
-The focus of LEAP-Macro is on energy policy analysis. It is an economic extension -- the Macro model -- to the LEAP energy energy policy analysis and climate change mitigation assessment tool. While Macro can be run independently, it is not intended for use as a stand-alone economic planning model. Specifically, it was developed with two purposes in mind:
+The focus of LEAP-Macro is on energy policy analysis. It is an economic extension -- the Macro model -- to the LEAP energy policy analysis and climate change mitigation assessment tool. While Macro can be run independently, it is not intended for use as a stand-alone economic planning model. Specifically, it was developed with two purposes in mind:
 1. To provide economic drivers to LEAP that are grounded in the structure of the economy;
 2. To estimate the impact of different energy investment scenarios on output and employment outside the energy sector.
 
