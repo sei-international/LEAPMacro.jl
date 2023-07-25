@@ -113,7 +113,7 @@ investment-fcn:
     # Change in induced investment with a change in the central bank lending rate
     intrate_sens: 0.20
     # Change in induced investment with a change in the current account-to-GDP ratio
-    curr_acct: 0.05
+    net_export: 0.05
     # Rate of adjustment of the autonomous investment rate towards the actual investment rate
     growth_adj: 0.10
 

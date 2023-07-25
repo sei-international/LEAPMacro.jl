@@ -211,8 +211,8 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["investment-fcn"]["use_profits_at_full_capacity"] = false
     end
     # If missing, quietly set to zero (the base model)
-    if !LMlib.haskeyvalue(global_params["investment-fcn"], "curr_acct")
-        global_params["investment-fcn"]["curr_acct"] = 0.0
+    if !LMlib.haskeyvalue(global_params["investment-fcn"], "net_export")
+        global_params["investment-fcn"]["net_export"] = 0.0
     end
     # Set the following to zero if absent, but issue a warning
     if !LMlib.haskeyvalue(global_params["investment-fcn"], "util_sens")

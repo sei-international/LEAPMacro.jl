@@ -14,7 +14,7 @@ mutable struct InvestmentFunction
 	util::AbstractFloat
 	profit::AbstractFloat
 	bank::AbstractFloat
-	CA::AbstractFloat
+	netexp::AbstractFloat
 end
 
 "Parameters for the Taylor function"
@@ -193,7 +193,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		params["investment-fcn"]["util_sens"], # util
 		params["investment-fcn"]["profit_sens"], # profit
 		params["investment-fcn"]["intrate_sens"], # bank
-		params["investment-fcn"]["curr_acct"] # CA
+		params["investment-fcn"]["net_export"] # netexp
 	)
     growth_adj = params["investment-fcn"]["growth_adj"]
 	# Linear program objective function
@@ -560,7 +560,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 	LMlib.write_header_to_csv(params, product_names, "basic_prices", run_number)
 	LMlib.write_header_to_csv(params, product_names, "domestic_prices", run_number)
 	# Create a file to hold scalar variables
-	scalar_var_list = [LMlib.gettext("GDP gr"), LMlib.gettext("curr acct surplus to GDP ratio"), LMlib.gettext("curr acct surplus"), LMlib.gettext("real GDP"),
+	scalar_var_list = [LMlib.gettext("GDP gr"), LMlib.gettext("net exports to GDP ratio"), LMlib.gettext("net exports"), LMlib.gettext("real GDP"),
 					   LMlib.gettext("GDP deflator"), LMlib.gettext("labor productivity gr"), LMlib.gettext("labor force gr"), LMlib.gettext("real investment"),
 					   LMlib.gettext("central bank rate"), LMlib.gettext("terms of trade index"), LMlib.gettext("real xr index"), LMlib.gettext("nominal xr index")]
 	LMlib.stringvec_to_quotedstringvec!(scalar_var_list)
@@ -708,11 +708,11 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		# Investment
 		#--------------------------------
 		if !previous_failed
-			CA_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
-			CA_to_GDP_ratio = CA_surplus/GDP
+			netexp_surplus = sum(prices.pw .* (value.(X) - value.(M)))/GDP_deflator
+			netexp_to_GDP_ratio = netexp_surplus/GDP
 		else
-			CA_surplus = NaN
-			CA_to_GDP_ratio = NaN
+			netexp_surplus = NaN
+			netexp_to_GDP_ratio = NaN
 		end
 
 		if !previous_failed
@@ -720,7 +720,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 			γ_u = α.util * (value.(u) .- 1)
 			γ_r = α.profit * (profit_rate .- targ_profit_rate)
 			γ_i = -α.bank * (i_bank - tf.i_targ0)
-			γ_c = α.CA * CA_to_GDP_ratio
+			γ_c = α.netexp * netexp_to_GDP_ratio
 			γ = max.(γ_0 + γ_u + γ_r .+ γ_i .+ γ_c, -exog.δ)
 			# Override default behavior if production is exogenously specified
 			if t < length(years)
@@ -871,7 +871,7 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
 		LMlib.append_row_to_csv(params, param_pb, "basic_prices", run_number, years[t])
 		LMlib.append_row_to_csv(params, param_pd, "domestic_prices", run_number, years[t])
 		# Scalar variables
-		scalar_var_vals = [GDP_gr, CA_to_GDP_ratio, CA_surplus, GDP, GDP_deflator, λ_gr_scalar, L_gr,
+		scalar_var_vals = [GDP_gr, netexp_to_GDP_ratio, netexp_surplus, GDP, GDP_deflator, λ_gr_scalar, L_gr,
 							param_I_tot, i_bank, prices.Px/prices.Pm, prices.RER, prices.XR]
 		LMlib.append_row_to_csv(params, scalar_var_vals, "collected_variables", run_number, years[t])
 

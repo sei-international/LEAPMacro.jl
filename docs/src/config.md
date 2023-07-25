@@ -205,7 +205,7 @@ The correspondence between the parameters and the [model variables](@ref exog-pa
   * `util_sens` : ``\underline{\alpha}_\text{util}``
   * `profit_sens` : ``\underline{\alpha}_\text{profit}``
   * `intrate_sens` : ``\underline{\alpha}_\text{bank}``
-  * `curr_account` : ``\underline{\alpha}_\text{CA}``
+  * `net_export` : ``\underline{\alpha}_\text{netx}``
   * `growth_adj` : ``\underline{\xi}``
 ```yaml
 #---------------------------------------------------------------------------
@@ -222,8 +222,8 @@ investment-fcn:
     use_profits_at_full_capacity: false
     # Change in induced investment with a change in the central bank lending rate
     intrate_sens: 0.20
-    # Change in induced investment with a change in the current account-to-GDP ratio
-    curr_acct: 0.00
+    # Change in induced investment with a change in the net export-to-GDP ratio
+    net_export: 0.00
     # Rate of adjustment of the autonomous investment rate towards the actual investment rate
     growth_adj: 0.10
 ```

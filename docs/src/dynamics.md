@@ -1,4 +1,4 @@
-```@meta
+```@metaA
 CurrentModule = LEAPMacro
 ```
 
@@ -225,21 +225,21 @@ r_i = \frac{\Pi_i}{p_K\underline{v}_i}.
 Capital-output ratios are initialized using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd).
 
 ## [Investment & potential output](@id dynamics-potential-output)
-Net potential output in sector ``i`` (that is, accounting for depreciation) grows at a rate ``\gamma_i``. Unless it is overridden by an [optional exogenous potential output](@ref config-optional-input-files), the value is determined endogenously by an investment function that responds to utilization, profitability, borrowing costs (proxied by the central bank lending rate), and external lender risk (proxied by the current account-to-GDP ratio). The model assumes no active disinvestment, so the net growth rate is not allowed to fall below (the negative of) the depreciation rate,
+Net potential output in sector ``i`` (that is, accounting for depreciation) grows at a rate ``\gamma_i``. Unless it is overridden by an [optional exogenous potential output](@ref config-optional-input-files), the value is determined endogenously by an investment function that responds to utilization, profitability, borrowing costs (proxied by the central bank lending rate), and external lender risk (proxied by the ratio of net exports to GDP, with higher net exports corresponding to lower risk). The model assumes no active disinvestment, so the net growth rate is not allowed to fall below (the negative of) the depreciation rate,
 ```math
 \gamma_i = \max\left[\gamma_{i0} + \underline{\alpha}_\text{util}\left(u_i - 1\right) +
            \underline{\alpha}_\text{profit}\left(r_i - \underline{r}^*\right) -
            \underline{\alpha}_\text{bank}\left(i_b - \underline{i}^\text{init}_{b0}\right) +
-           \underline{\alpha}_\text{CA} C,
+           \underline{\alpha}_\text{netx} C,
            -\underline{\delta}_i\right],
 ```
-where ``C`` is the current account-to-GDP ratio. Using the GDP deflator ``P_\text{GDP}`` calculated from ``\pi_\text{GDP}``, this ratio is given by
+where ``C`` is the ratio of net exports to GDP. Using the GDP deflator ``P_\text{GDP}`` calculated from ``\pi_\text{GDP}``, this ratio is given by
 ```math
 C = \frac{\sum_{k=1}^{n_p} p_{w,k}(X_k-M_k)}{P_\text{GDP}Y}.
 ```
-The first term ``\gamma_{i0}`` is "autonomous investment". It represents long-run expectations. The other terms make up "induced investment" due to short-term changes in utilization, profits, borrowing costs, and the current account relative to GDP.
+The first term ``\gamma_{i0}`` is "autonomous investment". It represents long-run expectations. The other terms make up "induced investment" due to short-term changes in utilization, profits, borrowing costs, and net exports relative to GDP.
 
-The target value for utilization is full utilization, ``u_i = 1``, while for the bank rate it is the initial value for the neutral bank rate that enters the Taylor function, ``\underline{i}^\text{init}_{b0}`` (see below). The target for the profit rate, ``\underline{r}^*``, is calculated by Macro during an internal calibration step to be consistent with starting values for investment and profits, using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd). The current account-to-GDP ratio term tends to push the economy towards a zero current account, with no surplus or deficit. The behavioral assumption behind this term is that foreign investors see a repayment risk from high current account deficits relative to GDP and, conversely, opportunities when there is a current account surplus.
+The target value for utilization is full utilization, ``u_i = 1``, while for the bank rate it is the initial value for the neutral bank rate that enters the Taylor function, ``\underline{i}^\text{init}_{b0}`` (see below). The target for the profit rate, ``\underline{r}^*``, is calculated by Macro during an internal calibration step to be consistent with starting values for investment and profits, using a procedure described below in [Demand for investment goods](@ref dynamics-inv-dmd). The net exports-to-GDP ratio term tends to push the economy towards a zero net exports, with no surplus or deficit. As net exports are the negative of net foreign financing (investments less domestic saving), the behavioral assumption behind this term is that foreign investors see a repayment risk when net foreign financing is high relative to GDP and, conversely, opportunities when there are net financing outflows.
 
 If potential output is specified exogenously through the variable ``\underline{z}_i^\text{exog}``, then 
 ```math
