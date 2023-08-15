@@ -238,14 +238,10 @@ function send_results_to_leap(params::Dict, indices::Array)
             variable = branch_df[i,:variable]
             lasthistoricalyear = branch_df[i,:last_historical_year]
             col = branch_df[i,:col]
-            start_ndx = (1+(col*ndxrows))
+            start_ndx = (1+(col*ndxrows)) + lasthistoricalyear - base_year
             end_ndx = (col+1)*ndxrows
 
-            if lasthistoricalyear > base_year
-                newexpression = build_interp_expression(base_year, indices[start_ndx:end_ndx], lasthistoricalyear=lasthistoricalyear)
-            else
-                newexpression = build_interp_expression(base_year, indices[start_ndx:end_ndx])
-            end
+            newexpression = build_interp_expression(lasthistoricalyear, indices[start_ndx:end_ndx])
             set_branchvar_expression(LEAP, branch, variable, newexpression, region = params["LEAP-info"]["region"], scenario=params["LEAP-info"]["input_scenario"])
 
         end

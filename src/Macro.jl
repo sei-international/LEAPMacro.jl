@@ -954,8 +954,9 @@ function macro_main(params::Dict, leapvals::LEAPlib.LEAPresults, run_number::Int
     end
 
     # Make indices into indices
-	if size(indices)[2] > 1
-		indices_0 = indices[1,:]
+	first_year_ndx = findfirst(years .== params["LEAP-info"]["last_historical_year"])
+	if !isnothing(first_year_ndx)
+		indices_0 = indices[first_year_ndx,:]
 		for t in eachindex(years)
 			indices[t,2:end] = indices[t,2:end] ./ indices_0[2:end]
 		end
