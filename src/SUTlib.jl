@@ -915,7 +915,7 @@ function process_sut(params::Dict)
 	ns = length(sector_ndxs)
 	np = length(product_ndxs)
 
-	terr_adj_sector_ndx = params["terr-adj-sector-indexes"]
+	terr_adj_sector_ndx = params["terr-adj-sector-indexes"] # TODO: This isn't used
 	terr_adj_product_ndx = params["terr-adj-product-indexes"]
 
     energy_product_ndxs = params["energy-product-indexes"]
