@@ -768,13 +768,16 @@ function get_var_params(params::Dict)
         data_sec_ndxs = [findfirst(params["included_sector_codes"] .== sec_code) for sec_code in data_sec_codes]
         # Confirm that the sectors are included
         if !isnothing(findfirst(isnothing.(data_sec_ndxs)))
-            invalid_sec_codes = data_sec_codes[findall(x -> isnothing(x), data_sec_ndxs)]
+            invalid_sec_ndxs = findall(x -> isnothing(x), data_sec_ndxs)
+            invalid_sec_codes = data_sec_codes[invalid_sec_ndxs]
             if length(invalid_sec_codes) > 1
                 invalid_sec_codes_str = format(LMlib.gettext("Sector codes '{1}' in input file '{2}' not valid"), join(invalid_sec_codes, "', '"), params["exog-files"]["pot_output"])
             else
                 invalid_sec_codes_str = format(LMlib.gettext("Sector code '{1}' in input file '{2}' not valid"), invalid_sec_codes[1], params["exog-files"]["pot_output"])
             end
-            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str))
+            deleteat!(data_sec_ndxs, invalid_sec_ndxs)
+            pot_output_df = pot_output_df[:,Not(1 .+ invalid_sec_ndxs)]
+            @warn invalid_sec_codes_str
         end
         for row in eachrow(pot_output_df)
             data_year = floor(Int64, row[:year])
@@ -790,13 +793,16 @@ function get_var_params(params::Dict)
         data_sec_ndxs = [findfirst(params["included_sector_codes"] .== sec_code) for sec_code in data_sec_codes]
         # Confirm that the sectors are included
         if !isnothing(findfirst(isnothing.(data_sec_ndxs)))
-            invalid_sec_codes = data_sec_codes[findall(x -> isnothing(x), data_sec_ndxs)]
+            invalid_sec_ndxs = findall(x -> isnothing(x), data_sec_ndxs)
+            invalid_sec_codes = data_sec_codes[invalid_sec_ndxs]
             if length(invalid_sec_codes) > 1
                 invalid_sec_codes_str = format(LMlib.gettext("Sector codes '{1}' in input file '{2}' not valid"), join(invalid_sec_codes, "', '"), params["exog-files"]["max_utilization"])
             else
                 invalid_sec_codes_str = format(LMlib.gettext("Sector code '{1}' in input file '{2}' not valid"), invalid_sec_codes[1], params["exog-files"]["max_utilization"])
             end
-            throw(DomainError(invalid_sec_codes, invalid_sec_codes_str))
+            deleteat!(data_sec_ndxs, invalid_sec_ndxs)
+            max_util_df = max_util_df[:,Not(1 .+ invalid_sec_ndxs)]
+            @warn invalid_sec_codes_str
         end
         for row in eachrow(max_util_df)
             data_year = floor(Int64, row[:year])
@@ -812,13 +818,16 @@ function get_var_params(params::Dict)
         data_prod_ndxs = [findfirst(params["included_product_codes"] .== prod_code) for prod_code in data_prod_codes]
         # Confirm that the products are included
         if !isnothing(findfirst(isnothing.(data_prod_ndxs)))
-            invalid_prod_codes = data_prod_codes[findall(x -> isnothing(x), data_prod_ndxs)]
+            invalid_prod_ndxs = findall(x -> isnothing(x), data_prod_ndxs)
+            invalid_prod_codes = data_prod_codes[invalid_prod_ndxs]
             if length(invalid_prod_codes) > 1
                 invalid_prod_codes_str = format(LMlib.gettext("Product codes '{1}' in input file '{2}' not valid"), join(invalid_prod_codes, "', '"), params["exog-files"]["real_price"])
             else
-                invalid_prod_codes_str = format(LMlib.gettext("Sector code '{1}' in input file '{2}' not valid"), invalid_prod_codes[1], params["exog-files"]["real_price"])
+                invalid_prod_codes_str = format(LMlib.gettext("Product code '{1}' in input file '{2}' not valid"), invalid_prod_codes[1], params["exog-files"]["real_price"])
             end
-            throw(DomainError(invalid_prod_codes, invalid_prod_codes_str))
+            deleteat!(data_prod_ndxs, invalid_prod_ndxs)
+            real_price_df = real_price_df[:,Not(1 .+ invalid_prod_ndxs)]
+            @warn invalid_prod_codes_str
         end
         for row in eachrow(real_price_df)
             data_year = floor(Int64, row[:year])
