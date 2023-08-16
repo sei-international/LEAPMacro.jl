@@ -423,6 +423,17 @@ function parse_param_file(YAML_file::AbstractString; include_energy_sectors::Boo
         global_params["LEAP-info"]["result_scenario"] = ""
     end
 
+    # If running LEAP, ensure that LEAP historical year is within year range
+    if global_params["model"]["run_leap"]
+        if global_params["LEAP-info"]["last_historical_year"] < global_params["years"]["start"]
+            throw(ErrorException(format(LMlib.gettext("LEAP last historical year {1} is earlier than the start year {2}"),
+                    global_params["LEAP-info"]["last_historical_year"], global_params["years"]["start"])))
+        elseif global_params["LEAP-info"]["last_historical_year"] > global_params["years"]["end"]
+            throw(ErrorException(format(LMlib.gettext("LEAP last historical year {1} is later than the end year {2}"),
+            global_params["LEAP-info"]["last_historical_year"], global_params["years"]["end"])))
+        end
+    end
+
     # Check that LEAP-investment keys are reported
     if LMlib.haskeyvalue(global_params, "LEAP-investment")
         # Key "inv_costs_unit" is missing, so apply the default
