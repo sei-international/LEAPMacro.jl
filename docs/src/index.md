@@ -5,6 +5,9 @@ CurrentModule = LEAPMacro
 # [LEAP-Macro](@id introduction)
 This documentation explains how to use **LEAP-Macro** to build a linked energy-economic model.
 
+!!! info "Accessing the code"
+    LEAP-Macro is open source and hosted on GitHub. If you wish to access the code, please visit the [LEAP-Macro GitHub repository](https://github.com/sei-international/LEAPMacro.jl).
+
 The energy system in a LEAP-Macro application is represented in [LEAP](https://leap.sei.org/), the Low Emissions Analysis Platform. The economy is represented in a macroeconomic model called **Macro**. This documentation will explain how to build a Macro model and link the model to LEAP.
 
 !!! tip "Learning about LEAP"
