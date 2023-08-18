@@ -790,12 +790,14 @@ function get_var_params(params::Dict)
             pot_output_df = pot_output_df[:,Not(1 .+ invalid_sec_ndxs)]
             @warn invalid_sec_codes_str
         end
-        for row in eachrow(pot_output_df)
-            data_year = floor(Int64, row[:year])
-            if data_year in sim_years
-                retval_exog.pot_output[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
+        if length(data_sec_ndxs) > 0
+            for row in eachrow(pot_output_df)
+                data_year = floor(Int64, row[:year])
+                if data_year in sim_years
+                    retval_exog.pot_output[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
+                end
             end
-       end
+        end
     end
 
     if !isnothing(max_util_df)
@@ -815,12 +817,14 @@ function get_var_params(params::Dict)
             max_util_df = max_util_df[:,Not(1 .+ invalid_sec_ndxs)]
             @warn invalid_sec_codes_str
         end
-        for row in eachrow(max_util_df)
-            data_year = floor(Int64, row[:year])
-            if data_year in sim_years
-                retval_exog.max_util[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
+        if length(data_sec_ndxs) > 0
+            for row in eachrow(max_util_df)
+                data_year = floor(Int64, row[:year])
+                if data_year in sim_years
+                    retval_exog.max_util[data_year - sim_years[1] + 1, data_sec_ndxs] .= Vector(row[2:end])
+                end
             end
-       end
+        end
     end
 
     if !isnothing(real_price_df)
@@ -840,12 +844,14 @@ function get_var_params(params::Dict)
             real_price_df = real_price_df[:,Not(1 .+ invalid_prod_ndxs)]
             @warn invalid_prod_codes_str
         end
-        for row in eachrow(real_price_df)
-            data_year = floor(Int64, row[:year])
-            if data_year in sim_years
-                retval_exog.price[data_year - sim_years[1] + 1, data_prod_ndxs] .= Vector(row[2:end])
+        if length(data_prod_ndxs) > 0
+            for row in eachrow(real_price_df)
+                data_year = floor(Int64, row[:year])
+                if data_year in sim_years
+                    retval_exog.price[data_year - sim_years[1] + 1, data_prod_ndxs] .= Vector(row[2:end])
+                end
             end
-       end
+        end
     end
 
     return retval_exog, retval_techchange
