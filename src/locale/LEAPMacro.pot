@@ -115,7 +115,7 @@ msgstr ""
 msgid "sector output"
 msgstr ""
 
-#: SUTlib.jl:1074
+#: SUTlib.jl:1086
 msgid "Measure of the significance to the economy of the supply of non-energy goods and services to the energy sector:"
 msgstr ""
 
@@ -129,6 +129,10 @@ msgstr ""
 
 #: Macro.jl:452
 msgid "domestic production"
+msgstr ""
+
+#: SUTlib.jl:836
+msgid "Exogenous prices file '{1}' does not contain all simulation years. Missing {2}."
 msgstr ""
 
 #: Macro.jl:564
@@ -147,7 +151,7 @@ msgstr ""
 msgid "Cell reference '{1}' is not in the correct format (e.g., 'AB3')"
 msgstr ""
 
-#: SUTlib.jl:835
+#: SUTlib.jl:847
 msgid "Product codes '{1}' in input file '{2}' not valid"
 msgstr ""
 
@@ -187,7 +191,7 @@ msgstr ""
 msgid "With configuration file '{1}' (including energy sectors):"
 msgstr ""
 
-#: SUTlib.jl:785; SUTlib.jl:810
+#: SUTlib.jl:791; SUTlib.jl:816
 msgid "Sector codes '{1}' in input file '{2}' not valid"
 msgstr ""
 
@@ -195,7 +199,7 @@ msgstr ""
 msgid "Simulating for {1}: {2}"
 msgstr ""
 
-#: SUTlib.jl:1073
+#: SUTlib.jl:1085
 msgid "This value should be small: {1:.2f}%."
 msgstr ""
 
@@ -247,6 +251,10 @@ msgstr ""
 msgid "Exogenous investment file '{1}' does not exist in the 'inputs' folder"
 msgstr ""
 
+#: SUTlib.jl:780
+msgid "Exogenous potential output file '{1}' does not contain all simulation years. Missing {2}."
+msgstr ""
+
 #: Macro.jl:165
 msgid "Loading data..."
 msgstr ""
@@ -287,11 +295,11 @@ msgstr ""
 msgid "capital-output ratio"
 msgstr ""
 
-#: SUTlib.jl:787; SUTlib.jl:812
+#: SUTlib.jl:793; SUTlib.jl:818
 msgid "Sector code '{1}' in input file '{2}' not valid"
 msgstr ""
 
-#: SUTlib.jl:837
+#: SUTlib.jl:849
 msgid "Product code '{1}' in input file '{2}' not valid"
 msgstr ""
 
