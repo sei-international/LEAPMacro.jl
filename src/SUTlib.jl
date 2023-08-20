@@ -774,6 +774,12 @@ function get_var_params(params::Dict)
     end
 
     if !isnothing(pot_output_df)
+        # Check that all simulation years are covered
+        missing_years = setdiff(sim_years, intersect(sim_years, floor.(Int64, pot_output_df[!,:year])))
+        if !isempty(missing_years)
+            throw(ErrorException(format(LMlib.gettext("Exogenous potential output file '{1}' does not contain all simulation years. Missing {2}."),
+                  params["exog-files"]["pot_output"], join(missing_years, ", "))))
+        end
         data_sec_codes = names(pot_output_df)[2:end]
         # Using findfirst: there should only be one entry per code
         data_sec_ndxs = [findfirst(params["included_sector_codes"] .== sec_code) for sec_code in data_sec_codes]
@@ -824,6 +830,12 @@ function get_var_params(params::Dict)
     end
 
     if !isnothing(real_price_df)
+        # Check that all simulation years are covered
+        missing_years = setdiff(sim_years, intersect(sim_years, floor.(Int64, real_price_df[!,:year])))
+        if !isempty(missing_years)
+            throw(ErrorException(format(LMlib.gettext("Exogenous prices file '{1}' does not contain all simulation years. Missing {2}."),
+                  params["exog-files"]["real_price"], join(missing_years, ", "))))
+        end
         data_prod_codes = names(real_price_df)[2:end]
         # Using findfirst: there should only be one entry per code
         data_prod_ndxs = [findfirst(params["included_product_codes"] .== prod_code) for prod_code in data_prod_codes]
