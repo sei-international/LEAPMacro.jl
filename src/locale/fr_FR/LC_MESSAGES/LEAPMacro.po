@@ -153,7 +153,7 @@ msgstr "Valeur pour le taux de change manquant dans l'année {1:d}, sans défaut
 msgid "sector output"
 msgstr "production du secteur"
 
-#: SUTlib.jl:1074
+#: SUTlib.jl:1086
 msgid ""
 "Measure of the significance to the economy of the supply of non-energy goods "
 "and services to the energy sector:"
@@ -175,6 +175,14 @@ msgstr "productivité du travail (taux de croissance)"
 msgid "domestic production"
 msgstr "production nationale"
 
+#: SUTlib.jl:836
+msgid ""
+"Exogenous prices file '{1}' does not contain all simulation years. Missing "
+"{2}."
+msgstr ""
+"Le fichier des prix exogènes '{1}' ne contient pas toutes les années de "
+"simulation. Manquant {2}."
+
 #: Macro.jl:564
 msgid "real investment"
 msgstr "investissement réel"
@@ -192,7 +200,7 @@ msgid "Cell reference '{1}' is not in the correct format (e.g., 'AB3')"
 msgstr ""
 "La référence de cellule \"{1}\" n'a pas le bon format (par exemple, \"AB3\")"
 
-#: SUTlib.jl:835
+#: SUTlib.jl:847
 msgid "Product codes '{1}' in input file '{2}' not valid"
 msgstr ""
 "Les codes produits '{1}' dans le fichier d'entrée '{2}' ne sont pas valides"
@@ -243,7 +251,7 @@ msgstr ""
 "Avec le fichier de configuration '{1}' (y compris les secteurs "
 "énergétiques) :"
 
-#: SUTlib.jl:785; SUTlib.jl:810
+#: SUTlib.jl:791; SUTlib.jl:816
 msgid "Sector codes '{1}' in input file '{2}' not valid"
 msgstr ""
 "Les codes de secteur '{1}' dans le fichier d'entrée '{2}' ne sont pas valides"
@@ -252,7 +260,7 @@ msgstr ""
 msgid "Simulating for {1}: {2}"
 msgstr "Simulation pour {1} : {2}"
 
-#: SUTlib.jl:1073
+#: SUTlib.jl:1085
 msgid "This value should be small: {1:.2f}%."
 msgstr "Cette valeur doit être faible : {1:.2f}%."
 
@@ -316,6 +324,14 @@ msgstr ""
 "Le fichier d'investissement exogène '{1}' n'existe pas dans le dossier "
 "'inputs'"
 
+#: SUTlib.jl:780
+msgid ""
+"Exogenous potential output file '{1}' does not contain all simulation years. "
+"Missing {2}."
+msgstr ""
+"Le fichier de sortie du potentiel exogène '{1}' ne contient pas toutes les "
+"années de simulation. Manquant {2}."
+
 #: Macro.jl:165
 msgid "Loading data..."
 msgstr "Chargement des données..."
@@ -359,12 +375,12 @@ msgstr "Obtention des résultats LEAP de la version '{1}'..."
 msgid "capital-output ratio"
 msgstr "ratio capital-production"
 
-#: SUTlib.jl:787; SUTlib.jl:812
+#: SUTlib.jl:793; SUTlib.jl:818
 msgid "Sector code '{1}' in input file '{2}' not valid"
 msgstr ""
 "Le code de secteur '{1}' dans le fichier d'entrée '{2}' n'est pas valide"
 
-#: SUTlib.jl:837
+#: SUTlib.jl:849
 #, fuzzy
 #| msgid "Product codes '{1}' in input file '{2}' not valid"
 msgid "Product code '{1}' in input file '{2}' not valid"
