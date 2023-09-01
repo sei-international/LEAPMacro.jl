@@ -1,6 +1,6 @@
-# LEAPMacro
-
 **LEAPMacro.jl is now [AMES.jl](https://github.com/sei-international/AMES.jl)** Please go to the [AMES repository](https://github.com/sei-international/AMES.jl) for more information.
+
+# LEAPMacro
 
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://sei-international.github.io/LEAPMacro.jl/stable)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://sei-international.github.io/LEAPMacro.jl/dev)
