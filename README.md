@@ -1,4 +1,4 @@
-# LEAPMacro.jl is now [AMES.jl](https://github.com/sei-international/AMES.jl)
+# Important Note: LEAPMacro.jl is now [AMES.jl](https://github.com/sei-international/AMES.jl)
 
 Please go to the [AMES repository](https://github.com/sei-international/AMES.jl) for more information.
 
