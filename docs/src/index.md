@@ -1,7 +1,9 @@
 ```@meta
 CurrentModule = LEAPMacro
 ```
-
+!!! alert "LEAP-Macro is now AMES"
+    The LEAP-Macro project has been renamed **AMES**, for **A**daptable **M**acroeconomic **E**xtension for **S**ustainability analysis. It is hosted on GitHub at the [AMES.jl repository](https://github.com/sei-international/AMES.jl).
+	
 # [LEAP-Macro](@id introduction)
 This documentation explains how to use **LEAP-Macro** to build a linked energy-economic model.
 
